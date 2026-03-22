@@ -1,0 +1,119 @@
+.screen {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--color-border);
+  flex-wrap: wrap;
+}
+
+.gameName {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.round {
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.scores {
+  display: flex;
+  gap: 12px;
+  flex: 1;
+  justify-content: center;
+}
+
+.score {
+  font-size: 14px;
+}
+
+.deviceStatus {
+  font-size: 20px;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  padding: 32px;
+}
+
+.presenterInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.presenterAvatar {
+  font-size: 64px;
+}
+
+.presenterName {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.presenterLabel {
+  font-size: 16px;
+  color: var(--color-text-muted);
+}
+
+.timer {
+  font-size: 96px;
+  font-weight: 700;
+  color: #7c3aed;
+  font-variant-numeric: tabular-nums;
+}
+
+.waitingText,
+.betweenText {
+  font-size: 18px;
+  color: var(--color-text-muted);
+}
+
+.primaryBtn {
+  padding: 16px 32px;
+  background: #7c3aed;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.verdictBtns {
+  display: flex;
+  gap: 16px;
+}
+
+.verdictBtn {
+  padding: 20px 40px;
+  font-size: 20px;
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.correct {
+  background: #22c55e;
+  color: #fff;
+}
+
+.wrong {
+  background: #ef4444;
+  color: #fff;
+}
