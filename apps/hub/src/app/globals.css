@@ -12,6 +12,9 @@
   --color-text-muted: rgba(240, 240, 240, 0.5);
   --topbar-height: 60px;
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --color-topbar-bg: rgba(10, 10, 10, 0.8);
+  --color-surface-hover: rgba(255, 255, 255, 0.08);
+  --color-border-hover: rgba(255, 255, 255, 0.16);
 }
 
 html, body {
