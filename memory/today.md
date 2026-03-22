@@ -18,3 +18,11 @@
 - Clerk wyłączony do Phase 5 (placeholder key crashował dev server). `@party/charades` kompiluje tylko `.d.ts` (emitDeclarationOnly) — runtime import z tej paczki nie działa w Next.js, config Kalambury tymczasowo inline w `games.ts`. Wrócimy gdy charades będzie miało pełny build. Next.js 16 automatycznie zmienia `tsconfig.json` przy pierwszym uruchomieniu (jsx → react-jsx, dodaje .next/dev/types).
 - Next: Phase 3 — moduł Kalambury (GameMenu, GameConfigModal, GameResults, GameScreen)
 - Experience recorded: yes
+
+### S2 (~dziś) [Project Party] Phase 3 — Kalambury MVP
+
+- Zaimplementowano pełny moduł Kalambury: content (zwierzęta/filmy/sport), Partykit server, hooks (useWordPool, useGameState, usePresenter), komponenty (PlayerForm, PlayerList, CategoryPicker, SettingsModal, QRPairing, DeviceListener, Podium), wszystkie 5 tras Next.js (GameMenu, SetupPage /config, GameScreen host /play, GameScreen prezenter /present, GameResults /results).
+- Partykit server z eventami TURN_START/TIMER_TICK/TURN_END/BETWEEN_TURNS/GAME_END/GAME_RESET. QR parowanie obowiązkowe (bez telefonu przycisk "Rozpocznij grę" nieaktywny). Timer autorytatywny po stronie hosta. Hasło widoczne wyłącznie na telefonie prezentera.
+- `@content/*` path alias w tsconfig huba rozwiązuje cross-workspace import z `content/charades/`. `@party/ui` ma pusty package.json bez tsconfig — build całego monorepo failuje na tym, ale hub builduje się w pełni (`npx turbo build --filter="@party/hub"` — wszystkie 6 tras OK).
+- Next: Phase 4 — Cloudflare Pages deploy + Partykit deploy
+- Experience recorded: tak
