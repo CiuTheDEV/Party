@@ -10,4 +10,5 @@ export type GameConfig = {
   href: string
   modes: string[]
   categories: string[]
+  gradient?: string
 }
