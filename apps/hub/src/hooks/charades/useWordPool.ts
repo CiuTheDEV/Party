@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import type { WordCategory } from '../../../../content/charades/index'
+import type { WordCategory } from '@content/charades/index'
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr]
