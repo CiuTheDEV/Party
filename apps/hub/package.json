@@ -9,15 +9,15 @@
     "start": "next start"
   },
   "dependencies": {
-    "@clerk/nextjs": "^6",
+    "@clerk/nextjs": "^7",
     "@party/charades": "*",
     "@party/game-sdk": "*",
-    "next": "^15",
+    "next": "^16",
     "react": "^19",
     "react-dom": "^19"
   },
   "devDependencies": {
-    "@types/node": "^22",
+    "@types/node": "^25",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "typescript": "^5"
