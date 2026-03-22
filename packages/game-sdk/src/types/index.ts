@@ -1,2 +1,2 @@
 export type { GameConfig } from './GameConfig'
-export type { GameModule, GameConfigModalProps, GameResultsProps } from './GameModule'
+export type { GameModule, GameResultsProps } from './GameModule'

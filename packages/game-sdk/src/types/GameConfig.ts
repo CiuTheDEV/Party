@@ -8,4 +8,6 @@ export type GameConfig = {
   isPremium: boolean
   color: string
   href: string
+  modes: string[]
+  categories: string[]
 }

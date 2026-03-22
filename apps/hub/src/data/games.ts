@@ -11,5 +11,7 @@ export const games: GameConfig[] = [
     isPremium: false,
     color: '#7c3aed',
     href: '/games/charades',
+    modes: ['classic'],
+    categories: ['animals', 'movies', 'sport'],
   },
 ]
