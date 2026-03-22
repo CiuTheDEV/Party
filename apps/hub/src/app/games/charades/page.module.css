@@ -1,0 +1,89 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  padding: 24px;
+}
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.icon {
+  font-size: 64px;
+}
+
+.title {
+  font-size: 36px;
+  font-weight: 700;
+}
+
+.description {
+  font-size: 16px;
+  color: var(--color-text-muted);
+  max-width: 400px;
+}
+
+.modeCard {
+  width: min(480px, 100%);
+  padding: 28px;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  background: var(--color-surface);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.modeName {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.modeDesc {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.details {
+  list-style: disc;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.playBtn {
+  display: block;
+  text-align: center;
+  padding: 14px;
+  background: #7c3aed;
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  border-radius: 10px;
+  transition: opacity 0.2s;
+}
+
+.playBtn:hover {
+  opacity: 0.85;
+}
+
+.backLink {
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.backLink:hover {
+  color: var(--color-text);
+}
