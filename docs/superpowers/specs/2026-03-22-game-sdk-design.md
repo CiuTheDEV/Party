@@ -64,11 +64,47 @@ type GameResultsProps = {
 }
 ```
 
+### Modal lifecycle
+
+`GameConfigModal` is rendered and managed **internally by `GameMenu`**. The hub never touches it. GameMenu owns the open/close state and mode selection — closing the modal returns to GameMenu with mode selection preserved.
+
+```
+GameMenu (owns state)
+  └── GameConfigModal (rendered when user clicks "Play")
+        ├── onClose → modal closes, GameMenu stays visible
+        └── onStart → navigate to GameScreen
+```
+
 ### What SDK does NOT define
 
 - `GameScreen` — each game implements its own gameplay screen with unique flow
 - Any runtime logic, helpers, or utilities
 - Any UI components
+
+---
+
+## Package Config
+
+`package.json` must include exports so TypeScript can resolve types:
+
+```json
+{
+  "name": "@party/game-sdk",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "lint": "eslint ."
+  }
+}
+```
 
 ---
 
