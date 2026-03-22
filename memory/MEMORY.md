@@ -39,6 +39,30 @@
 
 ---
 
+### 2026-03-22 — Hydration mismatch z `typeof window !== 'undefined'` w Next.js
+
+**Symptom:** `Hydration failed because the server rendered HTML didn't match the client` — komponent 'use client' generuje inny HTML po SSR i po hydration.
+
+**Root cause:** Next.js renderuje komponenty `'use client'` po stronie serwera podczas SSR, żeby wygenerować HTML. `typeof window !== 'undefined'` zwraca `false` na serwerze, więc wyrenderowany HTML jest pusty. Na kliencie po hydration window istnieje, komponent renderuje URL — mismatch.
+
+**Fix:** `useState('') + useEffect(() => setValue(...), [deps])` — pierwsza render (SSR i hydration) daje `''`, dopiero po mount (tylko client) wartość się ustawia.
+
+**Jak zapobiec:** Nigdy nie używaj `typeof window !== 'undefined'` jako guard na wartość renderowaną. Zawsze `useState + useEffect` dla wartości client-only.
+
+---
+
+### 2026-03-22 — CSS import z workspace package działa w Next.js bez konfiguracji
+
+**Symptom:** Nie wiadomo czy `import '@party/ui/tokens.css'` zadziała gdy paczka jest workspace i Next.js ją bundluje.
+
+**Root cause:** Next.js/Turbopack bundluje workspace packages przez path alias (`@party/ui` → `../../packages/ui/src`). CSS pliki z tych paczek są traktowane jak lokalne — Next.js je przetwarza normalnie.
+
+**Fix:** Nie potrzeba żadnej specjalnej konfiguracji. Wystarczy dodać `"@party/ui/*": ["../../packages/ui/src/*"]` do `paths` w tsconfig huba.
+
+**Jak zapobiec:** Przy tworzeniu nowej workspace paczki z CSS — skonfiguruj path alias w tsconfig aplikacji konsumującej, reszta działa automatycznie.
+
+---
+
 ### 2026-03-22 — Next.js 16 modyfikuje tsconfig.json przy pierwszym uruchomieniu
 
 **Symptom:** Po `npm run dev` Next.js automatycznie zmienia `tsconfig.json` — ustawia `jsx: react-jsx` (było `preserve`) i dodaje `.next/dev/types/**/*.ts` do includes.

@@ -15,7 +15,9 @@
 - [x] Phase 0 — working monorepo, Cloudflare Pages deployment (monorepo ✅, CF deploy pending)
 - [x] Phase 1 — Hub: landing page with game list ✅
 - [x] Phase 2 — Game SDK: module contract defined ✅
-- [ ] Phase 3 — Module: Kalambury (GameMenu, GameConfigModal, GameResults, GameScreen)
+- [x] Phase 3 — Module: Kalambury (GameMenu, GameConfigModal, GameResults, GameScreen) ✅
+- [x] Shared Shell @party/ui — Neon Dark, Topbar+Sidebar, GameCard, token system ✅
+- [ ] Phase 4 — Deploy: Cloudflare Pages + Partykit
 
 ## This Quarter
 

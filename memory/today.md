@@ -26,3 +26,10 @@
 - `@content/*` path alias w tsconfig huba rozwiązuje cross-workspace import z `content/charades/`. `@party/ui` ma pusty package.json bez tsconfig — build całego monorepo failuje na tym, ale hub builduje się w pełni (`npx turbo build --filter="@party/hub"` — wszystkie 6 tras OK).
 - Next: Phase 4 — Cloudflare Pages deploy + Partykit deploy
 - Experience recorded: tak
+
+### S3 (~wieczór) [Project Party] Bugfixy + Shared Shell @party/ui
+
+- Naprawiono 3 bugi: hydration mismatch w QRPairing (useState+useEffect zamiast typeof window), game freeze w fazie 'between' (brak przycisku "Następna tura →"), Partykit nie startował automatycznie (dodany do dev.bat jako osobne okno).
+- Zaprojektowano i zaimplementowano `@party/ui` — shared shell z Neon Dark brand identity. Komponenty: Topbar, GameSidebar (desktop sidebar + mobile tab bar via CSS media query), GameShell, GameCard (gradient hero). Dwupoziomowy token system: globalne `tokens.css` + per-game `theme.css`. Hub home page i charades layout zmigrowane do @party/ui. Stare komponenty (Topbar, GameCard, GamesGrid z huba) usunięte.
+- Phase 3 ✅ ukończona. Shared shell ✅ ukończony. Next: Phase 4 — Cloudflare Pages deploy + Partykit deploy. Do rozważenia: redesign charades-specific screens (GameMenu, SetupPage, GameResults, GameScreen) — UI jest "bardzo ubogie".
+- Experience recorded: yes

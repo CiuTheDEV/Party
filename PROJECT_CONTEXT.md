@@ -16,7 +16,7 @@ Adding a new game = new package. Games don't know about each other.
 
 ## Current Focus
 
-> 🎯 Phase 3 — Moduł Kalambury
+> 🎯 Phase 4 — Deploy (Cloudflare Pages + Partykit)
 
 ---
 
@@ -27,7 +27,7 @@ Adding a new game = new package. Games don't know about each other.
 | 0 | Monorepo (Turborepo) setup, Cloudflare Pages, CI/CD | ✅ Done (CF deploy pending) |
 | 1 | Hub — landing page, game list, room creation | ✅ Done |
 | 2 | Game SDK — module contract, interfaces | ✅ Done |
-| 3 | Module: Charades (no multiplayer, single screen) | 🟡 Next |
+| 3 | Module: Charades (no multiplayer, single screen) | ✅ Done |
 | 4 | Real-time multiplayer (Partykit, rooms, codes) | ⬜ TODO |
 | 5 | Optional auth (Clerk, guest + account) | ⬜ TODO |
 | 6 | Leaderboards and game history (for accounts) | ⬜ TODO |
@@ -76,9 +76,13 @@ project-party/                     # Monorepo (Turborepo)
 <!-- handoff:start -->
 ## Session Handoff
 
-- Last: 2026-03-22 — Phase 0, 1, 2 completed
-- Did: Turborepo monorepo init, hub (Next.js 16) z Topbar/GameCard/GamesGrid/PremiumModal, @party/game-sdk (typy GameConfig/GameModule), @party/charades config stub. Zaktualizowano deps do najnowszych (Next 16, Clerk 7, Turbo 2.8).
-- Next: Phase 3 — moduł Kalambury: GameMenu, GameConfigModal, GameResults, GameScreen
-- Blocker: Clerk wyłączony (placeholder key) — wróci w Phase 5. Charades config inline w games.ts (emitDeclarationOnly nie daje runtime JS) — wróci gdy charades będzie miało pełny Next.js build.
+### Previous: 2026-03-22 — Phase 0-2
+- Turborepo init, hub (Next.js 16), @party/game-sdk, deps update.
+
+### Latest: 2026-03-22 — Phase 3 ✅ + Shared Shell @party/ui ✅
+- Did: Bugfixy (hydration QRPairing, game freeze 'between', Partykit w dev.bat). Zaimplementowano pełny @party/ui: Topbar, GameSidebar (desktop+mobile), GameShell, GameCard gradient hero. Dwupoziomowy token system (tokens.css globalny + theme.css per gra). Hub strona główna + charades layout zmigrowane. Stare komponenty usunięte. Build: 7 tras OK, 0 błędów TS.
+- Next: Phase 4 — Cloudflare Pages deploy + Partykit deploy
+- Blocker: Clerk wyłączony (Phase 5). UI charades-specific screens "bardzo ubogie" — redesign to osobny spec.
+- Architecture note: @party/ui importowany przez path alias (bez dist/), Next.js bundluje TS source bezpośrednio. CSS z workspace paczki działa bez dodatkowej konfiguracji.
 
 <!-- handoff:end -->
