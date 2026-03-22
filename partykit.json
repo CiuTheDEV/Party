@@ -1,0 +1,5 @@
+{
+  "name": "party-charades",
+  "main": "packages/partykit/charades/server.ts",
+  "compatibilityDate": "2024-01-01"
+}

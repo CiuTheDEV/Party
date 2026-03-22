@@ -1,0 +1,6 @@
+{
+  "name": "@party/partykit",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./charades/server.ts"
+}
