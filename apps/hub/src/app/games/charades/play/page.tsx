@@ -119,7 +119,12 @@ function PlayScreen({ config }: { config: Config }) {
         )}
 
         {state.phase === 'between' && (
-          <p className={styles.betweenText}>Podaj telefon kolejnej osobie…</p>
+          <div className={styles.betweenView}>
+            <p className={styles.betweenText}>Podaj telefon kolejnej osobie…</p>
+            <button className={styles.primaryBtn} onClick={sendWord}>
+              Następna tura →
+            </button>
+          </div>
         )}
       </main>
     </div>
