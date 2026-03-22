@@ -26,6 +26,12 @@
       "@/*": [
         "./src/*"
       ],
+      "@party/ui": [
+        "../../packages/ui/src"
+      ],
+      "@party/ui/*": [
+        "../../packages/ui/src/*"
+      ],
       "@content/*": [
         "../../content/*"
       ]
@@ -37,7 +43,9 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
-    "../../content/**/*.ts"
+    "../../content/**/*.ts",
+    "../../packages/ui/src/**/*.ts",
+    "../../packages/ui/src/**/*.tsx"
   ],
   "exclude": [
     "node_modules"
