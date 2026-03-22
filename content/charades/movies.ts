@@ -10,7 +10,8 @@ export const movies: WordCategory = {
     'Shrek', 'Lew Król', 'Alladyn', 'Kopciuszek', 'Pinokio',
     'Harry Potter', 'Hobbit', 'Władca Pierścieni', 'Narnia',
     'Shining', 'Mumia', 'Dracula', 'Frankenstein',
-    'Titanic', 'Pearl Harbor', 'Braveheart', 'Gladiator',
-    'Forrest Gump', 'Cast Away', 'Szósty zmysł',
+    'Pearl Harbor', 'Forrest Gump', 'Cast Away', 'Szósty zmysł',
+    'Parasite', 'Joker', 'Avengers', 'Jurassic Park', 'Indiana Jones',
+    'Schindler\'s List', 'E.T.', 'Gremlins',
   ],
 }
