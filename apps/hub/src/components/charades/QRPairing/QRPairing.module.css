@@ -1,0 +1,48 @@
+.qrWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+}
+
+.hint {
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.url {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  word-break: break-all;
+  text-align: center;
+}
+
+.connected {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border: 2px solid #22c55e;
+  border-radius: 10px;
+  background: rgba(34, 197, 94, 0.08);
+  font-size: 15px;
+}
+
+.icon {
+  font-size: 20px;
+}
+
+.disconnectBtn {
+  margin-left: auto;
+  padding: 4px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  cursor: pointer;
+}
