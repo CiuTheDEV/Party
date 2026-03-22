@@ -2,9 +2,21 @@
   "name": "@party/charades",
   "version": "0.0.1",
   "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts"
+    }
+  },
   "scripts": {
-    "build": "tsc",
-    "dev": "next dev",
-    "lint": "eslint ."
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@party/game-sdk": "*"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "typescript": "^5"
   }
 }
