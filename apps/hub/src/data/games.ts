@@ -13,5 +13,6 @@ export const games: GameConfig[] = [
     href: '/games/charades',
     modes: ['classic'],
     categories: ['animals', 'movies', 'sport'],
+    gradient: 'linear-gradient(135deg, #3b1f7a, #7c3aed, #a78bfa)',
   },
 ]
