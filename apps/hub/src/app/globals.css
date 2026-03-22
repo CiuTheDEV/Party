@@ -4,22 +4,6 @@
   padding: 0;
 }
 
-:root {
-  --color-bg: #0a0a0a;
-  --color-surface: rgba(255, 255, 255, 0.04);
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-text: #f0f0f0;
-  --color-text-muted: rgba(240, 240, 240, 0.5);
-  --topbar-height: 60px;
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --color-topbar-bg: rgba(10, 10, 10, 0.8);
-  --color-surface-hover: rgba(255, 255, 255, 0.08);
-  --color-border-hover: rgba(255, 255, 255, 0.16);
-  --color-focus-outline: rgba(255, 255, 255, 0.4);
-  --color-overlay: rgba(0, 0, 0, 0.7);
-  --color-surface-elevated: #141414;
-}
-
 html, body {
   background-color: var(--color-bg);
   color: var(--color-text);

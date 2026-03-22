@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import '@party/ui/tokens.css'
 import './globals.css'
 
 export const metadata: Metadata = {

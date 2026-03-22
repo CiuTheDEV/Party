@@ -1,0 +1,33 @@
+:root {
+  /* Tło i powierzchnie */
+  --color-bg: #0a0a0a;
+  --color-surface: rgba(255, 255, 255, 0.04);
+  --color-surface-hover: rgba(255, 255, 255, 0.08);
+  --color-surface-elevated: #141414;
+
+  /* Obramowania */
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-hover: rgba(255, 255, 255, 0.16);
+
+  /* Tekst */
+  --color-text: #f0f0f0;
+  --color-text-muted: rgba(240, 240, 240, 0.5);
+
+  /* Interakcja */
+  --color-focus-outline: rgba(255, 255, 255, 0.4);
+  --color-overlay: rgba(0, 0, 0, 0.7);
+  --color-topbar-bg: rgba(10, 10, 10, 0.9);
+
+  /* Layout */
+  --topbar-height: 52px;
+  --sidebar-width: 200px;
+
+  /* Typografia */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Domyślne wartości game theme (nadpisywane przez theme.css każdej gry) */
+  --game-color-primary: #7c3aed;
+  --game-color-primary-light: #a78bfa;
+  --game-color-primary-glow: rgba(124, 58, 237, 0.15);
+  --game-gradient: linear-gradient(135deg, #3b1f7a, #7c3aed, #a78bfa);
+}
