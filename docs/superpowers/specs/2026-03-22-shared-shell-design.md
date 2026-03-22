@@ -35,6 +35,12 @@ Każda gra definiuje nasycony, wyrazisty kolor. Przykłady:
 
 Naprawiony build (TypeScript `emitDeclarationOnly`), importowana przez hub i przyszłe aplikacje.
 
+**`packages/ui/tsconfig.json`** — nowy, z `emitDeclarationOnly: true`, `jsx: react-jsx`, `moduleResolution: bundler`. Rozszerza root tsconfig.
+
+**`packages/ui/package.json`** — skrypt `build: tsc`, `main: src/index.ts`, `types: src/index.ts`. Hub importuje przez workspace `@party/ui`.
+
+**`apps/hub/tsconfig.json`** — dodaje path alias `"@party/ui": ["../../packages/ui/src"]` żeby TypeScript rozwiązał importy.
+
 ```
 packages/ui/
 ├── package.json
@@ -86,7 +92,7 @@ Niezmienne, ładowane przez root layout huba. Zastępują zmienne z `globals.css
   --color-topbar-bg: rgba(10, 10, 10, 0.9);
 
   /* Layout */
-  --topbar-height: 52px;
+  --topbar-height: 52px;   /* zmiana z 60px — tokens.css jest importowany po globals.css i nadpisuje */
   --sidebar-width: 200px;
 
   /* Typografia */
@@ -151,6 +157,12 @@ Zawartość:
 - Nagłówek: `gameEmoji` + `gameName`
 - Lista linków — aktywny wyróżniony lewym paskiem `--game-color-primary` + tło `--game-color-primary-glow`
 - Na dole zawsze: „← Wróć do lobby" (link do `/`)
+
+### `GameSidebar` — mobile tab bar
+
+Na mobile (<768px) `GameSidebar` renderuje dolny tab bar zamiast bocznej nawigacji. Ten sam komponent, inna prezentacja CSS. Wysokość 56px, przyklejony do dołu. `GameShell` dodaje `padding-bottom: 56px` do main content na mobile.
+
+Nie ma osobnego komponentu `MobileTabBar` — to CSS media query w `GameSidebar.module.css`.
 
 ### `GameShell`
 
@@ -241,13 +253,17 @@ Usuwa definicje CSS custom properties (przeniesione do `tokens.css`). Zostaje: C
 Importuje `@party/ui/tokens.css` zamiast definiować zmienne lokalnie.
 
 **`apps/hub/src/app/page.tsx`**
-Używa `GameCard` z `@party/ui` zamiast lokalnego `GameCard`.
+Używa `GameCard` z `@party/ui` zamiast lokalnego `GameCard`. Grid kart renderowany bezpośrednio w `page.tsx` przez CSS grid — `GamesGrid` komponent usunięty, zastąpiony prostym `<div className={styles.grid}>`.
 
 **`apps/hub/src/data/games.ts`**
-Dodaje pole `gradient` do każdej gry.
+Dodaje pole `gradient` do każdej gry. Przykład dla Kalambury: `gradient: 'linear-gradient(135deg, #3b1f7a, #7c3aed, #a78bfa)'`.
 
 **`packages/game-sdk/src/types/GameConfig.ts`**
-Dodaje opcjonalne pole `gradient?: string`.
+Dodaje opcjonalne pole `gradient?: string` (CSS gradient string używany przez `GameCard`).
+
+### Trasy per gra — layout files
+
+Każda gra ma własny `layout.tsx` bezpośrednio w swoim folderze (nie parametryczny `[game]`). Dla Kalambury: `apps/hub/src/app/games/charades/layout.tsx`. Przy dodaniu nowej gry: analogiczny plik w jej folderze.
 
 ### Usuwane pliki z huba
 
