@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import styles from './QRPairing.module.css'
 
@@ -10,9 +11,11 @@ type Props = {
 }
 
 export function QRPairing({ roomId, isConnected, onDisconnect }: Props) {
-  const presenterUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/games/charades/present?room=${roomId}`
-    : ''
+  const [presenterUrl, setPresenterUrl] = useState('')
+
+  useEffect(() => {
+    setPresenterUrl(`${window.location.origin}/games/charades/present?room=${roomId}`)
+  }, [roomId])
 
   if (isConnected) {
     return (
