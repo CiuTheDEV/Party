@@ -2,12 +2,12 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
-import type { Game } from '@/data/games'
+import type { GameConfig } from '@party/game-sdk'
 import { PremiumModal } from '@/components/PremiumModal/PremiumModal'
 import styles from './GameCard.module.css'
 
 type GameCardProps = {
-  game: Game
+  game: GameConfig
 }
 
 export function GameCard({ game }: GameCardProps) {

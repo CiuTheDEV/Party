@@ -1,9 +1,9 @@
-import type { Game } from '@/data/games'
+import type { GameConfig } from '@party/game-sdk'
 import { GameCard } from '@/components/GameCard/GameCard'
 import styles from './GamesGrid.module.css'
 
 type GamesGridProps = {
-  games: Game[]
+  games: GameConfig[]
 }
 
 export function GamesGrid({ games }: GamesGridProps) {

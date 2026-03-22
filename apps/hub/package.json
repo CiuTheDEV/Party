@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^6",
+    "@party/charades": "*",
+    "@party/game-sdk": "*",
     "next": "^15",
     "react": "^19",
     "react-dom": "^19"
