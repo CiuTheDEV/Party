@@ -1,54 +1,104 @@
-# Task Routing Detailed Table (Tiers 2-4 + Cost Comparison)
+# Task Routing
 
-> On-demand loading. Tier 1 (Sonnet evaluates escalation) stays in rules/behaviors.md.
-
-## Tier 2: Opus Exclusive Scenarios
-
-| Task Type | Route | Notes |
-|-----------|-------|-------|
-| Critical logic/secrets/credentials | **Opus exclusive** | Safety floor, never outsource |
-| Data analysis/core metrics/business logic | **Opus exclusive** | Optional: Opus -> Codex verify |
-| Critical code review | **Opus lead -> Codex audit** | Multi-model cross-check |
-| New feature >50 lines (critical) | **Opus write -> Codex review** | Maker-checker |
-| Bug fix (critical) | **Opus fix -> Codex verify** | Prevent regression |
-
-## Tier 3: External Model Assistance
-
-| Task Type | Route | Notes |
-|-----------|-------|-------|
-| Code review (non-critical) | **Sonnet -> Codex** | Codex deep reasoning |
-| Complex refactor/cross-file changes | **Codex** | Suitable for >100 line non-sensitive refactors |
-| Cross-verification/second opinion | **Codex** (fallback: alternative) | Different model family, independent verification |
-| Simple queries/formatting/search | **Haiku (subagent)** | Fastest, cheapest |
-| Batch text analysis/filtering | **Alternative model** | For high-frequency scenarios |
-
-## Tier 4: Local Models — Free Compute Pool (Ollama, fallback)
-
-**Principle: If a $0 model can do it, don't burn premium quota.**
-
-| Task Type | Model | Method | Notes |
-|-----------|-------|--------|-------|
-| Commit message generation | Local 7B model | `curl localhost:11434/v1/...` | Replace main session generation |
-| Simple text formatting/translation | Local 7B model | curl | Replace Haiku subagent |
-| Diff classification (critical vs trivial) | Local 7B model | curl | Pre-filter before Codex review |
-| Batch/non-critical tasks | Local agent | configured agent | Zero-cost batch processing |
-| Offline work | Local model | ollama run | Only option when disconnected |
-
-**Limitations**: 32K context, no MCP, weaker than Haiku. Complex tasks still need cloud models.
-**Fallback**: Ollama not running -> `ollama serve &` or fall back to Haiku subagent.
-
-## Model Cost Overview
-
-| Tier | Model | Source | Monthly | Typical Scenario | Method | Status |
-|------|-------|--------|---------|-----------------|--------|--------|
-| **L1 Top** | Opus | Claude Max | $200-250 | Critical/complex reasoning | Main session | Active |
-| **L2 Workhorse** | Sonnet | Claude Max | Included | Daily dev/analysis | Main/subagent | Active |
-| **L3 Economy** | Haiku | Claude Max | Included | Simple queries/subagent | `Task(model="haiku")` | Active |
-| **L3 Audit** | Codex (GPT) | ChatGPT Plus | $20 | Code review/cross-verify | MCP or CLI | Active |
-| **L4 Local** | Ollama 7B | Local | $0 | Offline/simple/fallback | `curl localhost:11434` | Standby |
-
-**Prompt Caching**: Anthropic API auto-enables, cache hits reduce cost 90%. Continuous conversations (<5min gap) work best.
+> On-demand loading. Core routing rules live in `rules/behaviors.md`.
 
 ---
 
-*Customize models and costs based on your subscriptions and available tools.*
+## Model Setup
+
+**Claude Pro — Sonnet as primary, Haiku for lightweight tasks.**
+
+| Model | Status | Use |
+|-------|--------|-----|
+| Sonnet | ✅ Active | Primary — all development work |
+| Haiku | ✅ Active | Lightweight tasks: quick lookups, simple formatting, low-stakes Q&A |
+| Codex / GPT-5.4 | ✅ Active | Token limit fallback + cross-verification |
+| Codex / GPT-5.4-mini | ✅ Active | Lightweight fallback tasks when token limit reached |
+| Antigravity | ✅ Active | Alternative fallback when token limit reached |
+| Opus | ❌ Not used | Too expensive on Claude Pro |
+| Local (Ollama) | ❌ Not used | Not set up |
+
+---
+
+## Routing Table
+
+### Sonnet handles directly
+
+| Task Type | Notes |
+|-----------|-------|
+| All UI / frontend development | Components, styles, layouts |
+| Bug fixes | Any size |
+| Docs, comments, README | Any `.md` file |
+| Config files | Non-secret parameters |
+| Game logic | Room management, scoring, state |
+| API routes | Cloudflare Workers, D1 queries |
+| Refactors ≤100 lines | Contained changes |
+| Auth flow (Clerk) | Integration work |
+| Partykit real-time setup | Multiplayer architecture |
+
+### Hand off to Codex / Antigravity
+
+| Trigger | Model | Action |
+|---------|-------|--------|
+| Token limit reached mid-task | GPT-5.4 | Save state → hand off with full context |
+| Cross-verification of critical logic | GPT-5.4 | Codex reviews Claude's output |
+| Lightweight token-limit tasks | GPT-5.4-mini | Simple, well-defined tasks only |
+| Refactor >100 lines, non-sensitive | GPT-5.4 | Optional outsource |
+
+### Use Haiku for
+
+| Task | Notes |
+|------|-------|
+| Quick factual lookups | No code involved |
+| Simple text formatting | No architectural decisions |
+| Low-stakes Q&A | When Sonnet would be overkill |
+
+---
+
+## Handoff Template
+
+When handing off to Codex/Antigravity:
+
+```
+# Project Party — Handoff
+
+## Read first (in this order)
+1. PROJECT_CONTEXT.md
+2. memory/today.md
+3. memory/active-tasks.json
+4. memory/MEMORY.md
+5. memory/patterns.md
+
+## Task
+[Specific description]
+
+## Context
+[What has been done, what remains]
+
+## Completion requirements
+1. Run: npm run lint && npm run build
+2. Confirm: PASS — read the output, don't assume
+3. Update: PROJECT_CONTEXT.md handoff block
+4. Report: results with evidence
+```
+
+---
+
+## Free Tier Constraints
+
+All services must have a free tier. Before adding anything new:
+
+| Service | Free tier | Action if exceeded |
+|---------|-----------|-------------------|
+| Cloudflare Pages | Unlimited deploys | — |
+| Cloudflare D1 | 5GB, 5M reads/day | Ask product owner |
+| Cloudflare Workers | 100k req/day | Ask product owner |
+| Clerk | 10,000 MAU | Ask product owner |
+| Partykit | Free tier | Check limits before heavy use |
+| Stripe | % per transaction | Not connected yet |
+
+> Any service without a free tier → stop and ask the product owner.
+
+---
+
+*Project Party uses Claude Pro: Sonnet (primary), Haiku (lightweight), Codex GPT-5.4/GPT-5.4-mini (fallback). No Opus.*

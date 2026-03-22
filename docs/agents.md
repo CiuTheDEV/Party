@@ -1,203 +1,118 @@
-# Agent Configuration & Multi-Model Collaboration
+# Agent Configuration & Multi-Agent Collaboration
 
-> On-demand loading. Contains Agent assignment, Subagent dispatch, multi-model routing rules.
+> On-demand loading. Contains agent assignment, handoff protocol, multi-model routing.
 
 ---
 
+## Agent Setup
+
+This project runs on **Claude Pro** — Sonnet as primary, Haiku for lightweight tasks. No Opus.
+
+| Agent | Model | When |
+|-------|-------|------|
+| **Claude Code** | Sonnet | Primary — all development sessions |
+| **Claude Code** | Haiku | Quick lookups, simple Q&A, lightweight tasks |
+| **Codex** | GPT-5.4 | Token limit fallback + cross-verification |
+| **Codex** | GPT-5.4-mini | Lightweight tasks when token limit reached |
+| **Antigravity** | — | Alternative fallback when token limit reached |
+
+## Token Limit Handoff Protocol
+
+When Claude token limit is approaching:
+
+1. Complete the current atomic unit of work (don't stop mid-function)
+2. Update `memory/today.md` with full session summary
+3. Update `memory/active-tasks.json` with current task state
+4. Update `PROJECT_CONTEXT.md` handoff block
+5. Output: `🔀 Handoff: [task] → Codex` with next steps clearly listed
+
+**Receiving agent checklist** (Codex/Antigravity starting a session):
+1. Read `PROJECT_CONTEXT.md` — architecture, current phase, decisions
+2. Read `memory/today.md` — what happened today, current task
+3. Read `memory/active-tasks.json` — in-flight tasks
+4. Read `memory/MEMORY.md` — technical pitfalls to avoid
+5. Read `memory/patterns.md` — reusable solutions (if exists)
+6. Only then start working
+
 ## Agent Task Assignment
-
-### Opus Tier (Critical, highest quality)
-
-| Agent | Scope | Core Duty |
-|-------|-------|-----------|
-| **your-critical-agent** | Critical business logic | Validation, quality control |
-
-### Sonnet Tier (Complex tasks, balance quality/speed)
 
 | Agent | Scope | Core Duty |
 |-------|-------|-----------|
 | **pr-reviewer** | Code review | PR quality, architecture consistency |
 | **security-reviewer** | Security audit | Vulnerability detection, sensitive info |
 | **performance-analyzer** | Performance analysis | Bottleneck identification, optimization |
-| **learning-agent** | Experience recording | patterns.md, recall queries |
-
-### Haiku Tier (Quick tasks)
-
-| Agent | Scope | Core Duty |
-|-------|-------|-----------|
-| **build-error-resolver** | Build fixes | TypeScript error quick fixes |
-
-### Built-in Agents
-
-| Agent | Model | Use |
-|-------|-------|-----|
-| general-purpose | sonnet | General multi-step tasks |
-| Explore | haiku | Quick codebase exploration |
-| Plan | inherit | Architecture design, implementation planning |
-| claude-code-guide | haiku | Claude Code usage guide |
-
-### Coordinator Agent (Main Agent = Claude Opus)
-
-| Duty | Description |
-|------|-------------|
-| **Orchestrate** | Dispatch tasks to other Agents/Codex |
-| **Decide** | Final judgment on critical matters |
-| **Memory** | Maintain hot data layer (today.md) |
-| **Align** | Daily status alignment |
-
----
 
 ## Subagent Dispatch Rules
 
-> **Default parallel, unless there are dependencies**
+**Default: sequential. Parallel only for truly independent tasks.**
 
-**Trigger conditions (dispatch when any met)**:
-- >=2 independent tasks
-- P0 has multiple pending items
-- User says "in parallel" / "simultaneously"
-- Complex task can be split into independent modules
-
-**Memory injection protocol (mandatory when dispatching subagent)**:
+**Memory injection when dispatching** (mandatory):
 ```
-You are working on [project-name].
+You are working on Project Party — a Polish browser party game portal.
 
-## Context Loading (must read first)
-1. ~/.claude/memory/today.md — Today's work context
-2. /path/to/project/PROJECT_CONTEXT.md — Project status
+## Required reading (before anything else)
+1. PROJECT_CONTEXT.md — architecture, current phase, key decisions
+2. memory/today.md — today's session context and current task
+3. memory/MEMORY.md — technical pitfalls to avoid
 
 ## Task
 [Specific task description]
 
-## Completion Requirements
-1. Run lint + build yourself, confirm PASS
+## Completion requirements
+1. Run lint + build, confirm PASS
 2. Update PROJECT_CONTEXT.md Session Handoff section
-3. Report results
+3. Report results with evidence (not "should work")
 ```
 
----
+## Cross-Verification
 
-## Multi-Model Collaboration
+Use Codex for second opinion on:
+- Critical game logic (room management, scoring)
+- Real-time architecture decisions (Partykit setup)
+- Security-sensitive code (auth flow, session tokens)
 
-> Main Agent focuses on orchestration, delegates execution
-
-### Main Agent Duties (Claude Opus)
-
-| Do | Don't |
-|----|-------|
-| Understand requirements, decompose tasks | Write large code blocks |
-| Critical decisions | Simple CRUD |
-| Verify external output | Document cleanup |
-| Maintain memory system | Repetitive tasks |
-
-### External Model Routing
-
-| Task Type | Default Executor | Method |
-|-----------|-----------------|--------|
-| Critical logic | Codex | `codex exec "..."` |
-| Frontend / docs | Alternative model | As configured |
-
-### Sensitive Code (Never outsource)
-
-- Critical execution logic (orders, state changes, settlements)
-- Credential operations (signing, auth, key management)
-- Secret/Token handling
-- Core business calculations (metrics, risk assessment)
-
----
-
-## Multi-Model Cross-Verification (Standard Practice)
-
-> Important analyses/decisions get second-model verification to avoid single-point blind spots
-
-### Trigger Conditions (Proactive)
-
-| Scenario | Must Cross-Verify |
-|----------|-------------------|
-| **Critical business analysis** | Yes |
-| **Architecture/system design** | Yes |
-| **Strategy decisions** | Yes |
-| **Risk assessment** | Yes |
-| **Complex bug diagnosis** | Yes |
-
-### Output Format
-
+**Output format**:
 ```
-Multi-model cross-verification:
-- Claude's view: [xxx]
-- Codex/Other view: [xxx]
-- Consensus: [xxx]
-- Divergence: [xxx]
-- Final conclusion: [xxx]
+Cross-verification:
+- Claude: [analysis]
+- Codex: [analysis]
+- Agreement: [what both agree on]
+- Divergence: [differences, if any]
+- Decision: [what we go with and why]
 ```
 
----
-
-## Multi-Model SSOT Collaboration Contract
-
-> All models use Claude as the hub, unified project state management.
-
-### Data Layers
+## Multi-Agent SSOT Contract
 
 | Layer | Location | Writer | Purpose |
 |-------|----------|--------|---------|
-| **L0 Rules Layer** | ~/.claude/ | Claude only | Rules, memory, experience |
-| **L1 Interface Layer** | PROJECT_CONTEXT.md | All models (restricted) | Project state |
-| **L2 Archive Layer** | Knowledge vault | Claude + automation | Persistent knowledge |
+| **L0 Rules** | `rules/` + `docs/` | Claude only | Rules, memory, experience |
+| **L1 Interface** | `PROJECT_CONTEXT.md` | All agents (restricted) | Project state |
+| **L2 Code** | `apps/` + `packages/` | All agents | Product code |
 
-### L1 Interface: PROJECT_CONTEXT.md Structure
+### File Operation Rules
 
-Fixed structure, external models can only write to the Handoff block:
+| Agent | Can create | Can modify | Never touch |
+|-------|-----------|-----------|-------------|
+| Claude Code | Anything (following behaviors.md) | Anything | — |
+| Codex / Antigravity | Code files | Code + Handoff block | `rules/`, `docs/`, `memory/` |
 
-```markdown
-# [Project Name] - Project Context
-
-## Architecture (Claude maintains)
-## Current Focus (Claude maintains)
-
+External agents can only write to the handoff block in `PROJECT_CONTEXT.md`:
+```
 <!-- handoff:start -->
 ## Session Handoff
-- Last: [time] by [model-name]
-- Task: [task ID/description]
+- Last: [time] by [agent]
+- Task: [description]
 - Did: [what was done]
 - Next: [next steps]
-- Blocker: [blockers]
+- Blocker: [if any]
 <!-- handoff:end -->
-
-## Tech Debt (Claude maintains)
 ```
 
-### External Model Injection Template
+### Violation Detection
 
-```bash
-codex exec "
-# Project Contract (must follow)
-1. Read PROJECT_CONTEXT.md first for status
-2. Only modify code files + content between <!-- handoff:start/end -->
-3. Never create/modify: ROADMAP.md, FOCUS.md, TODO.md, TASKS.md, STATUS.md
-4. Never write to ~/.claude/ or knowledge vault (unless task explicitly requires)
-5. After completion, write Handoff: Last: [time] by [model], Task: [description]
-
-# Task
-[specific task description]
-
-# Verification
-[verification commands]
-"
-```
-
-### File Operation Whitelist
-
-| Model | Can Create | Can Modify | Never Touch |
-|-------|-----------|-----------|-------------|
-| Claude | Anything (following behaviors.md) | Anything | - |
-| External models | Code files | Code + Handoff block | ROADMAP/FOCUS/TODO/TASKS/.claude/vault/ |
-
-### Violation Detection (Claude executes during review)
-
-1. `git diff --name-only` — Check for modifications outside whitelist
-2. Check PROJECT_CONTEXT.md changes are within `<!-- handoff:start/end -->` markers
-3. Violation → `git checkout -- [file]` rollback + record in patterns.md
+1. `git diff --name-only` — check for modifications outside whitelist
+2. Violation → `git checkout -- [file]` rollback + record in `memory/MEMORY.md`
 
 ---
 
-*Customize agent assignments and model routing based on your specific projects and needs.*
+*Customize based on available tools and subscriptions.*

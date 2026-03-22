@@ -1,10 +1,9 @@
 {
   "_schema": {
-    "description": "Cross-session in-flight task registry. Tasks that span multiple sessions are tracked here.",
+    "description": "Cross-session in-flight task registry.",
     "fields": {
       "id": "Incrementing task ID (T001, T002, ...)",
       "title": "Brief task title",
-      "project": "Which project this belongs to",
       "status": "active | blocked | waiting",
       "context": "Current state and what's been done",
       "next_action": "Specific next step to take",

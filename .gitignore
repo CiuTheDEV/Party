@@ -1,0 +1,12 @@
+# Codex — never commit credentials or session history
+.codex/auth.json
+.codex/sessions/
+.codex/logs/
+
+# Claude Code — never commit local settings with potential secrets
+.claude/settings.local.json
+
+# Env files
+.env
+.env.*
+.dev.vars

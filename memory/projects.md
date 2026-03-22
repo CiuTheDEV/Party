@@ -1,21 +1,27 @@
 # Projects Overview
 
-<!--
-  Cross-project status summary. Only put summaries and pointers here.
-  Detailed status lives in each project's PROJECT_CONTEXT.md.
+*Last updated: 2026-03-22*
 
-  Update: After each session-end that touches a project.
--->
+---
 
 ## Active Projects
 
-| Project | Status | Key Metrics | Last Updated |
-|---------|--------|-------------|--------------|
-| your-project-1 | Active | [relevant metrics] | YYYY-MM-DD |
-| your-project-2 | Paused | [relevant metrics] | YYYY-MM-DD |
+| Project | Status | Phase | Last Updated |
+|---------|--------|-------|--------------|
+| Project Party | 🟡 Setup | Phase 0 — monorepo | 2026-03-22 |
 
-## Project Quick Links
+---
 
-| Project | Repo | Deploy | Docs |
-|---------|------|--------|------|
-| your-project-1 | [GitHub URL] | [Deploy URL] | PROJECT_CONTEXT.md |
+## Project Party
+
+**Description**: Polish browser-based party game portal for hangouts. Hub + game module system.
+First game: Charades / Pantomime (gestures, expressions, body language — no drawing, no words).
+
+**Stack**: Next.js + Turborepo + Cloudflare Pages + Partykit + Clerk + Stripe (stub)
+
+| Resource | URL |
+|----------|-----|
+| Repo | https://github.com/CiuTheDEV/Party |
+| Prod | [Cloudflare URL — TBD] |
+| Stripe | [Dashboard — TBD] |
+| Docs | `PROJECT_CONTEXT.md` |

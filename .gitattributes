@@ -1,2 +1,6 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Codex config — track config but never auth credentials
+.codex/config.toml text=auto
+.codex/auth.json linguist-generated

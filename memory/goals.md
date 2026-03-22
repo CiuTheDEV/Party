@@ -1,26 +1,23 @@
 # Goals & Focus
 
-<!--
-  Three-tier goal tracking:
-  - This Week: Max 5 items, tactical execution
-  - This Month: Strategic milestones
-  - This Quarter: North star objectives
+*Last updated: 2026-03-22*
 
-  Update: session-end removes completed items, adds new discoveries.
-  Completed items don't stay here (today.md has the record).
--->
+---
 
-## This Week (Week N)
+## This Week
 
-1. [Goal 1 — specific, measurable]
-2. [Goal 2]
+1. Fill in CLAUDE.md — name, Cloudflare / GitHub accounts
+2. Initialize Turborepo monorepo with base structure
+3. Deploy skeleton to Cloudflare Pages
 
 ## This Month
 
-- [ ] [Monthly milestone 1]
-- [ ] [Monthly milestone 2]
+- [ ] Phase 0 — working monorepo, Cloudflare Pages deployment
+- [ ] Phase 1 — Hub: landing page with game list, room creation
+- [ ] Phase 2 — Game SDK: module contract defined
 
 ## This Quarter
 
-- [Quarter objective 1]
-- [Quarter objective 2]
+- Working Charades prototype (no multiplayer)
+- Real-time multiplayer with room codes
+- Optional accounts via Clerk

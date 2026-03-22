@@ -1,16 +1,16 @@
-# Project Party — Claude Code Global Memory
+# Project Party — Codex Global Memory
 
-> Auto-loaded: rules/ (behaviors.md, skill-triggers.md, memory-flush.md)
+> Auto-loaded on startup: rules/ (behaviors.md, skill-triggers.md, memory-flush.md)
 > On-demand: docs/ (agents.md, content-safety.md, behaviors-extended.md, scaffolding-checkpoint.md, task-routing.md, behaviors-reference.md)
 > Hot data layer: memory/today.md + memory/active-tasks.json
 
 ---
 
-## User Info
+## Project Info
 
 - **Name**: Mati
 - **Project dir**: C:\Users\Mateo\Desktop\Party
-- **Identity**: Product Owner — AI agents write the code
+- **Identity**: Product Owner is not a developer — AI agents write the code
 - **Philosophy**: Build simple, verify always, never over-engineer
 
 ### Platform Accounts
@@ -21,23 +21,25 @@
 
 ---
 
-## Agents & Token Budget
+## Agents & Models
 
 Documentation must be readable by all agents — session handoff must be seamless.
 
-| Agent | When to use |
-|-------|-------------|
-| **Claude Code (Sonnet)** | Primary — daily sessions |
-| **Claude Code (Haiku)** | Lightweight tasks — quick lookups, simple Q&A |
-| **Codex (GPT-5.4)** | When Claude token limit is reached |
-| **Codex (GPT-5.4-mini)** | Lightweight fallback tasks at token limit |
-| **Antigravity** | Alternative when token limit is reached |
+| Agent | Model | When |
+|-------|-------|------|
+| **Claude Code** | Sonnet | Primary — daily sessions |
+| **Claude Code** | Haiku | Lightweight tasks — quick lookups, simple Q&A |
+| **Codex** | GPT-5.4 | Token limit fallback + cross-verification |
+| **Codex** | GPT-5.4-mini | Lightweight fallback tasks at token limit |
+| **Antigravity** | — | Alternative fallback |
 
-### Token Rules (Claude Pro)
-- Sonnet only — **no Opus**, too expensive on Pro plan
-- Split work into small sessions to avoid burning context
-- At token limit: save state to `memory/today.md` + `memory/active-tasks.json`, hand off to Codex
-- Every agent starting a session **must read** `PROJECT_CONTEXT.md` + `memory/today.md` + `memory/MEMORY.md` + `memory/patterns.md` first
+### Starting a session (mandatory)
+1. Read `PROJECT_CONTEXT.md` — architecture, current phase, last handoff
+2. Read `memory/today.md` — what happened today, current task
+3. Read `memory/active-tasks.json` — in-flight tasks
+4. Read `memory/MEMORY.md` — technical pitfalls (if exists)
+5. Read `memory/patterns.md` — reusable solutions (if exists)
+6. Only then start working
 
 ---
 
@@ -215,6 +217,17 @@ Every module must export:
 
 ---
 
+## What you can touch
+
+| Allowed | Never touch |
+|---------|-------------|
+| `apps/` — all code files | `rules/` |
+| `packages/` — all code files | `docs/` |
+| `content/` — word lists | `memory/` (except handoff block) |
+| `PROJECT_CONTEXT.md` handoff block | `CLAUDE.md` |
+
+---
+
 ## On-demand Loading Index
 
 | Scenario | Load file |
@@ -230,6 +243,29 @@ Every module must export:
 | AI content safety | `Read docs/content-safety.md` |
 | Extended behavior rules | `Read docs/behaviors-extended.md` |
 | Memory search / reference details | `Read docs/behaviors-reference.md` |
+
+---
+
+## Completing a session
+
+Update the handoff block in `PROJECT_CONTEXT.md`:
+
+```
+<!-- handoff:start -->
+## Session Handoff
+- Last: [time] by Codex (GPT-5.4)
+- Task: [description]
+- Did: [what was done]
+- Next: [next steps]
+- Blocker: [if any]
+<!-- handoff:end -->
+```
+
+Then commit:
+```bash
+git add [specific files]  # Never git add .
+git commit -m "[type]: [description]"
+```
 
 ---
 
