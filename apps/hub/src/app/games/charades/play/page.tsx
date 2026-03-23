@@ -10,7 +10,7 @@ import styles from './page.module.css'
 
 type Config = {
   players: Omit<Player, 'score'>[]
-  selectedCategories: string[]
+  selectedCategories: Record<string, ('easy' | 'hard')[]>
   settings: GameSettings
   roomId: string
 }
@@ -21,7 +21,7 @@ export default function CharadesPlayPage() {
 
   useEffect(() => {
     const raw = sessionStorage.getItem('charades:config')
-    if (!raw) { router.replace('/games/charades/config'); return }
+    if (!raw) { router.replace('/games/charades'); return }
     setConfig(JSON.parse(raw))
   }, [router])
 
@@ -31,12 +31,12 @@ export default function CharadesPlayPage() {
 
 function PlayScreen({ config }: { config: Config }) {
   const router = useRouter()
-  const cats = allCategories.filter((c) => config.selectedCategories.includes(c.id))
-  const { nextWord } = useWordPool(cats)
+  const cats = allCategories.filter((c) => c.id in config.selectedCategories)
+  const { nextWord } = useWordPool(cats, config.selectedCategories)
 
   const getNextWord = useCallback(() => {
     const word = nextWord()
-    const cat = cats.find((c) => c.words.includes(word))?.name ?? ''
+    const cat = cats.find((c) => c.wordsEasy.includes(word) || c.wordsHard.includes(word))?.name ?? ''
     return { word, category: cat }
   }, [nextWord, cats])
 

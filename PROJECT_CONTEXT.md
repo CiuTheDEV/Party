@@ -79,9 +79,9 @@ project-party/                     # Monorepo (Turborepo)
 ### Previous: 2026-03-22 — Phase 3 ✅ + Shared Shell @party/ui ✅
 - Bugfixy (hydration QRPairing, game freeze 'between', Partykit w dev.bat). @party/ui: Topbar, GameSidebar, GameShell, GameCard, token system. Hub + charades layout zmigrowane.
 
-### Latest: 2026-03-23 — Electric Nocturne pixel-perfect alignment ✅
-- Did: Dopasowano Kalambury menu page 1:1 do Stitch reference. Tokeny: `--game-color-primary: #7c3aed`, sidebar inactive `#64748b`, subtitle 18px, badge tokenami, GameIcon `#0f0f11` bg, GameShell glow `z-index:-1`, logo dynamiczny kolor. Wszystkie hardcoded kolory usunięte. 5 commitów.
-- Architecture: shared komponenty (`packages/ui/`) + lokalna treść (`apps/hub/src/app/games/charades/`). Per-game theme override przez `theme.css`.
+### Latest: 2026-03-23 — Setup modal + UI redesign ✅
+- Did: Pełny redesign setup flow dla Kalamburów. Config przepięty z trasy `/config` na lokalny modal w `page.tsx`. Nowe komponenty: `PlayerGrid`, `AddPlayerModal` (modal dodania gracza z walidacją + shake animation), `CategoryPicker` (accordion, easy/hard per kategoria, `SelectedCategories = Record<string, ('easy'|'hard')[]>`), `SettingsModal` (sidebar + slider + quick buttons), `QRPairing` (sekcja + modal QR z kodem sesji). Walidacja "Rozpocznij grę" z podświetlaniem błędnych sekcji. Stara trasa `/config`, `PlayerForm`, `PlayerList` usunięte. `WordCategory` zmieniona na `wordsEasy[]` + `wordsHard[]`, `useWordPool` obsługuje osobne pule.
+- Pattern: ten układ (menu + setup modal) to zatwierdzony wzorzec dla każdej kolejnej gry — zmienia się tylko `--game-color-primary` i zawartość sekcji.
 - Next: Phase 4 — Cloudflare Pages deploy + Partykit deploy
 - Blocker: Clerk wyłączony (Phase 5).
 

@@ -15,4 +15,30 @@
 
 ## Entries
 
-*(empty — no sessions yet)*
+## Config modal jako lokalny stan (nie routing)
+
+**Scenario**: Setup gry — modal konfiguracji przed rozpoczęciem rozgrywki.
+
+**Rozwiązanie**: `useState(false)` w `page.tsx`, nie osobna trasa `/config`. Modal renderowany warunkowo w tym samym komponencie co menu.
+
+**Dlaczego**: Prostsze, zachowuje stan menu (wybrany tryb), łatwy fallback. Stara trasa `/config` była martwym kodem.
+
+---
+
+## SelectedCategories jako Record zamiast Set
+
+**Scenario**: Przekazywanie wybranych kategorii + poziomów trudności przez sessionStorage do strony rozgrywki.
+
+**Rozwiązanie**: `Record<string, ('easy' | 'hard')[]>` zamiast `Record<string, Set<...>>`.
+
+**Dlaczego**: `Set` nie serializuje się do JSON — `JSON.stringify` zwraca `{}`. `Record` z tablicą serializuje się poprawnie.
+
+---
+
+## Shake animation reset przez key
+
+**Scenario**: Animacja shake ma się odtwarzać przy każdym kliknięciu "Rozpocznij" gdy warunki nie są spełnione.
+
+**Rozwiązanie**: `shakeKey` licznik w stanie + `key={`err-${shakeKey}`}` na elemencie z animacją. React odmontowuje i remontuje element, co resetuje animację CSS.
+
+**Dlaczego**: Sama klasa CSS z `animation` nie odpala się ponownie jeśli element już ją ma — trzeba wymusić remount.

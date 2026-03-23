@@ -8,7 +8,7 @@
 
 | Project | Status | Phase | Last Updated |
 |---------|--------|-------|--------------|
-| Project Party | 🟡 Setup | Phase 0 — monorepo | 2026-03-22 |
+| Project Party | 🟢 Active | Phase 3 done, UI polish | 2026-03-23 |
 
 ---
 

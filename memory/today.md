@@ -34,6 +34,13 @@
 - Next: Phase 4 — Cloudflare Pages deploy + Partykit deploy
 - Experience recorded: yes
 
+### S5 (~2026-03-23) [Project Party] Setup modal + UI redesign Kalambury
+
+- Pełny redesign setup flow: config z trasy `/config` przeniesiony na lokalny modal w `page.tsx`. Nowe komponenty: `PlayerGrid`, `AddPlayerModal` (walidacja + shake), `CategoryPicker` (accordion easy/hard), `SettingsModal` (sidebar + slider), `QRPairing` (sekcja + modal QR). `WordCategory` zmieniona na `wordsEasy[]` + `wordsHard[]`, `useWordPool` obsługuje osobne pule. Stara trasa `/config`, `PlayerForm`, `PlayerList` usunięte. Refaktor + aktualizacja dokumentacji.
+- Ten układ (menu + setup modal) to zatwierdzony wzorzec dla każdej kolejnej gry — zmienia się tylko `--game-color-primary` i zawartość sekcji.
+- Next: Phase 4 — Cloudflare Pages deploy + Partykit deploy
+- Experience recorded: yes (patterns.md — modal jako stan, SelectedCategories, shake key)
+
 ### S3 (~wieczór) [Project Party] Bugfixy + Shared Shell @party/ui
 
 - Naprawiono 3 bugi: hydration mismatch w QRPairing (useState+useEffect zamiast typeof window), game freeze w fazie 'between' (brak przycisku "Następna tura →"), Partykit nie startował automatycznie (dodany do dev.bat jako osobne okno).

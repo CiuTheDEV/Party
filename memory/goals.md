@@ -17,6 +17,7 @@
 - [x] Phase 2 — Game SDK: module contract defined ✅
 - [x] Phase 3 — Module: Kalambury (GameMenu, GameConfigModal, GameResults, GameScreen) ✅
 - [x] Shared Shell @party/ui — Neon Dark, Topbar+Sidebar, GameCard, token system ✅
+- [x] Charades UI redesign — setup modal, PlayerGrid, CategoryPicker, SettingsModal, QRPairing ✅
 - [ ] Phase 4 — Deploy: Cloudflare Pages + Partykit
 
 ## This Quarter

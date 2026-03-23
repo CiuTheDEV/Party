@@ -1,29 +1,120 @@
-.grid {
+.accordion {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+  color: var(--color-text);
+}
+
+.header:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.headerTitle {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.headerCount {
+  font-size: 14px;
+  color: var(--color-text-muted);
+}
+
+.arrow {
+  font-size: 18px;
+  color: var(--color-text-muted);
+  transition: transform 0.2s;
+  display: inline-block;
+}
+
+.arrowOpen {
+  transform: rotate(180deg);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 10px;
+  padding: 14px 0 4px;
+}
+
+@media (max-width: 767px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 0 4px;
+}
+
+.actionBtn {
+  padding: 8px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.actionBtn:hover {
+  border-color: rgba(255, 255, 255, 0.25);
+  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.cardWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .card {
-  padding: 12px 16px;
-  border: 2px solid var(--color-outline-variant);
-  border-radius: 8px;
-  background: var(--color-surface);
+  padding: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
   color: var(--color-text);
-  cursor: pointer;
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-  transition: border-color 0.2s, background 0.2s;
-  min-width: 120px;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: border-color 0.15s, background 0.15s;
 }
 
-.card:hover {
-  border-color: rgba(255, 255, 255, 0.25);
+.cardEasy {
+  border-color: #f472b6;
+  background: rgba(244, 114, 182, 0.1);
 }
 
-.card.selected {
+.cardHard {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.cardMixed {
   border-color: #7c3aed;
   background: rgba(124, 58, 237, 0.12);
 }
@@ -33,7 +124,49 @@
   font-weight: 600;
 }
 
-.count {
+.diffRow {
+  display: flex;
+  gap: 6px;
+}
+
+.diffBtn {
+  flex: 1;
+  height: 34px;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 14px;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: border-color 0.15s, background 0.15s, opacity 0.15s;
+  opacity: 0.4;
+  white-space: nowrap;
+}
+
+.diffBtn:hover {
+  opacity: 0.75;
+}
+
+.diffEasy {
+  border-color: #f472b6;
+  background: rgba(244, 114, 182, 0.15);
+  opacity: 1;
+  color: #fff;
+}
+
+.diffHard {
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
+  opacity: 1;
+  color: #fff;
+}
+
+.diffCount {
   font-size: 12px;
+  font-weight: 600;
   color: var(--color-text-muted);
 }

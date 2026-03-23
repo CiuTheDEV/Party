@@ -1,0 +1,348 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modal {
+  background: #18181b;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  width: min(900px, 100%);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.title {
+  font-size: 26px;
+  font-weight: 700;
+  text-align: center;
+  padding: 24px 28px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  padding: 24px 28px;
+}
+
+.left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding-right: 28px;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-left: 28px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0;
+}
+
+.avatarPreview {
+  width: 140px;
+  height: 140px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatarEmoji {
+  font-size: 90px;
+  line-height: 1;
+}
+
+.avatarPlaceholder {
+  font-size: 56px;
+  color: var(--color-text-muted);
+  opacity: 0.25;
+}
+
+.avatarHint {
+  font-size: 15px;
+  color: var(--color-text-muted);
+  opacity: 0.6;
+  margin: 0;
+}
+
+.inputHint {
+  font-size: 13px;
+  color: #f87171;
+  margin: 0;
+  height: 18px;
+  line-height: 18px;
+}
+
+.input {
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text);
+  font-size: 18px;
+  text-align: center;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--game-color-primary);
+}
+
+.input::placeholder {
+  color: var(--color-text-muted);
+  opacity: 0.5;
+}
+
+.genderRow {
+  display: flex;
+  gap: 8px;
+}
+
+.genderBtn {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text-muted);
+  font-size: 22px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.genderBtn[data-gender="ona"] {
+  color: #f472b6;
+}
+
+.genderBtn[data-gender="ona"].selected {
+  border-color: #f472b6;
+  background: rgba(244, 114, 182, 0.15);
+  color: #f472b6;
+}
+
+.genderBtn[data-gender="on"] {
+  color: #60a5fa;
+}
+
+.genderBtn[data-gender="on"].selected {
+  border-color: #60a5fa;
+  background: rgba(96, 165, 250, 0.15);
+  color: #60a5fa;
+}
+
+.categoryTabs {
+  display: flex;
+  gap: 6px;
+}
+
+.categoryTab {
+  flex: 1;
+  padding: 12px 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text-muted);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.categoryTab.activeTab {
+  border-color: var(--game-color-primary);
+  background: var(--game-color-primary-glow);
+  color: var(--color-text);
+}
+
+.avatarGrid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+
+.avatarBtn {
+  aspect-ratio: 1;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 36px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatarBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.avatarBtn.selectedAvatar {
+  border-color: var(--game-color-primary);
+  background: var(--game-color-primary-glow);
+}
+
+.avatarBtn.takenAvatar {
+  opacity: 0.25;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
+.footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 16px 28px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.cancelBtn {
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text);
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cancelBtn:hover {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.submitBtn {
+  padding: 16px;
+  border: none;
+  border-radius: 10px;
+  background: var(--game-color-primary);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.submitBtn:not([data-ready="true"]) {
+  opacity: 0.5;
+}
+
+.fieldError {
+  border-color: #f87171 !important;
+  animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  75% { transform: translateX(6px); }
+}
+
+@media (max-width: 767px) {
+  .backdrop {
+    padding: 5vh 12px 12px;
+    align-items: flex-start;
+  }
+
+  .modal {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    border-radius: 20px;
+  }
+
+  .title {
+    font-size: 20px;
+    padding: 16px 20px 14px;
+  }
+
+  .body {
+    grid-template-columns: 1fr;
+    padding: 16px 20px;
+    overflow-y: auto;
+  }
+
+  .left {
+    padding-right: 0;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding-bottom: 16px;
+  }
+
+  .right {
+    padding-left: 0;
+  }
+
+  .avatarPreview {
+    width: 90px;
+    height: 90px;
+  }
+
+  .avatarEmoji {
+    font-size: 60px;
+  }
+
+  .avatarPlaceholder {
+    font-size: 36px;
+  }
+
+  .avatarBtn {
+    font-size: 26px;
+  }
+
+  .label {
+    font-size: 12px;
+  }
+
+  .input {
+    font-size: 16px;
+    padding: 12px 14px;
+  }
+
+  .categoryTab {
+    font-size: 13px;
+    padding: 8px 4px;
+  }
+
+  .genderBtn {
+    font-size: 24px;
+  }
+
+  .cancelBtn,
+  .submitBtn {
+    font-size: 16px;
+    padding: 14px;
+  }
+
+  .footer {
+    padding: 12px 20px 16px;
+  }
+}

@@ -1,0 +1,150 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  min-width: 0;
+  width: 100%;
+}
+
+@media (max-width: 767px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .card,
+  .addCard {
+    aspect-ratio: unset;
+    padding: 10px 6px;
+    min-height: 90px;
+  }
+
+  .avatar {
+    font-size: 40px;
+    flex: unset;
+  }
+
+  .namePill {
+    font-size: 12px;
+    padding: 4px 6px;
+  }
+
+  .addIcon {
+    font-size: 20px;
+  }
+
+  .addLabel {
+    font-size: 11px;
+  }
+}
+
+.card {
+  position: relative;
+  aspect-ratio: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.removeBtn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-text-muted);
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.removeBtn:hover {
+  background: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+
+.avatar {
+  font-size: 80px;
+  line-height: 1;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.namePill {
+  width: calc(100% - 8px);
+  padding: 7px 10px;
+  border-radius: 9999px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: rgba(0, 0, 0, 0.35);
+  flex-shrink: 0;
+}
+
+.namePill[data-gender="ona"] {
+  border-color: #f472b6;
+  color: #f9a8d4;
+}
+
+.namePill[data-gender="on"] {
+  border-color: #60a5fa;
+  color: #93c5fd;
+}
+
+.addCard {
+  aspect-ratio: 1;
+  background: rgba(255, 255, 255, 0.03);
+  border: 2px dashed rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.addCard:hover {
+  border-color: var(--game-color-primary);
+  background: var(--game-color-primary-glow);
+}
+
+.addIcon {
+  font-size: 36px;
+  font-weight: 300;
+  color: var(--color-text-muted);
+  line-height: 1;
+}
+
+.addCard:hover .addIcon {
+  color: var(--game-color-primary);
+}
+
+.addLabel {
+  font-size: 16px;
+  color: var(--color-text-muted);
+}
+
+.addCard:hover .addLabel {
+  color: var(--game-color-primary);
+}
