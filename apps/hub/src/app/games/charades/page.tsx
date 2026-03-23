@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useId } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import { Users, Smartphone, Target, Info } from 'lucide-react'
@@ -12,6 +12,14 @@ import { CategoryPicker, type SelectedCategories } from '../../../components/cha
 import { SettingsModal } from '../../../components/charades/SettingsModal/SettingsModal'
 import { QRPairing } from '../../../components/charades/QRPairing/QRPairing'
 import type { Player, GameSettings } from '../../../hooks/charades/useGameState'
+import {
+  clearPresenterSession,
+  createCharadesRoomId,
+  isPresenterSessionFresh,
+  readCharadesSetup,
+  readPresenterSession,
+  writeCharadesSetup,
+} from '../../../utils/charades-storage'
 import styles from './page.module.css'
 
 const DeviceListener = dynamic(
@@ -21,7 +29,6 @@ const DeviceListener = dynamic(
 
 export default function CharadesMenuPage() {
   const router = useRouter()
-  const roomId = useId().replace(/:/g, '')
 
   const [showConfig, setShowConfig] = useState(false)
   const [showAddPlayer, setShowAddPlayer] = useState(false)
@@ -32,6 +39,43 @@ export default function CharadesMenuPage() {
   const [isDeviceConnected, setIsDeviceConnected] = useState(false)
   const [startAttempted, setStartAttempted] = useState(false)
   const [shakeKey, setShakeKey] = useState(0)
+  const [roomId, setRoomId] = useState('')
+  const [isSetupReady, setIsSetupReady] = useState(false)
+
+  useEffect(() => {
+    const storedSetup = readCharadesSetup()
+    const nextRoomId = storedSetup?.roomId || createCharadesRoomId()
+
+    setRoomId(nextRoomId)
+
+    if (storedSetup) {
+      setPlayers(storedSetup.players)
+      setSelectedCategories(storedSetup.selectedCategories)
+      setSettings(storedSetup.settings)
+    }
+
+    setIsDeviceConnected(isPresenterSessionFresh(readPresenterSession(), nextRoomId))
+    setIsSetupReady(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isSetupReady || !roomId) {
+      return
+    }
+
+    writeCharadesSetup({
+      roomId,
+      players,
+      selectedCategories,
+      settings,
+    })
+  }, [isSetupReady, players, roomId, selectedCategories, settings])
+
+  function handleDisconnectDevice() {
+    clearPresenterSession()
+    setIsDeviceConnected(false)
+    setRoomId(createCharadesRoomId())
+  }
 
   function addPlayer(p: Omit<Player, 'score'>) {
     setPlayers((prev) => [...prev, p])
@@ -44,6 +88,10 @@ export default function CharadesMenuPage() {
   const canStart = players.length >= 2 && Object.keys(selectedCategories).length >= 1 && isDeviceConnected
 
   function handleStart() {
+    if (!roomId) {
+      return
+    }
+
     if (!canStart) { setStartAttempted(true); setShakeKey((k) => k + 1); return }
     sessionStorage.setItem(
       'charades:config',
@@ -173,10 +221,14 @@ export default function CharadesMenuPage() {
                 <QRPairing
                   roomId={roomId}
                   isConnected={isDeviceConnected}
-                  onDisconnect={() => setIsDeviceConnected(false)}
+                  onDisconnect={handleDisconnectDevice}
                 />
               </div>
-              <DeviceListener roomId={roomId} onConnect={() => setIsDeviceConnected(true)} />
+              <DeviceListener
+                roomId={roomId}
+                onConnect={() => setIsDeviceConnected(true)}
+                onDisconnect={() => setIsDeviceConnected(false)}
+              />
             </div>
 
             <div className={styles.configFooter}>

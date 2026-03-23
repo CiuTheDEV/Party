@@ -1,23 +1,77 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import PartySocket from 'partysocket'
+import { getPartykitHost } from '../../utils/charades-runtime'
+import {
+  isPresenterSessionFresh,
+  readPresenterSession,
+} from '../../utils/charades-storage'
 
 export default function DeviceListener({
   roomId,
   onConnect,
+  onDisconnect,
 }: {
   roomId: string
   onConnect: () => void
+  onDisconnect: () => void
 }) {
+  const isConnectedRef = useRef(false)
+
   useEffect(() => {
-    const host = process.env.NEXT_PUBLIC_PARTYKIT_HOST ?? 'localhost:1999'
+    if (!roomId) {
+      isConnectedRef.current = false
+      onDisconnect()
+      return
+    }
+
+    const syncConnectionState = () => {
+      const nextConnected = isPresenterSessionFresh(readPresenterSession(), roomId)
+
+      if (nextConnected === isConnectedRef.current) {
+        return
+      }
+
+      isConnectedRef.current = nextConnected
+
+      if (nextConnected) {
+        onConnect()
+        return
+      }
+
+      onDisconnect()
+    }
+
+    syncConnectionState()
+
+    const host = getPartykitHost()
     const ws = new PartySocket({ host, room: roomId })
-    ws.addEventListener('message', (event: MessageEvent) => {
+    const handleMessage = (event: MessageEvent) => {
       const msg = JSON.parse(event.data)
-      if (msg.type === 'DEVICE_CONNECTED') onConnect()
-    })
-    return () => ws.close()
-  }, [roomId, onConnect])
+      if (msg.type === 'DEVICE_CONNECTED') {
+        isConnectedRef.current = true
+        onConnect()
+      }
+    }
+
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === 'charades:presenter-session') {
+        syncConnectionState()
+      }
+    }
+
+    const poll = window.setInterval(syncConnectionState, 2000)
+
+    ws.addEventListener('message', handleMessage)
+    window.addEventListener('storage', handleStorage)
+
+    return () => {
+      window.clearInterval(poll)
+      window.removeEventListener('storage', handleStorage)
+      ws.removeEventListener('message', handleMessage)
+      ws.close()
+    }
+  }, [roomId, onConnect, onDisconnect])
   return null
 }

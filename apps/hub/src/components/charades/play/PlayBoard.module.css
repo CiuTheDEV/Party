@@ -2,135 +2,378 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px 24px 8px;
+  height: 100%;
+  padding: 4px 12px;
   position: relative;
   z-index: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .stage {
-  width: min(1200px, 100%);
-  min-height: min(68vh, 840px);
+  --order-card-gap: 18px;
+  --order-card-width: min(220px, calc((100vw - 180px) / 4), calc((100dvh - 220px) / 3 * 0.7333));
+  --order-card-height: calc(var(--order-card-width) * 1.3636);
+  width: min(1440px, 100%);
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 24px;
-  padding: clamp(20px, 3vw, 36px) clamp(20px, 4vw, 48px);
-  border-radius: 40px;
-  background:
-    radial-gradient(circle at 50% 16%, rgba(255, 244, 196, 0.16), transparent 22%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02) 28%, rgba(0, 0, 0, 0.12) 100%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.08),
-    0 30px 80px rgba(0, 0, 0, 0.34);
+  padding: clamp(20px, 2.4vw, 32px) clamp(20px, 2.8vw, 40px);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   text-align: center;
   position: relative;
   overflow: hidden;
 }
 
-.spotlight {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(circle at 50% 18%, rgba(255, 238, 179, 0.28), transparent 16%),
-    linear-gradient(180deg, rgba(255, 232, 168, 0.16), transparent 34%);
-  pointer-events: none;
-  opacity: 0.9;
-}
-
-.stageIntro,
-.heroCopy,
-.timerWrap,
-.verdictPrompt {
+.copy {
   display: grid;
   gap: 12px;
   position: relative;
   z-index: 1;
 }
 
+.deckArea {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.collectDeckArea {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.deck {
+  position: relative;
+  width: clamp(280px, 34vw, 520px);
+  height: 340px;
+}
+
+.deckFloating {
+  position: absolute;
+  left: 50%;
+  bottom: -34px;
+  flex-shrink: 0;
+  transform: none;
+  opacity: 0.9;
+}
+
+.deckLaunchAnchor {
+  position: absolute;
+  left: 50%;
+  bottom: -14px;
+  width: var(--order-card-width);
+  height: var(--order-card-height);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateX(-50%);
+}
+
+.deckCard {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  width: 220px;
+  height: 300px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(16, 18, 28, 0.96), rgba(10, 12, 20, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  transform-origin: 50% 88%;
+}
+
+.centerDeckCard {
+  transform: translate(calc(-50% + var(--stack-x)), var(--stack-y)) rotate(var(--stack-rotate));
+  z-index: var(--stack-z);
+}
+
+.deckFloating .deckCard {
+  top: auto;
+  left: 50%;
+  bottom: 0;
+  right: auto;
+  transform-origin: 50% 100%;
+}
+
+.cornerDeckCard {
+  transform: translate(
+    calc(-50% + var(--corner-fan-x)),
+    var(--corner-fan-y)
+  ) rotate(var(--corner-fan-rotate));
+  z-index: var(--corner-z);
+}
+
 .eyebrow {
-  font-size: clamp(0.95rem, 0.8vw + 0.8rem, 1.2rem);
+  font-size: clamp(0.85rem, 0.7vw + 0.76rem, 1rem);
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--game-color-primary);
+  color: var(--color-text-muted);
 }
 
 .title {
-  font-size: clamp(2.25rem, 3.6vw, 4.4rem);
+  font-size: clamp(2rem, 3vw, 3.6rem);
   font-weight: 800;
-  line-height: 1.05;
+  line-height: 1.1;
   color: var(--color-text);
 }
 
 .message {
-  max-width: 26ch;
-  font-size: clamp(1.15rem, 1.35vw, 1.85rem);
+  max-width: 24ch;
+  font-size: clamp(1rem, 1.1vw, 1.35rem);
   line-height: 1.35;
   color: var(--color-text-muted);
 }
 
 .orderList {
-  width: min(980px, 100%);
+  width: min(calc(var(--order-card-width) * 4 + var(--order-card-gap) * 3), 100%);
   display: grid;
-  gap: 16px;
+  grid-template-columns: repeat(4, var(--order-card-width));
+  justify-content: center;
+  gap: var(--order-card-gap);
   position: relative;
   z-index: 1;
 }
 
-.orderItem,
-.orderItemActive {
-  display: grid;
-  grid-template-columns: auto auto 1fr;
-  align-items: center;
-  gap: 18px;
-  padding: 20px 24px;
-  border-radius: 24px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  text-align: left;
+.orderSlot {
+  position: relative;
+  width: var(--order-card-width);
+  height: var(--order-card-height);
 }
 
-.orderItemActive {
-  transform: scale(1.02);
-  background: linear-gradient(135deg, color-mix(in srgb, var(--game-color-primary) 24%, transparent), rgba(255, 210, 125, 0.16));
-  border: 2px solid color-mix(in srgb, var(--game-color-primary) 62%, white 4%);
-  box-shadow: 0 18px 40px color-mix(in srgb, var(--game-color-primary) 24%, transparent);
+.revealArea {
+  width: min(1240px, 100%);
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.orderCard,
+.orderCardActive,
+.orderCardSettled,
+.orderCardSettledActive,
+.orderCardPending,
+.dealingCard,
+.dealingCardActive {
+  perspective: 1200px;
+  width: var(--order-card-width);
+  height: var(--order-card-height);
+}
+
+.orderCardSettled,
+.orderCardSettledActive {
+  position: absolute;
+  inset: 0;
+}
+
+.orderCardSettled .orderCardInner,
+.orderCardSettledActive .orderCardInner {
+  transform: rotateY(180deg);
+}
+
+.orderCardSettledActive .orderCardFront {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.dealingCard,
+.dealingCardActive {
+  position: absolute;
+  inset: 0;
+  will-change: transform;
+}
+
+.collectingCard {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 220px;
+  height: 300px;
+  transform: translate(-50%, -50%);
+  will-change: transform;
+  pointer-events: none;
+  z-index: 20;
+}
+
+.orderCardPending {
+  visibility: hidden;
+}
+
+.orderCardInner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+}
+
+.orderCardFront,
+.orderCardBack {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  backface-visibility: hidden;
+}
+
+.orderCardFront {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transform: rotateY(180deg);
+  text-align: center;
+}
+
+.orderCardBack {
+  background: linear-gradient(180deg, rgba(16, 18, 28, 0.96), rgba(10, 12, 20, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 16px 30px rgba(0, 0, 0, 0.22);
+}
+
+.cardBackFace {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 18px;
+}
+
+.cardBackFace::before {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cardBackFace::after {
+  content: '';
+  position: absolute;
+  inset: 22px;
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.03), transparent 42%),
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.018) 0 8px,
+      rgba(255, 255, 255, 0) 8px 16px
+    );
+  opacity: 0.8;
+}
+
+.cardBackCorner {
+  position: absolute;
+  z-index: 1;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--game-color-primary);
+  top: 18px;
+  left: 18px;
+}
+
+.cardBackCorner:last-child {
+  top: auto;
+  left: auto;
+  right: 18px;
+  bottom: 18px;
+}
+
+.cardBackCenter {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translate(-50%, -50%);
+}
+
+.cardBackLabel {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 128px;
+  min-height: 40px;
+  padding: 0 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
 }
 
 .orderIndex {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.08);
-  font-size: 1.35rem;
+  font-size: 1.1rem;
   font-weight: 800;
 }
 
-.orderAvatar,
-.presenterAvatar {
-  font-size: clamp(2rem, 2vw + 1.2rem, 3.5rem);
+.orderAvatar {
+  margin-top: auto;
+  font-size: clamp(3rem, 3vw + 1rem, 4.4rem);
 }
 
-.orderMeta {
-  display: flex;
-  flex-direction: column;
+.presenterAvatar {
+  font-size: clamp(1.8rem, 1.8vw + 1rem, 2.8rem);
+}
+
+.orderFrontMeta {
+  display: grid;
   gap: 6px;
 }
 
-.orderName,
-.presenterName {
-  font-size: clamp(1.4rem, 1.8vw, 2.4rem);
+.orderLabel {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.orderName {
+  font-size: clamp(1.15rem, 1vw + 0.95rem, 1.6rem);
   font-weight: 800;
   color: var(--color-text);
 }
 
-.orderHint {
-  font-size: clamp(0.95rem, 0.7vw + 0.8rem, 1.15rem);
-  color: var(--color-text-muted);
+.presenterName {
+  font-size: clamp(1.2rem, 1.4vw, 2rem);
+  font-weight: 800;
+  color: var(--color-text);
 }
 
 .presenterCard,
@@ -138,28 +381,27 @@
   display: flex;
   align-items: center;
   gap: 18px;
-  padding: 24px 28px;
-  border-radius: 28px;
-  background: rgba(8, 10, 24, 0.44);
+  padding: 18px 22px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
   position: relative;
   z-index: 1;
 }
 
 .presenterCardCompact {
-  padding: 16px 22px;
-  background: rgba(8, 10, 24, 0.32);
+  padding: 14px 18px;
 }
 
 .presenterMeta {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
   text-align: left;
 }
 
 .presenterSubtitle {
-  font-size: clamp(1rem, 1vw + 0.8rem, 1.35rem);
+  font-size: clamp(0.95rem, 0.8vw + 0.78rem, 1.1rem);
   line-height: 1.35;
   color: var(--color-text-muted);
 }
@@ -168,27 +410,61 @@
   font-size: clamp(96px, 20vw, 220px);
   font-weight: 900;
   line-height: 1;
-  color: #fff7d6;
+  color: var(--color-text);
   font-variant-numeric: tabular-nums;
-  text-shadow:
-    0 0 22px rgba(255, 217, 102, 0.34),
-    0 0 64px color-mix(in srgb, var(--game-color-primary) 26%, transparent);
 }
 
 @media (max-width: 900px) {
   .board {
-    padding: 8px 16px 4px;
+    padding: 2px 10px;
   }
 
-  .orderItem,
-  .orderItemActive,
+  .orderCardFront,
+  .orderCardBack,
   .presenterCard,
   .presenterCardCompact {
     padding: 18px;
   }
 
   .stage {
-    min-height: min(64vh, 760px);
-    border-radius: 28px;
+    --order-card-gap: 10px;
+    --order-card-width: min(190px, calc((100vw - 72px) / 3), calc((100dvh - 190px) / 4 * 0.7333));
+    --order-card-height: calc(var(--order-card-width) * 1.3684);
+    border-radius: 20px;
+  }
+
+  .deck {
+    width: min(100%, 420px);
+    height: 300px;
+  }
+
+  .deckCard {
+    width: 190px;
+    height: 260px;
+  }
+
+  .collectingCard {
+    width: 190px;
+    height: 260px;
+  }
+
+  .orderCard,
+  .orderCardSettled,
+  .orderCardSettledActive,
+  .orderCardPending {
+    width: var(--order-card-width);
+    height: var(--order-card-height);
+  }
+
+  .revealArea {
+    min-height: auto;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .orderList {
+    width: 100%;
+    grid-template-columns: repeat(3, var(--order-card-width));
+    justify-content: center;
   }
 }

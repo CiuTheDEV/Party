@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import usePartySocket from 'partysocket/react'
 import type { HostEvent, PresenterEvent } from '../../types/charades-events'
+import { getPartykitHost } from '../../utils/charades-runtime'
 
 export type Player = {
   name: string
@@ -24,7 +25,8 @@ type GamePhase =
 type GameState = {
   phase: GamePhase
   players: Player[]
-  order: number[]       // indeksy graczy w kolejności prezentowania
+  order: number[]
+  isRoundOrderRevealing: boolean
   currentOrderIdx: number
   currentRound: number
   totalRounds: number
@@ -42,8 +44,9 @@ export function useGameState(
 ) {
   const [state, setState] = useState<GameState>({
     phase: 'round-order',
-    players: players.map((p) => ({ ...p, score: 0 })),
-    order: shuffle(players.map((_, i) => i)),
+    players: players.map((player) => ({ ...player, score: 0 })),
+    order: [],
+    isRoundOrderRevealing: false,
     currentOrderIdx: 0,
     currentRound: 1,
     totalRounds: settings.rounds,
@@ -56,21 +59,42 @@ export function useGameState(
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const currentTurnIdRef = useRef('')
 
+  const startTimer = useCallback(() => {
+    setState((current) => ({ ...current, phase: 'timer-running' }))
+
+    let remaining = settings.timerSeconds
+    timerRef.current = setInterval(() => {
+      remaining -= 1
+      send({ type: 'TIMER_TICK', turnId: currentTurnIdRef.current, remaining })
+      setState((current) => ({ ...current, timerRemaining: remaining }))
+
+      if (remaining <= 0) {
+        clearInterval(timerRef.current!)
+        setState((current) => ({ ...current, phase: 'verdict' }))
+        send({ type: 'TURN_END', turnId: currentTurnIdRef.current, reason: 'timeout' })
+      }
+    }, 1000)
+  }, [settings.timerSeconds])
+
   const socket = usePartySocket({
-    host: process.env.NEXT_PUBLIC_PARTYKIT_HOST ?? 'localhost:1999',
+    host: getPartykitHost(),
     room: roomId,
     onMessage(event) {
       const msg = JSON.parse(event.data) as PresenterEvent | { type: 'ROOM_STATE' }
+
       if (msg.type === 'PRESENTER_READY') {
-        if ((msg as PresenterEvent & { type: 'PRESENTER_READY' }).turnId !== currentTurnIdRef.current) return
+        if ((msg as PresenterEvent & { type: 'PRESENTER_READY' }).turnId !== currentTurnIdRef.current) {
+          return
+        }
         startTimer()
       }
+
       if (msg.type === 'DEVICE_CONNECTED') {
-        setState((s) => ({ ...s, isDeviceConnected: true }))
+        setState((current) => ({ ...current, isDeviceConnected: true }))
       }
     },
     onClose() {
-      setState((s) => ({ ...s, isDeviceConnected: false }))
+      setState((current) => ({ ...current, isDeviceConnected: false }))
     },
   })
 
@@ -78,25 +102,20 @@ export function useGameState(
     socket.send(JSON.stringify(event))
   }
 
-  function startTimer() {
-    setState((s) => ({ ...s, phase: 'timer-running' }))
-    let remaining = settings.timerSeconds
-    timerRef.current = setInterval(() => {
-      remaining -= 1
-      send({ type: 'TIMER_TICK', turnId: currentTurnIdRef.current, remaining })
-      setState((s) => ({ ...s, timerRemaining: remaining }))
-      if (remaining <= 0) {
-        clearInterval(timerRef.current!)
-        setState((s) => ({ ...s, phase: 'verdict' }))
-        send({ type: 'TURN_END', turnId: currentTurnIdRef.current, reason: 'timeout' })
-      }
-    }, 1000)
-  }
-
   const startRound = useCallback(() => {
-    setState((s) => ({
-      ...s,
+    setState((current) => ({
+      ...current,
+      order: shuffle(current.players.map((_, index) => index)),
+      isRoundOrderRevealing: true,
+      currentOrderIdx: 0,
+    }))
+  }, [])
+
+  const finishRoundOrder = useCallback(() => {
+    setState((current) => ({
+      ...current,
       phase: 'prepare',
+      isRoundOrderRevealing: false,
       currentOrderIdx: 0,
     }))
   }, [])
@@ -105,8 +124,13 @@ export function useGameState(
     const { word, category } = getNextWord()
     const turnId = crypto.randomUUID()
     currentTurnIdRef.current = turnId
+
     const presenterIdx = state.order[state.currentOrderIdx]
     const presenter = state.players[presenterIdx]
+
+    if (!presenter) {
+      return
+    }
 
     send({
       type: 'TURN_START',
@@ -117,94 +141,100 @@ export function useGameState(
       timerSeconds: settings.timerSeconds,
     })
 
-    setState((s) => ({
-      ...s,
+    setState((current) => ({
+      ...current,
       phase: 'waiting-ready',
       currentWord: word,
       currentCategory: category,
       timerRemaining: settings.timerSeconds,
     }))
-  }, [getNextWord, settings.timerSeconds, state.order, state.currentOrderIdx, state.players])
+  }, [getNextWord, settings.timerSeconds, state.currentOrderIdx, state.order, state.players])
 
   const giveVerdict = useCallback((correct: boolean) => {
     if (timerRef.current) {
       clearInterval(timerRef.current)
       timerRef.current = null
     }
+
     send({ type: 'TURN_END', turnId: currentTurnIdRef.current, reason: 'verdict' })
 
-    setState((s) => {
-      const presenterIdx = s.order[s.currentOrderIdx]
-      const updatedPlayers = s.players.map((p, i) =>
-        i === presenterIdx && correct ? { ...p, score: p.score + 1 } : p,
+    setState((current) => {
+      const presenterIdx = current.order[current.currentOrderIdx]
+      const updatedPlayers = current.players.map((player, index) =>
+        index === presenterIdx && correct ? { ...player, score: player.score + 1 } : player,
       )
-      const isLastInRound = s.currentOrderIdx === s.order.length - 1
-      const isGameEnding = s.currentRound === s.totalRounds && isLastInRound
+
+      const isLastInRound = current.currentOrderIdx === current.order.length - 1
+      const isGameEnding = current.currentRound === current.totalRounds && isLastInRound
 
       if (!isLastInRound) {
-        const nextPresenterIdx = s.order[s.currentOrderIdx + 1]
+        const nextPresenterIdx = current.order[current.currentOrderIdx + 1]
         const nextPresenter = updatedPlayers[nextPresenterIdx]
+
         send({
           type: 'BETWEEN_TURNS',
           nextPresenterName: nextPresenter.name,
           nextPresenterAvatar: nextPresenter.avatar,
         })
+
         return {
-          ...s,
+          ...current,
           players: updatedPlayers,
           phase: 'prepare',
-          currentOrderIdx: s.currentOrderIdx + 1,
+          currentOrderIdx: current.currentOrderIdx + 1,
         }
       }
 
       if (!isGameEnding) {
-        const reshuffledOrder = shuffle(s.players.map((_, i) => i))
-        const nextPresenter = updatedPlayers[reshuffledOrder[0]]
+        const nextPresenter = updatedPlayers[0]
+
         send({
           type: 'BETWEEN_TURNS',
           nextPresenterName: nextPresenter.name,
           nextPresenterAvatar: nextPresenter.avatar,
         })
+
         return {
-          ...s,
+          ...current,
           players: updatedPlayers,
           phase: 'round-order',
-          order: reshuffledOrder,
+          order: [],
+          isRoundOrderRevealing: false,
           currentOrderIdx: 0,
-          currentRound: s.currentRound + 1,
+          currentRound: current.currentRound + 1,
         }
       }
 
-      if (isGameEnding) {
-        send({ type: 'GAME_END' })
-        return {
-          ...s,
-          players: updatedPlayers,
-          phase: 'verdict',
-          currentRound: s.currentRound + 1,
-        }
+      send({ type: 'GAME_END' })
+      return {
+        ...current,
+        players: updatedPlayers,
+        phase: 'verdict',
+        currentRound: current.currentRound + 1,
       }
-      return s
     })
   }, [])
 
   const isGameOver = state.currentRound > state.totalRounds
 
-  // Cleanup timer on unmount
   useEffect(() => {
     return () => {
-      if (timerRef.current) clearInterval(timerRef.current)
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+      }
     }
   }, [])
 
-  return { state, startRound, sendWord, giveVerdict, isGameOver }
+  return { state, startRound, finishRoundOrder, sendWord, giveVerdict, isGameOver }
 }
 
-function shuffle(arr: number[]): number[] {
-  const a = [...arr]
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[a[i], a[j]] = [a[j], a[i]]
+function shuffle(values: number[]) {
+  const shuffled = [...values]
+
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1))
+    ;[shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]]
   }
-  return a
+
+  return shuffled
 }

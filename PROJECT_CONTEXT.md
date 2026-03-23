@@ -75,9 +75,9 @@ project-party/                     # Monorepo (Turborepo)
 
 <!-- handoff:start -->
 ## Session Handoff
-- Last: 2026-03-23 16:42 by Codex (GPT-5.4)
-- Task: Task 1 planu cinema-layout dla `/games/charades/play` - odpiecie gameplay route od GameShell
-- Did: `apps/hub/src/app/games/charades/layout.tsx` renderuje teraz `GameShell` dla tras modulu poza segmentem `play`, dzieki czemu `/games/charades/play` nie dziedziczy sidebara ani chrome menu. `apps/hub/src/app/games/charades/play/page.module.css` zostal zredukowany do minimalnego wrappera z pelna wysokoscia viewportu.
-- Next: Zweryfikowac runtime fullscreen stage po ustabilizowaniu lokalnego Next.js/HMR i przejsc do kolejnego taska planu cinema-layout.
-- Blocker: Pelna weryfikacja runtime/build nadal moze byc ograniczona przez lokalne problemy `.next`/HMR opisane wczesniej; w tej sesji potwierdzono tylko `npx tsc --noEmit` dla `apps/hub`.
+- Last: 2026-03-23 23:50 by Codex (GPT-5.4)
+- Task: Iteracyjny redesign `games/charades` - fullscreen GameScreen, pairing persistence i flow losowania kolejnosci z animowanymi kartami.
+- Did: Dodano persistence setupu i sesji prezentera w przegladarce (`charades-storage`, restore graczy/kategorii/ustawien, reconnect aktywnego prezentera), naprawiono runtime host/presenter dla PartyKit (`charades-runtime`, QR warning), uproszczono fullscreen host screen bez sidebara i score, przebudowano top/bottom bar, oraz przepieto etap `round-order` na wieloetapowa animacje kart z GSAP. W trakcie sesji wielokrotnie retuszowano viewport, uklad boardu, talie kart i motion reveal. `C:\Users\Mateo\Desktop\Party\node_modules\.bin\tsc.cmd --noEmit` dla `apps/hub` przechodzi.
+- Next: Dopracowac finalny wyglad i geometrie talii kart w fazie `round-order` na podstawie ostatniego feedbacku usera, a potem przejsc do kolejnych ekranow flow (`przygotowanie`, `timer`, `werdykt`) juz bez rozbijania viewportu.
+- Blocker: Brak twardego blockera technicznego; zostal otwarty temat UX/visual polish animacji kart i stagingu talii, ktory jest jeszcze niedomkniety.
 <!-- handoff:end -->

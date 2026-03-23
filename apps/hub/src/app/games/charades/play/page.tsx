@@ -44,7 +44,7 @@ function PlayScreen({ config }: { config: Config }) {
     return { word, category: cat }
   }, [nextWord, cats])
 
-  const { state, startRound, sendWord, giveVerdict, isGameOver } = useGameState(
+  const { state, startRound, finishRoundOrder, sendWord, giveVerdict, isGameOver } = useGameState(
     config.roomId,
     config.players.map((p) => ({ ...p, score: 0 })),
     config.settings,
@@ -71,6 +71,8 @@ function PlayScreen({ config }: { config: Config }) {
         currentOrderIdx={state.currentOrderIdx}
         currentRound={state.currentRound}
         isDeviceConnected={state.isDeviceConnected}
+        isRoundOrderRevealing={state.isRoundOrderRevealing}
+        onFinishRoundOrder={finishRoundOrder}
         onGiveVerdict={giveVerdict}
         onSendWord={sendWord}
         onStartRound={startRound}

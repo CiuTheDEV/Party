@@ -1,6 +1,13 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import usePartySocket from 'partysocket/react'
 import type { HostEvent, PresenterEvent } from '../../types/charades-events'
+import { getPartykitHost } from '../../utils/charades-runtime'
+import {
+  clearPresenterSession,
+  getPresenterHeartbeatMs,
+  readPresenterSession,
+  writePresenterSession,
+} from '../../utils/charades-storage'
 
 type PresenterPhase = 'your-turn' | 'timer-running' | 'timeout' | 'between' | 'ended'
 
@@ -16,6 +23,14 @@ type PresenterState = {
 }
 
 export function usePresenter(roomId: string) {
+  const sessionId = useMemo(() => {
+    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+      return crypto.randomUUID()
+    }
+
+    return Math.random().toString(36).slice(2)
+  }, [])
+
   const [state, setState] = useState<PresenterState>({
     phase: 'your-turn',
     currentTurnId: '',
@@ -28,9 +43,10 @@ export function usePresenter(roomId: string) {
   })
 
   const socket = usePartySocket({
-    host: process.env.NEXT_PUBLIC_PARTYKIT_HOST ?? 'localhost:1999',
+    host: getPartykitHost(),
     room: roomId,
     onOpen() {
+      writeHeartbeat()
       const event: PresenterEvent = { type: 'DEVICE_CONNECTED' }
       socket.send(JSON.stringify(event))
     },
@@ -40,6 +56,38 @@ export function usePresenter(roomId: string) {
       handleHostEvent(msg as HostEvent)
     },
   })
+
+  const writeHeartbeat = useCallback(() => {
+    if (!roomId) {
+      return
+    }
+
+    writePresenterSession({
+      roomId,
+      sessionId,
+      connected: true,
+      lastSeenAt: Date.now(),
+    })
+  }, [roomId, sessionId])
+
+  useEffect(() => {
+    if (!roomId) {
+      return
+    }
+
+    writeHeartbeat()
+
+    const interval = window.setInterval(writeHeartbeat, getPresenterHeartbeatMs())
+
+    return () => {
+      window.clearInterval(interval)
+      const session = readPresenterSession()
+
+      if (session?.sessionId === sessionId) {
+        clearPresenterSession()
+      }
+    }
+  }, [roomId, sessionId, writeHeartbeat])
 
   function handleHostEvent(event: HostEvent) {
     switch (event.type) {

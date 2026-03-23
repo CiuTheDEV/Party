@@ -17,8 +17,6 @@ type Phase =
   | 'timer-running'
   | 'verdict'
 
-type PhoneState = 'polaczony' | 'oczekiwanie' | 'rozlaczony'
-
 type HostGameScreenProps = {
   phase: Phase
   currentRound: number
@@ -29,6 +27,8 @@ type HostGameScreenProps = {
   presenter: PlayerSummary | undefined
   timerRemaining: number
   isDeviceConnected: boolean
+  isRoundOrderRevealing: boolean
+  onFinishRoundOrder: () => void
   onStartRound: () => void
   onSendWord: () => void
   onGiveVerdict: (correct: boolean) => void
@@ -38,35 +38,25 @@ export function HostGameScreen(props: HostGameScreenProps) {
   const orderedPlayers = props.order
     .map((playerIdx) => props.players[playerIdx])
     .filter((player): player is PlayerSummary => Boolean(player))
-  const activePlayer = orderedPlayers[props.currentOrderIdx] ?? props.presenter
-  const phoneState: PhoneState = !props.isDeviceConnected
-    ? 'rozlaczony'
-    : props.phase === 'prepare' || props.phase === 'waiting-ready'
-      ? 'oczekiwanie'
-      : 'polaczony'
 
   return (
     <div className={styles.screen}>
-      <PlayTopBar
-        activePlayer={activePlayer}
-        currentOrderIdx={props.currentOrderIdx}
-        currentRound={props.currentRound}
-        orderLength={props.order.length}
-        phase={props.phase}
-        phoneState={phoneState}
-        totalRounds={props.totalRounds}
-      />
+      <PlayTopBar />
 
       <PlayBoard
         currentOrderIdx={props.currentOrderIdx}
         order={orderedPlayers}
         phase={props.phase}
+        players={props.players}
         presenter={props.presenter}
+        isRoundOrderRevealing={props.isRoundOrderRevealing}
+        onFinishRoundOrder={props.onFinishRoundOrder}
         timerRemaining={props.timerRemaining}
       />
 
       <PlayBottomBar
         isDeviceConnected={props.isDeviceConnected}
+        isRoundOrderRevealing={props.isRoundOrderRevealing}
         phase={props.phase}
         onGiveVerdict={props.onGiveVerdict}
         onSendWord={props.onSendWord}
