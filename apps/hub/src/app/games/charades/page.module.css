@@ -80,8 +80,8 @@
   font-weight: 700;
   letter-spacing: 0.1em;
   color: var(--game-color-primary);
-  background: rgba(208, 149, 255, 0.12);
-  border: 1px solid rgba(208, 149, 255, 0.35);
+  background: var(--game-color-primary-glow);
+  border: 1px solid rgba(124, 58, 237, 0.35);
   border-radius: 9999px;
   padding: 4px 12px;
   white-space: nowrap;
@@ -127,7 +127,7 @@
   text-align: center;
   padding: 20px;
   background: var(--game-color-primary);
-  color: #0e0e0f;
+  color: #fff;
   font-weight: 700;
   font-size: 18px;
   border-radius: 12px;

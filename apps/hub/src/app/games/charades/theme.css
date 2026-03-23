@@ -1,6 +1,6 @@
 :root {
-  --game-color-primary: #d095ff;
-  --game-color-primary-light: #c782ff;
-  --game-color-primary-glow: rgba(208, 149, 255, 0.15);
+  --game-color-primary: #7c3aed;
+  --game-color-primary-light: #6d28d9;
+  --game-color-primary-glow: rgba(124, 58, 237, 0.15);
   --game-gradient: linear-gradient(135deg, #1a0a3d, #3b1f7a);
 }
