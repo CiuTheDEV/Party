@@ -24,7 +24,7 @@
   padding: 13px 20px;
   font-size: 15px;
   font-weight: 600;
-  color: var(--color-text-muted);
+  color: #64748b;
   text-decoration: none;
   transition: color 0.15s, background 0.15s;
   border-left: 3px solid transparent;
