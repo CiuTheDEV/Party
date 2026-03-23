@@ -75,16 +75,6 @@ project-party/                     # Monorepo (Turborepo)
 
 <!-- handoff:start -->
 ## Session Handoff
-
-### Previous: 2026-03-22 — Phase 3 ✅ + Shared Shell @party/ui ✅
-- Bugfixy (hydration QRPairing, game freeze 'between', Partykit w dev.bat). @party/ui: Topbar, GameSidebar, GameShell, GameCard, token system. Hub + charades layout zmigrowane.
-
-### Latest: 2026-03-23 — Setup modal + UI redesign ✅
-- Did: Pełny redesign setup flow dla Kalamburów. Config przepięty z trasy `/config` na lokalny modal w `page.tsx`. Nowe komponenty: `PlayerGrid`, `AddPlayerModal` (modal dodania gracza z walidacją + shake animation), `CategoryPicker` (accordion, easy/hard per kategoria, `SelectedCategories = Record<string, ('easy'|'hard')[]>`), `SettingsModal` (sidebar + slider + quick buttons), `QRPairing` (sekcja + modal QR z kodem sesji). Walidacja "Rozpocznij grę" z podświetlaniem błędnych sekcji. Stara trasa `/config`, `PlayerForm`, `PlayerList` usunięte. `WordCategory` zmieniona na `wordsEasy[]` + `wordsHard[]`, `useWordPool` obsługuje osobne pule.
-- Pattern: ten układ (menu + setup modal) to zatwierdzony wzorzec dla każdej kolejnej gry — zmienia się tylko `--game-color-primary` i zawartość sekcji.
-- Next: Phase 4 — Cloudflare Pages deploy + Partykit deploy
-- Blocker: Clerk wyłączony (Phase 5).
-
 - Last: 2026-03-23 16:05 by Codex (GPT-5.4)
 - Task: Zintegrowany follow-up Task 2 + Task 3 dla host GameScreen + naprawy z review Task 1
 - Did: Dodano nowy host UI dla `/games/charades/play` (`HostGameScreen`, `PlayTopBar`, `PlayBoard`, `PlayBottomBar`) i przepieto `page.tsx` na flow `round-order -> prepare -> waiting-ready -> timer-running -> verdict`. Naprawiono soft-lock po zmianie hooka oraz zablokowano drugie klikniecie werdyktu po `isGameOver` przez wczesny exit renderu przed redirectem.
