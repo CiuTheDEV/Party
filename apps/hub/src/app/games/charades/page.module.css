@@ -150,15 +150,43 @@
 @media (max-width: 767px) {
   .page {
     min-height: calc(100vh - var(--topbar-height) - 56px);
-    padding: 24px 16px;
-    gap: 20px;
+    padding: 20px 16px;
+    gap: 16px;
+  }
+
+  .hero {
+    gap: 8px;
   }
 
   .title {
     font-size: 28px;
   }
 
-  .footer {
-    display: none;
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .modeCard {
+    padding: 20px;
+    max-height: none;
+    gap: 12px;
+  }
+
+  .modeBody {
+    gap: 12px;
+  }
+
+  .modeDesc {
+    font-size: 13px;
+  }
+
+  .details {
+    font-size: 13px;
+    gap: 6px;
+  }
+
+  .playBtn {
+    padding: 12px;
+    font-size: 15px;
   }
 }
