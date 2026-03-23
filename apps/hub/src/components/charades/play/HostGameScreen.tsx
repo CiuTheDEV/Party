@@ -8,6 +8,7 @@ import styles from './HostGameScreen.module.css'
 type PlayerSummary = {
   name: string
   avatar: string
+  score: number
 }
 
 type Phase =
@@ -45,6 +46,7 @@ export function HostGameScreen(props: HostGameScreenProps) {
         isDeviceConnected={props.isDeviceConnected}
         orderLength={props.order.length}
         phase={props.phase}
+        players={props.players}
         totalRounds={props.totalRounds}
       />
 

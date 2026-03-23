@@ -7,6 +7,12 @@ type Phase =
   | 'timer-running'
   | 'verdict'
 
+type ScorePlayer = {
+  name: string
+  avatar: string
+  score: number
+}
+
 type PlayTopBarProps = {
   currentRound: number
   totalRounds: number
@@ -14,6 +20,7 @@ type PlayTopBarProps = {
   orderLength: number
   phase: Phase
   isDeviceConnected: boolean
+  players: ScorePlayer[]
 }
 
 const phaseLabels: Record<Phase, string> = {
@@ -31,14 +38,26 @@ export function PlayTopBar({
   orderLength,
   phase,
   isDeviceConnected,
+  players,
 }: PlayTopBarProps) {
   return (
     <header className={styles.bar}>
-      <div className={styles.metaGroup}>
-        <span className={styles.gameName}>Kalambury</span>
-        <span className={styles.meta}>Runda {currentRound}/{totalRounds}</span>
-        <span className={styles.meta}>Gracz {currentOrderIdx + 1}/{orderLength}</span>
-        <span className={styles.status}>{phaseLabels[phase]}</span>
+      <div className={styles.leftSide}>
+        <div className={styles.metaGroup}>
+          <span className={styles.gameName}>Kalambury</span>
+          <span className={styles.meta}>Runda {currentRound}/{totalRounds}</span>
+          <span className={styles.meta}>Gracz {currentOrderIdx + 1}/{orderLength}</span>
+          <span className={styles.status}>{phaseLabels[phase]}</span>
+        </div>
+
+        <div className={styles.scoreboard} aria-label="Wyniki graczy">
+          {players.map((player) => (
+            <span key={player.name} className={styles.scoreChip}>
+              <span className={styles.scoreAvatar}>{player.avatar}</span>
+              <span className={styles.scoreValue}>{player.score}</span>
+            </span>
+          ))}
+        </div>
       </div>
 
       <div className={isDeviceConnected ? styles.deviceConnected : styles.deviceDisconnected}>
