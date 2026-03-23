@@ -1,0 +1,12 @@
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+  background: var(--game-gradient);
+  flex-shrink: 0;
+}
+
+.sm { width: 48px; height: 48px; font-size: 24px; border-radius: 12px; }
+.md { width: 72px; height: 72px; font-size: 36px; border-radius: 16px; }
+.lg { width: 96px; height: 96px; font-size: 48px; border-radius: 20px; }
