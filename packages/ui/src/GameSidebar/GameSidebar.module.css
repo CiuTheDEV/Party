@@ -25,7 +25,7 @@
   color: var(--color-text-muted);
   text-decoration: none;
   transition: color 0.15s, background 0.15s;
-  border-right: 2px solid transparent;
+  border-left: 3px solid transparent;
 }
 
 .navLink:hover {
@@ -36,7 +36,7 @@
 .navLink.active {
   color: var(--game-color-primary-light);
   background: var(--game-color-primary-glow);
-  border-right-color: var(--game-color-primary);
+  border-left-color: var(--game-color-primary);
   font-weight: 600;
 }
 
