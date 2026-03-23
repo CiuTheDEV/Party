@@ -33,6 +33,7 @@
 /* Mode card */
 .modeCard {
   width: min(520px, 100%);
+  flex: 1;
   padding: 40px;
   border: 1px solid var(--color-border);
   border-radius: 16px;
@@ -90,6 +91,7 @@
 
 .playBtn {
   display: block;
+  margin-top: auto;
   text-align: center;
   padding: 16px;
   background: var(--game-color-primary);
