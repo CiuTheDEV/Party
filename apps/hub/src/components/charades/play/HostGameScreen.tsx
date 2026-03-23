@@ -8,7 +8,6 @@ import styles from './HostGameScreen.module.css'
 type PlayerSummary = {
   name: string
   avatar: string
-  score: number
 }
 
 type Phase =

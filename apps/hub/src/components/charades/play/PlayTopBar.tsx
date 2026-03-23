@@ -48,7 +48,6 @@ export function PlayTopBar({
         <span className={styles.meta}>
           {activePlayer ? `${activePlayer.avatar} ${activePlayer.name}` : `Gracz ${currentOrderIdx + 1}/${orderLength}`}
         </span>
-        <span className={styles.meta}>Gracz {currentOrderIdx + 1}/{orderLength}</span>
       </div>
 
       <div className={isDeviceConnected ? styles.deviceConnected : styles.deviceDisconnected}>
