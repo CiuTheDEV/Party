@@ -85,4 +85,9 @@ project-party/                     # Monorepo (Turborepo)
 - Next: Phase 4 — Cloudflare Pages deploy + Partykit deploy
 - Blocker: Clerk wyłączony (Phase 5).
 
+- Last: 2026-03-23 15:49 by Codex (GPT-5.4)
+- Task: Przebudowa modelu stanu hosta w `useGameState.ts` dla nowego flow GameScreen
+- Did: Zmieniono fazy hosta na `round-order -> prepare -> waiting-ready -> timer-running -> verdict`, dodano `startRound`, rozdzielono start rundy od `sendWord`, przepisano `giveVerdict` na 3 jawne galezie z reshuffle po pelnej rundzie i koncem gry przez `GAME_END`.
+- Next: Zaktualizowac host/presenter UI do nowych faz (`round-order`, `prepare`) i usunac tymczasowa zaleznosc od `BETWEEN_TURNS`, jesli nie bedzie juz potrzebna.
+- Blocker: `npx turbo build --filter="@party/hub"` blokuje srodowisko worktree przez bledy `Module not found` w lokalnym `next/dist/...`, wiec nie zweryfikowano pelnego buildu aplikacji.
 <!-- handoff:end -->

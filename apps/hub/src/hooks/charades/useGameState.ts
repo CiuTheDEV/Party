@@ -15,11 +15,11 @@ export type GameSettings = {
 }
 
 type GamePhase =
-  | 'idle'           // przed wysłaniem hasła
-  | 'waiting-ready'  // czekanie na PRESENTER_READY
-  | 'timer-running'  // timer odlicza
-  | 'verdict'        // czas minął, czekamy na werdykt
-  | 'between'        // między turami
+  | 'round-order'
+  | 'prepare'
+  | 'waiting-ready'
+  | 'timer-running'
+  | 'verdict'
 
 type GameState = {
   phase: GamePhase
@@ -41,7 +41,7 @@ export function useGameState(
   getNextWord: () => { word: string; category: string },
 ) {
   const [state, setState] = useState<GameState>({
-    phase: 'idle',
+    phase: 'round-order',
     players: players.map((p) => ({ ...p, score: 0 })),
     order: shuffle(players.map((_, i) => i)),
     currentOrderIdx: 0,
@@ -93,6 +93,14 @@ export function useGameState(
     }, 1000)
   }
 
+  const startRound = useCallback(() => {
+    setState((s) => ({
+      ...s,
+      phase: 'prepare',
+      currentOrderIdx: 0,
+    }))
+  }, [])
+
   const sendWord = useCallback(() => {
     const { word, category } = getNextWord()
     const turnId = crypto.randomUUID()
@@ -119,7 +127,10 @@ export function useGameState(
   }, [getNextWord, settings.timerSeconds, state.order, state.currentOrderIdx, state.players])
 
   const giveVerdict = useCallback((correct: boolean) => {
-    if (timerRef.current) clearInterval(timerRef.current)
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+      timerRef.current = null
+    }
     send({ type: 'TURN_END', turnId: currentTurnIdRef.current, reason: 'verdict' })
 
     setState((s) => {
@@ -128,32 +139,52 @@ export function useGameState(
         i === presenterIdx && correct ? { ...p, score: p.score + 1 } : p,
       )
       const isLastInRound = s.currentOrderIdx === s.order.length - 1
-      const isLastRound = s.currentRound === s.totalRounds && isLastInRound
-      // Oblicz nextOrderIdx PRZED aktualizacją stanu
-      const nextOrderIdx = isLastInRound ? 0 : s.currentOrderIdx + 1
-      const nextRound = isLastInRound ? s.currentRound + 1 : s.currentRound
-      // nextPresenter oparty na nextOrderIdx — nie na currentOrderIdx
-      const nextPresenterIdx = s.order[nextOrderIdx]
-      const nextPresenter = updatedPlayers[nextPresenterIdx]
+      const isGameEnding = s.currentRound === s.totalRounds && isLastInRound
 
-      if (!isLastRound) {
+      if (!isLastInRound) {
+        const nextPresenterIdx = s.order[s.currentOrderIdx + 1]
+        const nextPresenter = updatedPlayers[nextPresenterIdx]
         send({
           type: 'BETWEEN_TURNS',
           nextPresenterName: nextPresenter.name,
           nextPresenterAvatar: nextPresenter.avatar,
         })
-      } else {
-        send({ type: 'GAME_END' })
+        return {
+          ...s,
+          players: updatedPlayers,
+          phase: 'prepare',
+          currentOrderIdx: s.currentOrderIdx + 1,
+        }
       }
 
-      return {
-        ...s,
-        players: updatedPlayers,
-        // phase 'idle' gdy koniec gry (komponent /play wykryje isGameOver i przekieruje)
-        phase: isLastRound ? 'idle' : 'between',
-        currentOrderIdx: nextOrderIdx,
-        currentRound: nextRound,
+      if (!isGameEnding) {
+        const reshuffledOrder = shuffle(s.players.map((_, i) => i))
+        const nextPresenter = updatedPlayers[reshuffledOrder[0]]
+        send({
+          type: 'BETWEEN_TURNS',
+          nextPresenterName: nextPresenter.name,
+          nextPresenterAvatar: nextPresenter.avatar,
+        })
+        return {
+          ...s,
+          players: updatedPlayers,
+          phase: 'round-order',
+          order: reshuffledOrder,
+          currentOrderIdx: 0,
+          currentRound: s.currentRound + 1,
+        }
       }
+
+      if (isGameEnding) {
+        send({ type: 'GAME_END' })
+        return {
+          ...s,
+          players: updatedPlayers,
+          phase: 'verdict',
+          currentRound: s.currentRound + 1,
+        }
+      }
+      return s
     })
   }, [])
 
@@ -166,7 +197,7 @@ export function useGameState(
     }
   }, [])
 
-  return { state, sendWord, giveVerdict, isGameOver }
+  return { state, startRound, sendWord, giveVerdict, isGameOver }
 }
 
 function shuffle(arr: number[]): number[] {
