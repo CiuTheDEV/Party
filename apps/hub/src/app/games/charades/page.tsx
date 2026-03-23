@@ -7,7 +7,10 @@ export default function CharadesMenuPage() {
   return (
     <main className={styles.page}>
       <section className={styles.hero}>
-        <GameIcon emoji="🎭" size="lg" />
+        <div className={styles.iconWrapper}>
+          <div className={styles.iconGlow} />
+          <GameIcon emoji="🎭" size="lg" />
+        </div>
         <h1 className={styles.title}>Kalambury</h1>
         <p className={styles.subtitle}>
           Pokazuj hasła bez słów — tylko gestem i mimiką.<br />
