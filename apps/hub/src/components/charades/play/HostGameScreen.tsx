@@ -37,16 +37,17 @@ export function HostGameScreen(props: HostGameScreenProps) {
   const orderedPlayers = props.order
     .map((playerIdx) => props.players[playerIdx])
     .filter((player): player is PlayerSummary => Boolean(player))
+  const activePlayer = orderedPlayers[props.currentOrderIdx] ?? props.presenter
 
   return (
     <div className={styles.screen}>
       <PlayTopBar
+        activePlayer={activePlayer}
         currentOrderIdx={props.currentOrderIdx}
         currentRound={props.currentRound}
         isDeviceConnected={props.isDeviceConnected}
         orderLength={props.order.length}
         phase={props.phase}
-        players={props.players}
         totalRounds={props.totalRounds}
       />
 

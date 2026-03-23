@@ -7,10 +7,9 @@ type Phase =
   | 'timer-running'
   | 'verdict'
 
-type ScorePlayer = {
+type ActivePlayer = {
   name: string
   avatar: string
-  score: number
 }
 
 type PlayTopBarProps = {
@@ -20,13 +19,13 @@ type PlayTopBarProps = {
   orderLength: number
   phase: Phase
   isDeviceConnected: boolean
-  players: ScorePlayer[]
+  activePlayer: ActivePlayer | undefined
 }
 
 const phaseLabels: Record<Phase, string> = {
-  'round-order': 'Kolejność rundy',
+  'round-order': 'Kolejnosc rundy',
   prepare: 'Przygotowanie',
-  'waiting-ready': 'Czekamy na prezentera',
+  'waiting-ready': 'Czekamy na gotowosc',
   'timer-running': 'Trwa tura',
   verdict: 'Werdykt',
 }
@@ -38,31 +37,23 @@ export function PlayTopBar({
   orderLength,
   phase,
   isDeviceConnected,
-  players,
+  activePlayer,
 }: PlayTopBarProps) {
   return (
     <header className={styles.bar}>
-      <div className={styles.leftSide}>
-        <div className={styles.metaGroup}>
-          <span className={styles.gameName}>Kalambury</span>
-          <span className={styles.meta}>Runda {currentRound}/{totalRounds}</span>
-          <span className={styles.meta}>Gracz {currentOrderIdx + 1}/{orderLength}</span>
-          <span className={styles.status}>{phaseLabels[phase]}</span>
-        </div>
-
-        <div className={styles.scoreboard} aria-label="Wyniki graczy">
-          {players.map((player) => (
-            <span key={player.name} className={styles.scoreChip}>
-              <span className={styles.scoreAvatar}>{player.avatar}</span>
-              <span className={styles.scoreValue}>{player.score}</span>
-            </span>
-          ))}
-        </div>
+      <div className={styles.metaGroup}>
+        <span className={styles.gameName}>Kalambury</span>
+        <span className={styles.meta}>Runda {currentRound}/{totalRounds}</span>
+        <span className={styles.status}>{phaseLabels[phase]}</span>
+        <span className={styles.meta}>
+          {activePlayer ? `${activePlayer.avatar} ${activePlayer.name}` : `Gracz ${currentOrderIdx + 1}/${orderLength}`}
+        </span>
+        <span className={styles.meta}>Gracz {currentOrderIdx + 1}/{orderLength}</span>
       </div>
 
       <div className={isDeviceConnected ? styles.deviceConnected : styles.deviceDisconnected}>
-        <span className={styles.deviceIcon}>{isDeviceConnected ? '📱' : '📵'}</span>
-        <span>Telefon {isDeviceConnected ? 'połączony' : 'rozłączony'}</span>
+        <span className={styles.deviceIcon}>{isDeviceConnected ? 'Telefon OK' : 'Brak telefonu'}</span>
+        <span>Telefon {isDeviceConnected ? 'polaczony' : 'rozlaczony'}</span>
       </div>
     </header>
   )

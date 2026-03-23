@@ -30,9 +30,13 @@ export function PlayBoard({
   if (phase === 'round-order') {
     return (
       <main className={styles.board}>
-        <div className={styles.panel}>
-          <p className={styles.eyebrow}>Nowa runda</p>
-          <h1 className={styles.title}>Kolejność prezentacji</h1>
+        <section className={styles.stage}>
+          <div className={styles.spotlight} />
+          <div className={styles.stageIntro}>
+            <p className={styles.eyebrow}>Nowa runda</p>
+            <h1 className={styles.title}>Kolejnosc wejsc na scene</h1>
+            <p className={styles.message}>Pierwsza osoba zaczyna od razu po starcie rundy.</p>
+          </div>
           <div className={styles.orderList}>
             {order.map((player, idx) => (
               <div
@@ -41,11 +45,16 @@ export function PlayBoard({
               >
                 <span className={styles.orderIndex}>{idx + 1}</span>
                 <span className={styles.orderAvatar}>{player.avatar}</span>
-                <span className={styles.orderName}>{player.name}</span>
+                <div className={styles.orderMeta}>
+                  <span className={styles.orderName}>{player.name}</span>
+                  <span className={styles.orderHint}>
+                    {idx === currentOrderIdx ? 'Startuje jako pierwszy' : 'Czeka na swoja kolej'}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
-        </div>
+        </section>
       </main>
     )
   }
@@ -53,10 +62,18 @@ export function PlayBoard({
   if (phase === 'timer-running') {
     return (
       <main className={styles.board}>
-        <div className={styles.panel}>
-          <PresenterCard presenter={presenter} subtitle="Ta osoba teraz pokazuje hasło" />
-          <div className={styles.timer}>{timerRemaining}</div>
-        </div>
+        <section className={styles.stage}>
+          <div className={styles.spotlight} />
+          <PresenterCard
+            presenter={presenter}
+            subtitle="Prezenter jest na scenie. Sala patrzy tylko na czas."
+            compact
+          />
+          <div className={styles.timerWrap}>
+            <p className={styles.eyebrow}>Zostalo czasu</p>
+            <div className={styles.timer}>{timerRemaining}</div>
+          </div>
+        </section>
       </main>
     )
   }
@@ -64,25 +81,41 @@ export function PlayBoard({
   if (phase === 'verdict') {
     return (
       <main className={styles.board}>
-        <div className={styles.panel}>
-          <PresenterCard presenter={presenter} subtitle="Czas minął. Podejmij decyzję dla tej tury." />
-          <h1 className={styles.title}>Czy drużyna zgadła?</h1>
-        </div>
+        <section className={styles.stage}>
+          <div className={styles.spotlight} />
+          <PresenterCard
+            presenter={presenter}
+            subtitle="To byl final tej tury. Wybierz werdykt ponizej."
+          />
+          <div className={styles.verdictPrompt}>
+            <p className={styles.eyebrow}>Decyzja gospodarza</p>
+            <h1 className={styles.title}>Czy druzyna zgadla haslo?</h1>
+          </div>
+        </section>
       </main>
     )
   }
 
   return (
     <main className={styles.board}>
-      <div className={styles.panel}>
-        <PresenterCard presenter={presenter} subtitle="Ta osoba jest teraz na ekranie telefonu." />
-        <h1 className={styles.title}>Podaj telefon</h1>
-        <p className={styles.message}>
-          {phase === 'prepare'
-            ? 'Gdy telefon będzie u prezentera, wyślij hasło na jego ekran.'
-            : 'Hasło zostało wysłane. Czekamy, aż prezenter kliknie „Gotowy”.'}
-        </p>
-      </div>
+      <section className={styles.stage}>
+        <div className={styles.spotlight} />
+        <PresenterCard
+          presenter={presenter}
+          subtitle="Ta osoba bierze telefon i wychodzi na scene."
+        />
+        <div className={styles.heroCopy}>
+          <p className={styles.eyebrow}>
+            {phase === 'prepare' ? 'Przygotowanie' : 'Czekamy na gotowosc'}
+          </p>
+          <h1 className={styles.title}>Podaj telefon</h1>
+          <p className={styles.message}>
+            {phase === 'prepare'
+              ? 'Gdy telefon bedzie u prezentera, wyslij haslo na jego ekran.'
+              : 'Haslo zostalo wyslane. Czekamy, az prezenter kliknie "Gotowy".'}
+          </p>
+        </div>
+      </section>
     </main>
   )
 }
@@ -90,13 +123,15 @@ export function PlayBoard({
 function PresenterCard({
   presenter,
   subtitle,
+  compact = false,
 }: {
   presenter: PlayerSummary | undefined
   subtitle: string
+  compact?: boolean
 }) {
   return (
-    <div className={styles.presenterCard}>
-      <span className={styles.presenterAvatar}>{presenter?.avatar ?? '🎭'}</span>
+    <div className={compact ? styles.presenterCardCompact : styles.presenterCard}>
+      <span className={styles.presenterAvatar}>{presenter?.avatar ?? '??'}</span>
       <div className={styles.presenterMeta}>
         <p className={styles.eyebrow}>Prezenter</p>
         <p className={styles.presenterName}>{presenter?.name ?? 'Brak gracza'}</p>

@@ -24,9 +24,11 @@ export function PlayBottomBar({
 }: PlayBottomBarProps) {
   return (
     <footer className={styles.bar}>
+      <div className={styles.rail} aria-hidden="true" />
+
       {phase === 'round-order' && (
         <button className={styles.primaryButton} onClick={onStartRound}>
-          Zaczynamy rundę
+          Zaczynamy runde
         </button>
       )}
 
@@ -36,23 +38,25 @@ export function PlayBottomBar({
           disabled={!isDeviceConnected}
           onClick={onSendWord}
         >
-          Wyślij hasło na telefon
+          Wyslij haslo na telefon
         </button>
       )}
 
       {phase === 'waiting-ready' && (
-        <p className={styles.infoText}>Czekamy, aż prezenter kliknie „Gotowy” na telefonie.</p>
+        <p className={styles.infoText}>Czekamy, az prezenter kliknie "Gotowy" na telefonie.</p>
       )}
 
-      {phase === 'timer-running' && <div className={styles.spacer} aria-hidden="true" />}
+      {phase === 'timer-running' && (
+        <p className={styles.infoText}>Tura trwa. Werdykt pojawi sie po zakonczeniu czasu.</p>
+      )}
 
       {phase === 'verdict' && (
         <div className={styles.verdictActions}>
           <button className={styles.successButton} onClick={() => onGiveVerdict(true)}>
-            Zgadnięto
+            Zgadnieto
           </button>
           <button className={styles.dangerButton} onClick={() => onGiveVerdict(false)}>
-            Nie zgadnięto
+            Nie zgadnieto
           </button>
         </div>
       )}
