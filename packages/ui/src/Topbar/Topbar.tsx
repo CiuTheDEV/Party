@@ -8,18 +8,16 @@ type TopbarProps = {
 export function Topbar({ gameName }: TopbarProps) {
   return (
     <header className={styles.topbar}>
-      <div className={styles.left}>
-        <Link href="/" className={styles.logo}>Project Party</Link>
-        {gameName && (
-          <>
-            <span className={styles.separator}>/</span>
-            <span className={styles.gameName}>{gameName}</span>
-          </>
-        )}
-      </div>
+      <Link href="/" className={styles.logo}>
+        <span className={styles.logoMark} aria-hidden="true">🎮</span>
+        <span className={styles.logoText}>
+          <span className={styles.logoLabel}>PROJECT PARTY</span>
+          {gameName && <span className={styles.logoGame}>{gameName}</span>}
+        </span>
+      </Link>
       <button className={styles.authBtn} aria-label="Zaloguj się">
+        <span className={styles.authIcon} aria-hidden="true">👤</span>
         <span className={styles.authBtnText}>Zaloguj się</span>
-        <span aria-hidden="true">👤</span>
       </button>
     </header>
   )
