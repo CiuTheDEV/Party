@@ -17,6 +17,8 @@ type Phase =
   | 'timer-running'
   | 'verdict'
 
+type PhoneState = 'polaczony' | 'oczekiwanie' | 'rozlaczony'
+
 type HostGameScreenProps = {
   phase: Phase
   currentRound: number
@@ -37,6 +39,11 @@ export function HostGameScreen(props: HostGameScreenProps) {
     .map((playerIdx) => props.players[playerIdx])
     .filter((player): player is PlayerSummary => Boolean(player))
   const activePlayer = orderedPlayers[props.currentOrderIdx] ?? props.presenter
+  const phoneState: PhoneState = !props.isDeviceConnected
+    ? 'rozlaczony'
+    : props.phase === 'prepare' || props.phase === 'waiting-ready'
+      ? 'oczekiwanie'
+      : 'polaczony'
 
   return (
     <div className={styles.screen}>
@@ -44,9 +51,9 @@ export function HostGameScreen(props: HostGameScreenProps) {
         activePlayer={activePlayer}
         currentOrderIdx={props.currentOrderIdx}
         currentRound={props.currentRound}
-        isDeviceConnected={props.isDeviceConnected}
         orderLength={props.order.length}
         phase={props.phase}
+        phoneState={phoneState}
         totalRounds={props.totalRounds}
       />
 

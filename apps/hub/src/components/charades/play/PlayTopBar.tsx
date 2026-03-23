@@ -12,13 +12,15 @@ type ActivePlayer = {
   avatar: string
 }
 
+type PhoneState = 'polaczony' | 'oczekiwanie' | 'rozlaczony'
+
 type PlayTopBarProps = {
   currentRound: number
   totalRounds: number
   currentOrderIdx: number
   orderLength: number
   phase: Phase
-  isDeviceConnected: boolean
+  phoneState: PhoneState
   activePlayer: ActivePlayer | undefined
 }
 
@@ -36,9 +38,13 @@ export function PlayTopBar({
   currentOrderIdx,
   orderLength,
   phase,
-  isDeviceConnected,
+  phoneState,
   activePlayer,
 }: PlayTopBarProps) {
+  const phoneLabel = phoneState === 'oczekiwanie' ? 'Telefon oczekiwanie' : `Telefon ${phoneState}`
+  const phoneClassName =
+    phoneState === 'rozlaczony' ? styles.deviceDisconnected : styles.deviceConnected
+
   return (
     <header className={styles.bar}>
       <div className={styles.metaGroup}>
@@ -50,9 +56,9 @@ export function PlayTopBar({
         </span>
       </div>
 
-      <div className={isDeviceConnected ? styles.deviceConnected : styles.deviceDisconnected}>
-        <span className={styles.deviceIcon}>{isDeviceConnected ? 'Telefon OK' : 'Brak telefonu'}</span>
-        <span>Telefon {isDeviceConnected ? 'polaczony' : 'rozlaczony'}</span>
+      <div className={phoneClassName}>
+        <span className={styles.deviceIcon}>Telefon</span>
+        <span>{phoneLabel}</span>
       </div>
     </header>
   )
