@@ -148,7 +148,17 @@
 
 /* Mobile */
 @media (max-width: 767px) {
+  .page {
+    min-height: calc(100vh - var(--topbar-height) - 56px);
+    padding: 24px 16px;
+    gap: 20px;
+  }
+
   .title {
     font-size: 28px;
+  }
+
+  .footer {
+    display: none;
   }
 }
