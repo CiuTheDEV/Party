@@ -33,7 +33,7 @@
 /* Mode card */
 .modeCard {
   width: min(520px, 100%);
-  flex: 1;
+  min-height: 340px;
   padding: 40px;
   border: 1px solid var(--color-border);
   border-radius: 16px;
