@@ -75,9 +75,9 @@ project-party/                     # Monorepo (Turborepo)
 
 <!-- handoff:start -->
 ## Session Handoff
-- Last: 2026-03-23 16:05 by Codex (GPT-5.4)
-- Task: Zintegrowany follow-up Task 2 + Task 3 dla host GameScreen + naprawy z review Task 1
-- Did: Dodano nowy host UI dla `/games/charades/play` (`HostGameScreen`, `PlayTopBar`, `PlayBoard`, `PlayBottomBar`) i przepieto `page.tsx` na flow `round-order -> prepare -> waiting-ready -> timer-running -> verdict`. Naprawiono soft-lock po zmianie hooka oraz zablokowano drugie klikniecie werdyktu po `isGameOver` przez wczesny exit renderu przed redirectem.
-- Next: Zweryfikowac ekran hosta w runtime po naprawie lokalnego srodowiska Next.js/worktree i rozwazyc czy event `BETWEEN_TURNS` jest dalej potrzebny po stronie prezentera.
-- Blocker: `npm run build` i `npx turbo build --filter="@party/hub"` w tym worktree nadal wykladaja sie na bledach `Module not found` wewnatrz lokalnego `node_modules/next/dist/...`, wiec pelny build nie potwierdza zmian aplikacyjnych.
+- Last: 2026-03-23 16:42 by Codex (GPT-5.4)
+- Task: Task 1 planu cinema-layout dla `/games/charades/play` - odpiecie gameplay route od GameShell
+- Did: `apps/hub/src/app/games/charades/layout.tsx` renderuje teraz `GameShell` dla tras modulu poza segmentem `play`, dzieki czemu `/games/charades/play` nie dziedziczy sidebara ani chrome menu. `apps/hub/src/app/games/charades/play/page.module.css` zostal zredukowany do minimalnego wrappera z pelna wysokoscia viewportu.
+- Next: Zweryfikowac runtime fullscreen stage po ustabilizowaniu lokalnego Next.js/HMR i przejsc do kolejnego taska planu cinema-layout.
+- Blocker: Pelna weryfikacja runtime/build nadal moze byc ograniczona przez lokalne problemy `.next`/HMR opisane wczesniej; w tej sesji potwierdzono tylko `npx tsc --noEmit` dla `apps/hub`.
 <!-- handoff:end -->

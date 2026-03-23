@@ -1,5 +1,8 @@
+'use client'
+
 import { GameShell } from '@party/ui'
 import type { NavLink } from '@party/ui'
+import { useSelectedLayoutSegment } from 'next/navigation'
 import { Play, Settings, BarChart2 } from 'lucide-react'
 import './theme.css'
 
@@ -10,6 +13,12 @@ const links: NavLink[] = [
 ]
 
 export default function CharadesLayout({ children }: { children: React.ReactNode }) {
+  const segment = useSelectedLayoutSegment()
+
+  if (segment === 'play') {
+    return <>{children}</>
+  }
+
   return (
     <GameShell gameName="Kalambury" gameEmoji="🎭" links={links}>
       {children}
