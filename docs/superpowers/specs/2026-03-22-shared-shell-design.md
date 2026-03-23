@@ -131,7 +131,7 @@ type TopbarProps = {
 ```
 
 Zawartość (lewa → prawa):
-- Logo „PARTY" jako link do `/`
+- Logo „Project Party" jako link do `/`
 - Separator `/` + `gameName` w kolorze `--game-color-primary-light` (tylko gdy podane)
 - Slot prawy: avatar lub przycisk „Zaloguj" (placeholder na Phase 5 — Clerk)
 

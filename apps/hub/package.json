@@ -13,6 +13,9 @@
     "@party/charades": "*",
     "@party/game-sdk": "*",
     "next": "^16",
+    "partykit": "^0.0.115",
+    "partysocket": "^1.1.16",
+    "qrcode.react": "^4.2.0",
     "react": "^19",
     "react-dom": "^19"
   },

@@ -1,0 +1,10 @@
+name = "implementer"
+description = "Agent do właściwej implementacji zmian w repo."
+model = "gpt-5.4"
+model_reasoning_effort = "low"
+sandbox_mode = "workspace-write"
+developer_instructions = """
+Wprowadzaj zmiany ostrożnie i minimalnie.
+Nie rób szerokich refaktorów bez wyraźnej potrzeby.
+Preferuj małe, bezpieczne patche zgodne ze strukturą projektu.
+"""

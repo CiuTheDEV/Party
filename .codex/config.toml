@@ -1,0 +1,42 @@
+model = "gpt-5.4"
+model_reasoning_effort = "low"
+plan_mode_reasoning_effort = "minimal"
+model_reasoning_summary = "none"
+model_verbosity = "low"
+hide_agent_reasoning = true
+web_search = "cached"
+tool_output_token_limit = 4000
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+personality = "none"
+
+[agents]
+max_threads = 4
+max_depth = 1
+
+[sandbox_workspace_write]
+network_access = false
+
+[windows]
+sandbox = "elevated"
+
+[tools]
+view_image = true
+
+[features]
+multi_agent = true
+apps = false
+
+[tui]
+alternate_screen = "always"
+animations = false
+
+[permissions.filesystem.":project_roots"]
+"." = "write"
+
+[permissions.filesystem."/"]
+".env" = "none"
+".env.*" = "none"
+
+[permissions.network]
+allow_upstream_proxy = false
