@@ -169,12 +169,13 @@
   .modeCard {
     padding: 20px;
     max-height: none;
-    gap: 0;
-    justify-content: space-between;
+    gap: 12px;
+    justify-content: flex-start;
   }
 
   .modeBody {
     gap: 12px;
+    justify-content: flex-start;
   }
 
   .modeName {
