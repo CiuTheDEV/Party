@@ -27,6 +27,13 @@
 - Next: Phase 4 — Cloudflare Pages deploy + Partykit deploy
 - Experience recorded: tak
 
+### S4 (~2026-03-23) [Project Party] Electric Nocturne — pixel-perfect alignment
+
+- Dopasowano Kalambury menu page 1:1 do Stitch reference (`code.html`) i mockupu. Poprawki: tokeny primary `#7c3aed`, sidebar inactive `#64748b`, subtitle 18px, badge z tokenami, GameIcon ciemne tło, GameShell glow `z-index:-1`, logo `--game-color-primary`. Wszystkie hardcoded kolory zamienione na tokeny.
+- Kluczowa lekcja: agent spędził 2h bo nie otworzył `code.html` na początku — pracował z założeniami. Poprawne podejście: Read referencja → porównaj token po tokenie → edytuj.
+- Next: Phase 4 — Cloudflare Pages deploy + Partykit deploy
+- Experience recorded: yes
+
 ### S3 (~wieczór) [Project Party] Bugfixy + Shared Shell @party/ui
 
 - Naprawiono 3 bugi: hydration mismatch w QRPairing (useState+useEffect zamiast typeof window), game freeze w fazie 'between' (brak przycisku "Następna tura →"), Partykit nie startował automatycznie (dodany do dev.bat jako osobne okno).

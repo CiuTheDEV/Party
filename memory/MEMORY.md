@@ -63,6 +63,18 @@
 
 ---
 
+### 2026-03-23 — CSS token alignment: zawsze otwórz referencję przed kodem
+
+**Symptom:** 2h iteracji na dopasowanie UI do mockupu — każda runda poprawek trafiała w coś innego.
+
+**Root cause:** Agent zakładał wartości tokenów z pamięci zamiast porównać 1:1 z `code.html` (Stitch reference). Hardcoded kolory (`#7c3aed`, `rgba(124,58,237,...)`) były pozostałością poprzedniej sesji i nie odpowiadały obecnym tokenom.
+
+**Fix:** Otworzyć `code.html` i porównać każdą wartość CSS z implementacją zanim zaczniesz edytować.
+
+**Jak zapobiec:** Przy zadaniach "dopasuj do mockupu" — **pierwsze działanie to `Read code.html`**, nie screenshot, nie assumption. Hardcoded kolory w CSS to czerwona flaga — zamień na tokeny i sprawdź czy tokeny mają właściwą wartość.
+
+---
+
 ### 2026-03-22 — Next.js 16 modyfikuje tsconfig.json przy pierwszym uruchomieniu
 
 **Symptom:** Po `npm run dev` Next.js automatycznie zmienia `tsconfig.json` — ustawia `jsx: react-jsx` (było `preserve`) i dodaje `.next/dev/types/**/*.ts` do includes.

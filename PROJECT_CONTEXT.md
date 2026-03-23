@@ -76,13 +76,13 @@ project-party/                     # Monorepo (Turborepo)
 <!-- handoff:start -->
 ## Session Handoff
 
-### Previous: 2026-03-22 — Phase 0-2
-- Turborepo init, hub (Next.js 16), @party/game-sdk, deps update.
+### Previous: 2026-03-22 — Phase 3 ✅ + Shared Shell @party/ui ✅
+- Bugfixy (hydration QRPairing, game freeze 'between', Partykit w dev.bat). @party/ui: Topbar, GameSidebar, GameShell, GameCard, token system. Hub + charades layout zmigrowane.
 
-### Latest: 2026-03-22 — Phase 3 ✅ + Shared Shell @party/ui ✅
-- Did: Bugfixy (hydration QRPairing, game freeze 'between', Partykit w dev.bat). Zaimplementowano pełny @party/ui: Topbar, GameSidebar (desktop+mobile), GameShell, GameCard gradient hero. Dwupoziomowy token system (tokens.css globalny + theme.css per gra). Hub strona główna + charades layout zmigrowane. Stare komponenty usunięte. Build: 7 tras OK, 0 błędów TS.
+### Latest: 2026-03-23 — Electric Nocturne pixel-perfect alignment ✅
+- Did: Dopasowano Kalambury menu page 1:1 do Stitch reference. Tokeny: `--game-color-primary: #7c3aed`, sidebar inactive `#64748b`, subtitle 18px, badge tokenami, GameIcon `#0f0f11` bg, GameShell glow `z-index:-1`, logo dynamiczny kolor. Wszystkie hardcoded kolory usunięte. 5 commitów.
+- Architecture: shared komponenty (`packages/ui/`) + lokalna treść (`apps/hub/src/app/games/charades/`). Per-game theme override przez `theme.css`.
 - Next: Phase 4 — Cloudflare Pages deploy + Partykit deploy
-- Blocker: Clerk wyłączony (Phase 5). UI charades-specific screens "bardzo ubogie" — redesign to osobny spec.
-- Architecture note: @party/ui importowany przez path alias (bez dist/), Next.js bundluje TS source bezpośrednio. CSS z workspace paczki działa bez dodatkowej konfiguracji.
+- Blocker: Clerk wyłączony (Phase 5).
 
 <!-- handoff:end -->
