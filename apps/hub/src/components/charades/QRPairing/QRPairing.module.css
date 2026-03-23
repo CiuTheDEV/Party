@@ -4,7 +4,6 @@
   align-items: center;
   gap: 12px;
   padding: 20px;
-  border: 1px solid var(--color-border);
   border-radius: 12px;
   background: var(--color-surface);
 }
@@ -39,7 +38,7 @@
 .disconnectBtn {
   margin-left: auto;
   padding: 4px 12px;
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-outline-variant);
   border-radius: 6px;
   background: transparent;
   color: var(--color-text-muted);
