@@ -1,13 +1,15 @@
 'use client'
 
+import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { ArrowLeft, Home } from 'lucide-react'
 import styles from './GameSidebar.module.css'
 
 export type NavLink = {
   label: string
   href: string
-  icon?: string
+  icon?: ReactNode
   disabled?: boolean
 }
 
@@ -24,10 +26,6 @@ export function GameSidebar({ gameName, gameEmoji, links }: GameSidebarProps) {
     <>
       {/* Desktop sidebar */}
       <aside className={styles.sidebar}>
-        <div className={styles.gameHeader}>
-          <span className={styles.gameEmoji}>{gameEmoji}</span>
-          <span className={styles.gameName}>{gameName}</span>
-        </div>
         <nav className={styles.nav}>
           {links.map((link) =>
             link.disabled ? (
@@ -51,7 +49,10 @@ export function GameSidebar({ gameName, gameEmoji, links }: GameSidebarProps) {
           )}
         </nav>
         <div className={styles.bottom}>
-          <Link href="/" className={styles.backLink}>← Wróć do lobby</Link>
+          <Link href="/" className={styles.backLink}>
+            <ArrowLeft size={14} />
+            Wróć do lobby
+          </Link>
         </div>
       </aside>
 
@@ -63,7 +64,7 @@ export function GameSidebar({ gameName, gameEmoji, links }: GameSidebarProps) {
               key={link.href}
               className={`${styles.tabItem} ${styles.tabDisabled}`}
             >
-              {link.icon && <span>{link.icon}</span>}
+              {link.icon && <span className={styles.tabIcon}>{link.icon}</span>}
               <span className={styles.tabLabel}>{link.label}</span>
             </span>
           ) : (
@@ -72,13 +73,13 @@ export function GameSidebar({ gameName, gameEmoji, links }: GameSidebarProps) {
               href={link.href}
               className={`${styles.tabItem} ${pathname === link.href ? styles.tabActive : ''}`}
             >
-              {link.icon && <span>{link.icon}</span>}
+              {link.icon && <span className={styles.tabIcon}>{link.icon}</span>}
               <span className={styles.tabLabel}>{link.label}</span>
             </Link>
           )
         )}
         <Link href="/" className={styles.tabItem}>
-          <span>🏠</span>
+          <span className={styles.tabIcon}><Home size={18} /></span>
           <span className={styles.tabLabel}>Lobby</span>
         </Link>
       </nav>
