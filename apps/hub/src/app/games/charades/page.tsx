@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Users, Smartphone, Target, Info } from 'lucide-react'
 import { GameIcon } from '@party/ui'
 import styles from './page.module.css'
 
@@ -24,9 +25,9 @@ export default function CharadesMenuPage() {
           Potrzebujesz drugiego urządzenia dla prezentera.
         </p>
         <ul className={styles.details}>
-          <li>👥 2–8 graczy</li>
-          <li>📱 Jedno urządzenie dla prezentera (telefon)</li>
-          <li>🎯 Wybierasz kategorie słów i liczbę rund</li>
+          <li><Users size={16} aria-hidden="true" />2–8 graczy</li>
+          <li><Smartphone size={16} aria-hidden="true" />Jedno urządzenie dla prezentera (telefon)</li>
+          <li><Target size={16} aria-hidden="true" />Wybierasz kategorie słów i liczbę rund</li>
         </ul>
         <Link href="/games/charades/config" className={styles.playBtn}>
           Zagraj Teraz ▶
@@ -39,7 +40,10 @@ export default function CharadesMenuPage() {
           <span className={styles.footerLink}>Zasady</span>
           <span className={styles.footerLink}>Wsparcie</span>
         </div>
-        <p className={styles.infoBar}>ℹ️ Pamiętaj o bezpiecznej zabawie w grupie!</p>
+        <p className={styles.infoBar}>
+          <Info size={13} aria-hidden="true" />
+          Pamiętaj o bezpiecznej zabawie w grupie!
+        </p>
       </footer>
     </main>
   )
