@@ -98,6 +98,10 @@
   gap: 10px;
 }
 
+.details li .iconPlayers { color: #a78bfa; }
+.details li .iconPhone   { color: #34d399; }
+.details li .iconTarget  { color: #fb923c; }
+
 .playBtn {
   display: block;
   margin-top: auto;
@@ -186,16 +190,16 @@
   }
 
   .modeName {
-    font-size: 20px;
+    font-size: 22px;
   }
 
   .modeDesc {
-    font-size: 15px;
+    font-size: 16px;
   }
 
   .details {
-    font-size: 15px;
-    gap: 8px;
+    font-size: 16px;
+    gap: 12px;
   }
 
   .playBtn {

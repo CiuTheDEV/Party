@@ -26,9 +26,9 @@ export default function CharadesMenuPage() {
             Potrzebujesz drugiego urządzenia dla prezentera.
           </p>
           <ul className={styles.details}>
-            <li><Users size={16} aria-hidden="true" />2–8 graczy</li>
-            <li><Smartphone size={16} aria-hidden="true" />Jedno urządzenie dla prezentera (telefon)</li>
-            <li><Target size={16} aria-hidden="true" />Wybierasz kategorie słów i liczbę rund</li>
+            <li><span className={styles.iconPlayers}><Users size={16} aria-hidden="true" /></span>2–8 graczy</li>
+            <li><span className={styles.iconPhone}><Smartphone size={16} aria-hidden="true" /></span>Jedno urządzenie dla prezentera (telefon)</li>
+            <li><span className={styles.iconTarget}><Target size={16} aria-hidden="true" /></span>Wybierasz kategorie słów i liczbę rund</li>
           </ul>
         </div>
         <Link href="/games/charades/config" className={styles.playBtn}>
