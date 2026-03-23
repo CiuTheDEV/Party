@@ -20,15 +20,17 @@ export default function CharadesMenuPage() {
           <h2 className={styles.modeName}>Tryb Klasyczny</h2>
           <span className={styles.badge}>ZALECANY</span>
         </div>
-        <p className={styles.modeDesc}>
-          Każdy gracz prezentuje hasło po kolei. Gra do wybranej liczby rund.
-          Potrzebujesz drugiego urządzenia dla prezentera.
-        </p>
-        <ul className={styles.details}>
-          <li><Users size={16} aria-hidden="true" />2–8 graczy</li>
-          <li><Smartphone size={16} aria-hidden="true" />Jedno urządzenie dla prezentera (telefon)</li>
-          <li><Target size={16} aria-hidden="true" />Wybierasz kategorie słów i liczbę rund</li>
-        </ul>
+        <div className={styles.modeBody}>
+          <p className={styles.modeDesc}>
+            Każdy gracz prezentuje hasło po kolei. Gra do wybranej liczby rund.
+            Potrzebujesz drugiego urządzenia dla prezentera.
+          </p>
+          <ul className={styles.details}>
+            <li><Users size={16} aria-hidden="true" />2–8 graczy</li>
+            <li><Smartphone size={16} aria-hidden="true" />Jedno urządzenie dla prezentera (telefon)</li>
+            <li><Target size={16} aria-hidden="true" />Wybierasz kategorie słów i liczbę rund</li>
+          </ul>
+        </div>
         <Link href="/games/charades/config" className={styles.playBtn}>
           Zagraj Teraz ▶
         </Link>
