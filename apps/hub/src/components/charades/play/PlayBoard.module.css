@@ -1,0 +1,134 @@
+.board {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 32px;
+}
+
+.panel {
+  width: min(1040px, 100%);
+  min-height: min(62vh, 720px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  padding: clamp(28px, 4vw, 52px);
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03));
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+  text-align: center;
+}
+
+.eyebrow {
+  font-size: clamp(0.95rem, 0.8vw + 0.8rem, 1.2rem);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--game-color-primary);
+}
+
+.title {
+  font-size: clamp(2.25rem, 3.6vw, 4.4rem);
+  font-weight: 800;
+  line-height: 1.05;
+  color: var(--color-text);
+}
+
+.message {
+  max-width: 20ch;
+  font-size: clamp(1.2rem, 1.5vw, 2rem);
+  line-height: 1.35;
+  color: var(--color-text-muted);
+}
+
+.orderList {
+  width: min(760px, 100%);
+  display: grid;
+  gap: 14px;
+}
+
+.orderItem,
+.orderItemActive {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 24px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  text-align: left;
+}
+
+.orderItemActive {
+  background: rgba(124, 58, 237, 0.18);
+  border: 2px solid rgba(124, 58, 237, 0.45);
+  box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.22);
+}
+
+.orderIndex {
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.orderAvatar,
+.presenterAvatar {
+  font-size: clamp(2rem, 2vw + 1.2rem, 3.5rem);
+}
+
+.orderName,
+.presenterName {
+  font-size: clamp(1.4rem, 1.8vw, 2.4rem);
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.presenterCard {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 24px 28px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.presenterMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.presenterSubtitle {
+  font-size: clamp(1rem, 1vw + 0.8rem, 1.35rem);
+  line-height: 1.35;
+  color: var(--color-text-muted);
+}
+
+.timer {
+  font-size: clamp(96px, 20vw, 220px);
+  font-weight: 900;
+  line-height: 1;
+  color: var(--game-color-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 900px) {
+  .board {
+    padding: 20px;
+  }
+
+  .orderItem,
+  .orderItemActive,
+  .presenterCard {
+    padding: 18px;
+  }
+}

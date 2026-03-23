@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { allCategories } from '@content/charades/index'
+import { HostGameScreen } from '../../../../components/charades/play/HostGameScreen'
 import { useWordPool } from '../../../../hooks/charades/useWordPool'
 import { useGameState } from '../../../../hooks/charades/useGameState'
 import type { Player, GameSettings } from '../../../../hooks/charades/useGameState'
@@ -21,7 +22,10 @@ export default function CharadesPlayPage() {
 
   useEffect(() => {
     const raw = sessionStorage.getItem('charades:config')
-    if (!raw) { router.replace('/games/charades'); return }
+    if (!raw) {
+      router.replace('/games/charades')
+      return
+    }
     setConfig(JSON.parse(raw))
   }, [router])
 
@@ -40,7 +44,7 @@ function PlayScreen({ config }: { config: Config }) {
     return { word, category: cat }
   }, [nextWord, cats])
 
-  const { state, sendWord, giveVerdict, isGameOver } = useGameState(
+  const { state, startRound, sendWord, giveVerdict, isGameOver } = useGameState(
     config.roomId,
     config.players.map((p) => ({ ...p, score: 0 })),
     config.settings,
@@ -56,77 +60,27 @@ function PlayScreen({ config }: { config: Config }) {
 
   const presenterIdx = state.order[state.currentOrderIdx]
   const presenter = state.players[presenterIdx]
-  const pronouns: Record<string, string> = {
-    on: 'pokazuje on',
-    ona: 'pokazuje ona',
-    none: `pokazuje ${presenter?.name ?? ''}`,
+
+  if (isGameOver) {
+    return <div className={styles.screen} aria-hidden="true" />
   }
-  const label = pronouns[presenter?.gender ?? 'none']
 
   return (
     <div className={styles.screen}>
-      <header className={styles.topbar}>
-        <span className={styles.gameName}>🎭 Kalambury</span>
-        <span className={styles.round}>Runda {state.currentRound}/{state.totalRounds}</span>
-        <div className={styles.scores}>
-          {state.players.map((p) => (
-            <span key={p.name} className={styles.score}>
-              {p.avatar} {p.score}
-            </span>
-          ))}
-        </div>
-        <span className={styles.deviceStatus}>
-          {state.isDeviceConnected ? '📱' : '📵'}
-        </span>
-      </header>
-
-      <main className={styles.main}>
-        <div className={styles.presenterInfo}>
-          <span className={styles.presenterAvatar}>{presenter?.avatar}</span>
-          <span className={styles.presenterName}>{presenter?.name}</span>
-          <span className={styles.presenterLabel}>{label}</span>
-        </div>
-
-        {state.phase === 'idle' && (
-          <button className={styles.primaryBtn} onClick={sendWord}>
-            Wyślij hasło na telefon
-          </button>
-        )}
-
-        {state.phase === 'waiting-ready' && (
-          <p className={styles.waitingText}>⏳ Czekam aż prezenter kliknie „Gotowy"…</p>
-        )}
-
-        {state.phase === 'timer-running' && (
-          <div className={styles.timer}>{state.timerRemaining}</div>
-        )}
-
-        {(state.phase === 'timer-running' || state.phase === 'verdict') && (
-          <div className={styles.verdictBtns}>
-            <button
-              className={`${styles.verdictBtn} ${styles.correct}`}
-              onClick={() => giveVerdict(true)}
-            >
-              Zgadnięto ✓
-            </button>
-            <button
-              className={`${styles.verdictBtn} ${styles.wrong}`}
-              onClick={() => giveVerdict(false)}
-            >
-              Nie zgadnięto ✗
-            </button>
-          </div>
-        )}
-
-        {state.phase === 'between' && (
-          <div className={styles.betweenView}>
-            <p className={styles.betweenText}>Podaj telefon kolejnej osobie…</p>
-            <button className={styles.primaryBtn} onClick={sendWord}>
-              Następna tura →
-            </button>
-          </div>
-        )}
-      </main>
+      <HostGameScreen
+        currentOrderIdx={state.currentOrderIdx}
+        currentRound={state.currentRound}
+        isDeviceConnected={state.isDeviceConnected}
+        onGiveVerdict={giveVerdict}
+        onSendWord={sendWord}
+        onStartRound={startRound}
+        order={state.order}
+        phase={state.phase}
+        players={state.players}
+        presenter={presenter}
+        timerRemaining={state.timerRemaining}
+        totalRounds={state.totalRounds}
+      />
     </div>
   )
 }
