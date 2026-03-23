@@ -7,9 +7,10 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
-  background: var(--color-topbar-bg);
-  backdrop-filter: blur(12px);
+  padding: 0 24px;
+  background: rgba(9, 9, 11, 0.4);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   z-index: 100;
 }
 
@@ -39,11 +40,12 @@
 }
 
 .logoLabel {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.1em;
-  color: var(--color-text-muted);
+  letter-spacing: 0.2em;
+  color: rgba(124, 58, 237, 0.8);
   line-height: 1;
+  text-transform: uppercase;
 }
 
 .logoGame {
