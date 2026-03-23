@@ -128,6 +128,7 @@
   .tabDisabled {
     opacity: 0.35;
     cursor: default;
+    pointer-events: none;
   }
 
   .tabLabel {
