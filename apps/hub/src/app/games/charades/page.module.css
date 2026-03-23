@@ -149,13 +149,16 @@
 /* Mobile */
 @media (max-width: 767px) {
   .page {
-    min-height: calc(100vh - var(--topbar-height) - 56px);
+    height: calc(100vh - var(--topbar-height) - 56px);
+    min-height: unset;
     padding: 20px 16px;
     gap: 16px;
+    overflow: hidden;
   }
 
   .hero {
     gap: 8px;
+    flex-shrink: 0;
   }
 
   .title {
@@ -167,10 +170,11 @@
   }
 
   .modeCard {
+    flex: 1;
+    min-height: 0;
     padding: 20px;
     max-height: none;
-    gap: 12px;
-    justify-content: flex-start;
+    gap: 16px;
   }
 
   .modeBody {
@@ -194,5 +198,10 @@
   .playBtn {
     padding: 14px;
     font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .footer {
+    flex-shrink: 0;
   }
 }
