@@ -21,6 +21,7 @@
   gap: 10px;
   padding: 13px 20px;
   font-size: 15px;
+  font-weight: 600;
   color: var(--color-text-muted);
   text-decoration: none;
   transition: color 0.15s, background 0.15s;
@@ -57,6 +58,7 @@
 
 .backLink {
   font-size: 14px;
+  font-weight: 600;
   color: var(--color-text-muted);
   text-decoration: none;
   transition: color 0.15s;
