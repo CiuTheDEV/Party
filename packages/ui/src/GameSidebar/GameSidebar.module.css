@@ -58,6 +58,12 @@
   font-weight: 600;
 }
 
+.navLinkDisabled {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
+}
+
 .navIcon {
   font-size: 15px;
 }
@@ -117,6 +123,11 @@
 
   .tabItem.tabActive {
     color: var(--game-color-primary-light);
+  }
+
+  .tabDisabled {
+    opacity: 0.35;
+    cursor: default;
   }
 
   .tabLabel {
