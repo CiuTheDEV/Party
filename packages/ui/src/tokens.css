@@ -1,33 +1,35 @@
 :root {
-  /* Tło i powierzchnie */
-  --color-bg: #0a0a0a;
+  /* Surface hierarchy — 3 levels (Electric Nocturne spec) */
+  --color-bg: #0e0e0f;
+  --color-surface-container: #19191b;
+  --color-surface-elevated: #262627;
+
+  /* Legacy surface tokens kept for compatibility */
   --color-surface: rgba(255, 255, 255, 0.04);
   --color-surface-hover: rgba(255, 255, 255, 0.08);
-  --color-surface-elevated: #141414;
 
-  /* Obramowania */
-  --color-border: rgba(255, 255, 255, 0.08);
-  --color-border-hover: rgba(255, 255, 255, 0.16);
+  /* Ghost border — accessibility fallback only, never for layout containment */
+  --color-outline-variant: rgba(255, 255, 255, 0.15);
 
-  /* Tekst */
+  /* Text */
   --color-text: #f0f0f0;
-  --color-text-muted: rgba(240, 240, 240, 0.5);
+  --color-text-muted: #adaaab;
 
-  /* Interakcja */
+  /* Interaction */
   --color-focus-outline: rgba(255, 255, 255, 0.4);
   --color-overlay: rgba(0, 0, 0, 0.7);
-  --color-topbar-bg: rgba(10, 10, 10, 0.9);
+  --color-topbar-bg: rgba(14, 14, 15, 0.85);
 
   /* Layout */
   --topbar-height: 72px;
   --sidebar-width: 240px;
 
-  /* Typografia */
+  /* Typography */
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
 
-  /* Domyślne wartości game theme (nadpisywane przez theme.css każdej gry) */
-  --game-color-primary: #7c3aed;
-  --game-color-primary-light: #a78bfa;
-  --game-color-primary-glow: rgba(124, 58, 237, 0.15);
-  --game-gradient: linear-gradient(135deg, #3b1f7a, #7c3aed, #a78bfa);
+  /* Game theme defaults (overridden per-game in theme.css) */
+  --game-color-primary: #d095ff;
+  --game-color-primary-light: #c782ff;
+  --game-color-primary-glow: rgba(208, 149, 255, 0.15);
+  --game-gradient: linear-gradient(135deg, #d095ff, #c782ff);
 }
