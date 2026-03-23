@@ -36,9 +36,9 @@
 }
 
 .navLink.active {
-  color: var(--game-color-primary-light);
-  background: linear-gradient(90deg, rgba(124, 58, 237, 0.15) 0%, rgba(124, 58, 237, 0) 100%);
-  border-left-color: #7c3aed;
+  color: var(--game-color-primary);
+  background: linear-gradient(90deg, var(--game-color-primary-glow) 0%, transparent 100%);
+  border-left-color: var(--game-color-primary);
   font-weight: 600;
 }
 
