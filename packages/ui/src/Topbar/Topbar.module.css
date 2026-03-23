@@ -79,10 +79,6 @@
   outline-offset: 2px;
 }
 
-.authIcon {
-  font-size: 14px;
-}
-
 @media (max-width: 767px) {
   .authBtnText {
     display: none;

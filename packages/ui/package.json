@@ -11,5 +11,8 @@
   "scripts": {
     "build": "tsc --noEmit",
     "lint": "eslint ."
+  },
+  "dependencies": {
+    "lucide-react": "^0.577.0"
   }
 }
