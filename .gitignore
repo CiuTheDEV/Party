@@ -20,3 +20,6 @@ dist/
 
 # Turborepo
 .turbo/
+
+# Local git worktrees
+.worktrees/
