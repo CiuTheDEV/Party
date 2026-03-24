@@ -17,6 +17,18 @@ node_modules/
 # Build outputs
 .next/
 dist/
+output/
+
+# Local tool/runtime artifacts
+.partykit/
+.playwright-cli/
+.playwright-mcp/
+.superpowers/
+docs/superpowers/
+*.tsbuildinfo
+
+# Local backups
+*.backup-*/
 
 # Turborepo
 .turbo/
