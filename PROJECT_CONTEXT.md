@@ -75,9 +75,9 @@ project-party/                     # Monorepo (Turborepo)
 
 <!-- handoff:start -->
 ## Session Handoff
-- Last: 2026-03-23 23:50 by Codex (GPT-5.4)
-- Task: Iteracyjny redesign `games/charades` - fullscreen GameScreen, pairing persistence i flow losowania kolejnosci z animowanymi kartami.
-- Did: Dodano persistence setupu i sesji prezentera w przegladarce (`charades-storage`, restore graczy/kategorii/ustawien, reconnect aktywnego prezentera), naprawiono runtime host/presenter dla PartyKit (`charades-runtime`, QR warning), uproszczono fullscreen host screen bez sidebara i score, przebudowano top/bottom bar, oraz przepieto etap `round-order` na wieloetapowa animacje kart z GSAP. W trakcie sesji wielokrotnie retuszowano viewport, uklad boardu, talie kart i motion reveal. `C:\Users\Mateo\Desktop\Party\node_modules\.bin\tsc.cmd --noEmit` dla `apps/hub` przechodzi.
-- Next: Dopracowac finalny wyglad i geometrie talii kart w fazie `round-order` na podstawie ostatniego feedbacku usera, a potem przejsc do kolejnych ekranow flow (`przygotowanie`, `timer`, `werdykt`) juz bez rozbijania viewportu.
-- Blocker: Brak twardego blockera technicznego; zostal otwarty temat UX/visual polish animacji kart i stagingu talii, ktory jest jeszcze niedomkniety.
+- Last: 2026-03-24 16:37 by Codex (GPT-5.4)
+- Task: Domkniecie etapu `round-order` w `games/charades` - przepisanie animacji losowania, polish kart graczy i statusu bottom bara.
+- Did: Przepisano `round-order` od zera na prostszy flow GSAP: stos kart na srodku, pojedynczy transfer do stosu w prawym dolnym rogu, potem rozdanie do slotow. Dopracowano handoff ladowania kart bez migotania, proporcje kart graczy, badge imienia zgodny z setupem (kolor wg plci), subtelny glow theme, spinner `Losowanie...` i 3-sekundowy countdown `Przechodzimy dalej za ...` po zakonczeniu rozdania. `C:\Users\Mateo\Desktop\Party\node_modules\.bin\tsc.cmd --noEmit` dla `apps/hub` przechodzi.
+- Next: Przejsc do kolejnych ekranow flow hosta (`przygotowanie`, `timer`, `werdykt`) i utrzymac nowy fullscreenowy kierunek bez rozbijania viewportu.
+- Blocker: Brak twardego blockera technicznego.
 <!-- handoff:end -->

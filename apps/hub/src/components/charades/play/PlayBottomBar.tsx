@@ -11,6 +11,7 @@ type PlayBottomBarProps = {
   phase: Phase
   isDeviceConnected: boolean
   isRoundOrderRevealing: boolean
+  roundOrderCountdown: number | null
   onStartRound: () => void
   onSendWord: () => void
   onGiveVerdict: (correct: boolean) => void
@@ -20,6 +21,7 @@ export function PlayBottomBar({
   phase,
   isDeviceConnected,
   isRoundOrderRevealing,
+  roundOrderCountdown,
   onStartRound,
   onSendWord,
   onGiveVerdict,
@@ -35,7 +37,16 @@ export function PlayBottomBar({
       )}
 
       {phase === 'round-order' && isRoundOrderRevealing && (
-        <p className={styles.infoText}>Losowanie...</p>
+        roundOrderCountdown === null ? (
+          <p className={styles.infoTextWithSpinner}>
+            <span className={styles.spinner} aria-hidden="true" />
+            <span>Losowanie...</span>
+          </p>
+        ) : (
+          <p className={styles.infoText}>
+            Przechodzimy dalej za {roundOrderCountdown} s
+          </p>
+        )
       )}
 
       {phase === 'prepare' && (

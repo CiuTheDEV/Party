@@ -5,6 +5,7 @@ import styles from './PlayBoard.module.css'
 type PlayerSummary = {
   name: string
   avatar: string
+  gender: 'on' | 'ona' | 'none'
 }
 
 type Phase =
@@ -21,14 +22,19 @@ type PlayBoardProps = {
   currentOrderIdx: number
   presenter: PlayerSummary | undefined
   isRoundOrderRevealing: boolean
-  onFinishRoundOrder: () => void
+  onRoundOrderSettled: () => void
   timerRemaining: number
 }
 
-const CARD_REVEAL_MS = 380
-const CARD_SETTLE_MS = 980
-const ORDER_HOLD_MS = 3000
-const ORDER_COLUMNS = 4
+type CardPoint = {
+  x: number
+  y: number
+}
+
+const COLLECT_DURATION = 0.22
+const DEAL_DURATION = 0.62
+const BETWEEN_COLLECT_MS = 30
+const BETWEEN_DEAL_MS = 110
 
 export function PlayBoard({
   phase,
@@ -37,282 +43,279 @@ export function PlayBoard({
   currentOrderIdx,
   presenter,
   isRoundOrderRevealing,
-  onFinishRoundOrder,
+  onRoundOrderSettled,
   timerRemaining,
 }: PlayBoardProps) {
   const totalCards = order.length > 0 ? order.length : players.length
-  const [revealedCount, setRevealedCount] = useState(0)
+  const [centerCount, setCenterCount] = useState(totalCards)
+  const [cornerCount, setCornerCount] = useState(0)
   const [settledCount, setSettledCount] = useState(0)
-  const [collectedCount, setCollectedCount] = useState(0)
-  const [dealOffsets, setDealOffsets] = useState<Record<number, { x: number; y: number }>>({})
-  const [collectOffset, setCollectOffset] = useState<{ x: number; y: number } | null>(null)
-  const finishScheduledRef = useRef(false)
-  const animationRefs = useRef<Partial<Record<number, gsap.core.Animation>>>({})
+  const [landedSlotIndex, setLandedSlotIndex] = useState<number | null>(null)
+  const [showFlyCard, setShowFlyCard] = useState(false)
+  const [flyCardFace, setFlyCardFace] = useState<'back' | 'front'>('back')
+  const [flyCardPlayer, setFlyCardPlayer] = useState<PlayerSummary | null>(null)
+  const [flyCardOrderIndex, setFlyCardOrderIndex] = useState<number | null>(null)
+  const [positionsReady, setPositionsReady] = useState(false)
+  const timelineRef = useRef<gsap.core.Timeline | null>(null)
   const revealAreaRef = useRef<HTMLDivElement | null>(null)
-  const deckLaunchRef = useRef<HTMLDivElement | null>(null)
-  const centerDeckRef = useRef<HTMLDivElement | null>(null)
+  const centerAnchorRef = useRef<HTMLDivElement | null>(null)
+  const cornerAnchorRef = useRef<HTMLDivElement | null>(null)
+  const flyCardRef = useRef<HTMLDivElement | null>(null)
+  const flyCardInnerRef = useRef<HTMLDivElement | null>(null)
   const slotRefs = useRef<(HTMLDivElement | null)[]>([])
-  const dealingCardRefs = useRef<(HTMLDivElement | null)[]>([])
-  const dealingInnerRefs = useRef<(HTMLDivElement | null)[]>([])
-  const collectingCardRef = useRef<HTMLDivElement | null>(null)
-  const collectingInnerRef = useRef<HTMLDivElement | null>(null)
-  const collectAnimationRef = useRef<gsap.core.Animation | null>(null)
-  const stackedDeckCount = players.length
-  const remainingDeckCount = Math.max(order.length - revealedCount, 0)
-  const totalRows = Math.max(1, Math.ceil(order.length / ORDER_COLUMNS))
-  const areDealOffsetsReady = order.length > 0 && Object.keys(dealOffsets).length === order.length
-  const isCollectPhase = isRoundOrderRevealing && collectedCount < totalCards
-  const isDealPhase = isRoundOrderRevealing && collectedCount >= totalCards
+  const settledPlayers = order.slice(0, settledCount)
 
   useEffect(() => {
     if (phase !== 'round-order') {
-      setRevealedCount(0)
+      timelineRef.current?.kill()
+      timelineRef.current = null
+      setCenterCount(totalCards)
+      setCornerCount(0)
       setSettledCount(0)
-      setCollectedCount(0)
-      setDealOffsets({})
-      setCollectOffset(null)
-      finishScheduledRef.current = false
-      Object.values(animationRefs.current).forEach((animation) => animation?.kill())
-      animationRefs.current = {}
-      collectAnimationRef.current?.kill()
-      collectAnimationRef.current = null
+      setLandedSlotIndex(null)
+      setShowFlyCard(false)
+      setFlyCardFace('back')
+      setFlyCardPlayer(null)
+      setFlyCardOrderIndex(null)
+      setPositionsReady(false)
       return
     }
 
     if (!isRoundOrderRevealing) {
-      setRevealedCount(0)
+      timelineRef.current?.kill()
+      timelineRef.current = null
+      setCenterCount(totalCards)
+      setCornerCount(0)
       setSettledCount(0)
-      setCollectedCount(0)
-      setDealOffsets({})
-      setCollectOffset(null)
-      finishScheduledRef.current = false
-      Object.values(animationRefs.current).forEach((animation) => animation?.kill())
-      animationRefs.current = {}
-      collectAnimationRef.current?.kill()
-      collectAnimationRef.current = null
+      setLandedSlotIndex(null)
+      setShowFlyCard(false)
+      setFlyCardFace('back')
+      setFlyCardPlayer(null)
+      setFlyCardOrderIndex(null)
       return
     }
-
-    if (order.length === 0 || !areDealOffsetsReady) {
-      return
-    }
-
-    setRevealedCount(0)
-    setSettledCount(0)
-    setCollectedCount(0)
-    finishScheduledRef.current = false
-    Object.values(animationRefs.current).forEach((animation) => animation?.kill())
-    animationRefs.current = {}
-    collectAnimationRef.current?.kill()
-    collectAnimationRef.current = null
-  }, [phase, isRoundOrderRevealing, order, areDealOffsetsReady])
-
-  useEffect(() => {
-    if (!isDealPhase || !areDealOffsetsReady) {
-      return
-    }
-
-    let current = 0
-    const revealTimer = window.setInterval(() => {
-      current += 1
-      setRevealedCount(Math.min(current, order.length))
-      if (current >= order.length) {
-        window.clearInterval(revealTimer)
-      }
-    }, CARD_REVEAL_MS)
-
-    return () => window.clearInterval(revealTimer)
-  }, [isDealPhase, areDealOffsetsReady, order.length])
+  }, [phase, isRoundOrderRevealing, totalCards])
 
   useLayoutEffect(() => {
-    if (!isCollectPhase) {
-      return
-    }
-
-    const centerDeck = centerDeckRef.current
-    const cornerDeck = deckLaunchRef.current
-    const card = collectingCardRef.current
-    const inner = collectingInnerRef.current
-
-    if (!centerDeck || !cornerDeck || !card || !inner || collectAnimationRef.current) {
-      return
-    }
-
-    const revealRect = revealAreaRef.current?.getBoundingClientRect()
-    const centerRect = centerDeck.getBoundingClientRect()
-    const cornerRect = cornerDeck.getBoundingClientRect()
-
-    if (!revealRect) {
-      return
-    }
-
-    const startX = centerRect.left - revealRect.left
-    const startY = centerRect.top - revealRect.top
-    const endX = cornerRect.left - revealRect.left
-    const endY = cornerRect.top - revealRect.top
-
-    gsap.set(card, {
-      x: startX - endX,
-      y: startY - endY,
-      rotation: 0,
-      scale: 1,
-      opacity: 1,
-    })
-
-    gsap.set(inner, {
-      rotateY: 0,
-      transformPerspective: 1200,
-      transformStyle: 'preserve-3d',
-    })
-
-    const timeline = gsap.timeline({
-      onComplete: () => {
-        collectAnimationRef.current = null
-        setCollectedCount((current) => current + 1)
-      },
-    })
-
-    timeline.to(card, {
-      x: 0,
-      y: 0,
-      rotation: -8,
-      duration: 0.42,
-      ease: 'power3.inOut',
-    }, 0)
-
-    collectAnimationRef.current = timeline
-
-    return () => {
-      timeline.kill()
-      if (collectAnimationRef.current === timeline) {
-        collectAnimationRef.current = null
-      }
-    }
-  }, [isCollectPhase, collectedCount])
-
-  useLayoutEffect(() => {
-    if (!isDealPhase || revealedCount === 0) {
-      return
-    }
-
-    const index = revealedCount - 1
-    const offset = dealOffsets[index]
-    const card = dealingCardRefs.current[index]
-    const inner = dealingInnerRefs.current[index]
-
-    if (!offset || !card || !inner) {
-      return
-    }
-
-    if (animationRefs.current[index]) {
-      return
-    }
-
-    gsap.set(card, {
-      x: offset.x,
-      y: offset.y,
-      rotation: -10,
-      scale: 0.94,
-      opacity: 1,
-    })
-
-    gsap.set(inner, {
-      rotateY: 0,
-      transformPerspective: 1200,
-      transformStyle: 'preserve-3d',
-    })
-
-    const timeline = gsap.timeline()
-    timeline.to(card, {
-      x: 0,
-      y: 0,
-      rotation: 0,
-      scale: 1,
-      duration: CARD_SETTLE_MS / 1000,
-      ease: 'power3.out',
-      onComplete: () => {
-        delete animationRefs.current[index]
-        setSettledCount((current) => Math.max(current, index + 1))
-      },
-    }, 0)
-
-    timeline.to(inner, {
-      rotateY: 180,
-      duration: CARD_SETTLE_MS / 1000,
-      ease: 'power2.out',
-    }, 0)
-
-    animationRefs.current[index] = timeline
-  }, [isDealPhase, revealedCount, dealOffsets])
-
-  useLayoutEffect(() => {
-    if (phase !== 'round-order' || !isRoundOrderRevealing) {
+    if (phase !== 'round-order' || !isRoundOrderRevealing || order.length === 0) {
       return
     }
 
     const revealArea = revealAreaRef.current
-    const deckLaunch = deckLaunchRef.current
-    const centerDeck = centerDeckRef.current
+    const centerAnchor = centerAnchorRef.current
+    const cornerAnchor = cornerAnchorRef.current
 
-    if (!revealArea || !deckLaunch || !centerDeck || order.length === 0) {
+    if (!revealArea || !centerAnchor || !cornerAnchor) {
       return
     }
 
     const measure = () => {
       const revealRect = revealArea.getBoundingClientRect()
-      const deckRect = deckLaunch.getBoundingClientRect()
-      const centerRect = centerDeck.getBoundingClientRect()
-      const launchX = deckRect.left - revealRect.left + 12
-      const launchY = deckRect.top - revealRect.top + 12
+      const centerRect = centerAnchor.getBoundingClientRect()
+      const cornerRect = cornerAnchor.getBoundingClientRect()
 
-      const nextOffsets: Record<number, { x: number; y: number }> = {}
+      const hasSlots = order.every((_, index) => slotRefs.current[index])
+      if (!hasSlots) {
+        setPositionsReady(false)
+        return
+      }
 
-      order.forEach((_, index) => {
+      const center = toLocalPoint(centerRect, revealRect)
+      const corner = toLocalPoint(cornerRect, revealRect)
+      const slots = order.map((_, index) => {
         const slot = slotRefs.current[index]
-        if (!slot) {
-          return
-        }
-
-        const slotRect = slot.getBoundingClientRect()
-        nextOffsets[index] = {
-          x: launchX - (slotRect.left - revealRect.left),
-          y: launchY - (slotRect.top - revealRect.top),
-        }
+        return slot ? toLocalPoint(slot.getBoundingClientRect(), revealRect) : null
       })
 
-      setCollectOffset({
-        x: centerRect.left - revealRect.left - launchX,
-        y: centerRect.top - revealRect.top - launchY,
+      const allSlotsReady = slots.every(Boolean)
+      if (!allSlotsReady) {
+        setPositionsReady(false)
+        return
+      }
+
+      setPositionsReady(true)
+
+      timelineRef.current?.kill()
+      timelineRef.current = buildRoundOrderTimeline({
+        center,
+        corner,
+        slots: slots as CardPoint[],
       })
-      setDealOffsets(nextOffsets)
     }
 
-    measure()
+    const raf = window.requestAnimationFrame(measure)
     window.addEventListener('resize', measure)
 
     return () => {
+      window.cancelAnimationFrame(raf)
       window.removeEventListener('resize', measure)
+      timelineRef.current?.kill()
+      timelineRef.current = null
     }
-  }, [phase, isRoundOrderRevealing, order, revealedCount, settledCount, collectedCount])
+  }, [phase, isRoundOrderRevealing, order, currentOrderIdx])
 
   useEffect(() => {
     if (
-      phase !== 'round-order' ||
-      !isDealPhase ||
-      order.length === 0 ||
-      settledCount !== order.length ||
-      finishScheduledRef.current
+      phase === 'round-order' &&
+      isRoundOrderRevealing &&
+      positionsReady &&
+      order.length > 0 &&
+      settledCount === order.length
     ) {
-      return
+      onRoundOrderSettled()
+    }
+  }, [phase, isRoundOrderRevealing, positionsReady, settledCount, order.length, onRoundOrderSettled])
+
+  function buildRoundOrderTimeline({
+    center,
+    corner,
+    slots,
+  }: {
+    center: CardPoint
+    corner: CardPoint
+    slots: CardPoint[]
+  }) {
+    const flyCard = flyCardRef.current
+    const flyCardInner = flyCardInnerRef.current
+
+    if (!flyCard || !flyCardInner) {
+      return null
     }
 
-    finishScheduledRef.current = true
-    const finishTimer = window.setTimeout(() => {
-      onFinishRoundOrder()
-    }, ORDER_HOLD_MS)
+    const timeline = gsap.timeline()
 
-    return () => window.clearTimeout(finishTimer)
-  }, [phase, isDealPhase, order.length, settledCount, onFinishRoundOrder])
+    gsap.set(flyCard, {
+      x: center.x,
+      y: center.y,
+      rotation: 0,
+      scale: 1,
+      opacity: 0,
+    })
+    gsap.set(flyCardInner, {
+      rotateY: 0,
+      transformPerspective: 1200,
+      transformStyle: 'preserve-3d',
+    })
+
+    for (let index = 0; index < totalCards; index += 1) {
+      timeline.add(() => {
+        setShowFlyCard(true)
+        setFlyCardFace('back')
+        setFlyCardPlayer(null)
+        setFlyCardOrderIndex(null)
+        setCenterCount(totalCards - index)
+        setCornerCount(index)
+        gsap.set(flyCard, {
+          x: center.x,
+          y: center.y,
+          rotation: -2,
+          scale: 1,
+          opacity: 1,
+        })
+        gsap.set(flyCardInner, { rotateY: 0 })
+      })
+
+      timeline.to(
+        flyCard,
+        {
+          x: corner.x,
+          y: corner.y,
+          rotation: -10,
+          duration: COLLECT_DURATION,
+          ease: 'power2.inOut',
+        },
+        '>'
+      )
+
+      timeline.add(() => {
+        setShowFlyCard(false)
+        setFlyCardOrderIndex(null)
+        setCenterCount(totalCards - index - 1)
+        setCornerCount(index + 1)
+      })
+
+      timeline.to({}, { duration: BETWEEN_COLLECT_MS / 1000 })
+    }
+
+    for (let index = 0; index < order.length; index += 1) {
+      const player = order[index]
+      const slot = slots[index]
+
+      timeline.add(() => {
+        setShowFlyCard(true)
+        setFlyCardFace('back')
+        setFlyCardPlayer(player)
+        setFlyCardOrderIndex(index + 1)
+        setCornerCount(totalCards - index)
+        gsap.set(flyCard, {
+          x: corner.x,
+          y: corner.y,
+          rotation: -10,
+          scale: 1,
+          opacity: 1,
+        })
+        gsap.set(flyCardInner, { rotateY: 0 })
+      })
+
+      timeline.to(
+        flyCard,
+        {
+          x: slot.x,
+          y: slot.y,
+          rotation: 0,
+          duration: DEAL_DURATION,
+          ease: 'power3.out',
+        },
+        '>'
+      )
+
+      timeline.to(
+        flyCardInner,
+        {
+          rotateY: 180,
+          duration: DEAL_DURATION * 0.7,
+          ease: 'power2.out',
+          onStart: () => {
+            setFlyCardFace('front')
+          },
+        },
+        '<+0.1'
+      )
+
+      timeline.to(
+        flyCard,
+        {
+          opacity: 0,
+          duration: 0.04,
+          ease: 'none',
+        },
+        '>'
+      )
+
+      timeline.add(() => {
+        setShowFlyCard(false)
+        setFlyCardFace('back')
+        setFlyCardPlayer(null)
+        setFlyCardOrderIndex(null)
+        setCornerCount(totalCards - index - 1)
+        gsap.set(flyCard, { opacity: 1 })
+        window.requestAnimationFrame(() => {
+          setLandedSlotIndex(index)
+          setSettledCount(index + 1)
+        })
+      })
+
+      timeline.to({}, { duration: 0.12 })
+
+      timeline.add(() => {
+        setLandedSlotIndex((current) => (current === index ? null : current))
+      })
+
+      timeline.to({}, { duration: BETWEEN_DEAL_MS / 1000 })
+    }
+
+    return timeline
+  }
 
   if (phase === 'round-order') {
     return (
@@ -320,10 +323,11 @@ export function PlayBoard({
         <section className={styles.stage}>
           {!isRoundOrderRevealing ? (
             <div className={styles.deckArea} aria-label="Zakryte karty graczy">
-              <div ref={centerDeckRef} className={styles.deck}>
-                {Array.from({ length: stackedDeckCount }).map((_, index) => (
+              <div className={styles.centerDeck}>
+                <div ref={centerAnchorRef} className={styles.centerAnchor} aria-hidden="true" />
+                {Array.from({ length: totalCards }).map((_, index) => (
                   <div
-                    key={`deck-${index}`}
+                    key={`center-${index}`}
                     className={`${styles.deckCard} ${styles.centerDeckCard}`}
                     style={getCenterDeckCardStyle(index)}
                   >
@@ -334,31 +338,49 @@ export function PlayBoard({
             </div>
           ) : (
             <div ref={revealAreaRef} className={styles.revealArea}>
-              <div ref={deckLaunchRef} className={styles.deckLaunchAnchor} aria-hidden="true" />
-
-              {isCollectPhase && (
-                <div ref={centerDeckRef} className={styles.collectDeckArea} aria-hidden="true">
-                  <div className={styles.deck}>
-                    {Array.from({ length: Math.max(totalCards - collectedCount, 0) }).map((_, index) => (
-                      <div
-                        key={`collect-center-${index}`}
-                        className={`${styles.deckCard} ${styles.centerDeckCard}`}
-                        style={getCenterDeckCardStyle(index)}
-                      >
-                        <CardBack branded />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {(collectedCount > 0 || isDealPhase) && (
-                <div className={`${styles.deck} ${styles.deckFloating}`} aria-hidden="true">
-                  {Array.from({
-                    length: isDealPhase ? remainingDeckCount : collectedCount,
-                  }).map((_, index, items) => (
+              <div className={styles.centerDeckShell} aria-hidden="true">
+                <div className={styles.centerDeck}>
+                  <div ref={centerAnchorRef} className={styles.centerAnchor} />
+                  {Array.from({ length: centerCount }).map((_, index) => (
                     <div
-                      key={`floating-${index}`}
+                      key={`collect-center-${index}`}
+                      className={`${styles.deckCard} ${styles.centerDeckCard}`}
+                      style={getCenterDeckCardStyle(index)}
+                    >
+                      <CardBack branded />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className={styles.orderList}>
+                {order.map((player, index) => (
+                  <div
+                    key={`${player.name}-${index}`}
+                    ref={(node) => {
+                      slotRefs.current[index] = node
+                    }}
+                    className={styles.orderSlot}
+                  >
+                    {index < settledCount ? (
+                      <SettledCard
+                        player={settledPlayers[index]}
+                        index={index}
+                        isActive={landedSlotIndex === index}
+                      />
+                    ) : (
+                      <div className={styles.orderCardPending} />
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className={styles.cornerDeckShell} aria-hidden="true">
+                <div className={styles.cornerDeck}>
+                  <div ref={cornerAnchorRef} className={styles.cornerAnchor} />
+                  {Array.from({ length: cornerCount }).map((_, index, items) => (
+                    <div
+                      key={`corner-${index}`}
                       className={`${styles.deckCard} ${styles.cornerDeckCard}`}
                       style={getCornerDeckCardStyle(index, items.length)}
                     >
@@ -366,102 +388,29 @@ export function PlayBoard({
                     </div>
                   ))}
                 </div>
-              )}
+              </div>
 
-              {isCollectPhase && collectOffset && (
-                <div
-                  ref={collectingCardRef}
-                  className={styles.collectingCard}
-                  style={
-                    {
-                      '--collect-x': `${collectOffset.x}px`,
-                      '--collect-y': `${collectOffset.y}px`,
-                    } as CSSProperties
-                  }
-                >
-                  <div ref={collectingInnerRef} className={styles.orderCardInner}>
-                    <div className={styles.orderCardBack}>
-                      <CardBack branded />
-                    </div>
+              <div
+                ref={flyCardRef}
+                className={`${styles.flyCard} ${showFlyCard ? styles.flyCardVisible : ''}`}
+                aria-hidden="true"
+              >
+                <div ref={flyCardInnerRef} className={styles.orderCardInner}>
+                  <div className={styles.orderCardBack}>
+                    <CardBack branded />
+                  </div>
+                  <div className={styles.orderCardFront}>
+                    {flyCardFace === 'front' && flyCardPlayer ? (
+                      <>
+                        <span className={styles.orderIndex}>{flyCardOrderIndex ?? ''}</span>
+                        <span className={styles.orderAvatar}>{flyCardPlayer.avatar}</span>
+                        <span className={styles.namePill} data-gender={flyCardPlayer.gender}>
+                          {flyCardPlayer.name}
+                        </span>
+                      </>
+                    ) : null}
                   </div>
                 </div>
-              )}
-
-              <div className={styles.orderList}>
-                {order.map((player, index) => {
-                  const dealOffset = dealOffsets[index]
-                  const cardStyle = {
-                    '--card-index': index,
-                    '--deal-x': `${dealOffset?.x ?? 0}px`,
-                    '--deal-y': `${dealOffset?.y ?? 0}px`,
-                  } as CSSProperties
-
-                  return (
-                    <div
-                      key={`${player.name}-${index}`}
-                      ref={(node) => {
-                        slotRefs.current[index] = node
-                      }}
-                      className={styles.orderSlot}
-                    >
-                      <div
-                        className={
-                          index < settledCount
-                            ? index === currentOrderIdx
-                              ? styles.orderCardSettledActive
-                              : styles.orderCardSettled
-                            : styles.orderCardPending
-                        }
-                        style={cardStyle}
-                      >
-                        <div className={styles.orderCardInner}>
-                          <div className={styles.orderCardBack}>
-                            <CardBack branded />
-                          </div>
-                          <div className={styles.orderCardFront}>
-                            <span className={styles.orderIndex}>{index + 1}</span>
-                            <span className={styles.orderAvatar}>{player.avatar}</span>
-                            <div className={styles.orderFrontMeta}>
-                              <span className={styles.orderLabel}>Gracz</span>
-                              <span className={styles.orderName}>{player.name}</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {index >= settledCount && index < revealedCount && (
-                        <div
-                          ref={(node) => {
-                            dealingCardRefs.current[index] = node
-                          }}
-                          className={
-                            index === currentOrderIdx ? styles.dealingCardActive : styles.dealingCard
-                          }
-                          style={cardStyle}
-                        >
-                          <div
-                            ref={(node) => {
-                              dealingInnerRefs.current[index] = node
-                            }}
-                            className={styles.orderCardInner}
-                          >
-                            <div className={styles.orderCardBack}>
-                              <CardBack branded />
-                            </div>
-                            <div className={styles.orderCardFront}>
-                              <span className={styles.orderIndex}>{index + 1}</span>
-                              <span className={styles.orderAvatar}>{player.avatar}</span>
-                              <div className={styles.orderFrontMeta}>
-                                <span className={styles.orderLabel}>Gracz</span>
-                                <span className={styles.orderName}>{player.name}</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )
-                })}
               </div>
             </div>
           )}
@@ -513,26 +462,54 @@ export function PlayBoard({
   )
 }
 
+function SettledCard({
+  player,
+  index,
+  isActive,
+}: {
+  player: PlayerSummary | undefined
+  index: number
+  isActive: boolean
+}) {
+  return (
+    <div className={isActive ? styles.orderCardSettledActive : styles.orderCardSettled}>
+      <div className={styles.orderCardInner}>
+        <div className={styles.orderCardBack}>
+          <CardBack branded />
+        </div>
+        <div className={styles.orderCardFront}>
+          <span className={styles.orderIndex}>{index + 1}</span>
+          <span className={styles.orderAvatar}>{player?.avatar ?? '??'}</span>
+          <span className={styles.namePill} data-gender={player?.gender ?? 'none'}>
+            {player?.name ?? 'Brak gracza'}
+          </span>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function toLocalPoint(rect: DOMRect, container: DOMRect): CardPoint {
+  return {
+    x: rect.left - container.left,
+    y: rect.top - container.top,
+  }
+}
+
 function getCenterDeckCardStyle(index: number) {
   return {
-    '--stack-x': `${index * 0.7}px`,
-    '--stack-y': `${index * 0.9}px`,
-    '--stack-rotate': `${index * 0.4}deg`,
+    '--stack-x': `${index * 0.9}px`,
+    '--stack-y': `${index * 1.1}px`,
+    '--stack-rotate': `${index * 0.45}deg`,
     '--stack-z': index + 1,
   } as CSSProperties
 }
 
 function getCornerDeckCardStyle(index: number, total: number) {
-  const center = (total - 1) / 2
-  const distanceFromCenter = index - center
-  const spread = total <= 4 ? 22 : total <= 8 ? 16 : 10
-  const lift = total <= 4 ? 18 : total <= 8 ? 12 : 8
-  const curve = total <= 4 ? 20 : total <= 8 ? 14 : 8
-
   return {
-    '--corner-fan-x': `${distanceFromCenter * spread}px`,
-    '--corner-fan-y': `${Math.abs(distanceFromCenter) * lift + distanceFromCenter * distanceFromCenter * curve}px`,
-    '--corner-fan-rotate': `${distanceFromCenter * (total <= 6 ? 5.2 : total <= 10 ? 4 : 3)}deg`,
+    '--corner-fan-x': `${index * 0.9}px`,
+    '--corner-fan-y': `${index * 1.1}px`,
+    '--corner-fan-rotate': `${index * 0.45}deg`,
     '--corner-z': index + 1,
   } as CSSProperties
 }
