@@ -22,6 +22,31 @@ import {
 } from '../../../utils/charades-storage'
 import styles from './page.module.css'
 
+const TEST_PLAYER_NAMES = [
+  'Antek',
+  'Basia',
+  'Celina',
+  'Dawid',
+  'Eryk',
+  'Felka',
+  'Gabi',
+  'Hubert',
+  'Iga',
+  'Julka',
+  'Kacper',
+  'Lena',
+  'Maks',
+  'Nina',
+  'Olek',
+  'Pola',
+  'Rafal',
+  'Sara',
+  'Tymon',
+  'Wera',
+] as const
+
+const TEST_AVATARS = ['😀', '😎', '🤩', '🥳', '😺', '🐻', '🦊', '🐼', '🐸', '🦁', '🎭', '🎨'] as const
+
 const DeviceListener = dynamic(
   () => import('../../../components/charades/DeviceListener'),
   { ssr: false },
@@ -83,6 +108,23 @@ export default function CharadesMenuPage() {
 
   function removePlayer(index: number) {
     setPlayers((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  function addRandomPlayer() {
+    setPlayers((prev) => {
+      if (prev.length >= 12) {
+        return prev
+      }
+
+      const usedNames = new Set(prev.map((player) => player.name.toLowerCase()))
+      const usedAvatars = new Set(prev.map((player) => player.avatar))
+
+      const availableName = TEST_PLAYER_NAMES.find((name) => !usedNames.has(name.toLowerCase())) ?? `Gracz ${prev.length + 1}`
+      const availableAvatar = TEST_AVATARS.find((avatar) => !usedAvatars.has(avatar)) ?? '🙂'
+      const gender: Omit<Player, 'score'>['gender'] = Math.random() > 0.5 ? 'on' : 'ona'
+
+      return [...prev, { name: availableName, avatar: availableAvatar, gender }]
+    })
   }
 
   const canStart = players.length >= 2 && Object.keys(selectedCategories).length >= 1 && isDeviceConnected
@@ -174,7 +216,17 @@ export default function CharadesMenuPage() {
               >
                 <div className={styles.configSectionHeader}>
                   <h3 className={styles.configSectionTitle}>Gracze</h3>
-                  <span className={styles.configSectionCount}>{players.length}/12</span>
+                  <div className={styles.configSectionMeta}>
+                    <button
+                      type="button"
+                      className={styles.configTestAddBtn}
+                      onClick={addRandomPlayer}
+                      disabled={players.length >= 12}
+                    >
+                      + test
+                    </button>
+                    <span className={styles.configSectionCount}>{players.length}/12</span>
+                  </div>
                 </div>
                 <PlayerGrid
                   players={players}

@@ -42,6 +42,13 @@ function applyEvent(state: RoomState, event: CharadesEvent): RoomState {
         currentPresenter: event.presenterName,
         timerRemaining: event.timerSeconds,
       }
+    case 'REVEAL_BUFFER_START':
+    case 'REVEAL_BUFFER_TICK':
+      if (event.turnId !== state.currentTurnId) return state
+      return { ...state, phase: 'turn', timerRemaining: event.remaining }
+    case 'REVEAL_BUFFER_END':
+      if (event.turnId !== state.currentTurnId) return state
+      return state
     case 'TIMER_TICK':
       if (event.turnId !== state.currentTurnId) return state
       return { ...state, timerRemaining: event.remaining }

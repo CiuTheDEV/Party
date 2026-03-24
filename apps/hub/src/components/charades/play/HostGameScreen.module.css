@@ -7,3 +7,189 @@
   overflow: hidden;
   background: var(--color-bg);
 }
+
+.modalOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(4, 5, 9, 0.68);
+  backdrop-filter: blur(14px);
+  z-index: 20;
+}
+
+.modalCard {
+  width: min(920px, 100%);
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+  max-height: min(720px, calc(100dvh - 48px));
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 50% 12%, color-mix(in srgb, var(--game-color-primary) 14%, transparent), transparent 52%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+    rgba(9, 10, 16, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 30px 60px rgba(0, 0, 0, 0.32);
+}
+
+.modalEyebrow {
+  justify-self: center;
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--game-color-primary) 42%, white);
+}
+
+.modalTitle {
+  margin: 0;
+  font-size: clamp(1.8rem, 1.7vw, 2.4rem);
+  font-weight: 800;
+  line-height: 1.05;
+  text-align: center;
+  color: var(--color-text);
+}
+
+.modalList {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  overflow-y: auto;
+  padding-right: 4px;
+  min-height: 0;
+}
+
+.playerOption {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 168px;
+  padding: 14px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02)),
+    rgba(7, 8, 13, 0.68);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease, border-color 0.15s ease;
+}
+
+.playerOptionSelected {
+  composes: playerOption;
+  border-color: color-mix(in srgb, var(--game-color-primary) 38%, white);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 0 0 1px color-mix(in srgb, var(--game-color-primary) 22%, transparent),
+    0 16px 28px rgba(0, 0, 0, 0.2);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.024)),
+    color-mix(in srgb, var(--game-color-primary) 10%, rgba(7, 8, 13, 0.68));
+}
+
+.playerOption:hover {
+  transform: translateY(-1px);
+  opacity: 0.96;
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.playerAvatar {
+  flex: 0 0 auto;
+  font-size: 3rem;
+  line-height: 1;
+}
+
+.playerName {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  max-width: 100%;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  background: rgba(0, 0, 0, 0.32);
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--color-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.playerName[data-gender='ona'] {
+  border-color: #f472b6;
+  color: #f9a8d4;
+}
+
+.playerName[data-gender='on'] {
+  border-color: #60a5fa;
+  color: #93c5fd;
+}
+
+.cancelButton {
+  justify-self: center;
+  min-height: 44px;
+  padding: 10px 22px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text);
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.confirmButton {
+  min-height: 44px;
+  padding: 10px 22px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--game-color-primary);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.confirmButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+  .modalCard {
+    width: min(640px, 100%);
+  }
+
+  .modalList {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .modalList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .playerOption {
+    min-height: 132px;
+  }
+
+  .modalActions {
+    flex-direction: column;
+  }
+}

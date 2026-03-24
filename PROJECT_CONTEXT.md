@@ -75,9 +75,9 @@ project-party/                     # Monorepo (Turborepo)
 
 <!-- handoff:start -->
 ## Session Handoff
-- Last: 2026-03-24 16:37 by Codex (GPT-5.4)
-- Task: Domkniecie etapu `round-order` w `games/charades` - przepisanie animacji losowania, polish kart graczy i statusu bottom bara.
-- Did: Przepisano `round-order` od zera na prostszy flow GSAP: stos kart na srodku, pojedynczy transfer do stosu w prawym dolnym rogu, potem rozdanie do slotow. Dopracowano handoff ladowania kart bez migotania, proporcje kart graczy, badge imienia zgodny z setupem (kolor wg plci), subtelny glow theme, spinner `Losowanie...` i 3-sekundowy countdown `Przechodzimy dalej za ...` po zakonczeniu rozdania. `C:\Users\Mateo\Desktop\Party\node_modules\.bin\tsc.cmd --noEmit` dla `apps/hub` przechodzi.
-- Next: Przejsc do kolejnych ekranow flow hosta (`przygotowanie`, `timer`, `werdykt`) i utrzymac nowy fullscreenowy kierunek bez rozbijania viewportu.
+- Last: 2026-03-24 18:22 by Codex (GPT-5.4)
+- Task: Dopracowanie flow hosta `prepare -> reveal-buffer -> timer -> verdict -> round-summary`, modalu przyznawania punktu i live raila z wynikiem w `games/charades`.
+- Did: Przebudowano ekrany hosta na wspolny jezyk wizualny, dodano `reveal-buffer`, reczny `STOP`, modal wyboru gracza do przyznania punktu po `Zgadnieto`, ekran `round-summary`, podglad hasla w `verdict` oraz testowy przycisk dodawania losowego gracza w setupie. Dopracowano stale wysokosci barow, copy etapow i boczny rail z wynikiem w `prepare`: pokazuje tylko osoby z min. 1 pkt, wysuwa sie po aktualizacji wyniku, animuje przetasowanie i chowa sie automatycznie lub recznie. `C:\Users\Mateo\Desktop\Party\node_modules\.bin\tsc.cmd --noEmit` dla `apps/hub` przechodzi.
+- Next: Dalszy visual polish `round-summary` i raila wyniku po review na zywo oraz ewentualny cleanup testowego przycisku `+ test` po zakonczeniu iteracji UI.
 - Blocker: Brak twardego blockera technicznego.
 <!-- handoff:end -->

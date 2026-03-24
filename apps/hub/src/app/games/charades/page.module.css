@@ -272,6 +272,12 @@
   justify-content: space-between;
 }
 
+.configSectionMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .configSectionTitle {
   font-weight: 600;
   color: var(--color-text-muted);
@@ -287,6 +293,31 @@
   background: rgba(255, 255, 255, 0.06);
   border-radius: 9999px;
   padding: 2px 8px;
+}
+
+.configTestAddBtn {
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.configTestAddBtn:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.18);
+  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.configTestAddBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .configHint {
@@ -473,6 +504,16 @@
 
   .configSectionCount {
     font-size: 12px;
+  }
+
+  .configSectionMeta {
+    gap: 6px;
+  }
+
+  .configTestAddBtn {
+    min-height: 24px;
+    padding: 0 8px;
+    font-size: 11px;
   }
 
   .configFooter {

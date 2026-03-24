@@ -3,8 +3,9 @@ import styles from './PlayBottomBar.module.css'
 type Phase =
   | 'round-order'
   | 'prepare'
-  | 'waiting-ready'
+  | 'reveal-buffer'
   | 'timer-running'
+  | 'round-summary'
   | 'verdict'
 
 type PlayBottomBarProps = {
@@ -13,8 +14,11 @@ type PlayBottomBarProps = {
   isRoundOrderRevealing: boolean
   roundOrderCountdown: number | null
   onStartRound: () => void
-  onSendWord: () => void
-  onGiveVerdict: (correct: boolean) => void
+  onContinueRoundSummary: () => void
+  onExitToMenu: () => void
+  onStopRound: () => void
+  onCorrectVerdict: () => void
+  onIncorrectVerdict: () => void
 }
 
 export function PlayBottomBar({
@@ -23,8 +27,11 @@ export function PlayBottomBar({
   isRoundOrderRevealing,
   roundOrderCountdown,
   onStartRound,
-  onSendWord,
-  onGiveVerdict,
+  onContinueRoundSummary,
+  onExitToMenu,
+  onStopRound,
+  onCorrectVerdict,
+  onIncorrectVerdict,
 }: PlayBottomBarProps) {
   return (
     <footer className={styles.bar}>
@@ -50,29 +57,42 @@ export function PlayBottomBar({
       )}
 
       {phase === 'prepare' && (
-        <button
-          className={styles.primaryButton}
-          disabled={!isDeviceConnected}
-          onClick={onSendWord}
-        >
-          Wyslij haslo na telefon
-        </button>
+        <p className={styles.infoText}>
+          {isDeviceConnected
+            ? 'Czekamy, az prezenter odkryje haslo na telefonie.'
+            : 'Polacz telefon prezentera, aby kontynuowac.'}
+        </p>
       )}
 
-      {phase === 'waiting-ready' && (
-        <p className={styles.infoText}>Czekamy, az prezenter kliknie "Gotowy" na telefonie.</p>
+      {phase === 'reveal-buffer' && (
+        <p className={styles.infoText}>Prezenter zapoznaje sie z haslem.</p>
       )}
 
       {phase === 'timer-running' && (
-        <p className={styles.infoText}>Tura trwa. Werdykt pojawi sie po zakonczeniu czasu.</p>
+        <div className={styles.timerActions}>
+          <button className={styles.stopButton} onClick={onStopRound}>
+            STOP
+          </button>
+        </div>
+      )}
+
+      {phase === 'round-summary' && (
+        <div className={styles.verdictActions}>
+          <button className={styles.stopButton} onClick={onExitToMenu}>
+            Powrot do menu
+          </button>
+          <button className={styles.primaryButton} onClick={onContinueRoundSummary}>
+            Nastepna runda
+          </button>
+        </div>
       )}
 
       {phase === 'verdict' && (
         <div className={styles.verdictActions}>
-          <button className={styles.successButton} onClick={() => onGiveVerdict(true)}>
+          <button className={styles.successButton} onClick={onCorrectVerdict}>
             Zgadnieto
           </button>
-          <button className={styles.dangerButton} onClick={() => onGiveVerdict(false)}>
+          <button className={styles.dangerButton} onClick={onIncorrectVerdict}>
             Nie zgadnieto
           </button>
         </div>

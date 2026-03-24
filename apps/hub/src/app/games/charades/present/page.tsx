@@ -16,7 +16,7 @@ export default function PresentPage() {
 function PresentScreen() {
   const params = useSearchParams()
   const roomId = params.get('room') ?? ''
-  const { state, confirmReady } = usePresenter(roomId)
+  const { state, revealWord } = usePresenter(roomId)
 
   if (!roomId) {
     return <div className={styles.error}>Brak kodu pokoju. Zeskanuj QR ponownie.</div>
@@ -27,18 +27,39 @@ function PresentScreen() {
       {state.phase === 'your-turn' && (
         <div className={styles.turnView}>
           <p className={styles.presenterLabel}>{state.presenterName}, Twoja tura!</p>
-          <div className={styles.word}>{state.word || '…'}</div>
-          <p className={styles.category}>{state.category}</p>
-          <button className={styles.readyBtn} onClick={confirmReady} disabled={!state.word}>
-            Gotowy
+          <div className={styles.hiddenWordCard}>
+            <p className={styles.hiddenWordLabel}>Hasło jest gotowe</p>
+            <div className={styles.hiddenWordMask}>••••••••</div>
+            <p className={styles.category}>{state.category}</p>
+          </div>
+          <button className={styles.readyBtn} onClick={revealWord} disabled={!state.word}>
+            Odkryj hasło
           </button>
+        </div>
+      )}
+
+      {state.phase === 'reveal-buffer' && (
+        <div className={styles.timerView}>
+          <div className={styles.word}>{state.word}</div>
+          <p className={styles.category}>{state.category}</p>
+          <p className={styles.revealHint}>Zapamiętaj hasło. Za chwilę zniknie.</p>
+          <div className={styles.timerBar}>
+            <div
+              className={styles.timerFill}
+              style={{ width: `${(state.revealRemaining / 10) * 100}%` }}
+            />
+          </div>
+          <span className={styles.timerCount}>{state.revealRemaining}s</span>
         </div>
       )}
 
       {state.phase === 'timer-running' && (
         <div className={styles.timerView}>
-          <div className={styles.word}>{state.word}</div>
-          <p className={styles.category}>{state.category}</p>
+          <div className={styles.hiddenWordCard}>
+            <p className={styles.hiddenWordLabel}>Hasło zostało ukryte</p>
+            <div className={styles.hiddenWordMask}>••••••••</div>
+          </div>
+          <p className={styles.revealHint}>Teraz pokazuj hasło bez patrzenia na telefon.</p>
           <div className={styles.timerBar}>
             <div
               className={styles.timerFill}

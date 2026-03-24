@@ -44,6 +44,36 @@
   letter-spacing: 0.1em;
 }
 
+.hiddenWordCard {
+  width: min(100%, 420px);
+  display: grid;
+  gap: 14px;
+  padding: 24px 20px;
+  border-radius: 24px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+}
+
+.hiddenWordLabel {
+  font-size: 14px;
+  color: rgba(240,240,240,0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.hiddenWordMask {
+  font-size: clamp(28px, 9vw, 52px);
+  font-weight: 900;
+  letter-spacing: 0.18em;
+}
+
+.revealHint {
+  font-size: 15px;
+  color: rgba(240,240,240,0.62);
+  text-align: center;
+  max-width: 26ch;
+}
+
 .readyBtn {
   margin-top: 16px;
   padding: 18px 48px;

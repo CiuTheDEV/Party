@@ -9,7 +9,7 @@ import {
   writePresenterSession,
 } from '../../utils/charades-storage'
 
-type PresenterPhase = 'your-turn' | 'timer-running' | 'timeout' | 'between' | 'ended'
+type PresenterPhase = 'your-turn' | 'reveal-buffer' | 'timer-running' | 'timeout' | 'between' | 'ended'
 
 type PresenterState = {
   phase: PresenterPhase
@@ -18,6 +18,7 @@ type PresenterState = {
   category: string
   presenterName: string
   timerRemaining: number
+  revealRemaining: number
   nextPresenterName: string
   nextPresenterAvatar: string
 }
@@ -38,6 +39,7 @@ export function usePresenter(roomId: string) {
     category: '',
     presenterName: '',
     timerRemaining: 0,
+    revealRemaining: 0,
     nextPresenterName: '',
     nextPresenterAvatar: '',
   })
@@ -100,7 +102,21 @@ export function usePresenter(roomId: string) {
           category: event.category,
           presenterName: event.presenterName,
           timerRemaining: event.timerSeconds,
+          revealRemaining: 0,
         }))
+        break
+      case 'REVEAL_BUFFER_START':
+      case 'REVEAL_BUFFER_TICK':
+        setState((s) => {
+          if (event.turnId !== s.currentTurnId) return s
+          return { ...s, phase: 'reveal-buffer', revealRemaining: event.remaining }
+        })
+        break
+      case 'REVEAL_BUFFER_END':
+        setState((s) => {
+          if (event.turnId !== s.currentTurnId) return s
+          return { ...s, phase: 'timer-running', revealRemaining: 0 }
+        })
         break
       case 'TIMER_TICK':
         setState((s) => {
@@ -109,7 +125,7 @@ export function usePresenter(roomId: string) {
         })
         break
       case 'TURN_END':
-        setState((s) => ({ ...s, phase: 'timeout', word: '' }))
+        setState((s) => ({ ...s, phase: 'timeout', word: '', revealRemaining: 0 }))
         break
       case 'BETWEEN_TURNS':
         setState((s) => ({
@@ -117,22 +133,23 @@ export function usePresenter(roomId: string) {
           phase: 'between',
           nextPresenterName: event.nextPresenterName,
           nextPresenterAvatar: event.nextPresenterAvatar,
+          word: '',
+          revealRemaining: 0,
         }))
         break
       case 'GAME_END':
-        setState((s) => ({ ...s, phase: 'ended', word: '' }))
+        setState((s) => ({ ...s, phase: 'ended', word: '', revealRemaining: 0 }))
         break
       case 'GAME_RESET':
-        setState((s) => ({ ...s, phase: 'your-turn', word: '' }))
+        setState((s) => ({ ...s, phase: 'your-turn', word: '', revealRemaining: 0 }))
         break
     }
   }
 
-  const confirmReady = useCallback(() => {
-    const event: PresenterEvent = { type: 'PRESENTER_READY', turnId: state.currentTurnId }
+  const revealWord = useCallback(() => {
+    const event: PresenterEvent = { type: 'WORD_REVEALED', turnId: state.currentTurnId }
     socket.send(JSON.stringify(event))
-    setState((s) => ({ ...s, phase: 'timer-running' }))
   }, [state.currentTurnId, socket])
 
-  return { state, confirmReady }
+  return { state, revealWord }
 }

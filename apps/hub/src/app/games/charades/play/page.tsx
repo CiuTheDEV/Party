@@ -44,7 +44,7 @@ function PlayScreen({ config }: { config: Config }) {
     return { word, category: cat }
   }, [nextWord, cats])
 
-  const { state, startRound, finishRoundOrder, sendWord, giveVerdict, isGameOver } = useGameState(
+  const { state, startRound, finishRoundOrder, finishRoundSummary, giveVerdict, stopRoundEarly, isGameOver } = useGameState(
     config.roomId,
     config.players.map((p) => ({ ...p, score: 0 })),
     config.settings,
@@ -70,16 +70,20 @@ function PlayScreen({ config }: { config: Config }) {
       <HostGameScreen
         currentOrderIdx={state.currentOrderIdx}
         currentRound={state.currentRound}
+        currentWord={state.currentWord}
         isDeviceConnected={state.isDeviceConnected}
         isRoundOrderRevealing={state.isRoundOrderRevealing}
         onFinishRoundOrder={finishRoundOrder}
+        onFinishRoundSummary={finishRoundSummary}
         onGiveVerdict={giveVerdict}
-        onSendWord={sendWord}
+        onExitToMenu={() => router.push('/games/charades')}
+        onStopRound={stopRoundEarly}
         onStartRound={startRound}
         order={state.order}
         phase={state.phase}
         players={state.players}
         presenter={presenter}
+        bufferRemaining={state.bufferRemaining}
         timerRemaining={state.timerRemaining}
         totalRounds={state.totalRounds}
       />
