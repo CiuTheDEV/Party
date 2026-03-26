@@ -1,0 +1,44 @@
+{
+  "files.encoding": "utf8",
+  "files.autoGuessEncoding": false,
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+  "editor.formatOnSave": false,
+  "editor.codeActionsOnSave": {},
+  "editor.renderWhitespace": "selection",
+  "editor.minimap.enabled": false,
+  "editor.unicodeHighlight.ambiguousCharacters": false,
+  "editor.unicodeHighlight.invisibleCharacters": false,
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "search.exclude": {
+    "**/.next": true,
+    "**/.turbo": true,
+    "**/dist": true,
+    "**/coverage": true
+  },
+  "files.watcherExclude": {
+    "**/.next/**": true,
+    "**/.turbo/**": true,
+    "**/dist/**": true,
+    "**/coverage/**": true
+  },
+  "markdownlint.config": {
+    "default": true,
+    "MD013": false,
+    "MD022": false,
+    "MD032": false,
+    "MD033": false,
+    "MD041": false,
+    "MD058": false,
+    "MD060": false
+  },
+  "[markdown]": {
+    "files.trimTrailingWhitespace": false,
+    "editor.wordWrap": "on"
+  },
+  "[powershell]": {
+    "files.encoding": "utf8"
+  }
+}

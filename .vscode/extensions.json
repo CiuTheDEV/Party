@@ -1,0 +1,15 @@
+{
+  "recommendations": [
+    "anthropic.claude-code",
+    "openai.chatgpt",
+    "editorconfig.editorconfig",
+    "eamodio.gitlens",
+    "usernamehw.errorlens",
+    "christian-kohler.path-intellisense",
+    "yzhang.markdown-all-in-one",
+    "ms-vscode.powershell"
+  ],
+  "unwantedRecommendations": [
+    "davidanson.vscode-markdownlint"
+  ]
+}

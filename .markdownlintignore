@@ -1,0 +1,10 @@
+AGENTS.md
+CLAUDE.md
+PROJECT_CONTEXT.md
+README.md
+
+.claude/**
+.codex/**
+docs/**
+memory/**
+rules/**

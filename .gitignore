@@ -6,6 +6,13 @@
 # Claude Code — never commit local settings with potential secrets
 .claude/settings.local.json
 
+# VS Code - keep shared workspace config, ignore personal machine files
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
 # Env files
 .env
 .env.*
@@ -26,6 +33,8 @@ output/
 .superpowers/
 docs/superpowers/
 *.tsbuildinfo
+*.log
+debug.log
 
 # Local backups
 *.backup-*/

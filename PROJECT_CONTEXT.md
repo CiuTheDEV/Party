@@ -75,9 +75,9 @@ project-party/                     # Monorepo (Turborepo)
 
 <!-- handoff:start -->
 ## Session Handoff
-- Last: 2026-03-24 18:22 by Codex (GPT-5.4)
-- Task: Dopracowanie flow hosta `prepare -> reveal-buffer -> timer -> verdict -> round-summary`, modalu przyznawania punktu i live raila z wynikiem w `games/charades`.
-- Did: Przebudowano ekrany hosta na wspolny jezyk wizualny, dodano `reveal-buffer`, reczny `STOP`, modal wyboru gracza do przyznania punktu po `Zgadnieto`, ekran `round-summary`, podglad hasla w `verdict` oraz testowy przycisk dodawania losowego gracza w setupie. Dopracowano stale wysokosci barow, copy etapow i boczny rail z wynikiem w `prepare`: pokazuje tylko osoby z min. 1 pkt, wysuwa sie po aktualizacji wyniku, animuje przetasowanie i chowa sie automatycznie lub recznie. `C:\Users\Mateo\Desktop\Party\node_modules\.bin\tsc.cmd --noEmit` dla `apps/hub` przechodzi.
-- Next: Dalszy visual polish `round-summary` i raila wyniku po review na zywo oraz ewentualny cleanup testowego przycisku `+ test` po zakonczeniu iteracji UI.
-- Blocker: Brak twardego blockera technicznego.
+- Last: 2026-03-26 16:48 by Codex (GPT-5.4)
+- Task: Uspojnienie zasad pracy Codex/Claude Code oraz uporzadkowanie lokalnego setupu VS Code pod ten repo.
+- Did: Ujednolicono `AGENTS.md` i `CLAUDE.md`, poprawiono skill metadata w `.codex` / `.claude`, dopieto `.vscode/settings.json`, `.vscode/extensions.json`, `.markdownlint.json`, `.markdownlintignore` i rozszerzono `.gitignore` o lokalne artefakty VS Code oraz logi. Dodatkowo rozdzielono problem warningow VS Code na dwie warstwy: repo markdownlint oraz osobne warningi z GitHub Copilot Chat.
+- Next: Po kolejnym otwarciu VS Code sprawdzic, czy workspace jest juz cichy; jesli nie, nastepny krok to cleanup konkretnych rozszerzen i ich cache, a nie dalsze zmiany w repo.
+- Blocker: Brak twardego blockera technicznego; otwarte sa tylko ewentualne dalsze poprawki ergonomii VS Code po review na zywo.
 <!-- handoff:end -->

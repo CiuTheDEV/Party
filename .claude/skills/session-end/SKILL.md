@@ -1,7 +1,6 @@
 ---
 name: session-end
 description: Session wrap-up - update handoff + commit + record experience
-version: 1.0.0
 allowed-tools:
   - Read
   - Write

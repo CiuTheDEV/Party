@@ -84,3 +84,15 @@
 **Fix:** Nie walczyć z tym — zacommitować zmiany wprowadzone przez Next.js.
 
 **Jak zapobiec:** Przy inicjalizacji nowego projektu Next.js — najpierw uruchom dev server, a dopiero potem commituj `tsconfig.json`. Unikniesz commita z "incorrect" konfiguracją.
+
+---
+
+### 2026-03-26 - VS Code moze pokazywac zolte warningi z kilku niezaleznych zrodel naraz
+
+**Symptom:** W Markdown caly plik "swieci na zolto" i panel `Problems` wyglada jakby winny byl jeden blad w repo.
+
+**Root cause:** W praktyce to byly dwa rozne zrodla halasu: `markdownlint` (styl markdownu i reguly typu MD022/MD058/MD060) oraz GitHub Copilot Chat, ktory potrafil osobno zglaszac `Unknown tool` / `Unknown model` ze swojego global storage. To nie jest jeden wspolny problem "VS Code zepsuty", tylko nakladajace sie diagnostyki rozszerzen.
+
+**Fix:** Rozdzielic problem na warstwy. Dla repo ustawic `.vscode/settings.json`, `.markdownlint.json` i `.markdownlintignore`, a dla Copilot Chat patrzec osobno na jego warningi i w razie potrzeby wylaczyc albo przeinstalowac rozszerzenie.
+
+**Jak zapobiec:** Gdy VS Code "swieci na zolto", najpierw ustal z jakiego rozszerzenia pochodzi warning. `markdownlint`, TypeScript, PowerShell i Copilot Chat potrafia generowac diagnostyki niezaleznie, wiec nie wolno zakladac jednego wspolnego root cause bez sprawdzenia zrodla.

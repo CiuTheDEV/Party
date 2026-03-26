@@ -19,6 +19,13 @@
 - Next: Phase 3 — moduł Kalambury (GameMenu, GameConfigModal, GameResults, GameScreen)
 - Experience recorded: yes
 
+### S7 (~16:48) [Project Party] VS Code workspace cleanup + agent rules sync
+
+- Ujednolicono `AGENTS.md` i `CLAUDE.md`, aby Codex i Claude Code pracowaly wedlug tych samych zasad. Dodatkowo dopieto lokalny setup VS Code: `.vscode/settings.json`, `.vscode/extensions.json`, `.markdownlint.json`, `.markdownlintignore` i poprawki w `.gitignore`.
+- Najwazniejsze odkrycie z tej sesji: zolte warningi w Markdown nie musza oznaczac problemu z samym plikiem. W tym repo glowny halas robily `markdownlint` oraz osobno GitHub Copilot Chat, wiec trzeba rozrozniac problem parsera markdown od problemu rozszerzen AI.
+- Next: sprawdzic po reloadzie VS Code, czy workspace dziala cicho i czy nowe ustawienia sa wystarczajace; jesli nie, kolejny krok to cleanup konkretnych rozszerzen, a nie zmian w repo.
+- Experience recorded: yes
+
 ### S2 (~dziś) [Project Party] Phase 3 — Kalambury MVP
 
 - Zaimplementowano pełny moduł Kalambury: content (zwierzęta/filmy/sport), Partykit server, hooks (useWordPool, useGameState, usePresenter), komponenty (PlayerForm, PlayerList, CategoryPicker, SettingsModal, QRPairing, DeviceListener, Podium), wszystkie 5 tras Next.js (GameMenu, SetupPage /config, GameScreen host /play, GameScreen prezenter /present, GameResults /results).

@@ -1,8 +1,6 @@
 ---
 name: experience-evolution
 description: Knowledge accumulation - learn from practice, avoid repeating mistakes
-version: 1.0.0
-mode: observe-only
 ---
 
 # Experience Evolution

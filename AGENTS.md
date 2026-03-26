@@ -1,6 +1,6 @@
-# Project Party — Codex Global Memory
+# Project Party — Agent Global Memory
 
-> Auto-loaded on startup: rules/ (behaviors.md, skill-triggers.md, memory-flush.md)
+> Auto-loaded: rules/ (behaviors.md, skill-triggers.md, memory-flush.md)
 > On-demand: docs/ (agents.md, content-safety.md, behaviors-extended.md, scaffolding-checkpoint.md, task-routing.md, behaviors-reference.md)
 > Hot data layer: memory/today.md + memory/active-tasks.json
 
@@ -14,6 +14,7 @@
 - **Philosophy**: Build simple, verify always, never over-engineer
 
 ### Platform Accounts
+
 | Platform | Account |
 |----------|---------|
 | Cloudflare | [account] |
@@ -33,7 +34,15 @@ Documentation must be readable by all agents — session handoff must be seamles
 | **Codex** | GPT-5.4-mini | Lightweight fallback tasks at token limit |
 | **Antigravity** | — | Alternative fallback |
 
+### Token & Session Rules
+
+- Claude Pro workflow: use Sonnet, not Opus
+- Split work into small sessions to avoid burning context
+- At token limit or handoff point, update project memory and hand off cleanly
+- Every agent starts from the same project memory and the same repo rules
+
 ### Starting a session (mandatory)
+
 1. Read `PROJECT_CONTEXT.md` — architecture, current phase, last handoff
 2. Read `memory/today.md` — what happened today, current task
 3. Read `memory/active-tasks.json` — in-flight tasks
@@ -114,6 +123,7 @@ project-party/                     # Monorepo (Turborepo)
 | `[next-game]` | 💡 TBD | To be defined with product owner |
 
 ### Module Contract (game-sdk)
+
 Every module must export:
 - `GameConfig` — name, description, color, icon, min/max players, modes list, categories list
 - `GameMenu` — mode selection screen (uses shared `game-template`)
@@ -127,11 +137,13 @@ Every module must export:
 ## Design System
 
 ### Theme
+
 - Each game defines its own theme (dark/light) in `GameConfig` via CSS custom properties
 - Never hardcode colors in components — always use variables
 - Shared layout, swappable colors → `packages/ui/game-template/`
 
 ### Responsiveness — from day 0, no exceptions
+
 - **Desktop** (≥768px): left sidebar (200px) + main content
 - **Mobile** (<768px): sidebar hidden → bottom tab bar
 - Every new component must work on both breakpoints before merging
@@ -159,12 +171,14 @@ Every module must export:
 ## Code Rules — no exceptions
 
 ### File structure
+
 - No CSS/TS/TSX file exceeds **300 lines** — if it grows, split into modules
 - Component styles live next to the component (`Button.module.css` beside `Button.tsx`)
 - One component = one file. Never pack 5 components into one file because "they're small"
 - `globals.css` only for: CSS reset, custom properties, base typography — nothing else
 
 ### Quality
+
 - No AI slop — comments only when explaining *why*, never *what*
 - No commented-out code blocks in the repo
 - No `TODO` without an open task in `memory/active-tasks.json`
@@ -222,9 +236,12 @@ Every module must export:
 | Allowed | Never touch |
 |---------|-------------|
 | `apps/` — all code files | `rules/` |
-| `packages/` — all code files | `docs/` |
-| `content/` — word lists | `memory/` (except handoff block) |
-| `PROJECT_CONTEXT.md` handoff block | `CLAUDE.md` |
+| `packages/` — all code files | Secrets / credentials |
+| `content/` — word lists | Production data without explicit request |
+| `docs/` — when task explicitly concerns docs, process, or agent rules |  |
+| `memory/` — read freely, update when the task or session workflow explicitly requires it |  |
+| `PROJECT_CONTEXT.md` handoff block |  |
+| `AGENTS.md` and `CLAUDE.md` — only when explicitly synchronizing agent rules |  |
 
 ---
 
@@ -248,12 +265,19 @@ Every module must export:
 
 ## Completing a session
 
-Update the handoff block in `PROJECT_CONTEXT.md`:
+When wrapping or handing off a session:
+1. Update the handoff block in `PROJECT_CONTEXT.md`
+2. Update `memory/today.md` when the session produced meaningful progress
+3. Update `memory/active-tasks.json` when a multi-session task changed state
+4. Update `memory/MEMORY.md` or `memory/patterns.md` when a reusable lesson was discovered
+5. Commit only when the user asked for it or the task explicitly includes a commit
 
-```
+Handoff block format:
+
+```md
 <!-- handoff:start -->
 ## Session Handoff
-- Last: [time] by Codex (GPT-5.4)
+- Last: [time] by [agent]
 - Task: [description]
 - Did: [what was done]
 - Next: [next steps]
@@ -261,12 +285,6 @@ Update the handoff block in `PROJECT_CONTEXT.md`:
 <!-- handoff:end -->
 ```
 
-Then commit:
-```bash
-git add [specific files]  # Never git add .
-git commit -m "[type]: [description]"
-```
-
 ---
 
-*Last updated: 2026-03-22*
+*Last updated: 2026-03-26*
