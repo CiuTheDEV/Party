@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import usePartySocket from 'partysocket/react'
 import type { HostEvent, PresenterEvent } from '../../types/charades-events'
+import type { CategoryDifficulty } from '../../components/charades/CategoryPicker/CategoryPicker'
 import { getPartykitHost } from '../../utils/charades-runtime'
 
 export type Player = {
@@ -35,6 +36,7 @@ type GameState = {
   bufferRemaining: number
   currentWord: string
   currentCategory: string
+  currentDifficulty: CategoryDifficulty | ''
   isDeviceConnected: boolean
 }
 
@@ -44,7 +46,7 @@ export function useGameState(
   roomId: string,
   players: Player[],
   settings: GameSettings,
-  getNextWord: () => { word: string; category: string },
+  getNextWord: () => { word: string; category: string; difficulty: CategoryDifficulty },
 ) {
   const [state, setState] = useState<GameState>({
     phase: 'round-order',
@@ -58,6 +60,7 @@ export function useGameState(
     bufferRemaining: REVEAL_BUFFER_SECONDS,
     currentWord: '',
     currentCategory: '',
+    currentDifficulty: '',
     isDeviceConnected: false,
   })
 
@@ -157,6 +160,7 @@ export function useGameState(
       currentOrderIdx: 0,
       currentWord: '',
       currentCategory: '',
+      currentDifficulty: '',
       bufferRemaining: REVEAL_BUFFER_SECONDS,
       timerRemaining: settings.timerSeconds,
     }))
@@ -170,6 +174,7 @@ export function useGameState(
       currentOrderIdx: 0,
       currentWord: '',
       currentCategory: '',
+      currentDifficulty: '',
       bufferRemaining: REVEAL_BUFFER_SECONDS,
       timerRemaining: settings.timerSeconds,
     }))
@@ -187,8 +192,15 @@ export function useGameState(
       return
     }
 
-    const { word, category } = getNextWord()
+    const { word, category, difficulty } = getNextWord()
     const turnId = crypto.randomUUID()
+    const nextPresenter = getNextPresenter(state.order, state.currentOrderIdx, state.players)
+    const isLastInRound = state.currentOrderIdx === state.order.length - 1
+    const nextStep = isLastInRound
+      ? state.currentRound === state.totalRounds
+        ? 'game-end'
+        : 'round-summary'
+      : 'next-presenter'
     currentTurnIdRef.current = turnId
 
     send({
@@ -196,14 +208,19 @@ export function useGameState(
       turnId,
       word,
       category,
+      difficulty,
       presenterName: presenter.name,
       timerSeconds: settings.timerSeconds,
+      nextPresenterName: nextPresenter.name,
+      nextPresenterAvatar: nextPresenter.avatar,
+      nextStep,
     })
 
     setState((current) => ({
       ...current,
       currentWord: word,
       currentCategory: category,
+      currentDifficulty: difficulty,
       timerRemaining: settings.timerSeconds,
       bufferRemaining: REVEAL_BUFFER_SECONDS,
     }))
@@ -261,6 +278,7 @@ export function useGameState(
           currentOrderIdx: current.currentOrderIdx + 1,
           currentWord: '',
           currentCategory: '',
+          currentDifficulty: '',
           bufferRemaining: REVEAL_BUFFER_SECONDS,
           timerRemaining: settings.timerSeconds,
         }
@@ -275,6 +293,7 @@ export function useGameState(
           currentOrderIdx: 0,
           currentWord: '',
           currentCategory: '',
+          currentDifficulty: '',
           bufferRemaining: REVEAL_BUFFER_SECONDS,
           timerRemaining: settings.timerSeconds,
         }
@@ -288,6 +307,7 @@ export function useGameState(
         currentRound: current.currentRound + 1,
         currentWord: '',
         currentCategory: '',
+        currentDifficulty: '',
         bufferRemaining: 0,
       }
     })
@@ -305,6 +325,7 @@ export function useGameState(
       currentRound: current.currentRound + 1,
       currentWord: '',
       currentCategory: '',
+      currentDifficulty: '',
       bufferRemaining: REVEAL_BUFFER_SECONDS,
       timerRemaining: settings.timerSeconds,
     }))
@@ -328,4 +349,14 @@ function shuffle(values: number[]) {
   }
 
   return shuffled
+}
+
+function getNextPresenter(order: number[], currentOrderIdx: number, players: Player[]) {
+  const nextPresenterIdx = order[currentOrderIdx + 1]
+  const nextPresenter = nextPresenterIdx === undefined ? undefined : players[nextPresenterIdx]
+
+  return {
+    name: nextPresenter?.name ?? '',
+    avatar: nextPresenter?.avatar ?? '',
+  }
 }

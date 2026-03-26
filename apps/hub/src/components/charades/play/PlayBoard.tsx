@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { gsap } from 'gsap'
 import styles from './PlayBoard.module.css'
 
@@ -37,10 +37,19 @@ type CardPoint = {
   y: number
 }
 
+type RankedPlayer = PlayerSummary & {
+  rank: number
+}
+
 const COLLECT_DURATION = 0.22
 const DEAL_DURATION = 0.62
 const BETWEEN_COLLECT_MS = 30
 const BETWEEN_DEAL_MS = 110
+const SCORE_RAIL_EXPAND_MS = 420
+const SCORE_RAIL_POST_EXPAND_WAIT_MS = 500
+const SCORE_RAIL_UPDATE_DELAY_MS = SCORE_RAIL_EXPAND_MS + SCORE_RAIL_POST_EXPAND_WAIT_MS
+const SCORE_RAIL_REORDER_DELAY_MS = 24
+const SCORE_RAIL_POST_REORDER_CLOSE_MS = 5000
 
 export function PlayBoard({
   phase,
@@ -68,15 +77,19 @@ export function PlayBoard({
   const [positionsReady, setPositionsReady] = useState(false)
   const [isVerdictWordVisible, setIsVerdictWordVisible] = useState(false)
   const [isScoreRailExpanded, setIsScoreRailExpanded] = useState(false)
+  const [displayedScoredPlayers, setDisplayedScoredPlayers] = useState<RankedPlayer[]>([])
   const timelineRef = useRef<gsap.core.Timeline | null>(null)
   const scoreRailRef = useRef<HTMLDivElement | null>(null)
   const scoreItemRefs = useRef<Record<string, HTMLDivElement | null>>({})
   const prevScorePositionsRef = useRef<Record<string, DOMRect>>({})
   const prevScoreRailVisibleRef = useRef(false)
   const scoreRailCollapseTimerRef = useRef<number | null>(null)
+  const scoreRailCommitTimerRef = useRef<number | null>(null)
   const scoreRailReorderTimerRef = useRef<number | null>(null)
   const prevScoreSignatureRef = useRef('')
-  const scoreAnimationPendingRef = useRef(false)
+  const prevPhaseRef = useRef<Phase>(phase)
+  const pendingScorePlayersRef = useRef<RankedPlayer[]>([])
+  const animateScoreRailOnNextDisplayRef = useRef(false)
   const revealAreaRef = useRef<HTMLDivElement | null>(null)
   const centerAnchorRef = useRef<HTMLDivElement | null>(null)
   const cornerAnchorRef = useRef<HTMLDivElement | null>(null)
@@ -84,20 +97,27 @@ export function PlayBoard({
   const flyCardInnerRef = useRef<HTMLDivElement | null>(null)
   const slotRefs = useRef<(HTMLDivElement | null)[]>([])
   const settledPlayers = order.slice(0, settledCount)
-  const rankedPlayers = [...players]
-    .sort((a, b) => (b.score ?? 0) - (a.score ?? 0) || a.name.localeCompare(b.name))
-    .map((player, index, list) => {
-      const prev = list[index - 1]
-      const sameAsPrev = prev && (prev.score ?? 0) === (player.score ?? 0)
-      const rank = sameAsPrev ? ((list[index - 1] as PlayerSummary & { rank?: number }).rank ?? index) : index + 1
-      return { ...player, rank }
-    })
+  const rankedPlayers = useMemo<RankedPlayer[]>(
+    () =>
+      [...players]
+        .sort((a, b) => (b.score ?? 0) - (a.score ?? 0) || a.name.localeCompare(b.name))
+        .map((player, index, list) => {
+          const prev = list[index - 1]
+          const sameAsPrev = prev && (prev.score ?? 0) === (player.score ?? 0)
+          const rank = sameAsPrev ? ((list[index - 1] as PlayerSummary & { rank?: number }).rank ?? index) : index + 1
+          return { ...player, rank }
+        }),
+    [players]
+  )
   const topScore = rankedPlayers[0]?.score ?? 0
   const leaders = rankedPlayers.filter((player) => (player.score ?? 0) === topScore).map((player) => player.name)
-  const scoredPlayers = rankedPlayers.filter((player) => (player.score ?? 0) > 0)
+  const scoredPlayers = useMemo(() => rankedPlayers.filter((player) => (player.score ?? 0) > 0), [rankedPlayers])
   const hasAnyScore = scoredPlayers.length > 0
-  const showPrepareScoreRail = phase === 'prepare' && hasAnyScore
+  const showPrepareScoreRail = phase === 'prepare' && displayedScoredPlayers.length > 0
   const scoreSignature = scoredPlayers.map((player) => `${getScoreKey(player)}:${player.score ?? 0}`).join('|')
+  const displayedScoreSignature = displayedScoredPlayers
+    .map((player) => `${getScoreKey(player)}:${player.score ?? 0}`)
+    .join('|')
 
   useEffect(() => {
     if (phase !== 'round-order') {
@@ -199,6 +219,9 @@ export function PlayBoard({
       if (scoreRailCollapseTimerRef.current !== null) {
         window.clearTimeout(scoreRailCollapseTimerRef.current)
       }
+      if (scoreRailCommitTimerRef.current !== null) {
+        window.clearTimeout(scoreRailCommitTimerRef.current)
+      }
       if (scoreRailReorderTimerRef.current !== null) {
         window.clearTimeout(scoreRailReorderTimerRef.current)
       }
@@ -206,38 +229,65 @@ export function PlayBoard({
   }, [])
 
   useEffect(() => {
-    if (!showPrepareScoreRail) {
+    pendingScorePlayersRef.current = scoredPlayers
+  }, [scoredPlayers])
+
+  useEffect(() => {
+    const previousPhase = prevPhaseRef.current
+    const enteringPrepare = previousPhase !== 'prepare' && phase === 'prepare'
+    const leavingPrepare = previousPhase === 'prepare' && phase !== 'prepare'
+
+    if (leavingPrepare) {
       if (scoreRailCollapseTimerRef.current !== null) {
         window.clearTimeout(scoreRailCollapseTimerRef.current)
+      }
+      if (scoreRailCommitTimerRef.current !== null) {
+        window.clearTimeout(scoreRailCommitTimerRef.current)
       }
       if (scoreRailReorderTimerRef.current !== null) {
         window.clearTimeout(scoreRailReorderTimerRef.current)
       }
       setIsScoreRailExpanded(false)
-      prevScoreSignatureRef.current = ''
-      return
     }
 
-    const isNewScoreState = prevScoreSignatureRef.current !== scoreSignature
-    if (isNewScoreState) {
-      scoreAnimationPendingRef.current = true
-      setIsScoreRailExpanded(true)
+    if (phase === 'prepare' && hasAnyScore && displayedScoredPlayers.length === 0) {
+      setDisplayedScoredPlayers(scoredPlayers)
+      prevScoreSignatureRef.current = scoreSignature
+    }
 
-      if (scoreRailCollapseTimerRef.current !== null) {
-        window.clearTimeout(scoreRailCollapseTimerRef.current)
+    if (enteringPrepare && hasAnyScore) {
+      const pendingPlayers = pendingScorePlayersRef.current
+      const pendingSignature = pendingPlayers.map((player) => `${getScoreKey(player)}:${player.score ?? 0}`).join('|')
+
+      if (displayedScoreSignature && displayedScoreSignature !== pendingSignature) {
+        animateScoreRailOnNextDisplayRef.current = true
+        setIsScoreRailExpanded(true)
+
+        if (scoreRailCollapseTimerRef.current !== null) {
+          window.clearTimeout(scoreRailCollapseTimerRef.current)
+        }
+      if (scoreRailCommitTimerRef.current !== null) {
+        window.clearTimeout(scoreRailCommitTimerRef.current)
       }
+        if (scoreRailReorderTimerRef.current !== null) {
+          window.clearTimeout(scoreRailReorderTimerRef.current)
+        }
 
-      scoreRailCollapseTimerRef.current = window.setTimeout(() => {
-        setIsScoreRailExpanded(false)
-      }, 3900)
+        scoreRailCommitTimerRef.current = window.setTimeout(() => {
+          setDisplayedScoredPlayers(pendingPlayers)
+        }, SCORE_RAIL_UPDATE_DELAY_MS)
+      } else if (!displayedScoreSignature) {
+        setDisplayedScoredPlayers(pendingPlayers)
+        prevScoreSignatureRef.current = pendingSignature
+      }
     }
 
-    prevScoreSignatureRef.current = scoreSignature
-  }, [showPrepareScoreRail, scoreSignature])
+    prevPhaseRef.current = phase
+  }, [displayedScoreSignature, displayedScoredPlayers.length, hasAnyScore, phase, scoreSignature, scoredPlayers])
 
   useLayoutEffect(() => {
     const visible = showPrepareScoreRail
-    const isNewScoreState = scoreAnimationPendingRef.current
+    const isNewScoreState = animateScoreRailOnNextDisplayRef.current && prevScoreSignatureRef.current !== displayedScoreSignature
 
     if (!visible) {
       prevScorePositionsRef.current = {}
@@ -248,7 +298,7 @@ export function PlayBoard({
     const previousPositions = prevScorePositionsRef.current
     const currentPositions: Record<string, DOMRect> = {}
 
-    scoredPlayers.forEach((player) => {
+    displayedScoredPlayers.forEach((player) => {
       const key = getScoreKey(player)
       const element = scoreItemRefs.current[key]
       if (!element) {
@@ -261,7 +311,7 @@ export function PlayBoard({
       const prevRect = previousPositions[key]
       if (!prevRect) {
         if (isNewScoreState) {
-          gsap.set(element, { opacity: 0, x: 18 })
+          gsap.set(element, { opacity: 0, x: 12, scale: 0.985, force3D: true })
         } else {
           gsap.set(element, { clearProps: 'transform,opacity' })
         }
@@ -279,17 +329,22 @@ export function PlayBoard({
             movedUp
               ? {
                   y: deltaY,
-                  scale: 1.02,
-                  zIndex: 6,
-                  boxShadow: '0 18px 28px rgba(0, 0, 0, 0.24)',
+                  x: -6,
+                  scale: 1.035,
+                  zIndex: 8,
+                  boxShadow: '0 20px 34px rgba(0, 0, 0, 0.26)',
+                  force3D: true,
                 }
               : {
                   y: deltaY,
+                  scale: 0.985,
+                  opacity: 0.94,
                   zIndex: 2,
+                  force3D: true,
                 }
           )
         } else {
-          gsap.set(element, { clearProps: 'transform,zIndex,boxShadow' })
+          gsap.set(element, { clearProps: 'transform,zIndex,boxShadow,opacity' })
         }
       }
     })
@@ -300,7 +355,9 @@ export function PlayBoard({
 
     if (isNewScoreState) {
       scoreRailReorderTimerRef.current = window.setTimeout(() => {
-        scoredPlayers.forEach((player) => {
+        let longestDuration = 0
+
+        displayedScoredPlayers.forEach((player) => {
           const key = getScoreKey(player)
           const element = scoreItemRefs.current[key]
           if (!element) {
@@ -312,7 +369,8 @@ export function PlayBoard({
             gsap.to(element, {
               opacity: 1,
               x: 0,
-              duration: 0.28,
+              scale: 1,
+              duration: 0.34,
               ease: 'power2.out',
               clearProps: 'transform,opacity',
             })
@@ -322,32 +380,47 @@ export function PlayBoard({
           const nextRect = currentPositions[key]
           const deltaY = prevRect.top - nextRect.top
           const movedUp = deltaY > 0
+          const duration = movedUp ? 0.64 : 0.52
+          longestDuration = Math.max(longestDuration, duration)
 
           gsap.to(element, movedUp
             ? {
                 y: 0,
+                x: 0,
                 scale: 1,
+                opacity: 1,
                 zIndex: 0,
                 boxShadow: '0 0 0 rgba(0, 0, 0, 0)',
-                duration: 0.52,
-                ease: 'power3.out',
-                clearProps: 'transform,zIndex,boxShadow',
+                duration,
+                ease: 'power2.inOut',
+                clearProps: 'transform,zIndex,boxShadow,opacity',
               }
             : {
                 y: 0,
+                scale: 1,
+                opacity: 1,
                 zIndex: 0,
-                duration: 0.42,
+                duration,
                 ease: 'power2.out',
-                clearProps: 'transform,zIndex',
+                clearProps: 'transform,zIndex,opacity',
               })
         })
-      }, 500)
-      scoreAnimationPendingRef.current = false
+
+        if (scoreRailCollapseTimerRef.current !== null) {
+          window.clearTimeout(scoreRailCollapseTimerRef.current)
+        }
+
+        scoreRailCollapseTimerRef.current = window.setTimeout(() => {
+          setIsScoreRailExpanded(false)
+        }, Math.round(longestDuration * 1000) + SCORE_RAIL_POST_REORDER_CLOSE_MS)
+      }, SCORE_RAIL_REORDER_DELAY_MS)
     }
 
     prevScorePositionsRef.current = currentPositions
     prevScoreRailVisibleRef.current = true
-  }, [showPrepareScoreRail, scoredPlayers, scoreSignature])
+    prevScoreSignatureRef.current = displayedScoreSignature
+    animateScoreRailOnNextDisplayRef.current = false
+  }, [displayedScoreSignature, displayedScoredPlayers, showPrepareScoreRail])
 
   useEffect(() => {
     if (
@@ -772,7 +845,7 @@ export function PlayBoard({
               <span className={styles.scoreRailLabel}>Wynik</span>
             </div>
             <div className={styles.scoreRailList}>
-              {scoredPlayers.map((player) => {
+              {displayedScoredPlayers.map((player) => {
                 const key = getScoreKey(player)
                 return (
                   <div
@@ -781,7 +854,7 @@ export function PlayBoard({
                       scoreItemRefs.current[key] = element
                     }}
                     className={styles.scoreRailItem}
-                    data-rank={scoredPlayers[0]?.score === (player.score ?? 0) ? 'leader' : 'chasing'}
+                    data-rank={displayedScoredPlayers[0]?.score === (player.score ?? 0) ? 'leader' : 'chasing'}
                   >
                     <span className={styles.scoreRailAvatar}>{player.avatar}</span>
                     <span className={styles.scoreRailName} data-gender={player.gender}>

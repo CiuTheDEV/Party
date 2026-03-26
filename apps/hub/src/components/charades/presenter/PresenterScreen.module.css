@@ -1,0 +1,205 @@
+.screen {
+  min-height: 100svh;
+  padding: clamp(10px, 2.2vw, 16px);
+  background:
+    radial-gradient(circle at top, rgba(251, 191, 36, 0.18), transparent 30%),
+    linear-gradient(180deg, #0b1016 0%, #070b11 48%, #040608 100%);
+  color: #f9fafb;
+}
+
+.frame {
+  width: min(100%, 760px);
+  min-height: calc(100svh - clamp(20px, 4.4vw, 32px));
+  margin: 0 auto;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: clamp(10px, 1.8vw, 14px);
+}
+
+.topBar,
+.messageCard {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015)),
+    rgba(9, 14, 19, 0.88);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(14px);
+}
+
+.topBar,
+.messageCard {
+  padding: clamp(12px, 2vw, 16px);
+}
+
+.topBar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+}
+
+.presenterBlock,
+.phaseBlock {
+  display: grid;
+  gap: 4px;
+}
+
+.phaseBlock {
+  justify-items: end;
+  text-align: right;
+}
+
+.phaseCenterValue {
+  justify-self: center;
+  font-size: clamp(1.55rem, 4.8vw, 2.2rem);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
+  color: #f8fafc;
+}
+
+.infoLabel {
+  margin: 0;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(248, 250, 252, 0.56);
+}
+
+.presenterName {
+  font-size: clamp(1.15rem, 3vw, 1.5rem);
+  font-weight: 800;
+  line-height: 1.05;
+}
+
+.phasePill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: rgba(56, 189, 248, 0.14);
+  color: #bae6fd;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.phaseSummary {
+  margin: 0;
+  color: rgba(248, 250, 252, 0.74);
+  font-size: clamp(0.88rem, 1.8vw, 0.95rem);
+  line-height: 1.35;
+}
+
+.stage {
+  min-height: 0;
+  display: grid;
+}
+
+.messageCard {
+  align-self: stretch;
+  display: grid;
+  place-content: center;
+  min-height: 100%;
+  gap: clamp(8px, 1.6vw, 12px);
+  text-align: center;
+}
+
+.messageAccent {
+  font-size: clamp(1rem, 3vw, 1.2rem);
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fcd34d;
+}
+
+.messageTitle {
+  margin: 0;
+  font-size: clamp(1.65rem, 5vw, 2.35rem);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.messageBody {
+  margin: 0;
+  color: rgba(248, 250, 252, 0.72);
+  font-size: clamp(0.94rem, 2vw, 1rem);
+  line-height: 1.45;
+}
+
+.messageNextPresenter {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+}
+
+.messageNextLabel {
+  margin: 0;
+  color: rgba(248, 250, 252, 0.58);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.messageNextRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.messageNextAvatar {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  line-height: 1;
+}
+
+.messageNextName {
+  font-size: clamp(1.05rem, 2.6vw, 1.22rem);
+  font-weight: 800;
+  line-height: 1.1;
+  color: rgba(248, 250, 252, 0.92);
+}
+
+@media (orientation: landscape) and (max-width: 900px) {
+  .frame {
+    min-height: calc(100svh - 20px);
+    gap: 8px;
+  }
+}
+
+@media (max-height: 760px) {
+  .screen {
+    padding-block: 8px;
+  }
+
+  .frame {
+    min-height: calc(100svh - 16px);
+    gap: 8px;
+  }
+
+  .topBar,
+  .messageCard {
+    border-radius: 20px;
+    padding: 10px 12px;
+  }
+
+  .presenterName {
+    font-size: clamp(1.02rem, 2.8vw, 1.25rem);
+  }
+
+  .phaseCenterValue {
+    font-size: clamp(1.3rem, 4vw, 1.7rem);
+  }
+
+  .phasePill {
+    padding: 6px 10px;
+  }
+
+  .messageTitle {
+    font-size: clamp(1.35rem, 4vw, 1.9rem);
+  }
+}

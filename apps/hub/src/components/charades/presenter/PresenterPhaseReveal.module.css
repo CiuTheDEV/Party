@@ -1,0 +1,184 @@
+.revealLayout {
+  width: 100%;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: clamp(12px, 2vw, 16px);
+  min-height: 0;
+}
+
+.wordHeroCard,
+.revealMetaCard {
+  width: 100%;
+  display: grid;
+  gap: clamp(10px, 1.8vw, 14px);
+  border-radius: 24px;
+  padding: clamp(16px, 2.4vw, 20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.22);
+}
+
+.wordHeroCard {
+  min-height: 0;
+  grid-template-rows: auto minmax(0, 1fr);
+  padding-block: clamp(18px, 4vw, 28px);
+  background:
+    radial-gradient(circle at top, rgba(56, 189, 248, 0.18), transparent 54%),
+    linear-gradient(180deg, rgba(15, 21, 27, 0.98), rgba(10, 15, 19, 0.92));
+}
+
+.revealMetaCard {
+  min-height: 0;
+  border: none;
+  place-items: center;
+  align-content: center;
+  text-align: center;
+  cursor: default;
+  background:
+    linear-gradient(180deg, #f97316 0%, #ef4444 100%);
+  box-shadow: 0 24px 44px rgba(239, 68, 68, 0.28);
+}
+
+.metaBlock {
+  display: grid;
+  gap: 4px;
+  text-align: left;
+}
+
+.wordHeroTop {
+  width: 100%;
+  display: flex;
+  gap: clamp(10px, 1.8vw, 12px);
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.badgeRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.categoryPill {
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: rgba(251, 191, 36, 0.14);
+  color: #fde68a;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.difficultyPill {
+  padding: 7px 11px;
+  border-radius: 999px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.difficultyPill[data-difficulty='easy'] {
+  background: rgba(74, 222, 128, 0.14);
+  color: #bbf7d0;
+}
+
+.difficultyPill[data-difficulty='hard'] {
+  background: rgba(248, 113, 113, 0.14);
+  color: #fecaca;
+}
+
+.wordHeroLabel,
+.wordHeroSubtle {
+  margin: 0;
+}
+
+.wordHeroLabel {
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(248, 250, 252, 0.54);
+}
+
+.wordHero {
+  min-height: 0;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: clamp(10px, 1.8vw, 14px);
+  text-align: center;
+}
+
+.word {
+  font-size: clamp(2.4rem, 11vw, 5.2rem);
+  font-weight: 900;
+  line-height: 0.92;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  color: #f8fafc;
+}
+
+.changeButtonLabel {
+  width: 100%;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  padding: 14px 18px;
+  color: #fff7ed;
+  font-size: clamp(1.2rem, 2.6vw, 1.4rem);
+  font-weight: 800;
+  line-height: 1.1;
+  text-align: center;
+}
+
+@media (max-width: 767px) {
+  .wordHeroTop {
+    text-align: left;
+  }
+
+  .badgeRow {
+    justify-content: flex-start;
+  }
+}
+
+@media (orientation: landscape) and (min-width: 820px) {
+  .revealLayout {
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 0.48fr);
+    grid-template-rows: minmax(0, 1fr);
+    align-items: stretch;
+  }
+}
+
+@media (max-height: 760px) {
+  .wordHeroCard,
+  .revealMetaCard {
+    border-radius: 20px;
+    padding: 14px 16px;
+  }
+
+  .wordHeroCard {
+    padding-block: 16px;
+  }
+
+  .word {
+    font-size: clamp(2rem, 8vw, 4rem);
+  }
+
+  .changeButtonLabel {
+    font-size: clamp(1.08rem, 2.4vw, 1.24rem);
+  }
+}
+
+@media (max-height: 760px) and (orientation: landscape) and (min-width: 820px) {
+  .wordHeroCard,
+  .revealMetaCard {
+    gap: 10px;
+  }
+
+  .revealLayout {
+    gap: 10px;
+  }
+}

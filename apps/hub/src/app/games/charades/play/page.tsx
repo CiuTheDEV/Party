@@ -39,9 +39,9 @@ function PlayScreen({ config }: { config: Config }) {
   const { nextWord } = useWordPool(cats, config.selectedCategories)
 
   const getNextWord = useCallback(() => {
-    const word = nextWord()
-    const cat = cats.find((c) => c.wordsEasy.includes(word) || c.wordsHard.includes(word))?.name ?? ''
-    return { word, category: cat }
+    const entry = nextWord()
+    const cat = cats.find((c) => c.wordsEasy.includes(entry.word) || c.wordsHard.includes(entry.word))?.name ?? ''
+    return { word: entry.word, category: cat, difficulty: entry.difficulty }
   }, [nextWord, cats])
 
   const { state, startRound, finishRoundOrder, finishRoundSummary, giveVerdict, stopRoundEarly, isGameOver } = useGameState(

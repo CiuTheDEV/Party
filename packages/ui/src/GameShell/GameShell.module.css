@@ -1,19 +1,25 @@
 .root {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .body {
   display: flex;
   flex: 1;
+  min-height: 0;
   margin-top: var(--topbar-height);
 }
 
 .main {
   flex: 1;
   min-width: 0;
+  min-height: 0;
   overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   position: relative;
 }
 

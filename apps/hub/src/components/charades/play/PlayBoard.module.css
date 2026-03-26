@@ -207,6 +207,9 @@
     linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.015)),
     rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.06);
+  transform-origin: center left;
+  will-change: transform, opacity, box-shadow;
+  backface-visibility: hidden;
 }
 
 .scoreRailItem[data-rank='leader'] {

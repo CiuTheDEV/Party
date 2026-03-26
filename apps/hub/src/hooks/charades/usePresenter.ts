@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useMemo } from 'react'
 import usePartySocket from 'partysocket/react'
-import type { HostEvent, PresenterEvent } from '../../types/charades-events'
+import type { PresenterViewState } from '../../components/charades/presenter/types'
+import type { HostEvent, PresenterEvent, RoomState, RoomStateMessage } from '../../types/charades-events'
 import { getPartykitHost } from '../../utils/charades-runtime'
 import {
   clearPresenterSession,
@@ -9,18 +10,21 @@ import {
   writePresenterSession,
 } from '../../utils/charades-storage'
 
-type PresenterPhase = 'your-turn' | 'reveal-buffer' | 'timer-running' | 'timeout' | 'between' | 'ended'
-
-type PresenterState = {
-  phase: PresenterPhase
-  currentTurnId: string
-  word: string
-  category: string
-  presenterName: string
-  timerRemaining: number
-  revealRemaining: number
-  nextPresenterName: string
-  nextPresenterAvatar: string
+const INITIAL_PRESENTER_STATE: PresenterViewState = {
+  phase: 'waiting',
+  currentTurnId: '',
+  word: '',
+  category: '',
+  difficulty: '',
+  presenterName: '',
+  timerRemaining: 0,
+  timerDuration: 0,
+  revealRemaining: 0,
+  revealDuration: 0,
+  nextPresenterName: '',
+  nextPresenterAvatar: '',
+  nextStep: 'next-presenter',
+  turnEndReason: 'none',
 }
 
 export function usePresenter(roomId: string) {
@@ -32,17 +36,7 @@ export function usePresenter(roomId: string) {
     return Math.random().toString(36).slice(2)
   }, [])
 
-  const [state, setState] = useState<PresenterState>({
-    phase: 'your-turn',
-    currentTurnId: '',
-    word: '',
-    category: '',
-    presenterName: '',
-    timerRemaining: 0,
-    revealRemaining: 0,
-    nextPresenterName: '',
-    nextPresenterAvatar: '',
-  })
+  const [state, setState] = useState<PresenterViewState>(INITIAL_PRESENTER_STATE)
 
   const socket = usePartySocket({
     host: getPartykitHost(),
@@ -53,8 +47,11 @@ export function usePresenter(roomId: string) {
       socket.send(JSON.stringify(event))
     },
     onMessage(event) {
-      const msg = JSON.parse(event.data) as HostEvent | { type: 'ROOM_STATE' }
-      if (msg.type === 'ROOM_STATE') return
+      const msg = JSON.parse(event.data) as HostEvent | RoomStateMessage
+      if (msg.type === 'ROOM_STATE') {
+        setState(mapRoomStateToPresenterView(msg.state))
+        return
+      }
       handleHostEvent(msg as HostEvent)
     },
   })
@@ -100,16 +97,28 @@ export function usePresenter(roomId: string) {
           currentTurnId: event.turnId,
           word: event.word,
           category: event.category,
+          difficulty: event.difficulty,
           presenterName: event.presenterName,
           timerRemaining: event.timerSeconds,
+          timerDuration: event.timerSeconds,
           revealRemaining: 0,
+          revealDuration: 0,
+          nextPresenterName: event.nextPresenterName,
+          nextPresenterAvatar: event.nextPresenterAvatar,
+          nextStep: event.nextStep,
+          turnEndReason: 'none',
         }))
         break
       case 'REVEAL_BUFFER_START':
       case 'REVEAL_BUFFER_TICK':
         setState((s) => {
           if (event.turnId !== s.currentTurnId) return s
-          return { ...s, phase: 'reveal-buffer', revealRemaining: event.remaining }
+          return {
+            ...s,
+            phase: 'reveal-buffer',
+            revealRemaining: event.remaining,
+            revealDuration: s.revealDuration || event.remaining,
+          }
         })
         break
       case 'REVEAL_BUFFER_END':
@@ -125,7 +134,17 @@ export function usePresenter(roomId: string) {
         })
         break
       case 'TURN_END':
-        setState((s) => ({ ...s, phase: 'timeout', word: '', revealRemaining: 0 }))
+        setState((s) => {
+          if (event.turnId !== s.currentTurnId) return s
+          return {
+            ...s,
+            phase: 'awaiting-verdict',
+            word: '',
+            difficulty: '',
+            revealRemaining: 0,
+            turnEndReason: event.reason,
+          }
+        })
         break
       case 'BETWEEN_TURNS':
         setState((s) => ({
@@ -134,22 +153,83 @@ export function usePresenter(roomId: string) {
           nextPresenterName: event.nextPresenterName,
           nextPresenterAvatar: event.nextPresenterAvatar,
           word: '',
+          difficulty: '',
           revealRemaining: 0,
+          turnEndReason: 'none',
         }))
         break
       case 'GAME_END':
-        setState((s) => ({ ...s, phase: 'ended', word: '', revealRemaining: 0 }))
+        setState((s) => ({ ...s, phase: 'ended', word: '', difficulty: '', revealRemaining: 0, turnEndReason: 'none' }))
         break
       case 'GAME_RESET':
-        setState((s) => ({ ...s, phase: 'your-turn', word: '', revealRemaining: 0 }))
+        setState(INITIAL_PRESENTER_STATE)
         break
     }
   }
 
   const revealWord = useCallback(() => {
+    if (!state.currentTurnId) {
+      return false
+    }
+
     const event: PresenterEvent = { type: 'WORD_REVEALED', turnId: state.currentTurnId }
-    socket.send(JSON.stringify(event))
+    try {
+      socket.send(JSON.stringify(event))
+      return true
+    } catch {
+      return false
+    }
   }, [state.currentTurnId, socket])
 
   return { state, revealWord }
+}
+
+function mapRoomStateToPresenterView(roomState: RoomState): PresenterViewState {
+  switch (roomState.presenterPhase) {
+    case 'your-turn':
+    case 'reveal-buffer':
+    case 'timer-running':
+    case 'awaiting-verdict':
+    case 'timeout':
+      return {
+        phase: roomState.presenterPhase === 'timeout' ? 'awaiting-verdict' : roomState.presenterPhase,
+        currentTurnId: roomState.currentTurnId,
+        word: roomState.currentWord,
+        category: roomState.currentCategory,
+        difficulty: roomState.currentDifficulty,
+        presenterName: roomState.currentPresenter,
+        timerRemaining: roomState.timerRemaining,
+        timerDuration: roomState.timerDuration,
+        revealRemaining: roomState.revealRemaining,
+        revealDuration: roomState.revealDuration,
+        nextPresenterName: roomState.nextPresenterName,
+        nextPresenterAvatar: roomState.nextPresenterAvatar,
+        nextStep: roomState.nextStep,
+        turnEndReason: roomState.turnEndReason,
+      }
+    case 'between':
+      return {
+        ...INITIAL_PRESENTER_STATE,
+        phase: 'between',
+        currentTurnId: roomState.currentTurnId,
+        presenterName: roomState.currentPresenter,
+        difficulty: roomState.currentDifficulty,
+        nextPresenterName: roomState.nextPresenterName,
+        nextPresenterAvatar: roomState.nextPresenterAvatar,
+        nextStep: roomState.nextStep,
+        turnEndReason: roomState.turnEndReason,
+      }
+    case 'ended':
+      return {
+        ...INITIAL_PRESENTER_STATE,
+        phase: 'ended',
+        currentTurnId: roomState.currentTurnId,
+        presenterName: roomState.currentPresenter,
+        difficulty: roomState.currentDifficulty,
+        turnEndReason: roomState.turnEndReason,
+      }
+    case 'waiting':
+    default:
+      return INITIAL_PRESENTER_STATE
+  }
 }

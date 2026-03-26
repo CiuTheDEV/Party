@@ -15,7 +15,7 @@ const links: NavLink[] = [
 export default function CharadesLayout({ children }: { children: React.ReactNode }) {
   const segment = useSelectedLayoutSegment()
 
-  if (segment === 'play') {
+  if (segment === 'play' || segment === 'present') {
     return <>{children}</>
   }
 

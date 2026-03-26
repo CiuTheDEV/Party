@@ -1,0 +1,289 @@
+.phaseStack {
+  width: 100%;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: clamp(12px, 2vw, 16px);
+  min-height: 0;
+}
+
+.phaseSingle {
+  width: 100%;
+  min-height: 0;
+  display: grid;
+}
+
+.phaseCard {
+  width: 100%;
+  display: grid;
+  min-height: 0;
+  gap: clamp(10px, 1.8vw, 14px);
+  border-radius: 24px;
+  padding: clamp(16px, 2.4vw, 20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015)),
+    rgba(9, 14, 19, 0.88);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.22);
+}
+
+.phaseCardAlert {
+  border-color: rgba(251, 113, 133, 0.34);
+  background:
+    radial-gradient(circle at top, rgba(251, 113, 133, 0.28), transparent 58%),
+    rgba(20, 8, 12, 0.9);
+}
+
+.timeoutCard {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.endedCard {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  background:
+    radial-gradient(circle at top, rgba(167, 139, 250, 0.14), transparent 52%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015)),
+    rgba(9, 14, 19, 0.88);
+}
+
+.phaseEyebrow {
+  margin: 0;
+  font-size: 0.72rem;
+  color: rgba(248, 247, 255, 0.58);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.phaseMetaRow {
+  display: flex;
+  gap: clamp(10px, 1.8vw, 12px);
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.timerHero,
+.timeoutHero,
+.endedHero {
+  display: grid;
+  min-height: 0;
+  gap: clamp(8px, 1.6vw, 10px);
+  justify-items: center;
+  align-content: center;
+  text-align: center;
+}
+
+.timerCount {
+  font-size: clamp(4rem, 16vw, 7rem);
+  font-weight: 900;
+  line-height: 0.9;
+}
+
+.phaseLead,
+.phaseBody,
+.phaseHint {
+  margin: 0;
+}
+
+.phaseLead {
+  color: rgba(248, 247, 255, 0.86);
+  font-size: clamp(1.15rem, 4vw, 1.5rem);
+  line-height: 1.35;
+}
+
+.phaseBody {
+  color: rgba(248, 247, 255, 0.74);
+  font-size: clamp(0.95rem, 1.8vw, 1rem);
+  line-height: 1.55;
+}
+
+.phaseHint {
+  color: rgba(248, 247, 255, 0.48);
+  font-size: clamp(0.96rem, 1.8vw, 1.05rem);
+}
+
+.phaseTitle {
+  margin: 0;
+  font-size: clamp(1.8rem, 7vw, 3.3rem);
+  font-weight: 800;
+  line-height: 0.98;
+}
+
+.timeoutMark,
+.endedMark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 110px;
+  min-height: 110px;
+  padding: 16px;
+  border-radius: 28px;
+  font-size: clamp(2rem, 10vw, 3.2rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.timeoutMark {
+  background: linear-gradient(135deg, #fb7185 0%, #e11d48 100%);
+  color: #fff5f7;
+  box-shadow: 0 18px 40px rgba(225, 29, 72, 0.34);
+}
+
+.endedMark {
+  background: rgba(124, 58, 237, 0.16);
+  color: #e9ddff;
+}
+
+.endedKicker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: rgba(167, 139, 250, 0.12);
+  color: #e9ddff;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.endedFooter {
+  display: grid;
+  justify-items: center;
+}
+
+.endedFooter .phaseBody {
+  max-width: 30ch;
+  text-align: center;
+  color: rgba(248, 247, 255, 0.68);
+}
+
+.passCard {
+  display: grid;
+  min-height: 0;
+  gap: clamp(12px, 2vw, 16px);
+  justify-items: center;
+  align-content: center;
+  text-align: center;
+}
+
+.passAvatar {
+  display: grid;
+  place-items: center;
+  width: clamp(88px, 20vw, 128px);
+  aspect-ratio: 1;
+  border-radius: 30px;
+  background: rgba(124, 58, 237, 0.18);
+  font-size: clamp(2.8rem, 10vw, 4rem);
+}
+
+.passMeta {
+  display: grid;
+  gap: clamp(6px, 1.4vw, 8px);
+}
+
+.timeoutNextPresenter {
+  display: grid;
+  gap: 10px;
+  justify-items: center;
+}
+
+.timeoutVerdict {
+  margin: 0;
+  font-size: clamp(1.15rem, 4vw, 1.5rem);
+  font-weight: 800;
+  line-height: 1.35;
+  color: rgba(248, 247, 255, 0.92);
+}
+
+.timeoutNextRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.timeoutNextRow .passAvatar {
+  width: clamp(42px, 9vw, 56px);
+  border-radius: 0;
+  background: transparent;
+  font-size: clamp(1.6rem, 5vw, 2.1rem);
+}
+
+.timeoutNextName {
+  font-size: clamp(1.15rem, 4vw, 1.45rem);
+  font-weight: 800;
+  line-height: 1.1;
+  color: rgba(248, 247, 255, 0.92);
+}
+
+@media (orientation: landscape) and (min-width: 820px) {
+  .phaseStack {
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 0.48fr);
+    grid-template-rows: minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .phaseSingle {
+    align-items: stretch;
+  }
+}
+
+@media (max-width: 767px) {
+  .phaseMetaRow {
+    align-items: flex-start;
+  }
+
+  .phaseHint {
+    text-align: left;
+  }
+}
+
+@media (max-height: 760px) {
+  .phaseCard,
+  .timeoutMark,
+  .endedMark {
+    border-radius: 20px;
+  }
+
+  .phaseCard {
+    padding: 14px 16px;
+  }
+
+  .timerCount {
+    font-size: clamp(3.3rem, 12vw, 5.2rem);
+  }
+
+  .timeoutMark,
+  .endedMark {
+    min-width: 96px;
+    min-height: 96px;
+    padding: 14px;
+  }
+}
+
+@media (max-height: 760px) and (orientation: landscape) and (min-width: 820px) {
+  .phaseStack {
+    gap: 10px;
+  }
+
+  .phaseCard {
+    gap: 10px;
+  }
+
+  .phaseMetaRow {
+    align-items: flex-start;
+  }
+
+  .timerHero,
+  .timeoutHero,
+  .endedHero,
+  .passCard {
+    gap: 8px;
+  }
+
+  .passAvatar {
+    width: clamp(76px, 14vw, 104px);
+    border-radius: 24px;
+  }
+}
