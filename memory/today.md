@@ -1,56 +1,65 @@
-# Today — 2026-03-22 (Sunday)
+# Today - 2026-03-26
 
 <!--
   Daily working memory. Each session appends a section.
-  At end of day, key items are archived and this file resets.
-
-  Format per session:
-  ### SN (~HH:MM) [Project/Topic] Brief description
-  - What was done (1-2 sentences)
-  - Key decisions/discoveries
-  - Next steps
-  - Experience recorded: yes/no
 -->
 
-### S1 (~dziś) [Project Party] Phase 0, 1, 2 — monorepo, hub, game SDK
+### S1 (~daytime) [Project Party] Phases 0-2 foundation
 
-- Zainicjalizowano Turborepo monorepo, zbudowano hub (Next.js 16) z Topbarem, GameCard, GamesGrid, PremiumModal. Zdefiniowano i zaimplementowano `@party/game-sdk` (typy GameConfig, GameModule). Zaktualizowano wszystkie zależności do najnowszych wersji.
-- Clerk wyłączony do Phase 5 (placeholder key crashował dev server). `@party/charades` kompiluje tylko `.d.ts` (emitDeclarationOnly) — runtime import z tej paczki nie działa w Next.js, config Kalambury tymczasowo inline w `games.ts`. Wrócimy gdy charades będzie miało pełny build. Next.js 16 automatycznie zmienia `tsconfig.json` przy pierwszym uruchomieniu (jsx → react-jsx, dodaje .next/dev/types).
-- Next: Phase 3 — moduł Kalambury (GameMenu, GameConfigModal, GameResults, GameScreen)
+- Initialized the Turborepo monorepo, built the hub shell, and defined the initial `@party/game-sdk` contract.
+- Disabled Clerk until Phase 5 because placeholder keys crashed runtime. At that point `@party/charades` still emitted only declarations, so runtime config imports had to stay out of the package.
+- Next: build the first Charades module.
 - Experience recorded: yes
 
-### S7 (~16:48) [Project Party] VS Code workspace cleanup + agent rules sync
+### S2 (~daytime) [Project Party] Phase 3 - Charades MVP
 
-- Ujednolicono `AGENTS.md` i `CLAUDE.md`, aby Codex i Claude Code pracowaly wedlug tych samych zasad. Dodatkowo dopieto lokalny setup VS Code: `.vscode/settings.json`, `.vscode/extensions.json`, `.markdownlint.json`, `.markdownlintignore` i poprawki w `.gitignore`.
-- Najwazniejsze odkrycie z tej sesji: zolte warningi w Markdown nie musza oznaczac problemu z samym plikiem. W tym repo glowny halas robily `markdownlint` oraz osobno GitHub Copilot Chat, wiec trzeba rozrozniac problem parsera markdown od problemu rozszerzen AI.
-- Next: sprawdzic po reloadzie VS Code, czy workspace dziala cicho i czy nowe ustawienia sa wystarczajace; jesli nie, kolejny krok to cleanup konkretnych rozszerzen, a nie zmian w repo.
+- Implemented the first playable Charades module with content, PartyKit server, gameplay hooks, and all core routes.
+- Added presenter pairing, host-side timer authority, and content loading from `content/charades`.
+- Next: move toward Phase 4 deploy and multiplayer hardening.
 - Experience recorded: yes
 
-### S2 (~dziś) [Project Party] Phase 3 — Kalambury MVP
+### S3 (~evening) [Project Party] Shared shell and early bug fixes
 
-- Zaimplementowano pełny moduł Kalambury: content (zwierzęta/filmy/sport), Partykit server, hooks (useWordPool, useGameState, usePresenter), komponenty (PlayerForm, PlayerList, CategoryPicker, SettingsModal, QRPairing, DeviceListener, Podium), wszystkie 5 tras Next.js (GameMenu, SetupPage /config, GameScreen host /play, GameScreen prezenter /present, GameResults /results).
-- Partykit server z eventami TURN_START/TIMER_TICK/TURN_END/BETWEEN_TURNS/GAME_END/GAME_RESET. QR parowanie obowiązkowe (bez telefonu przycisk "Rozpocznij grę" nieaktywny). Timer autorytatywny po stronie hosta. Hasło widoczne wyłącznie na telefonie prezentera.
-- `@content/*` path alias w tsconfig huba rozwiązuje cross-workspace import z `content/charades/`. `@party/ui` ma pusty package.json bez tsconfig — build całego monorepo failuje na tym, ale hub builduje się w pełni (`npx turbo build --filter="@party/hub"` — wszystkie 6 tras OK).
-- Next: Phase 4 — Cloudflare Pages deploy + Partykit deploy
-- Experience recorded: tak
-
-### S4 (~2026-03-23) [Project Party] Electric Nocturne — pixel-perfect alignment
-
-- Dopasowano Kalambury menu page 1:1 do Stitch reference (`code.html`) i mockupu. Poprawki: tokeny primary `#7c3aed`, sidebar inactive `#64748b`, subtitle 18px, badge z tokenami, GameIcon ciemne tło, GameShell glow `z-index:-1`, logo `--game-color-primary`. Wszystkie hardcoded kolory zamienione na tokeny.
-- Kluczowa lekcja: agent spędził 2h bo nie otworzył `code.html` na początku — pracował z założeniami. Poprawne podejście: Read referencja → porównaj token po tokenie → edytuj.
-- Next: Phase 4 — Cloudflare Pages deploy + Partykit deploy
+- Fixed hydration mismatch in QR pairing, fixed a game freeze in the `between` phase, and added PartyKit startup to local dev flow.
+- Built `@party/ui` as the shared shell layer with topbar, sidebar, game shell, and game cards.
+- Next: improve Charades-specific screens and continue toward deploy.
 - Experience recorded: yes
 
-### S5 (~2026-03-23) [Project Party] Setup modal + UI redesign Kalambury
+### S4 (~2026-03-23) [Project Party] UI alignment work
 
-- Pełny redesign setup flow: config z trasy `/config` przeniesiony na lokalny modal w `page.tsx`. Nowe komponenty: `PlayerGrid`, `AddPlayerModal` (walidacja + shake), `CategoryPicker` (accordion easy/hard), `SettingsModal` (sidebar + slider), `QRPairing` (sekcja + modal QR). `WordCategory` zmieniona na `wordsEasy[]` + `wordsHard[]`, `useWordPool` obsługuje osobne pule. Stara trasa `/config`, `PlayerForm`, `PlayerList` usunięte. Refaktor + aktualizacja dokumentacji.
-- Ten układ (menu + setup modal) to zatwierdzony wzorzec dla każdej kolejnej gry — zmienia się tylko `--game-color-primary` i zawartość sekcji.
-- Next: Phase 4 — Cloudflare Pages deploy + Partykit deploy
-- Experience recorded: yes (patterns.md — modal jako stan, SelectedCategories, shake key)
+- Matched the Charades menu to the reference design more closely and replaced hardcoded colors with proper tokens.
+- Key lesson: open the actual reference source first instead of guessing from memory.
+- Next: continue product work and deploy path.
+- Experience recorded: yes
 
-### S3 (~wieczór) [Project Party] Bugfixy + Shared Shell @party/ui
+### S5 (~2026-03-23) [Project Party] Setup modal redesign
 
-- Naprawiono 3 bugi: hydration mismatch w QRPairing (useState+useEffect zamiast typeof window), game freeze w fazie 'between' (brak przycisku "Następna tura →"), Partykit nie startował automatycznie (dodany do dev.bat jako osobne okno).
-- Zaprojektowano i zaimplementowano `@party/ui` — shared shell z Neon Dark brand identity. Komponenty: Topbar, GameSidebar (desktop sidebar + mobile tab bar via CSS media query), GameShell, GameCard (gradient hero). Dwupoziomowy token system: globalne `tokens.css` + per-game `theme.css`. Hub home page i charades layout zmigrowane do @party/ui. Stare komponenty (Topbar, GameCard, GamesGrid z huba) usunięte.
-- Phase 3 ✅ ukończona. Shared shell ✅ ukończony. Next: Phase 4 — Cloudflare Pages deploy + Partykit deploy. Do rozważenia: redesign charades-specific screens (GameMenu, SetupPage, GameResults, GameScreen) — UI jest "bardzo ubogie".
+- Moved setup from a separate route into an in-page modal flow and introduced the now-approved setup pattern.
+- Added dedicated components for players, categories, settings, and QR pairing.
+- Next: continue toward Phase 4 and eventually generalize the setup pattern.
+- Experience recorded: yes
+
+### S7 (~16:48) [Project Party] VS Code workspace cleanup + agent rule sync
+
+- Synchronized `AGENTS.md` and `CLAUDE.md` and reduced workspace noise from Markdown and local editor configuration.
+- Split the warning problem into repo-level Markdown issues and separate Copilot/extension-level issues.
+- Next: verify the local editor state after reload, but do not treat editor cleanup as product work.
+- Experience recorded: yes
+
+### S9 (~2026-03-27) [Project Party] Pre-MVP cleanup - polskie znaki + refaktory
+
+- Usunięto martwy duplikat `Podium` z `apps/hub/src/components/charades/Podium/` (zero importów)
+- Wyodrębniono stałą `CLEARED_WORD` w `game-state-transitions.ts` - eliminacja 6 powtórzeń
+- Poprawiono 80+ błędów polskich znaków w 13 plikach (brakujące ą/ę/ó/ś/ź/ż/ć/ń/ł)
+- Naprawiono HTML entities w `CharadesMenuContent.tsx` - React renderował je dosłownie
+- Naprawiono Unicode escapes w `PairingPanel.tsx` - zamienione na bezpośrednie znaki
+- Zidentyfikowano i zapisano listę pre-MVP issues do `memory/goals.md`
+- Experience recorded: no (zmiany mechaniczne, brak wzorców do zapamiętania)
+
+### S8 (~23:40) [Project Party] Module architecture cleanup + docs realignment
+
+- Completed a major architecture cleanup: `charades` now owns menu, setup, and results, while host gameplay was reduced through smaller hooks and components.
+- Confirmed the key product direction: shared shell and setup skeleton, custom setup sections per game, and fully game-specific gameplay.
+- Updated project documentation to reflect the real architecture instead of the older interim state.
+- Next: return to product work - Phase 4 deploy and PartyKit.
 - Experience recorded: yes

@@ -14,7 +14,7 @@ export function PresenterTimerBar({ remaining, duration }: PresenterTimerBarProp
     <div
       className={styles.timerBar}
       role="progressbar"
-      aria-label="Pozostaly czas"
+      aria-label="Pozostały czas"
       aria-valuemin={0}
       aria-valuemax={duration}
       aria-valuenow={Math.max(0, remaining)}

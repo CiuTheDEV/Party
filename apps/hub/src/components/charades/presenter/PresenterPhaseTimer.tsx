@@ -11,9 +11,9 @@ export function PresenterPhaseTimer({ remaining: _remaining, duration: _duration
   return (
     <div className={phaseStyles.phaseSingle}>
       <section className={phaseStyles.phaseCard}>
-        <p className={phaseStyles.phaseEyebrow}>Haslo zostalo ukryte</p>
+        <p className={phaseStyles.phaseEyebrow}>Hasło zostało ukryte</p>
         <div className={phaseStyles.timerHero}>
-          <h2 className={phaseStyles.phaseTitle}>Czas prezentowania rozpoczal sie.</h2>
+          <h2 className={phaseStyles.phaseTitle}>Czas prezentowania rozpoczął się.</h2>
           <p className={phaseStyles.phaseLead}>Powodzenia!</p>
         </div>
       </section>

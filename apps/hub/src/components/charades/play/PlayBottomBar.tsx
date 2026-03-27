@@ -39,7 +39,7 @@ export function PlayBottomBar({
 
       {phase === 'round-order' && !isRoundOrderRevealing && (
         <button className={styles.primaryButton} onClick={onStartRound}>
-          Wylosuj kolejnosc
+          Wylosuj kolejność
         </button>
       )}
 
@@ -59,13 +59,13 @@ export function PlayBottomBar({
       {phase === 'prepare' && (
         <p className={styles.infoText}>
           {isDeviceConnected
-            ? 'Czekamy, az prezenter odkryje haslo na telefonie.'
-            : 'Polacz telefon prezentera, aby kontynuowac.'}
+            ? 'Czekamy, aż prezenter odkryje hasło na telefonie.'
+            : 'Połącz telefon prezentera, aby kontynuować.'}
         </p>
       )}
 
       {phase === 'reveal-buffer' && (
-        <p className={styles.infoText}>Prezenter zapoznaje sie z haslem.</p>
+        <p className={styles.infoText}>Prezenter zapoznaje się z hasłem.</p>
       )}
 
       {phase === 'timer-running' && (
@@ -79,10 +79,10 @@ export function PlayBottomBar({
       {phase === 'round-summary' && (
         <div className={styles.verdictActions}>
           <button className={styles.stopButton} onClick={onExitToMenu}>
-            Powrot do menu
+            Powrót do menu
           </button>
           <button className={styles.primaryButton} onClick={onContinueRoundSummary}>
-            Nastepna runda
+            Następna runda
           </button>
         </div>
       )}
@@ -90,10 +90,10 @@ export function PlayBottomBar({
       {phase === 'verdict' && (
         <div className={styles.verdictActions}>
           <button className={styles.successButton} onClick={onCorrectVerdict}>
-            Zgadnieto
+            Zgadnięto
           </button>
           <button className={styles.dangerButton} onClick={onIncorrectVerdict}>
-            Nie zgadnieto
+            Nie zgadnięto
           </button>
         </div>
       )}

@@ -31,7 +31,7 @@ export function PresenterScreen({ state, onRevealWord }: PresenterScreenProps) {
             <MessagePanel
               accent="Gotowe"
               title="Telefon sparowany"
-              body="Host jeszcze nie rozpoczal pierwszej tury."
+              body="Host jeszcze nie rozpoczął pierwszej tury."
             />
           )}
 
@@ -108,7 +108,7 @@ function MessagePanel({
       <p className={styles.messageBody}>{body}</p>
       {nextPresenter ? (
         <div className={styles.messageNextPresenter}>
-          <p className={styles.messageNextLabel}>Nastepny prezenter</p>
+          <p className={styles.messageNextLabel}>Następny prezenter</p>
           <div className={styles.messageNextRow}>
             <span className={styles.messageNextAvatar}>{nextPresenter.avatar}</span>
             <span className={styles.messageNextName}>{nextPresenter.name}</span>
@@ -138,35 +138,35 @@ const PRESENTER_PHASE_CHROME: Record<
   'your-turn': {
     phaseLabel: 'Przygotowanie',
     presenterLabel: 'Prezentuje teraz',
-    phaseSummary: 'Odkryj haslo, gdy telefon jest juz tylko u Ciebie.',
+    phaseSummary: 'Odkryj hasło, gdy telefon jest już tylko u Ciebie.',
   },
   'reveal-buffer': {
-    phaseLabel: 'Zapamietaj haslo',
+    phaseLabel: 'Zapamiętaj hasło',
     presenterLabel: 'Prezentuje teraz',
-    phaseSummary: 'Zapamietaj haslo zanim zniknie.',
+    phaseSummary: 'Zapamiętaj hasło zanim zniknie.',
     phaseValue: (state) => `${state.revealRemaining}s`,
   },
   'timer-running': {
     phaseLabel: 'Pokazuj',
     presenterLabel: 'Prezentuje teraz',
-    phaseSummary: 'Haslo jest ukryte. Liczy sie tylko gest i tempo.',
+    phaseSummary: 'Hasło jest ukryte. Liczy się tylko gest i tempo.',
   },
   'awaiting-verdict': {
     phaseLabel: 'Werdykt',
-    presenterLabel: 'Prezentowal',
-    phaseSummary: 'Tura jest zamknieta. Czekaj na decyzje hosta.',
+    presenterLabel: 'Prezentował',
+    phaseSummary: 'Tura jest zamknięta. Czekaj na decyzję hosta.',
   },
   between: {
     phaseLabel: 'Zmiana prezentera',
     presenterLabel: 'Telefon przejmuje',
-    phaseSummary: 'Przekaz telefon dalej albo poczekaj na finalny ekran.',
+    phaseSummary: 'Przekaż telefon dalej albo poczekaj na finalny ekran.',
     presenterName: (state) => state.nextPresenterName || 'Koniec sekwencji',
   },
   ended: {
     phaseLabel: 'Koniec gry',
     presenterLabel: 'Sesja',
-    phaseSummary: 'Ta karta nie jest juz potrzebna.',
-    presenterName: () => 'Zakonczona',
+    phaseSummary: 'Ta karta nie jest już potrzebna.',
+    presenterName: () => 'Zakończona',
   },
 }
 
@@ -182,18 +182,18 @@ function getPresenterChrome(state: PresenterViewState) {
 
 function getAwaitingVerdictTitle(state: PresenterViewState) {
   if (state.turnEndReason === 'timeout') {
-    return 'Czas dobiegl konca'
+    return 'Czas dobiegł końca'
   }
 
   if (state.nextStep === 'round-summary') {
-    return 'Czekanie na nowe losowanie kolejnosci'
+    return 'Czekanie na nowe losowanie kolejności'
   }
 
   if (state.nextStep === 'game-end') {
-    return 'Gra sie zakonczyla'
+    return 'Gra się zakończyła'
   }
 
-  return 'Tura zakonczona'
+  return 'Tura zakończona'
 }
 
 function getAwaitingVerdictBody(state: PresenterViewState) {
@@ -201,8 +201,8 @@ function getAwaitingVerdictBody(state: PresenterViewState) {
     return state.nextStep === 'next-presenter'
       ? 'Dokonajcie werdyktu.'
       : state.nextStep === 'round-summary'
-        ? 'Dokonajcie werdyktu. Nastepnie pojawi sie nowe losowanie kolejnosci.'
-        : 'Dokonajcie werdyktu. Nastepnie pojawi sie final gry.'
+        ? 'Dokonajcie werdyktu. Następnie pojawi się nowe losowanie kolejności.'
+        : 'Dokonajcie werdyktu. Następnie pojawi się finał gry.'
   }
 
   if (state.nextStep === 'next-presenter') {
@@ -210,11 +210,11 @@ function getAwaitingVerdictBody(state: PresenterViewState) {
   }
 
   if (state.nextStep === 'round-summary') {
-    return 'Host domyka te ture i za chwile pokaze podsumowanie oraz nowe losowanie kolejnosci.'
+    return 'Host domyka tę turę i za chwilę pokaże podsumowanie oraz nowe losowanie kolejności.'
   }
 
   if (state.nextStep === 'game-end') {
-    return 'Host domyka ostatni werdykt. Za chwile pojawi sie final gry.'
+    return 'Host domyka ostatni werdykt. Za chwilę pojawi się finał gry.'
   }
 
   return 'Host wybiera werdykt dla tej rundy.'

@@ -22,13 +22,13 @@ export function PresenterPhaseReveal({
       <section className={styles.wordHeroCard}>
         <div className={styles.wordHeroTop}>
           <div className={styles.metaBlock}>
-            <p className={styles.wordHeroLabel}>Karta hasla</p>
+            <p className={styles.wordHeroLabel}>Karta hasła</p>
           </div>
           <div className={styles.badgeRow}>
             <span className={styles.categoryPill}>{category}</span>
             {difficulty ? (
               <span className={styles.difficultyPill} data-difficulty={difficulty}>
-                {difficulty === 'easy' ? 'Latwe' : 'Trudne'}
+                {difficulty === 'easy' ? 'Łatwe' : 'Trudne'}
               </span>
             ) : null}
           </div>
@@ -39,7 +39,7 @@ export function PresenterPhaseReveal({
       </section>
 
       <button className={styles.revealMetaCard} type="button" aria-disabled="true">
-        <span className={styles.changeButtonLabel}>Zmien haslo</span>
+        <span className={styles.changeButtonLabel}>Zmień hasło</span>
       </button>
     </div>
   )

@@ -17,22 +17,22 @@ export function PresenterPhaseBetween({
   const isPassingToNextPresenter = nextStep === 'next-presenter'
   const title =
     nextStep === 'next-presenter'
-      ? 'Nastepny prezenter'
+      ? 'Następny prezenter'
       : nextStep === 'round-summary'
         ? 'Poczekaj na podsumowanie rundy'
-        : 'Poczekaj na ekran koncowy gry'
+        : 'Poczekaj na ekran końcowy gry'
   const lead =
     nextStep === 'next-presenter'
       ? nextPresenterName
       : nextStep === 'round-summary'
-        ? 'Ta runda dobiegla konca. Host pokazuje teraz podsumowanie.'
-        : 'To byla ostatnia tura. Host zaraz pokaze final gry.'
+        ? 'Ta runda dobiegła końca. Host pokazuje teraz podsumowanie.'
+        : 'To była ostatnia tura. Host zaraz pokaże finał gry.'
   const body =
     nextStep === 'next-presenter'
-      ? 'Ekran jest gotowy na kolejna ture. Upewnij sie tylko, ze nowy prezenter ma telefon w reku.'
+      ? 'Ekran jest gotowy na kolejną turę. Upewnij się tylko, że nowy prezenter ma telefon w ręku.'
       : nextStep === 'round-summary'
-        ? 'Nie przekazuj juz telefonu dalej. Zaczekaj, az host zamknie podsumowanie i rozpocznie kolejna runde.'
-        : 'Nie przekazuj juz telefonu dalej. Zaczekaj na finalny ekran albo powrot do lobby.'
+        ? 'Nie przekazuj już telefonu dalej. Zaczekaj, aż host zamknie podsumowanie i rozpocznie kolejną rundę.'
+        : 'Nie przekazuj już telefonu dalej. Zaczekaj na finalny ekran albo powrót do lobby.'
 
   return (
     <div className={phaseStyles.phaseStack}>

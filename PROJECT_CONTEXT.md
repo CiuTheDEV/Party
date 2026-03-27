@@ -1,22 +1,31 @@
-# Project Party — Project Context
+# Project Party - Project Context
 
-*Last updated: 2026-03-22*
+*Last updated: 2026-03-26*
 
 ---
 
-## What is this
+## What Is This
 
 Polish browser-based party game portal for hangouts and friend gatherings.
-Inspiration: Jackbox Party Pack — Polish, no installation, runs in browser.
+Inspiration: Jackbox Party Pack, but browser-first, Polish-first, no installation.
 
-**Architecture**: Hub + module system. Hub is the shell, each game is an independent module.
-Adding a new game = new package. Games don't know about each other.
+Core product model:
+- `hub` is the platform shell,
+- each game is its own module in `packages/games/<game>`,
+- shared menu and setup chrome live in shared layers,
+- gameplay stays per game.
 
 ---
 
 ## Current Focus
 
-> 🎯 Phase 4 — Deploy (Cloudflare Pages + Partykit)
+> Phase 4 - deploy and multiplayer foundation (Cloudflare Pages + Partykit)
+
+Secondary focus completed in this session block:
+- architecture cleanup for game modules,
+- shared setup framework,
+- ownership cleanup for `charades`,
+- gameplay refactor in host-side code.
 
 ---
 
@@ -24,60 +33,105 @@ Adding a new game = new package. Games don't know about each other.
 
 | Phase | Description | Status |
 |-------|-------------|--------|
-| 0 | Monorepo (Turborepo) setup, Cloudflare Pages, CI/CD | ✅ Done (CF deploy pending) |
-| 1 | Hub — landing page, game list, room creation | ✅ Done |
-| 2 | Game SDK — module contract, interfaces | ✅ Done |
-| 3 | Module: Charades (no multiplayer, single screen) | ✅ Done |
-| 4 | Real-time multiplayer (Partykit, rooms, codes) | ⬜ TODO |
-| 5 | Optional auth (Clerk, guest + account) | ⬜ TODO |
-| 6 | Leaderboards and game history (for accounts) | ⬜ TODO |
-| 7 | Monetization stubs (Stripe, premium categories) | ⬜ TODO |
-| 8 | Launch | ⬜ TODO |
+| 0 | Monorepo (Turborepo) setup, CI/CD base, Cloudflare-ready structure | Done |
+| 1 | Hub - landing page, game list, shared shell | Done |
+| 2 | Game SDK - module contract and shared interfaces | Done |
+| 3 | First game: Charades / Kalambury MVP | Done |
+| 3.5 | Module architecture cleanup: shared setup + module ownership | Done |
+| 4 | Real-time multiplayer / deploy (Partykit, rooms, Cloudflare) | In progress |
+| 5 | Optional auth (Clerk, guest + account) | TODO |
+| 6 | Leaderboards and game history | TODO |
+| 7 | Monetization stubs (Stripe-ready, not connected) | TODO |
+| 8 | Launch | TODO |
 
 ---
 
 ## Architecture
 
-```
-project-party/                     # Monorepo (Turborepo)
-├── apps/
-│   └── hub/                       # Next.js — landing page, game list
-├── packages/
-│   ├── ui/                        # Shared UI components
-│   │   └── game-template/         # Shared layout used by every game menu
-│   ├── game-sdk/                  # Module contract (types, interfaces)
-│   └── games/
-│       └── charades/              # Module: Charades ← first game
-└── content/
-    └── charades/                  # Word lists and categories
+```text
+project-party/
+|- apps/
+|  `- hub/                  # Next.js platform shell
+|- packages/
+|  |- ui/                   # Shared shell + shared setup template
+|  |- game-sdk/             # Module contract (config, setup, menu, results)
+|  `- games/
+|     `- charades/          # First game module
+`- content/
+   `- charades/             # Word lists and categories
 ```
 
-## Key Architecture Decisions
+### Current Architectural Direction
 
-| Decision | Choice | Reason |
-|----------|--------|--------|
-| Structure | Monorepo (Turborepo) | Games as independent packages |
-| Hosting | Cloudflare Pages + Workers | Owner has account, free tier |
-| Real-time | Partykit | Easier than Durable Objects, built on CF |
-| Auth | Clerk | Guest + account support, simplest DX |
-| Database | Cloudflare D1 | Native CF, zero ops, SQLite |
-| Payments | Stripe (stub) | Designed in, not connected yet |
+- `hub` owns platform concerns:
+  - routing,
+  - game registry,
+  - shared shell mounting,
+  - session/bootstrap glue.
+- `@party/ui` owns shared presentation patterns:
+  - topbar,
+  - sidebar,
+  - shell layout,
+  - setup modal/template chrome.
+- `@party/game-sdk` owns the module contract.
+- each game module owns:
+  - `config`,
+  - menu content,
+  - setup sections,
+  - setup validation/state model,
+  - results UI,
+  - eventually gameplay entrypoints.
+
+### Important Nuance
+
+Current repo is closer to the target architecture, but not fully there yet:
+- `charades` already owns menu, setup and results,
+- host gameplay runtime still lives mainly in `apps/hub/src/components/charades/play` and `apps/hub/src/hooks/charades`,
+- next architectural step for full module ownership would be moving gameplay/runtime deeper into the game module.
+
+### Shared Setup Model
+
+The approved direction is:
+- every game uses the same setup skeleton/chrome,
+- each game injects its own setup sections,
+- setup state is one shared object per game,
+- gameplay after clicking `Start` stays fully custom per game.
+
+This means:
+- UI updates to setup shell propagate to all games,
+- games keep flexibility in section content and order,
+- hub does not hardcode per-game setup structure.
 
 ---
 
-## Open Questions / Tech Debt
+## Key Decisions
 
-- [ ] Partykit vs Cloudflare Durable Objects — check costs at scale
-- [ ] Payment model: one-time packs vs hub subscription — decide before Phase 7
-- [ ] Content moderation if player-generated content is ever added
+| Decision | Choice | Reason |
+|----------|--------|--------|
+| Structure | Monorepo (Turborepo) | Hub + independent game packages |
+| Hosting | Cloudflare Pages + Workers | Free tier + aligned with owner account |
+| Real-time | Partykit | Fastest path to multiplayer on CF stack |
+| Database | Cloudflare D1 | Native CF, zero ops |
+| Auth | Clerk later | Good guest/account split, deferred to later phase |
+| Payments | Stripe stub only | Monetization-ready, no live payments now |
+| Shared setup | One shell, custom game sections | Common UX without losing game flexibility |
+
+---
+
+## Open Questions / Remaining Tech Debt
+
+- [ ] Decide how far gameplay ownership should move from `apps/hub` into `packages/games/charades`
+- [ ] Finalize Phase 4 deploy path for hub + Partykit
+- [ ] Verify module contract on a second game, not only `charades`
+- [ ] Decide long-term room architecture details before production multiplayer
 
 ---
 
 <!-- handoff:start -->
 ## Session Handoff
-- Last: 2026-03-26 16:48 by Codex (GPT-5.4)
-- Task: Uspojnienie zasad pracy Codex/Claude Code oraz uporzadkowanie lokalnego setupu VS Code pod ten repo.
-- Did: Ujednolicono `AGENTS.md` i `CLAUDE.md`, poprawiono skill metadata w `.codex` / `.claude`, dopieto `.vscode/settings.json`, `.vscode/extensions.json`, `.markdownlint.json`, `.markdownlintignore` i rozszerzono `.gitignore` o lokalne artefakty VS Code oraz logi. Dodatkowo rozdzielono problem warningow VS Code na dwie warstwy: repo markdownlint oraz osobne warningi z GitHub Copilot Chat.
-- Next: Po kolejnym otwarciu VS Code sprawdzic, czy workspace jest juz cichy; jesli nie, nastepny krok to cleanup konkretnych rozszerzen i ich cache, a nie dalsze zmiany w repo.
-- Blocker: Brak twardego blockera technicznego; otwarte sa tylko ewentualne dalsze poprawki ergonomii VS Code po review na zywo.
+- Last: 2026-03-27 by Claude (Sonnet)
+- Task: Pre-MVP cleanup - refaktory i polskie znaki.
+- Did: Usunięto martwy duplikat Podium z hub, wyodrębniono stałą CLEARED_WORD w game-state-transitions, naprawiono 80+ błędów polskich znaków w 13 plikach (w tym HTML entities i Unicode escapes). Zidentyfikowano listę pre-MVP issues i zapisano do goals.md.
+- Next: Zaimplementować pre-MVP issues: pusty PlayTopBar (brak exit), "Zmień hasło" disabled na telefonie, obsługa rozłączenia prezentera. Potem Phase 4 deploy.
+- Blocker: Brak.
 <!-- handoff:end -->
