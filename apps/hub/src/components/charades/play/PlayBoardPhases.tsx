@@ -1,3 +1,4 @@
+import { ChevronLeft } from 'lucide-react'
 import type { MutableRefObject } from 'react'
 import styles from './PlayBoard.module.css'
 import { PresenterCard } from './PlayBoardCards'
@@ -202,7 +203,7 @@ export function PrepareView({
             aria-label={isScoreRailExpanded ? 'Schowaj wynik' : 'Pokaż wynik'}
           >
             <span className={styles.scoreRailToggleIcon} aria-hidden="true">
-              {isScoreRailExpanded ? '>' : '<'}
+              <ChevronLeft size={22} />
             </span>
           </button>
 

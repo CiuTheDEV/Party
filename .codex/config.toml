@@ -1,5 +1,5 @@
 model = "gpt-5.4"
-model_reasoning_effort = "low"
+model_reasoning_effort = "medium"
 plan_mode_reasoning_effort = "minimal"
 model_reasoning_summary = "none"
 model_verbosity = "low"
@@ -26,6 +26,7 @@ view_image = true
 [features]
 multi_agent = true
 apps = false
+rmcp_client = true
 
 [tui]
 alternate_screen = "always"
@@ -40,3 +41,14 @@ animations = false
 
 [permissions.network]
 allow_upstream_proxy = false
+
+[mcp_servers.playwright]
+command = "npx"
+args = ["@playwright/mcp@latest"]
+
+[mcp_servers.context7]
+url = "https://mcp.context7.com/mcp"
+
+[mcp_servers.github]
+url = "https://api.githubcopilot.com/mcp/"
+bearer_token_env_var = "GITHUB_MCP_PAT"

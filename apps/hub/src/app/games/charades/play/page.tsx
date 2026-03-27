@@ -44,7 +44,17 @@ function PlayScreen({ config }: { config: Config }) {
     return { word: entry.word, category: cat, difficulty: entry.difficulty }
   }, [nextWord, cats])
 
-  const { state, startRound, finishRoundOrder, finishRoundSummary, giveVerdict, stopRoundEarly, isGameOver } = useGameState(
+  const {
+    state,
+    startRound,
+    finishRoundOrder,
+    finishRoundSummary,
+    giveVerdict,
+    stopRoundEarly,
+    pausePhaseTimer,
+    resumePhaseTimer,
+    isGameOver,
+  } = useGameState(
     config.roomId,
     config.players.map((p) => ({ ...p, score: 0 })),
     config.settings,
@@ -57,6 +67,36 @@ function PlayScreen({ config }: { config: Config }) {
       router.push('/games/charades/results')
     }
   }, [isGameOver, state.players, router])
+
+  useEffect(() => {
+    const beforeUnloadHandler = (event: BeforeUnloadEvent) => {
+      event.preventDefault()
+      event.returnValue = ''
+    }
+
+    const currentUrl = window.location.href
+    window.history.pushState({ guard: 'charades-play' }, '', currentUrl)
+
+    const popStateHandler = () => {
+      const shouldLeave = window.confirm('Halo, gra trwa. Pójście wstecz utraci postęp.')
+
+      if (shouldLeave) {
+        window.removeEventListener('beforeunload', beforeUnloadHandler)
+        router.push('/games/charades')
+        return
+      }
+
+      window.history.pushState({ guard: 'charades-play' }, '', currentUrl)
+    }
+
+    window.addEventListener('beforeunload', beforeUnloadHandler)
+    window.addEventListener('popstate', popStateHandler)
+
+    return () => {
+      window.removeEventListener('beforeunload', beforeUnloadHandler)
+      window.removeEventListener('popstate', popStateHandler)
+    }
+  }, [router])
 
   const presenterIdx = state.order[state.currentOrderIdx]
   const presenter = state.players[presenterIdx]
@@ -72,17 +112,21 @@ function PlayScreen({ config }: { config: Config }) {
         currentRound={state.currentRound}
         currentWord={state.currentWord}
         isDeviceConnected={state.isDeviceConnected}
+        isRoomConnected={state.isRoomConnected}
         isRoundOrderRevealing={state.isRoundOrderRevealing}
         onFinishRoundOrder={finishRoundOrder}
         onFinishRoundSummary={finishRoundSummary}
         onGiveVerdict={giveVerdict}
         onExitToMenu={() => router.push('/games/charades')}
+        onPauseGame={pausePhaseTimer}
+        onResumeGame={resumePhaseTimer}
         onStopRound={stopRoundEarly}
         onStartRound={startRound}
         order={state.order}
         phase={state.phase}
         players={state.players}
         presenter={presenter}
+        roomId={config.roomId}
         bufferRemaining={state.bufferRemaining}
         timerRemaining={state.timerRemaining}
         totalRounds={state.totalRounds}

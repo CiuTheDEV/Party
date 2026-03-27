@@ -6,21 +6,26 @@
 
 ## This Week
 
-1. ~~Close architecture cleanup for the first game module~~ ✅
-2. ~~Re-align documentation with the new module/setup vision~~ ✅
-3. ~~Charades pre-MVP polish~~ — Polish characters ✅, remaining issues below
+1. ~~Close architecture cleanup for the first game module~~
+2. ~~Re-align documentation with the new module/setup vision~~
+3. ~~Charades pre-MVP polish~~ - Polish characters fixed, remaining cleanup below
 4. Move forward with Phase 4 deploy path
 
 ## Charades - pre-MVP blockers
 
 ### Critical (game is broken without these)
-- [ ] PlayTopBar — add exit button (host currently cannot leave without a page reset)
-- [ ] "Zmień hasło" on presenter phone — implement or remove the disabled button
-- [ ] Presenter disconnect handling — fallback when phone loses connection during play
+- [x] PlayTopBar - safe in-game settings/exit flow
+- [ ] "Zmień hasło" on presenter phone - implement or remove the disabled button
+- [x] Presenter disconnect handling - pause + reconnect modal when phone drops during play
 
 ### Important (quality degraders)
-- [ ] Error boundaries for WebSocket/Partykit — unhandled errors crash the page
-- [ ] Page refresh resilience — refresh during gameplay destroys the session
+- [ ] Error boundaries for WebSocket/Partykit - unhandled errors crash the page
+- [ ] Page refresh/back resilience - gameplay still needs broader hardening
+
+### Cleanup / code quality (next pass)
+- [ ] Review `useGameState` callback/effect dependencies around `send` after socket reconnects
+- [ ] Remove dead presenter/runtime leftovers: `PresenterTimerBar`, ignored timer props, stale refs after recent UI refactors
+- [ ] Split oversized Charades files back under repo limits (`ResultsGroups.module.css`, `PlayBoard.tsx`, `PlayBoard.module.css`)
 
 ## This Month
 

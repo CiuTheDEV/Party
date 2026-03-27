@@ -2,13 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Podium } from '../../../../components/charades/Podium/Podium'
-import type { Player } from '../../../../hooks/charades/useGameState'
-import styles from './page.module.css'
+import { CharadesResultsScreen, type CharadesResultPlayer } from '@party/charades'
 
 export default function CharadesResultsPage() {
   const router = useRouter()
-  const [players, setPlayers] = useState<Player[]>([])
+  const [players, setPlayers] = useState<CharadesResultPlayer[]>([])
 
   useEffect(() => {
     const raw = sessionStorage.getItem('charades:results')
@@ -23,7 +21,7 @@ export default function CharadesResultsPage() {
 
   function handlePlayAgain() {
     sessionStorage.removeItem('charades:results')
-    router.push('/games/charades/play')
+    router.push('/games/charades?setup=1')
   }
 
   function handleBackToMenu() {
@@ -37,24 +35,10 @@ export default function CharadesResultsPage() {
   }
 
   return (
-    <main className={styles.page}>
-      <div className={styles.header}>
-        <p className={styles.eyebrow}>Final gry</p>
-        <h1 className={styles.title}>Wyniki kalamburow</h1>
-      </div>
-
-      <section className={styles.resultsPanel}>
-        <Podium players={players} />
-      </section>
-
-      <div className={styles.actions}>
-        <button className={styles.againBtn} onClick={handlePlayAgain}>
-          Zagraj jeszcze raz
-        </button>
-        <button className={styles.menuBtn} onClick={handleBackToMenu}>
-          Wroc do menu
-        </button>
-      </div>
-    </main>
+    <CharadesResultsScreen
+      players={players}
+      onPlayAgain={handlePlayAgain}
+      onBackToMenu={handleBackToMenu}
+    />
   )
 }

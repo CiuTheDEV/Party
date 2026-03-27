@@ -32,6 +32,12 @@
       "@party/ui/*": [
         "../../packages/ui/src/*"
       ],
+      "@party/charades": [
+        "../../packages/games/charades/src"
+      ],
+      "@party/charades/*": [
+        "../../packages/games/charades/src/*"
+      ],
       "@content/*": [
         "../../content/*"
       ]
@@ -45,7 +51,9 @@
     ".next/dev/types/**/*.ts",
     "../../content/**/*.ts",
     "../../packages/ui/src/**/*.ts",
-    "../../packages/ui/src/**/*.tsx"
+    "../../packages/ui/src/**/*.tsx",
+    "../../packages/games/charades/src/**/*.ts",
+    "../../packages/games/charades/src/**/*.tsx"
   ],
   "exclude": [
     "node_modules"

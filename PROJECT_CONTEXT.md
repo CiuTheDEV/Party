@@ -1,6 +1,6 @@
 # Project Party - Project Context
 
-*Last updated: 2026-03-26*
+*Last updated: 2026-03-27*
 
 ---
 
@@ -25,7 +25,8 @@ Secondary focus completed in this session block:
 - architecture cleanup for game modules,
 - shared setup framework,
 - ownership cleanup for `charades`,
-- gameplay refactor in host-side code.
+- gameplay refactor in host-side code,
+- pre-MVP polish for host play and results UX.
 
 ---
 
@@ -129,9 +130,9 @@ This means:
 
 <!-- handoff:start -->
 ## Session Handoff
-- Last: 2026-03-27 by Claude (Sonnet)
-- Task: Pre-MVP cleanup — refactors and Polish character fixes.
-- Did: Removed dead Podium duplicate from hub, extracted CLEARED_WORD constant, fixed 80+ missing Polish diacritics across 13 files (including HTML entities and Unicode escapes). Identified and saved pre-MVP issues list to goals.md.
-- Next: Implement pre-MVP issues — empty PlayTopBar (no exit button), disabled "Zmień hasło" on presenter phone, presenter disconnect handling. Then Phase 4 deploy.
+- Last: 2026-03-27 by Codex (GPT-5.4)
+- Task: Charades pre-MVP polish and results UX cleanup.
+- Did: Finished play-screen settings/pause flow, presenter disconnect pause/reconnect flow, back/refresh guards, timer and score-rail fixes, and a broader results redesign with podium plus expandable full ranking. Recorded next cleanup pass in goals, today, and active tasks.
+- Next: Run the queued Charades cleanup pass: reconnect-safe `useGameState` dependencies, remove dead presenter/runtime leftovers, and split oversized files (`ResultsGroups.module.css`, `PlayBoard.tsx`, `PlayBoard.module.css`). After that return to remaining pre-MVP hardening and Phase 4 deploy.
 - Blocker: None.
 <!-- handoff:end -->

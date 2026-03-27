@@ -1,12 +1,12 @@
 # Behavior Rules Extended (On-demand loading)
 
-> Low-frequency rules split from rules/behaviors.md. Load when needed.
+> Low-frequency rules split from `rules/behaviors.md`. Load when needed.
 
 ## Knowledge Base Write Strategy
 
 **Pre-write decision tree**:
-```
-Received content to record →
+```text
+Received content to record ->
 |-- Clear precedent? (same directory has similar files)
 |   +-- File directly + update knowledge index
 |-- Know the domain but no precedent?
@@ -16,34 +16,34 @@ Received content to record →
 ```
 
 **Banned**:
-- Same content written to multiple files (SSOT violation)
+- Writing the same content to multiple files (SSOT violation)
 - Inventing new directories without precedent
-- Skipping decision tree
+- Skipping the decision tree
 
 ## Proactive Association Rules
 
-### Starting new task
+### Starting a new task
 Check `memory/patterns.md` first:
-- Any related pitfall records?
-- Any related decision patterns?
+- any related pitfall records?
+- any related decision patterns?
 
-### Completing code task
+### Completing a code task
 Self-check:
-- Any pitfall experience to record?
-- Need to update PROJECT_CONTEXT.md?
+- any pitfall experience to record?
+- does `PROJECT_CONTEXT.md` need an update?
 
-### User expresses emotion (tired/frustrated/anxious)
-- Check recent work intensity (`memory/today.md`)
-- Don't take frustration literally — address the underlying issue
+### User expresses emotion (tired / frustrated / anxious)
+- Check recent work intensity in `memory/today.md`
+- Do not take frustration literally - address the underlying issue
 
 ## Execution Plan Mode (complex tasks)
 
-```
-User requirement → Claude outputs execution plan → User approves → Claude executes → Report
+```text
+User requirement -> Claude outputs execution plan -> User approves -> Claude executes -> Report
 ```
 
 **Execution plan template**:
-```
+```text
 ## Execution Plan
 Task: [one sentence]
 Scope: [files/modules affected]
@@ -53,4 +53,4 @@ Risk: [potential issues]
 
 ---
 
-*Split from behaviors.md for on-demand loading*
+*Split from `behaviors.md` for on-demand loading.*

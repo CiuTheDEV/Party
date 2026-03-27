@@ -1,0 +1,151 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 920px);
+  margin: 0 auto;
+  gap: 14px;
+}
+
+.hero {
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 28px;
+  display: grid;
+  gap: 16px;
+  justify-items: center;
+  padding: 26px 24px 28px;
+  text-align: center;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(251, 191, 36, 0.18), transparent 42%),
+    radial-gradient(circle at 50% 100%, rgba(124, 58, 237, 0.1), transparent 48%),
+    linear-gradient(180deg, rgba(21, 27, 34, 0.96), rgba(12, 16, 22, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 22px 42px rgba(0, 0, 0, 0.2);
+}
+
+.heroEyebrow {
+  margin: 0;
+  color: rgba(248, 250, 252, 0.62);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.heroScore {
+  margin: 0;
+  color: #fde68a;
+  font-size: 0.96rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+
+.heroNames {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.heroNameChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 62px;
+  padding: 12px 20px;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(251, 191, 36, 0.12), rgba(255, 255, 255, 0.04)),
+    rgba(255, 255, 255, 0.06);
+  color: #f8fafc;
+  font-size: 1.2rem;
+  font-weight: 900;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 16px 30px rgba(0, 0, 0, 0.18);
+}
+
+.heroAvatar {
+  font-size: 2.15rem;
+  line-height: 1;
+}
+
+.podiumSection {
+  display: flex;
+  justify-content: center;
+}
+
+.podium {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding-top: 6px;
+}
+
+.slot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: clamp(96px, 17vw, 124px);
+}
+
+.slotAvatar {
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+}
+
+.slotName {
+  font-size: 1rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+.slotScore {
+  font-size: 0.8rem;
+  color: rgba(248, 250, 252, 0.74);
+}
+
+.bar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px 14px 0 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.52);
+  box-shadow: 0 14px 28px rgba(124, 58, 237, 0.18);
+}
+
+.place1 .bar {
+  background: linear-gradient(180deg, #8b5cf6 0%, #7c3aed 100%);
+}
+
+.place2 .bar {
+  background: linear-gradient(180deg, rgba(124, 58, 237, 0.82), rgba(91, 33, 182, 0.72));
+}
+
+.place3 .bar {
+  background: linear-gradient(180deg, rgba(91, 33, 182, 0.74), rgba(67, 26, 123, 0.68));
+}
+
+@media (max-width: 767px) {
+  .wrapper {
+    gap: 12px;
+  }
+
+  .hero {
+    border-radius: 22px;
+    padding: 22px 16px 24px;
+  }
+
+  .podium {
+    gap: 10px;
+  }
+
+  .slot {
+    width: clamp(84px, 27vw, 112px);
+  }
+}

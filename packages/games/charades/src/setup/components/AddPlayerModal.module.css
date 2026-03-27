@@ -31,7 +31,6 @@
 .body {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0;
   padding: 24px 28px;
 }
 
@@ -82,19 +81,11 @@
   opacity: 0.25;
 }
 
-.avatarHint {
-  font-size: 15px;
-  color: var(--color-text-muted);
-  opacity: 0.6;
-  margin: 0;
-}
-
 .inputHint {
   font-size: 13px;
   color: #f87171;
   margin: 0;
-  height: 18px;
-  line-height: 18px;
+  min-height: 18px;
 }
 
 .input {
@@ -107,16 +98,6 @@
   text-align: center;
 }
 
-.input:focus {
-  outline: none;
-  border-color: var(--game-color-primary);
-}
-
-.input::placeholder {
-  color: var(--color-text-muted);
-  opacity: 0.5;
-}
-
 .genderRow {
   display: flex;
   gap: 8px;
@@ -125,17 +106,12 @@
 .genderBtn {
   width: 48px;
   height: 48px;
-  padding: 0;
   border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.04);
   color: var(--color-text-muted);
   font-size: 22px;
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s, color 0.15s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .genderBtn[data-gender="ona"] {
@@ -145,7 +121,6 @@
 .genderBtn[data-gender="ona"].selected {
   border-color: #f472b6;
   background: rgba(244, 114, 182, 0.15);
-  color: #f472b6;
 }
 
 .genderBtn[data-gender="on"] {
@@ -155,7 +130,6 @@
 .genderBtn[data-gender="on"].selected {
   border-color: #60a5fa;
   background: rgba(96, 165, 250, 0.15);
-  color: #60a5fa;
 }
 
 .categoryTabs {
@@ -170,13 +144,10 @@
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.04);
   color: var(--color-text-muted);
-  font-size: 16px;
-  font-weight: 500;
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s, color 0.15s;
 }
 
-.categoryTab.activeTab {
+.activeTab {
   border-color: var(--game-color-primary);
   background: var(--game-color-primary-glow);
   color: var(--color-text);
@@ -195,22 +166,14 @@
   background: rgba(255, 255, 255, 0.05);
   font-size: 36px;
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-.avatarBtn:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.avatarBtn.selectedAvatar {
+.selectedAvatar {
   border-color: var(--game-color-primary);
   background: var(--game-color-primary-glow);
 }
 
-.avatarBtn.takenAvatar {
+.takenAvatar {
   opacity: 0.25;
   cursor: not-allowed;
   filter: grayscale(1);
@@ -224,31 +187,25 @@
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.cancelBtn {
-  padding: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--color-text);
-  font-size: 18px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.cancelBtn:hover {
-  background: rgba(255, 255, 255, 0.09);
-}
-
+.cancelBtn,
 .submitBtn {
   padding: 16px;
-  border: none;
   border-radius: 10px;
-  background: var(--game-color-primary);
-  color: #fff;
   font-size: 18px;
   font-weight: 700;
   cursor: pointer;
-  transition: opacity 0.15s;
+}
+
+.cancelBtn {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text);
+}
+
+.submitBtn {
+  border: none;
+  background: var(--game-color-primary);
+  color: #fff;
 }
 
 .submitBtn:not([data-ready="true"]) {
@@ -264,85 +221,4 @@
   0%, 100% { transform: translateX(0); }
   25% { transform: translateX(-6px); }
   75% { transform: translateX(6px); }
-}
-
-@media (max-width: 767px) {
-  .backdrop {
-    padding: 5vh 12px 12px;
-    align-items: flex-start;
-  }
-
-  .modal {
-    width: 100%;
-    height: 100%;
-    max-height: 100%;
-    border-radius: 20px;
-  }
-
-  .title {
-    font-size: 20px;
-    padding: 16px 20px 14px;
-  }
-
-  .body {
-    grid-template-columns: 1fr;
-    padding: 16px 20px;
-    overflow-y: auto;
-  }
-
-  .left {
-    padding-right: 0;
-    border-right: none;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    padding-bottom: 16px;
-  }
-
-  .right {
-    padding-left: 0;
-  }
-
-  .avatarPreview {
-    width: 90px;
-    height: 90px;
-  }
-
-  .avatarEmoji {
-    font-size: 60px;
-  }
-
-  .avatarPlaceholder {
-    font-size: 36px;
-  }
-
-  .avatarBtn {
-    font-size: 26px;
-  }
-
-  .label {
-    font-size: 12px;
-  }
-
-  .input {
-    font-size: 16px;
-    padding: 12px 14px;
-  }
-
-  .categoryTab {
-    font-size: 13px;
-    padding: 8px 4px;
-  }
-
-  .genderBtn {
-    font-size: 24px;
-  }
-
-  .cancelBtn,
-  .submitBtn {
-    font-size: 16px;
-    padding: 14px;
-  }
-
-  .footer {
-    padding: 12px 20px 16px;
-  }
 }

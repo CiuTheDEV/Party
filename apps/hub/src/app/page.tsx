@@ -13,7 +13,7 @@ export default function HomePage() {
     <>
       <Topbar />
       <main className={styles.main}>
-        <h1 className={styles.heading}>Wybierz grę</h1>
+        <h1 className={styles.heading}>Wybierz gr&#281;</h1>
         <div className={styles.grid}>
           {games.map((game) => (
             <GameCard

@@ -1,14 +1,22 @@
 import type { ComponentType } from 'react'
-import type { GameConfig } from './GameConfig'
+import type { GameConfig, GameShellConfig } from './GameConfig'
+import type {
+  GameMenuContentProps,
+  GameSetupSection,
+  GameSetupValidation,
+} from './GameSetup'
 
 export type GameResultsProps = {
   onPlayAgain: () => void
   onBackToMenu: () => void
 }
 
-export type GameModule = {
+export type GameModule<TSetupState = unknown, TSetupHelpers = undefined> = {
   config: GameConfig
-  GameMenu: ComponentType
-  GameSetup: ComponentType
+  shell: GameShellConfig
+  createInitialSetupState: () => TSetupState
+  setupSections: GameSetupSection<TSetupState, TSetupHelpers>[]
+  validateSetup: (state: TSetupState) => GameSetupValidation
+  GameMenuContent: ComponentType<GameMenuContentProps>
   GameResults: ComponentType<GameResultsProps>
 }

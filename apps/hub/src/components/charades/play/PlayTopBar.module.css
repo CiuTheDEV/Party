@@ -1,6 +1,7 @@
 .bar {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   height: 64px;
   padding: 0 24px;
   box-sizing: border-box;
@@ -22,9 +23,70 @@
   background: transparent;
 }
 
+.actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.buttonBase {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0 18px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.settingsButton {
+  composes: buttonBase;
+  width: 42px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text);
+}
+
+.loginButton {
+  composes: buttonBase;
+  border: 1px solid var(--color-outline-variant);
+  background: var(--color-surface-elevated);
+  color: var(--color-text);
+}
+
+.loginText {
+  white-space: nowrap;
+}
+
 @media (max-width: 900px) {
   .bar {
     height: 56px;
     padding: 0 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .actions {
+    gap: 8px;
+  }
+
+  .settingsButton,
+  .loginButton {
+    font-size: 0.88rem;
+  }
+
+  .loginButton {
+    padding: 0 14px;
+  }
+
+  .loginText {
+    display: none;
+  }
+
+  .loginButton::after {
+    content: 'Zaloguj';
   }
 }

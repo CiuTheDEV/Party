@@ -14,15 +14,15 @@ export function GameCard({ game, onPremiumClick }: GameCardProps) {
 
   if (game.isPremium) {
     return (
-      <button className={styles.card} onClick={onPremiumClick} aria-label={`${game.name} — Premium`}>
+      <button className={styles.card} onClick={onPremiumClick} aria-label={`${game.name} - Premium`}>
         <div className={styles.hero} style={{ background: gradient, opacity: 0.4 }}>
-          <span className={styles.heroIcon}>🔒</span>
+          <span className={styles.heroIcon}>{'\uD83D\uDD12'}</span>
         </div>
         <div className={styles.body}>
           <div className={styles.name}>{game.name}</div>
           <div className={styles.description}>{game.description}</div>
           <div className={styles.meta}>
-            <span className={styles.players}>{game.minPlayers}–{game.maxPlayers} graczy</span>
+            <span className={styles.players}>{game.minPlayers}&ndash;{game.maxPlayers} graczy</span>
             <span className={styles.premiumBadge}>Premium</span>
           </div>
         </div>
@@ -39,8 +39,8 @@ export function GameCard({ game, onPremiumClick }: GameCardProps) {
         <div className={styles.name}>{game.name}</div>
         <div className={styles.description}>{game.description}</div>
         <div className={styles.meta}>
-          <span className={styles.players}>{game.minPlayers}–{game.maxPlayers} graczy</span>
-          <span className={styles.playBtn}>Zagraj →</span>
+          <span className={styles.players}>{game.minPlayers}&ndash;{game.maxPlayers} graczy</span>
+          <span className={styles.playBtn}>Zagraj &rarr;</span>
         </div>
       </div>
     </Link>

@@ -10,6 +10,7 @@ type Phase =
 
 type PlayBottomBarProps = {
   phase: Phase
+  isRoomConnected: boolean
   isDeviceConnected: boolean
   isRoundOrderRevealing: boolean
   roundOrderCountdown: number | null
@@ -23,6 +24,7 @@ type PlayBottomBarProps = {
 
 export function PlayBottomBar({
   phase,
+  isRoomConnected,
   isDeviceConnected,
   isRoundOrderRevealing,
   roundOrderCountdown,
@@ -36,6 +38,13 @@ export function PlayBottomBar({
   return (
     <footer className={styles.bar}>
       <div className={styles.rail} aria-hidden="true" />
+
+      {!isRoomConnected ? (
+        <p className={styles.connectionAlert}>
+          Problem z połączeniem z pokojem. Odśwież stronę albo wróć do menu, jeśli stan gry się nie
+          odświeża.
+        </p>
+      ) : null}
 
       {phase === 'round-order' && !isRoundOrderRevealing && (
         <button className={styles.primaryButton} onClick={onStartRound}>

@@ -22,6 +22,7 @@
 }
 
 .title {
+  margin: 0;
   font-size: 22px;
   font-weight: 700;
   text-align: center;
@@ -263,7 +264,8 @@
     flex-shrink: 0;
   }
 
-  .cancelBtn, .applyBtn {
+  .cancelBtn,
+  .applyBtn {
     font-size: 15px;
     padding: 12px 20px;
   }

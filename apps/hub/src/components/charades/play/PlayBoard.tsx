@@ -1,56 +1,28 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import styles from './PlayBoard.module.css'
-
-type PlayerSummary = {
-  name: string
-  avatar: string
-  gender: 'on' | 'ona' | 'none'
-  score?: number
-}
-
-type Phase =
-  | 'round-order'
-  | 'prepare'
-  | 'reveal-buffer'
-  | 'timer-running'
-  | 'round-summary'
-  | 'verdict'
-
-type PlayBoardProps = {
-  phase: Phase
-  players: PlayerSummary[]
-  order: PlayerSummary[]
-  currentOrderIdx: number
-  presenter: PlayerSummary | undefined
-  currentWord: string
-  isRoundOrderRevealing: boolean
-  onRoundOrderSettled: () => void
-  timerRemaining: number
-  bufferRemaining?: number
-  currentRound: number
-  totalRounds: number
-}
-
-type CardPoint = {
-  x: number
-  y: number
-}
-
-type RankedPlayer = PlayerSummary & {
-  rank: number
-}
+import { CardBack, SettledCard } from './PlayBoardCards'
+import {
+  BufferView,
+  PrepareView,
+  RoundSummaryView,
+  TimerRunningView,
+  VerdictView,
+} from './PlayBoardPhases'
+import {
+  getCenterDeckCardStyle,
+  getCornerDeckCardStyle,
+  getRankedPlayers,
+  getScoreKey,
+  toLocalPoint,
+} from './playboard-helpers'
+import type { CardPoint, Phase, PlayBoardProps, PlayerSummary, RankedPlayer } from './playboard-types'
+import { usePrepareScoreRail } from './usePrepareScoreRail'
 
 const COLLECT_DURATION = 0.22
 const DEAL_DURATION = 0.62
 const BETWEEN_COLLECT_MS = 30
 const BETWEEN_DEAL_MS = 110
-const SCORE_RAIL_EXPAND_MS = 420
-const SCORE_RAIL_POST_EXPAND_WAIT_MS = 500
-const SCORE_RAIL_UPDATE_DELAY_MS = SCORE_RAIL_EXPAND_MS + SCORE_RAIL_POST_EXPAND_WAIT_MS
-const SCORE_RAIL_REORDER_DELAY_MS = 24
-const SCORE_RAIL_POST_REORDER_CLOSE_MS = 5000
-
 export function PlayBoard({
   phase,
   players,
@@ -64,6 +36,7 @@ export function PlayBoard({
   bufferRemaining = 0,
   currentRound,
   totalRounds,
+  animationsEnabled = true,
 }: PlayBoardProps) {
   const totalCards = order.length > 0 ? order.length : players.length
   const [centerCount, setCenterCount] = useState(totalCards)
@@ -76,20 +49,7 @@ export function PlayBoard({
   const [flyCardOrderIndex, setFlyCardOrderIndex] = useState<number | null>(null)
   const [positionsReady, setPositionsReady] = useState(false)
   const [isVerdictWordVisible, setIsVerdictWordVisible] = useState(false)
-  const [isScoreRailExpanded, setIsScoreRailExpanded] = useState(false)
-  const [displayedScoredPlayers, setDisplayedScoredPlayers] = useState<RankedPlayer[]>([])
   const timelineRef = useRef<gsap.core.Timeline | null>(null)
-  const scoreRailRef = useRef<HTMLDivElement | null>(null)
-  const scoreItemRefs = useRef<Record<string, HTMLDivElement | null>>({})
-  const prevScorePositionsRef = useRef<Record<string, DOMRect>>({})
-  const prevScoreRailVisibleRef = useRef(false)
-  const scoreRailCollapseTimerRef = useRef<number | null>(null)
-  const scoreRailCommitTimerRef = useRef<number | null>(null)
-  const scoreRailReorderTimerRef = useRef<number | null>(null)
-  const prevScoreSignatureRef = useRef('')
-  const prevPhaseRef = useRef<Phase>(phase)
-  const pendingScorePlayersRef = useRef<RankedPlayer[]>([])
-  const animateScoreRailOnNextDisplayRef = useRef(false)
   const revealAreaRef = useRef<HTMLDivElement | null>(null)
   const centerAnchorRef = useRef<HTMLDivElement | null>(null)
   const cornerAnchorRef = useRef<HTMLDivElement | null>(null)
@@ -98,26 +58,21 @@ export function PlayBoard({
   const slotRefs = useRef<(HTMLDivElement | null)[]>([])
   const settledPlayers = order.slice(0, settledCount)
   const rankedPlayers = useMemo<RankedPlayer[]>(
-    () =>
-      [...players]
-        .sort((a, b) => (b.score ?? 0) - (a.score ?? 0) || a.name.localeCompare(b.name))
-        .map((player, index, list) => {
-          const prev = list[index - 1]
-          const sameAsPrev = prev && (prev.score ?? 0) === (player.score ?? 0)
-          const rank = sameAsPrev ? ((list[index - 1] as PlayerSummary & { rank?: number }).rank ?? index) : index + 1
-          return { ...player, rank }
-        }),
+    () => getRankedPlayers(players),
     [players]
   )
   const topScore = rankedPlayers[0]?.score ?? 0
   const leaders = rankedPlayers.filter((player) => (player.score ?? 0) === topScore).map((player) => player.name)
-  const scoredPlayers = useMemo(() => rankedPlayers.filter((player) => (player.score ?? 0) > 0), [rankedPlayers])
-  const hasAnyScore = scoredPlayers.length > 0
-  const showPrepareScoreRail = phase === 'prepare' && displayedScoredPlayers.length > 0
-  const scoreSignature = scoredPlayers.map((player) => `${getScoreKey(player)}:${player.score ?? 0}`).join('|')
-  const displayedScoreSignature = displayedScoredPlayers
-    .map((player) => `${getScoreKey(player)}:${player.score ?? 0}`)
-    .join('|')
+  const {
+    displayedScoredPlayers,
+    isScoreRailExpanded,
+    scoreItemRefs,
+    showPrepareScoreRail,
+    toggleScoreRail,
+  } = usePrepareScoreRail({
+    phase,
+    scoredPlayers: rankedPlayers.filter((player) => (player.score ?? 0) > 0),
+  })
 
   useEffect(() => {
     if (phase !== 'round-order') {
@@ -148,10 +103,24 @@ export function PlayBoard({
       setFlyCardOrderIndex(null)
       return
     }
-  }, [phase, isRoundOrderRevealing, totalCards])
+    if (!animationsEnabled) {
+      timelineRef.current?.kill()
+      timelineRef.current = null
+      setCenterCount(0)
+      setCornerCount(0)
+      setSettledCount(order.length)
+      setLandedSlotIndex(null)
+      setShowFlyCard(false)
+      setFlyCardFace('back')
+      setFlyCardPlayer(null)
+      setFlyCardOrderIndex(null)
+      setPositionsReady(true)
+      return
+    }
+  }, [animationsEnabled, order.length, phase, isRoundOrderRevealing, totalCards])
 
   useLayoutEffect(() => {
-    if (phase !== 'round-order' || !isRoundOrderRevealing || order.length === 0) {
+    if (phase !== 'round-order' || !isRoundOrderRevealing || order.length === 0 || !animationsEnabled) {
       return
     }
 
@@ -206,221 +175,13 @@ export function PlayBoard({
       timelineRef.current?.kill()
       timelineRef.current = null
     }
-  }, [phase, isRoundOrderRevealing, order, currentOrderIdx])
+  }, [animationsEnabled, phase, isRoundOrderRevealing, order, currentOrderIdx])
 
   useEffect(() => {
     if (phase !== 'verdict') {
       setIsVerdictWordVisible(false)
     }
   }, [phase, currentWord])
-
-  useEffect(() => {
-    return () => {
-      if (scoreRailCollapseTimerRef.current !== null) {
-        window.clearTimeout(scoreRailCollapseTimerRef.current)
-      }
-      if (scoreRailCommitTimerRef.current !== null) {
-        window.clearTimeout(scoreRailCommitTimerRef.current)
-      }
-      if (scoreRailReorderTimerRef.current !== null) {
-        window.clearTimeout(scoreRailReorderTimerRef.current)
-      }
-    }
-  }, [])
-
-  useEffect(() => {
-    pendingScorePlayersRef.current = scoredPlayers
-  }, [scoredPlayers])
-
-  useEffect(() => {
-    const previousPhase = prevPhaseRef.current
-    const enteringPrepare = previousPhase !== 'prepare' && phase === 'prepare'
-    const leavingPrepare = previousPhase === 'prepare' && phase !== 'prepare'
-
-    if (leavingPrepare) {
-      if (scoreRailCollapseTimerRef.current !== null) {
-        window.clearTimeout(scoreRailCollapseTimerRef.current)
-      }
-      if (scoreRailCommitTimerRef.current !== null) {
-        window.clearTimeout(scoreRailCommitTimerRef.current)
-      }
-      if (scoreRailReorderTimerRef.current !== null) {
-        window.clearTimeout(scoreRailReorderTimerRef.current)
-      }
-      setIsScoreRailExpanded(false)
-    }
-
-    if (phase === 'prepare' && hasAnyScore && displayedScoredPlayers.length === 0) {
-      setDisplayedScoredPlayers(scoredPlayers)
-      prevScoreSignatureRef.current = scoreSignature
-    }
-
-    if (enteringPrepare && hasAnyScore) {
-      const pendingPlayers = pendingScorePlayersRef.current
-      const pendingSignature = pendingPlayers.map((player) => `${getScoreKey(player)}:${player.score ?? 0}`).join('|')
-
-      if (displayedScoreSignature && displayedScoreSignature !== pendingSignature) {
-        animateScoreRailOnNextDisplayRef.current = true
-        setIsScoreRailExpanded(true)
-
-        if (scoreRailCollapseTimerRef.current !== null) {
-          window.clearTimeout(scoreRailCollapseTimerRef.current)
-        }
-      if (scoreRailCommitTimerRef.current !== null) {
-        window.clearTimeout(scoreRailCommitTimerRef.current)
-      }
-        if (scoreRailReorderTimerRef.current !== null) {
-          window.clearTimeout(scoreRailReorderTimerRef.current)
-        }
-
-        scoreRailCommitTimerRef.current = window.setTimeout(() => {
-          setDisplayedScoredPlayers(pendingPlayers)
-        }, SCORE_RAIL_UPDATE_DELAY_MS)
-      } else if (!displayedScoreSignature) {
-        setDisplayedScoredPlayers(pendingPlayers)
-        prevScoreSignatureRef.current = pendingSignature
-      }
-    }
-
-    prevPhaseRef.current = phase
-  }, [displayedScoreSignature, displayedScoredPlayers.length, hasAnyScore, phase, scoreSignature, scoredPlayers])
-
-  useLayoutEffect(() => {
-    const visible = showPrepareScoreRail
-    const isNewScoreState = animateScoreRailOnNextDisplayRef.current && prevScoreSignatureRef.current !== displayedScoreSignature
-
-    if (!visible) {
-      prevScorePositionsRef.current = {}
-      prevScoreRailVisibleRef.current = false
-      return
-    }
-
-    const previousPositions = prevScorePositionsRef.current
-    const currentPositions: Record<string, DOMRect> = {}
-
-    displayedScoredPlayers.forEach((player) => {
-      const key = getScoreKey(player)
-      const element = scoreItemRefs.current[key]
-      if (!element) {
-        return
-      }
-
-      const nextRect = element.getBoundingClientRect()
-      currentPositions[key] = nextRect
-
-      const prevRect = previousPositions[key]
-      if (!prevRect) {
-        if (isNewScoreState) {
-          gsap.set(element, { opacity: 0, x: 12, scale: 0.985, force3D: true })
-        } else {
-          gsap.set(element, { clearProps: 'transform,opacity' })
-        }
-        return
-      }
-
-      const deltaY = prevRect.top - nextRect.top
-      if (Math.abs(deltaY) > 1) {
-        const movedUp = deltaY > 0
-        gsap.killTweensOf(element)
-
-        if (isNewScoreState) {
-          gsap.set(
-            element,
-            movedUp
-              ? {
-                  y: deltaY,
-                  x: -6,
-                  scale: 1.035,
-                  zIndex: 8,
-                  boxShadow: '0 20px 34px rgba(0, 0, 0, 0.26)',
-                  force3D: true,
-                }
-              : {
-                  y: deltaY,
-                  scale: 0.985,
-                  opacity: 0.94,
-                  zIndex: 2,
-                  force3D: true,
-                }
-          )
-        } else {
-          gsap.set(element, { clearProps: 'transform,zIndex,boxShadow,opacity' })
-        }
-      }
-    })
-
-    if (scoreRailReorderTimerRef.current !== null) {
-      window.clearTimeout(scoreRailReorderTimerRef.current)
-    }
-
-    if (isNewScoreState) {
-      scoreRailReorderTimerRef.current = window.setTimeout(() => {
-        let longestDuration = 0
-
-        displayedScoredPlayers.forEach((player) => {
-          const key = getScoreKey(player)
-          const element = scoreItemRefs.current[key]
-          if (!element) {
-            return
-          }
-
-          const prevRect = previousPositions[key]
-          if (!prevRect) {
-            gsap.to(element, {
-              opacity: 1,
-              x: 0,
-              scale: 1,
-              duration: 0.34,
-              ease: 'power2.out',
-              clearProps: 'transform,opacity',
-            })
-            return
-          }
-
-          const nextRect = currentPositions[key]
-          const deltaY = prevRect.top - nextRect.top
-          const movedUp = deltaY > 0
-          const duration = movedUp ? 0.64 : 0.52
-          longestDuration = Math.max(longestDuration, duration)
-
-          gsap.to(element, movedUp
-            ? {
-                y: 0,
-                x: 0,
-                scale: 1,
-                opacity: 1,
-                zIndex: 0,
-                boxShadow: '0 0 0 rgba(0, 0, 0, 0)',
-                duration,
-                ease: 'power2.inOut',
-                clearProps: 'transform,zIndex,boxShadow,opacity',
-              }
-            : {
-                y: 0,
-                scale: 1,
-                opacity: 1,
-                zIndex: 0,
-                duration,
-                ease: 'power2.out',
-                clearProps: 'transform,zIndex,opacity',
-              })
-        })
-
-        if (scoreRailCollapseTimerRef.current !== null) {
-          window.clearTimeout(scoreRailCollapseTimerRef.current)
-        }
-
-        scoreRailCollapseTimerRef.current = window.setTimeout(() => {
-          setIsScoreRailExpanded(false)
-        }, Math.round(longestDuration * 1000) + SCORE_RAIL_POST_REORDER_CLOSE_MS)
-      }, SCORE_RAIL_REORDER_DELAY_MS)
-    }
-
-    prevScorePositionsRef.current = currentPositions
-    prevScoreRailVisibleRef.current = true
-    prevScoreSignatureRef.current = displayedScoreSignature
-    animateScoreRailOnNextDisplayRef.current = false
-  }, [displayedScoreSignature, displayedScoredPlayers, showPrepareScoreRail])
 
   useEffect(() => {
     if (
@@ -688,317 +449,46 @@ export function PlayBoard({
   }
 
   if (phase === 'timer-running') {
-    return (
-      <main className={styles.board}>
-        <section className={styles.stage}>
-          <div className={styles.prepareLayout}>
-            <div className={styles.preparePlayerPane}>
-              <PresenterCard presenter={presenter} subtitle="Prezenter" featured />
-            </div>
-
-            <div className={styles.timerContent}>
-              <span className={styles.eyebrow}>Prezentuj!</span>
-              <div className={styles.timerHero}>
-                <h1 className={styles.timerTitle}>Czas do konca prezentowania</h1>
-                <div className={styles.timer}>{timerRemaining}</div>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
-    )
+    return <TimerRunningView presenter={presenter} timerRemaining={timerRemaining} />
   }
 
   if (phase === 'verdict') {
     return (
-      <main className={styles.board}>
-        <section className={styles.stage}>
-          <div className={styles.prepareLayout}>
-            <div className={styles.preparePlayerPane}>
-              <PresenterCard presenter={presenter} subtitle="Prezenter" featured />
-            </div>
-
-            <div className={styles.verdictContent}>
-              <span className={styles.eyebrow}>Werdykt</span>
-              <div className={styles.verdictHero}>
-                <h1 className={styles.verdictTitle}>Czy haslo zostalo odgadniete?</h1>
-                {currentWord ? (
-                  <>
-                    <button
-                      type="button"
-                      className={styles.verdictRevealButton}
-                      onClick={() => setIsVerdictWordVisible((current) => !current)}
-                    >
-                      {isVerdictWordVisible ? 'Ukryj haslo' : 'Pokaz haslo'}
-                    </button>
-                    <div className={styles.verdictWordSlot}>
-                      <div
-                        className={styles.verdictWord}
-                        data-visible={isVerdictWordVisible}
-                        aria-hidden={!isVerdictWordVisible}
-                      >
-                        {currentWord}
-                      </div>
-                    </div>
-                  </>
-                ) : null}
-              </div>
-              <div className={styles.verdictNote}>
-                <span className={styles.verdictNoteLabel}>Decyzja hosta</span>
-                <p className={styles.verdictNoteText}>
-                  Wybierz w dolnym pasku, czy prezentowane haslo zostalo odgadniete.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
-      </main>
+      <VerdictView
+        presenter={presenter}
+        currentWord={currentWord}
+        isVerdictWordVisible={isVerdictWordVisible}
+        onToggleWordVisibility={() => setIsVerdictWordVisible((current) => !current)}
+      />
     )
   }
 
   if (phase === 'round-summary') {
     return (
-      <main className={styles.board}>
-        <section className={styles.stage}>
-          <div className={styles.summaryScreen}>
-            <span className={styles.eyebrow}>Podsumowanie rundy</span>
-            <div className={styles.summaryHero}>
-              <h1 className={styles.summaryTitle}>
-                Podsumowanie rundy {currentRound}/{totalRounds}
-              </h1>
-              <p className={styles.summaryLead}>
-                {leaders.length > 0
-                  ? `Aktualni liderzy: ${leaders.join(', ')} (${topScore})`
-                  : 'Po tej rundzie nadal nie ma zdobytych punktow.'}
-              </p>
-            </div>
-
-            <div className={styles.summaryRanking}>
-              {rankedPlayers.map((player) => (
-                <div key={player.name} className={styles.summaryRow} data-rank={player.rank}>
-                  <span className={styles.summaryRank}>#{player.rank}</span>
-                  <span className={styles.summaryAvatar}>{player.avatar}</span>
-                  <span className={styles.summaryName} data-gender={player.gender}>
-                    {player.name}
-                  </span>
-                  <span className={styles.summaryScore}>{player.score ?? 0}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      </main>
+      <RoundSummaryView
+        currentRound={currentRound}
+        totalRounds={totalRounds}
+        leaders={leaders}
+        topScore={topScore}
+        rankedPlayers={rankedPlayers}
+      />
     )
   }
 
   if (phase === 'prepare') {
     return (
-      <main className={`${styles.board} ${styles.boardPrepare}`}>
-        <section className={`${styles.stage} ${styles.stagePrepare}`}>
-          <div className={styles.prepareScene}>
-            <div className={styles.prepareLayout}>
-              <div className={styles.preparePlayerPane}>
-                <PresenterCard presenter={presenter} subtitle="Prezenter" featured />
-              </div>
-
-              <div className={styles.prepareContent}>
-                <span className={styles.eyebrow}>Za chwile start</span>
-                <div className={styles.prepareHero}>
-                  <h1 className={styles.title}>Haslo czeka na urzadzeniu prezentera</h1>
-                </div>
-
-                <div className={styles.stepList}>
-                  <div className={styles.stepItem}>
-                    <span className={styles.stepIndex}>1</span>
-                    <p>Po kliknieciu "Odkryj haslo" prezenter ma 10 sekund, by zapoznac sie z haslem.</p>
-                  </div>
-                  <div className={styles.stepItem}>
-                    <span className={styles.stepIndex}>2</span>
-                    <p>Po tym czasie uruchomi sie glowny licznik na prezentowanie hasla.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {showPrepareScoreRail && (
-          <aside ref={scoreRailRef} className={styles.scoreRail} data-expanded={isScoreRailExpanded}>
-            <button
-              type="button"
-              className={styles.scoreRailToggle}
-              data-expanded={isScoreRailExpanded}
-              onClick={() => {
-                if (scoreRailCollapseTimerRef.current !== null) {
-                  window.clearTimeout(scoreRailCollapseTimerRef.current)
-                }
-                setIsScoreRailExpanded((current) => !current)
-              }}
-              aria-label={isScoreRailExpanded ? 'Schowaj wynik' : 'Pokaz wynik'}
-            >
-              <span className={styles.scoreRailToggleIcon} aria-hidden="true">
-                {isScoreRailExpanded ? '›' : '‹'}
-              </span>
-            </button>
-
-            <div className={styles.scoreRailHeader}>
-              <span className={styles.scoreRailLabel}>Wynik</span>
-            </div>
-            <div className={styles.scoreRailList}>
-              {displayedScoredPlayers.map((player) => {
-                const key = getScoreKey(player)
-                return (
-                  <div
-                    key={key}
-                    ref={(element) => {
-                      scoreItemRefs.current[key] = element
-                    }}
-                    className={styles.scoreRailItem}
-                    data-rank={displayedScoredPlayers[0]?.score === (player.score ?? 0) ? 'leader' : 'chasing'}
-                  >
-                    <span className={styles.scoreRailAvatar}>{player.avatar}</span>
-                    <span className={styles.scoreRailName} data-gender={player.gender}>
-                      {player.name}
-                    </span>
-                    <span className={styles.scoreRailPoints}>{player.score ?? 0}</span>
-                  </div>
-                )
-              })}
-            </div>
-          </aside>
-        )}
-      </main>
+      <PrepareView
+        presenter={presenter}
+        showScoreRail={showPrepareScoreRail}
+        isScoreRailExpanded={isScoreRailExpanded}
+        displayedScoredPlayers={displayedScoredPlayers}
+        scoreItemRefs={scoreItemRefs}
+        onToggleScoreRail={toggleScoreRail}
+        getScoreKey={getScoreKey}
+      />
     )
   }
 
-  return (
-    <main className={styles.board}>
-      <section className={styles.stage}>
-        <div className={styles.prepareLayout}>
-          <div className={styles.preparePlayerPane}>
-            <PresenterCard presenter={presenter} subtitle="Prezenter" featured />
-          </div>
-
-          <div className={styles.bufferContent}>
-            <span className={styles.eyebrow}>Zapamietaj haslo</span>
-            <div className={styles.bufferHero}>
-              <h1 className={styles.bufferTitle}>Prezenter zapoznaje sie z haslem</h1>
-              <div className={styles.bufferTimerWrap}>
-                <div className={styles.timer}>{bufferRemaining}</div>
-                <span className={styles.bufferTimerLabel}>sekund do startu tury</span>
-              </div>
-            </div>
-            <div className={styles.bufferSideNote}>
-              <span className={styles.bufferSideNoteLabel}>Na planszy</span>
-              <p className={styles.bufferHint}>
-                To jest moment tylko dla prezentera. Reszta graczy czeka na start tury.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-    </main>
-  )
-}
-
-function SettledCard({
-  player,
-  index,
-  isActive,
-}: {
-  player: PlayerSummary | undefined
-  index: number
-  isActive: boolean
-}) {
-  return (
-    <div className={isActive ? styles.orderCardSettledActive : styles.orderCardSettled}>
-      <div className={styles.orderCardInner}>
-        <div className={styles.orderCardBack}>
-          <CardBack branded />
-        </div>
-        <div className={styles.orderCardFront}>
-          <span className={styles.orderIndex}>{index + 1}</span>
-          <span className={styles.orderAvatar}>{player?.avatar ?? '??'}</span>
-          <span className={styles.namePill} data-gender={player?.gender ?? 'none'}>
-            {player?.name ?? 'Brak gracza'}
-          </span>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function toLocalPoint(rect: DOMRect, container: DOMRect): CardPoint {
-  return {
-    x: rect.left - container.left,
-    y: rect.top - container.top,
-  }
-}
-
-function getCenterDeckCardStyle(index: number) {
-  return {
-    '--stack-x': `${index * 0.9}px`,
-    '--stack-y': `${index * 1.1}px`,
-    '--stack-rotate': `${index * 0.45}deg`,
-    '--stack-z': index + 1,
-  } as CSSProperties
-}
-
-function getCornerDeckCardStyle(index: number, total: number) {
-  return {
-    '--corner-fan-x': `${index * 0.9}px`,
-    '--corner-fan-y': `${index * 1.1}px`,
-    '--corner-fan-rotate': `${index * 0.45}deg`,
-    '--corner-z': index + 1,
-  } as CSSProperties
-}
-
-function getScoreKey(player: PlayerSummary) {
-  return `${player.name}-${player.avatar}-${player.gender}`
-}
-
-function CardBack({ branded = false }: { branded?: boolean }) {
-  return (
-    <div className={styles.cardBackFace}>
-      <span className={styles.cardBackCorner}>{branded ? 'K' : ''}</span>
-      <div className={styles.cardBackCenter}>
-        {branded && <span className={styles.cardBackLabel}>Kalambury</span>}
-      </div>
-      <span className={styles.cardBackCorner}>{branded ? 'K' : ''}</span>
-    </div>
-  )
-}
-
-function PresenterCard({
-  presenter,
-  subtitle,
-  compact = false,
-  featured = false,
-}: {
-  presenter: PlayerSummary | undefined
-  subtitle: string
-  compact?: boolean
-  featured?: boolean
-}) {
-  return (
-    <div
-      className={
-        compact ? styles.presenterCardCompact : featured ? styles.presenterCardFeatured : styles.presenterCard
-      }
-    >
-      <span className={featured ? styles.presenterBadgeFeatured : styles.presenterSubtitle}>{subtitle}</span>
-      <span className={featured ? styles.presenterAvatarFeatured : styles.presenterAvatar}>
-        {presenter?.avatar ?? '??'}
-      </span>
-      <div className={styles.presenterMeta}>
-        <span
-          className={featured ? styles.presenterNamePill : styles.presenterName}
-          data-gender={presenter?.gender ?? 'none'}
-        >
-          {presenter?.name ?? 'Brak gracza'}
-        </span>
-      </div>
-    </div>
-  )
+  return <BufferView presenter={presenter} bufferRemaining={bufferRemaining} />
 }
 

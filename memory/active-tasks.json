@@ -18,5 +18,16 @@
       "Remind user about tasks stale >14 days"
     ]
   },
-  "tasks": []
+  "tasks": [
+    {
+      "id": "T001",
+      "title": "Charades code cleanup pass",
+      "status": "active",
+      "context": "Pre-MVP review identified three cleanup areas: stale useGameState dependencies around send/socket reconnects, dead presenter/runtime leftovers after recent refactors, and oversized files in results/playboard that break repo limits.",
+      "next_action": "Fix useGameState dependency issues first, then remove dead presenter/runtime code, then split oversized Charades files.",
+      "blocker": "",
+      "created": "2026-03-27",
+      "updated": "2026-03-27"
+    }
+  ]
 }

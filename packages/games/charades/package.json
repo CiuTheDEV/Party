@@ -6,6 +6,8 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "import": "./dist/index.js",
+      "default": "./dist/index.js",
       "types": "./dist/index.d.ts"
     }
   },
@@ -13,7 +15,11 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@party/game-sdk": "*"
+    "@party/game-sdk": "*",
+    "@party/ui": "*",
+    "lucide-react": "^0.577.0",
+    "qrcode.react": "^4.2.0",
+    "react": "^19"
   },
   "devDependencies": {
     "@types/react": "^19",

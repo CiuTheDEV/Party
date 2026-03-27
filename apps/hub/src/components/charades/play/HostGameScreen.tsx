@@ -1,24 +1,19 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { PlayBoard } from './PlayBoard'
 import { PlayBottomBar } from './PlayBottomBar'
+import { ReconnectPresenterModal } from './ReconnectPresenterModal'
+import { PlaySettingsModal } from './PlaySettingsModal'
 import { PlayTopBar } from './PlayTopBar'
+import { VerdictPickerModal } from './VerdictPickerModal'
+import type { Phase, PlayerSummary } from './playboard-types'
+import { useRoundOrderCountdown } from './useRoundOrderCountdown'
+import {
+  readCharadesPlayPreferences,
+  writeCharadesPlayPreferences,
+} from '../../../utils/charades-play-preferences'
 import styles from './HostGameScreen.module.css'
-
-type PlayerSummary = {
-  name: string
-  avatar: string
-  gender: 'on' | 'ona' | 'none'
-}
-
-type Phase =
-  | 'round-order'
-  | 'prepare'
-  | 'reveal-buffer'
-  | 'timer-running'
-  | 'round-summary'
-  | 'verdict'
 
 type HostGameScreenProps = {
   phase: Phase
@@ -28,23 +23,39 @@ type HostGameScreenProps = {
   order: number[]
   players: PlayerSummary[]
   presenter: PlayerSummary | undefined
+  roomId: string
   currentWord: string
   timerRemaining: number
   bufferRemaining: number
   isDeviceConnected: boolean
+  isRoomConnected: boolean
   isRoundOrderRevealing: boolean
   onFinishRoundOrder: () => void
   onFinishRoundSummary: () => void
   onStartRound: () => void
   onExitToMenu: () => void
+  onPauseGame: () => void
+  onResumeGame: () => void
   onStopRound: () => void
   onGiveVerdict: (correct: boolean, guessedPlayerIdx?: number) => void
 }
 
 export function HostGameScreen(props: HostGameScreenProps) {
-  const [roundOrderCountdown, setRoundOrderCountdown] = useState<number | null>(null)
   const [isVerdictPickerOpen, setIsVerdictPickerOpen] = useState(false)
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [soundEnabled, setSoundEnabled] = useState(true)
+  const [animationsEnabled, setAnimationsEnabled] = useState(true)
   const [selectedGuessedPlayerIdx, setSelectedGuessedPlayerIdx] = useState<number | null>(null)
+  const wasSettingsOpenRef = useRef(false)
+  const isPresenterReconnectRequired =
+    !props.isDeviceConnected &&
+    (props.phase === 'prepare' || props.phase === 'reveal-buffer' || props.phase === 'timer-running')
+  const isPauseOverlayOpen = isSettingsOpen || isPresenterReconnectRequired
+  const { roundOrderCountdown, startRoundOrderCountdown } = useRoundOrderCountdown({
+    shouldRun: props.phase === 'round-order' && props.isRoundOrderRevealing,
+    isPaused: isPauseOverlayOpen,
+    onFinished: props.onFinishRoundOrder,
+  })
   const orderedPlayers = useMemo(
     () =>
       props.order
@@ -54,10 +65,10 @@ export function HostGameScreen(props: HostGameScreenProps) {
   )
 
   useEffect(() => {
-    if (props.phase !== 'round-order' || !props.isRoundOrderRevealing) {
-      setRoundOrderCountdown(null)
-    }
-  }, [props.phase, props.isRoundOrderRevealing])
+    const preferences = readCharadesPlayPreferences()
+    setSoundEnabled(preferences.soundEnabled)
+    setAnimationsEnabled(preferences.animationsEnabled)
+  }, [])
 
   useEffect(() => {
     if (props.phase !== 'verdict') {
@@ -67,26 +78,44 @@ export function HostGameScreen(props: HostGameScreenProps) {
   }, [props.phase])
 
   useEffect(() => {
-    if (roundOrderCountdown === null) {
+    if (isPauseOverlayOpen) {
+      wasSettingsOpenRef.current = true
+      props.onPauseGame()
       return
     }
 
-    if (roundOrderCountdown <= 0) {
-      props.onFinishRoundOrder()
-      setRoundOrderCountdown(null)
-      return
+    if (wasSettingsOpenRef.current) {
+      wasSettingsOpenRef.current = false
+      props.onResumeGame()
     }
+  }, [isPauseOverlayOpen, props.onPauseGame, props.onResumeGame])
 
-    const timer = window.setTimeout(() => {
-      setRoundOrderCountdown((current) => (current === null ? null : current - 1))
-    }, 1000)
-
-    return () => window.clearTimeout(timer)
-  }, [roundOrderCountdown, props.onFinishRoundOrder])
+  const persistPreferences = useCallback((nextSoundEnabled: boolean, nextAnimationsEnabled: boolean) => {
+    writeCharadesPlayPreferences({
+      soundEnabled: nextSoundEnabled,
+      animationsEnabled: nextAnimationsEnabled,
+    })
+  }, [])
 
   const handleRoundOrderSettled = useCallback(() => {
-    setRoundOrderCountdown((current) => (current === null ? 3 : current))
-  }, [])
+    startRoundOrderCountdown()
+  }, [startRoundOrderCountdown])
+
+  const toggleSound = useCallback(() => {
+    setSoundEnabled((current) => {
+      const next = !current
+      persistPreferences(next, animationsEnabled)
+      return next
+    })
+  }, [animationsEnabled, persistPreferences])
+
+  const toggleAnimations = useCallback(() => {
+    setAnimationsEnabled((current) => {
+      const next = !current
+      persistPreferences(soundEnabled, next)
+      return next
+    })
+  }, [persistPreferences, soundEnabled])
 
   const presenterIdx = props.order[props.currentOrderIdx]
   const guessedPlayers = props.players
@@ -95,9 +124,10 @@ export function HostGameScreen(props: HostGameScreenProps) {
 
   return (
     <div className={styles.screen}>
-      <PlayTopBar />
+      <PlayTopBar onOpenSettings={() => setIsSettingsOpen(true)} />
 
       <PlayBoard
+        animationsEnabled={animationsEnabled}
         currentOrderIdx={props.currentOrderIdx}
         order={orderedPlayers}
         phase={props.phase}
@@ -113,6 +143,7 @@ export function HostGameScreen(props: HostGameScreenProps) {
       />
 
       <PlayBottomBar
+        isRoomConnected={props.isRoomConnected}
         isDeviceConnected={props.isDeviceConnected}
         isRoundOrderRevealing={props.isRoundOrderRevealing}
         phase={props.phase}
@@ -128,48 +159,38 @@ export function HostGameScreen(props: HostGameScreenProps) {
         onStopRound={props.onStopRound}
       />
 
-      {isVerdictPickerOpen && (
-        <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-label="Wybierz gracza">
-          <div className={styles.modalCard}>
-            <span className={styles.modalEyebrow}>Zgadnieto</span>
-            <h2 className={styles.modalTitle}>Ktory gracz odgadl haslo?</h2>
-            <div className={styles.modalList}>
-              {guessedPlayers.map((player) => {
-                const isSelected = selectedGuessedPlayerIdx === player.index
-                return (
-                  <button
-                    key={`${player.name}-${player.index}`}
-                    className={isSelected ? styles.playerOptionSelected : styles.playerOption}
-                    onClick={() => setSelectedGuessedPlayerIdx(player.index)}
-                  >
-                    <span className={styles.playerAvatar}>{player.avatar}</span>
-                    <span className={styles.playerName} data-gender={player.gender}>
-                      {player.name}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-            <div className={styles.modalActions}>
-              <button className={styles.cancelButton} onClick={() => setIsVerdictPickerOpen(false)}>
-                Wroc
-              </button>
-              <button
-                className={styles.confirmButton}
-                disabled={selectedGuessedPlayerIdx === null}
-                onClick={() => {
-                  if (selectedGuessedPlayerIdx === null) {
-                    return
-                  }
-                  props.onGiveVerdict(true, selectedGuessedPlayerIdx)
-                }}
-              >
-                Przyznaj punkt
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {isVerdictPickerOpen ? (
+        <VerdictPickerModal
+          players={guessedPlayers}
+          selectedPlayerIdx={selectedGuessedPlayerIdx}
+          onSelectPlayer={setSelectedGuessedPlayerIdx}
+          onCancel={() => setIsVerdictPickerOpen(false)}
+          onConfirm={() => {
+            if (selectedGuessedPlayerIdx === null) {
+              return
+            }
+            props.onGiveVerdict(true, selectedGuessedPlayerIdx)
+          }}
+        />
+      ) : null}
+
+      {isSettingsOpen ? (
+        <PlaySettingsModal
+          soundEnabled={soundEnabled}
+          animationsEnabled={animationsEnabled}
+          onToggleSound={toggleSound}
+          onToggleAnimations={toggleAnimations}
+          onExitToMenu={props.onExitToMenu}
+          onContinue={() => setIsSettingsOpen(false)}
+        />
+      ) : null}
+
+      {isPresenterReconnectRequired ? (
+        <ReconnectPresenterModal
+          roomId={props.roomId}
+          onBackToMenu={props.onExitToMenu}
+        />
+      ) : null}
     </div>
   )
 }

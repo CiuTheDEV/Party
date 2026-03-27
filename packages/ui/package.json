@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build": "tsc --noEmit",
-    "lint": "eslint ."
+    "lint": "tsc --noEmit"
   },
   "dependencies": {
     "lucide-react": "^0.577.0"

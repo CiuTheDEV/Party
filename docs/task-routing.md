@@ -6,63 +6,57 @@
 
 ## Model Setup
 
-**Claude Pro — Sonnet as primary, Haiku for lightweight tasks.**
+**Claude Pro - Sonnet as primary, Haiku for lightweight tasks.**
 
 | Model | Status | Use |
 |-------|--------|-----|
-| Sonnet | ✅ Active | Primary — all development work |
-| Haiku | ✅ Active | Lightweight tasks: quick lookups, simple formatting, low-stakes Q&A |
-| Codex / GPT-5.4 | ✅ Active | Token limit fallback + cross-verification |
-| Codex / GPT-5.4-mini | ✅ Active | Lightweight fallback tasks when token limit reached |
-| Antigravity | ✅ Active | Alternative fallback when token limit reached |
-| Opus | ❌ Not used | Too expensive on Claude Pro |
-| Local (Ollama) | ❌ Not used | Not set up |
-
----
+| Sonnet | Active | Primary - all development work |
+| Haiku | Active | Lightweight tasks: quick lookups, simple formatting, low-stakes Q&A |
+| Codex / GPT-5.4 | Active | Token limit fallback + cross-verification |
+| Codex / GPT-5.4-mini | Active | Lightweight fallback tasks when token limit is reached |
+| Antigravity | Active | Alternative fallback |
+| Opus | Not used | Too expensive on Claude Pro |
+| Local (Ollama) | Not used | Not set up |
 
 ## Routing Table
 
-### Sonnet handles directly
+### Sonnet Handles Directly
 
 | Task Type | Notes |
 |-----------|-------|
-| All UI / frontend development | Components, styles, layouts |
+| UI / frontend development | Components, styles, layouts |
 | Bug fixes | Any size |
 | Docs, comments, README | Any `.md` file |
 | Config files | Non-secret parameters |
 | Game logic | Room management, scoring, state |
 | API routes | Cloudflare Workers, D1 queries |
-| Refactors ≤100 lines | Contained changes |
+| Contained refactors | Small to medium changes |
 | Auth flow (Clerk) | Integration work |
-| Partykit real-time setup | Multiplayer architecture |
+| Partykit setup | Multiplayer architecture |
 
-### Hand off to Codex / Antigravity
+### Hand Off to Codex / Antigravity
 
 | Trigger | Model | Action |
 |---------|-------|--------|
-| Token limit reached mid-task | GPT-5.4 | Save state → hand off with full context |
-| Cross-verification of critical logic | GPT-5.4 | Codex reviews Claude's output |
+| Token limit reached mid-task | GPT-5.4 | Save state and hand off with full context |
+| Cross-verification of critical logic | GPT-5.4 | Codex reviews Claude output |
 | Lightweight token-limit tasks | GPT-5.4-mini | Simple, well-defined tasks only |
-| Refactor >100 lines, non-sensitive | GPT-5.4 | Optional outsource |
+| Large non-sensitive refactor | GPT-5.4 | Optional outsource |
 
-### Use Haiku for
+### Use Haiku For
 
 | Task | Notes |
 |------|-------|
 | Quick factual lookups | No code involved |
-| Simple text formatting | No architectural decisions |
+| Simple text formatting | No architecture decisions |
 | Low-stakes Q&A | When Sonnet would be overkill |
-
----
 
 ## Handoff Template
 
-When handing off to Codex/Antigravity:
+```text
+# Project Party - Handoff
 
-```
-# Project Party — Handoff
-
-## Read first (in this order)
+## Read first
 1. PROJECT_CONTEXT.md
 2. memory/today.md
 3. memory/active-tasks.json
@@ -77,12 +71,10 @@ When handing off to Codex/Antigravity:
 
 ## Completion requirements
 1. Run: npm run lint && npm run build
-2. Confirm: PASS — read the output, don't assume
-3. Update: PROJECT_CONTEXT.md handoff block
-4. Report: results with evidence
+2. Confirm PASS from output
+3. Update PROJECT_CONTEXT.md handoff block
+4. Report results with evidence
 ```
-
----
 
 ## Free Tier Constraints
 
@@ -90,15 +82,15 @@ All services must have a free tier. Before adding anything new:
 
 | Service | Free tier | Action if exceeded |
 |---------|-----------|-------------------|
-| Cloudflare Pages | Unlimited deploys | — |
-| Cloudflare D1 | 5GB, 5M reads/day | Ask product owner |
-| Cloudflare Workers | 100k req/day | Ask product owner |
-| Clerk | 10,000 MAU | Ask product owner |
-| Partykit | Free tier | Check limits before heavy use |
-| Stripe | % per transaction | Not connected yet |
+| Cloudflare Pages | Yes | Ask the product owner if limits matter |
+| Cloudflare D1 | Yes | Ask the product owner |
+| Cloudflare Workers | Yes | Ask the product owner |
+| Clerk | Yes | Ask the product owner |
+| Partykit | Yes | Verify limits before heavy use |
+| Stripe | Transaction-based | Not connected yet |
 
-> Any service without a free tier → stop and ask the product owner.
+> Any service without a free tier means stop and ask the product owner.
 
 ---
 
-*Project Party uses Claude Pro: Sonnet (primary), Haiku (lightweight), Codex GPT-5.4/GPT-5.4-mini (fallback). No Opus.*
+*Project Party uses Claude Pro: Sonnet (primary), Haiku (lightweight), Codex GPT-5.4/GPT-5.4-mini (fallback).* 

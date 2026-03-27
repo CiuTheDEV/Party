@@ -12,6 +12,7 @@
 !.vscode/extensions.json
 !.vscode/tasks.json
 !.vscode/launch.json
+!.vscode/mcp.json
 
 # Env files
 .env

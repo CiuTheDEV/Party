@@ -2,30 +2,29 @@
 
 Polish browser-based party game portal for hangouts and friend gatherings.
 
-**Status**: 🚧 In development — Phase 0 (monorepo setup)
+**Status**: In development - Phase 4 groundwork in progress
 
 ---
 
-## What is this
+## What Is This
 
-A hub where you pick a game, and each game is an independent module. Think Jackbox Party Pack — but Polish, no installation, runs in the browser.
+A hub where you pick a game, and each game is an independent module. Think Jackbox Party Pack, but browser-first, Polish-first, and installation-free.
 
-**First game**: Charades / Pantomime — show the word with gestures, expressions, and body language. No drawing, no saying the word.
+**First game**: Charades / Pantomime - express the word with gestures, expressions, and body language. No drawing, no saying the word.
 
 ## Architecture
 
-```
-project-party/                     # Monorepo (Turborepo)
-├── apps/
-│   └── hub/                       # Next.js — landing page, game list
-├── packages/
-│   ├── ui/                        # Shared UI components
-│   │   └── game-template/         # Shared layout for every game menu
-│   ├── game-sdk/                  # Game module contract (types, interfaces)
-│   └── games/
-│       └── charades/              # Module: Charades ← first game
-└── content/
-    └── charades/                  # Word lists and categories
+```text
+project-party/
+|- apps/
+|  `- hub/                  # Next.js platform shell
+|- packages/
+|  |- ui/                   # Shared UI components and shell
+|  |- game-sdk/             # Game module contract
+|  `- games/
+|     `- charades/          # First game module
+`- content/
+   `- charades/             # Word lists and categories
 ```
 
 ## Stack
@@ -36,27 +35,27 @@ project-party/                     # Monorepo (Turborepo)
 | Monorepo | Turborepo |
 | Real-time | Partykit |
 | Database | Cloudflare D1 |
-| Auth | Clerk (optional — guest play supported) |
+| Auth | Clerk later |
 | Hosting | Cloudflare Pages |
-| Payments | Stripe (stub — not connected yet) |
+| Payments | Stripe stub |
 
-## How it works
+## How It Works
 
-1. **Hub** — pick a game from the list
-2. **Game menu** — choose a mode, click Play
-3. **Config modal** — set up teams, pick word deck, configure options
-4. **Gameplay** — everyone plays together
-5. **Results** — scores, back to menu
+1. **Hub** - pick a game
+2. **Game menu** - choose mode and open setup
+3. **Config modal** - players, settings, categories, devices, start
+4. **Gameplay** - fully game-specific runtime
+5. **Results** - scores and return paths
 
-Two ways to join:
-- **Room code** — host on big screen, others join on phones (Jackbox-style)
-- **Link** — click the link, everyone on their own device
+Join modes:
+- **Room code** - host on a big screen, others join on phones
+- **Link** - everyone joins from their own device
 
 ## Development
 
-This project is built with Claude Code (Sonnet) as the primary AI agent.
-See `CLAUDE.md` for the full workflow configuration.
+This repo is primarily developed with Claude Code and Codex working against the same project memory and repo rules.
+See `AGENTS.md` / `CLAUDE.md` for workflow details.
 
 ---
 
-*Hobbyist project. Free tiers only. Built with Claude Code.*
+*Hobby project. Free tiers only.*

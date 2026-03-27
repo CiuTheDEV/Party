@@ -1,10 +1,10 @@
 import { useState, useCallback } from 'react'
 import type { WordCategory } from '@content/charades/index'
-import type { CategoryDifficulty, SelectedCategories } from '../../components/charades/CategoryPicker/CategoryPicker'
+import type { CharadesCategoryDifficulty, CharadesSelectedCategories } from '@party/charades'
 
 export type WordPoolEntry = {
   word: string
-  difficulty: CategoryDifficulty
+  difficulty: CharadesCategoryDifficulty
 }
 
 function shuffle<T>(arr: T[]): T[] {
@@ -16,9 +16,9 @@ function shuffle<T>(arr: T[]): T[] {
   return a
 }
 
-function buildPool(categories: WordCategory[], selected: SelectedCategories): WordPoolEntry[] {
+function buildPool(categories: WordCategory[], selected: CharadesSelectedCategories): WordPoolEntry[] {
   const words = categories.flatMap((c) => {
-    const diffs: CategoryDifficulty[] = selected[c.id] ?? ['easy']
+    const diffs: CharadesCategoryDifficulty[] = selected[c.id] ?? ['easy']
     const out: WordPoolEntry[] = []
     if (diffs.includes('easy')) out.push(...c.wordsEasy.map((word) => ({ word, difficulty: 'easy' as const })))
     if (diffs.includes('hard')) out.push(...c.wordsHard.map((word) => ({ word, difficulty: 'hard' as const })))
@@ -27,7 +27,7 @@ function buildPool(categories: WordCategory[], selected: SelectedCategories): Wo
   return shuffle(words)
 }
 
-export function useWordPool(categories: WordCategory[], selected: SelectedCategories) {
+export function useWordPool(categories: WordCategory[], selected: CharadesSelectedCategories) {
   const [pool, setPool] = useState<WordPoolEntry[]>(() => buildPool(categories, selected))
   const [index, setIndex] = useState(0)
 

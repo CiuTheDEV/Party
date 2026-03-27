@@ -114,6 +114,14 @@
   text-align: center;
 }
 
+.connectionAlert {
+  margin: 0 0 8px;
+  color: #fcd34d;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-align: center;
+}
+
 .spinner {
   width: 16px;
   height: 16px;

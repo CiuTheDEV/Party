@@ -1,5 +1,8 @@
-import type { SelectedCategories } from '../components/charades/CategoryPicker/CategoryPicker'
-import type { GameSettings, Player } from '../hooks/charades/useGameState'
+import type {
+  CharadesGameSettings,
+  CharadesPlayerDraft,
+  CharadesSelectedCategories,
+} from '@party/charades'
 
 const SETUP_STORAGE_KEY = 'charades:setup'
 const PRESENTER_SESSION_STORAGE_KEY = 'charades:presenter-session'
@@ -9,9 +12,9 @@ const PRESENTER_SESSION_TTL_MS = 15000
 
 export type StoredCharadesSetup = {
   roomId: string
-  players: Omit<Player, 'score'>[]
-  selectedCategories: SelectedCategories
-  settings: GameSettings
+  players: CharadesPlayerDraft[]
+  selectedCategories: CharadesSelectedCategories
+  settings: CharadesGameSettings
 }
 
 export type StoredPresenterSession = {

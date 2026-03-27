@@ -1,37 +1,38 @@
 # Agent Configuration & Multi-Agent Collaboration
 
-> On-demand loading. Contains agent assignment, handoff protocol, multi-model routing.
+> On-demand loading. Contains agent assignment, handoff protocol, and multi-model routing.
 
 ---
 
 ## Agent Setup
 
-This project runs on **Claude Pro** — Sonnet as primary, Haiku for lightweight tasks. No Opus.
+This project runs on **Claude Pro** with Sonnet as the primary model and Haiku for lightweight tasks. No Opus.
 
 | Agent | Model | When |
 |-------|-------|------|
-| **Claude Code** | Sonnet | Primary — all development sessions |
+| **Claude Code** | Sonnet | Primary - all development sessions |
 | **Claude Code** | Haiku | Quick lookups, simple Q&A, lightweight tasks |
 | **Codex** | GPT-5.4 | Token limit fallback + cross-verification |
-| **Codex** | GPT-5.4-mini | Lightweight tasks when token limit reached |
-| **Antigravity** | — | Alternative fallback when token limit reached |
+| **Codex** | GPT-5.4-mini | Lightweight tasks when token limit is reached |
+| **Antigravity** | - | Alternative fallback |
 
 ## Token Limit Handoff Protocol
 
-When Claude token limit is approaching:
+When Claude is approaching the token limit:
 
-1. Complete the current atomic unit of work (don't stop mid-function)
-2. Update `memory/today.md` with full session summary
-3. Update `memory/active-tasks.json` with current task state
-4. Update `PROJECT_CONTEXT.md` handoff block
-5. Output: `🔀 Handoff: [task] → Codex` with next steps clearly listed
+1. Finish the current atomic unit of work
+2. Update `memory/today.md` with a full session summary
+3. Update `memory/active-tasks.json` with the current task state
+4. Update the handoff block in `PROJECT_CONTEXT.md`
+5. Output a clear handoff with the next steps
 
-**Receiving agent checklist** (Codex/Antigravity starting a session):
-1. Read `PROJECT_CONTEXT.md` — architecture, current phase, decisions
-2. Read `memory/today.md` — what happened today, current task
-3. Read `memory/active-tasks.json` — in-flight tasks
-4. Read `memory/MEMORY.md` — technical pitfalls to avoid
-5. Read `memory/patterns.md` — reusable solutions (if exists)
+**Receiving agent checklist**
+
+1. Read `PROJECT_CONTEXT.md`
+2. Read `memory/today.md`
+3. Read `memory/active-tasks.json`
+4. Read `memory/MEMORY.md`
+5. Read `memory/patterns.md`
 6. Only then start working
 
 ## Agent Task Assignment
@@ -44,41 +45,43 @@ When Claude token limit is approaching:
 
 ## Subagent Dispatch Rules
 
-**Default: sequential. Parallel only for truly independent tasks.**
+**Default: sequential. Use parallel work only for truly independent tasks.**
 
-**Memory injection when dispatching** (mandatory):
-```
-You are working on Project Party — a Polish browser party game portal.
+**Memory injection when dispatching**
 
-## Required reading (before anything else)
-1. PROJECT_CONTEXT.md — architecture, current phase, key decisions
-2. memory/today.md — today's session context and current task
-3. memory/MEMORY.md — technical pitfalls to avoid
+```text
+You are working on Project Party - a Polish browser party game portal.
+
+## Required reading
+1. PROJECT_CONTEXT.md
+2. memory/today.md
+3. memory/MEMORY.md
 
 ## Task
 [Specific task description]
 
 ## Completion requirements
-1. Run lint + build, confirm PASS
+1. Run lint + build and confirm PASS
 2. Update PROJECT_CONTEXT.md Session Handoff section
-3. Report results with evidence (not "should work")
+3. Report results with evidence
 ```
 
 ## Cross-Verification
 
-Use Codex for second opinion on:
-- Critical game logic (room management, scoring)
-- Real-time architecture decisions (Partykit setup)
-- Security-sensitive code (auth flow, session tokens)
+Use Codex for a second opinion on:
+- critical game logic,
+- real-time architecture decisions,
+- security-sensitive code.
 
-**Output format**:
-```
+**Output format**
+
+```text
 Cross-verification:
 - Claude: [analysis]
 - Codex: [analysis]
-- Agreement: [what both agree on]
-- Divergence: [differences, if any]
-- Decision: [what we go with and why]
+- Agreement: [common ground]
+- Divergence: [differences]
+- Decision: [final direction and why]
 ```
 
 ## Multi-Agent SSOT Contract
@@ -93,25 +96,15 @@ Cross-verification:
 
 | Agent | Can create | Can modify | Never touch |
 |-------|-----------|-----------|-------------|
-| Claude Code | Anything (following behaviors.md) | Anything | — |
-| Codex / Antigravity | Code files | Code + Handoff block | `rules/`, `docs/`, `memory/` |
+| Claude Code | Anything (following `behaviors.md`) | Anything | - |
+| Codex / Antigravity | Code files | Code + handoff block | `rules/`, `docs/`, `memory/` |
 
-External agents can only write to the handoff block in `PROJECT_CONTEXT.md`:
-```
-<!-- handoff:start -->
-## Session Handoff
-- Last: [time] by [agent]
-- Task: [description]
-- Did: [what was done]
-- Next: [next steps]
-- Blocker: [if any]
-<!-- handoff:end -->
-```
+External agents may only write to the handoff block in `PROJECT_CONTEXT.md`.
 
 ### Violation Detection
 
-1. `git diff --name-only` — check for modifications outside whitelist
-2. Violation → `git checkout -- [file]` rollback + record in `memory/MEMORY.md`
+1. Run `git diff --name-only`
+2. If an agent wrote outside the allowed scope, roll it back and record the lesson in `memory/MEMORY.md`
 
 ---
 

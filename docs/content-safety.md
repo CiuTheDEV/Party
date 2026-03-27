@@ -1,26 +1,26 @@
 # AI Content Extraction Safety + Quality Control
 
-> On-demand loading. Trigger conditions in rules/behaviors.md.
+> On-demand loading. Trigger conditions live in `rules/behaviors.md`.
 
 ## AI Content Extraction Safety
 
 ### Source Attribution Requirements
 
 **Trigger scenarios**:
-- Processing any external URL (tweet/article/video/doc)
-- Extracting key points, summarizing, citing others' views
+- processing any external URL (tweet / article / video / doc)
+- extracting key points, summarizing, or citing someone else's view
 
 **Mandatory output format**:
-```
+```text
 ### [Content Title]
 [Body text]
 Source: [URL] - Paragraph X / Line Y
 ```
 
 **Banned behaviors**:
-- Output unattributed "N key points from source"
-- Pattern-complete then disguise as source content
-- Cannot verify but continue outputting without warning user
+- outputting unattributed “N key points from source”
+- pattern-completing and disguising it as source content
+- continuing without warning the user when verification failed
 
 ### Context Pollution Isolation (Auto-detect)
 
@@ -30,21 +30,21 @@ Source: [URL] - Paragraph X / Line Y
 3. Memory conflict with previous records
 
 **Auto-execute**:
-```
+```text
 Detected output error/hallucination, executing context isolation:
-1. Stopping current conversation on this topic
-2. Suggesting user start fresh conversation
-3. Marked error content â€” will NOT write to memory
+1. Stop the current conversation on this topic
+2. Suggest that the user starts a fresh conversation
+3. Mark the error content so it will NOT be written to memory
 ```
 
-**Banned**: Continuing in same session after finding error / Writing error to memory
+**Banned**: continuing in the same session after finding the error, or writing error content to memory.
 
-### Long Conversation Re-Anchor (Auto-trigger)
+### Long Conversation Re-anchor (Auto-trigger)
 
-**Trigger**: >20 conversation turns
+**Trigger**: more than 20 conversation turns
 
 **Auto-execute**:
-```
+```text
 Conversation has been going for [N] turns, executing re-anchor check:
 My current understanding of the task:
 1. [Main goal]
@@ -55,5 +55,5 @@ Is this correct? Please point out any drift.
 
 ## Quality Control
 
-- >20 turns or >50 tool calls â†’ Proactively suggest fresh session
-- Critical business code â†’ Must list 3 potential risk points
+- More than 20 turns or more than 50 tool calls -> proactively suggest a fresh session
+- Critical business code -> must list 3 potential risk points

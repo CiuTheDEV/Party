@@ -11,6 +11,7 @@ const initialState: RoomState = {
   currentCategory: '',
   currentDifficulty: '',
   currentPresenter: '',
+  presenterConnected: false,
   timerRemaining: 0,
   timerDuration: 0,
   revealRemaining: 0,
@@ -23,6 +24,7 @@ const initialState: RoomState = {
 
 export default class CharadesServer implements Party.Server {
   state: RoomState = { ...initialState }
+  presenterConnectionId: string | null = null
 
   constructor(readonly room: Party.Room) {}
 
@@ -32,8 +34,26 @@ export default class CharadesServer implements Party.Server {
 
   onMessage(message: string, sender: Party.Connection) {
     const event = JSON.parse(message) as CharadesEvent
+
+    if (event.type === 'DEVICE_CONNECTED') {
+      this.presenterConnectionId = sender.id
+    }
+
     this.state = applyEvent(this.state, event)
     this.room.broadcast(message, [sender.id])
+  }
+
+  onClose(conn: Party.Connection) {
+    if (conn.id !== this.presenterConnectionId) {
+      return
+    }
+
+    this.presenterConnectionId = null
+    this.state = {
+      ...this.state,
+      presenterConnected: false,
+    }
+    this.room.broadcast(JSON.stringify({ type: 'PRESENTER_DISCONNECTED' }))
   }
 }
 
@@ -57,6 +77,11 @@ function applyEvent(state: RoomState, event: CharadesEvent): RoomState {
         nextPresenterAvatar: event.nextPresenterAvatar,
         nextStep: event.nextStep,
         turnEndReason: 'none',
+      }
+    case 'DEVICE_CONNECTED':
+      return {
+        ...state,
+        presenterConnected: true,
       }
     case 'REVEAL_BUFFER_START':
     case 'REVEAL_BUFFER_TICK':

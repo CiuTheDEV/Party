@@ -1,98 +1,110 @@
-# Project Party — Technical Pitfalls & Lessons Learned
+# Technical Pitfalls & Lessons Learned
 
-> Written by agents during sessions. Read at the start of every session.
-> SSOT for technical gotchas — never write these to today.md.
+> Written by agents during sessions.
+> This is the SSOT for technical gotchas - never store these in `today.md`.
 
 ---
 
-## How to use this file
+## How to Use This File
 
-- Add entries when hitting non-obvious technical issues
-- Format: date, symptom, root cause, fix, how to prevent
-- Never delete entries — they represent real pain
+- Add entries when you hit a non-obvious technical issue
+- Format: date, symptom, root cause, fix, prevention
+- Never delete entries - they represent real pain already paid for
 
 ---
 
 ## Entries
 
-### 2026-03-22 — emitDeclarationOnly + runtime import w Next.js
+### 2026-03-22 - `emitDeclarationOnly` breaks runtime imports in Next.js
 
-**Symptom:** `Module not found: Can't resolve '@party/charades'` w Next.js dev server po tym jak hub zaimportował `config` z paczki workspace.
+**Symptom:** `Module not found: Can't resolve '@party/charades'` after importing runtime config from the workspace package into the hub.
 
-**Root cause:** Paczka `@party/charades` była skonfigurowana z `emitDeclarationOnly: true` w tsconfig — kompilator emituje tylko `.d.ts` (deklaracje typów), zero plików `.js`. Next.js/Turbopack szuka runtime JS (`dist/index.js`) gdy robimy value import (`import { config } from '@party/charades'`), ale plik nie istnieje.
+**Root cause:** `@party/charades` was configured with `emitDeclarationOnly: true`, so TypeScript emitted only `.d.ts` files and no runtime `.js`. Next.js expected `dist/index.js` for a value import, but the file did not exist.
 
-**Fix:** Tymczasowo przeniesiony config Kalambury inline do `apps/hub/src/data/games.ts`. Import z `@party/charades` usunięty do czasu gdy paczka będzie miała pełny Next.js build (Phase 3).
+**Fix:** Temporarily moved the Charades config inline into `apps/hub/src/data/games.ts` until the package had a real JS build.
 
-**Jak zapobiec:** Paczki types-only (`emitDeclarationOnly`) można importować tylko jako typy (`import type { ... }`). Wartości runtime (const, function) muszą być w paczkach z normalnym buildem JS. Przed importem value z workspace package — sprawdź czy `dist/index.js` istnieje.
-
----
-
-### 2026-03-22 — Clerk crashuje dev server z placeholder key
-
-**Symptom:** `@clerk/clerk-react: The publishableKey passed to Clerk is invalid` — biały ekran z błędem runtime zamiast strony.
-
-**Root cause:** Clerk waliduje `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` przy każdym renderze, nawet gdy klucz to placeholder (`pk_test_placeholder`).
-
-**Fix:** Tymczasowo usunięty `<ClerkProvider>` z `layout.tsx` i Clerk komponenty z `Topbar.tsx`. Wróci w Phase 5 z prawdziwymi kluczami z dashboard.clerk.com.
-
-**Jak zapobiec:** Clerk wymaga prawdziwego klucza nawet w dev. Albo użyj prawdziwego test key od razu, albo nie dodawaj ClerkProvider dopóki nie masz kluczy.
+**How to prevent it:** Type-only packages can only be imported with `import type`. Any runtime value import must come from a package that actually builds JS output.
 
 ---
 
-### 2026-03-22 — Hydration mismatch z `typeof window !== 'undefined'` w Next.js
+### 2026-03-22 - Clerk crashes the dev server with a placeholder key
 
-**Symptom:** `Hydration failed because the server rendered HTML didn't match the client` — komponent 'use client' generuje inny HTML po SSR i po hydration.
+**Symptom:** `@clerk/clerk-react: The publishableKey passed to Clerk is invalid` and a blank runtime error screen.
 
-**Root cause:** Next.js renderuje komponenty `'use client'` po stronie serwera podczas SSR, żeby wygenerować HTML. `typeof window !== 'undefined'` zwraca `false` na serwerze, więc wyrenderowany HTML jest pusty. Na kliencie po hydration window istnieje, komponent renderuje URL — mismatch.
+**Root cause:** Clerk validates `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` at render time, even if the key is just a placeholder.
 
-**Fix:** `useState('') + useEffect(() => setValue(...), [deps])` — pierwsza render (SSR i hydration) daje `''`, dopiero po mount (tylko client) wartość się ustawia.
+**Fix:** Removed `<ClerkProvider>` and Clerk UI from the app until real keys are available.
 
-**Jak zapobiec:** Nigdy nie używaj `typeof window !== 'undefined'` jako guard na wartość renderowaną. Zawsze `useState + useEffect` dla wartości client-only.
-
----
-
-### 2026-03-22 — CSS import z workspace package działa w Next.js bez konfiguracji
-
-**Symptom:** Nie wiadomo czy `import '@party/ui/tokens.css'` zadziała gdy paczka jest workspace i Next.js ją bundluje.
-
-**Root cause:** Next.js/Turbopack bundluje workspace packages przez path alias (`@party/ui` → `../../packages/ui/src`). CSS pliki z tych paczek są traktowane jak lokalne — Next.js je przetwarza normalnie.
-
-**Fix:** Nie potrzeba żadnej specjalnej konfiguracji. Wystarczy dodać `"@party/ui/*": ["../../packages/ui/src/*"]` do `paths` w tsconfig huba.
-
-**Jak zapobiec:** Przy tworzeniu nowej workspace paczki z CSS — skonfiguruj path alias w tsconfig aplikacji konsumującej, reszta działa automatycznie.
+**How to prevent it:** Do not wire Clerk into runtime until you have a real test key.
 
 ---
 
-### 2026-03-23 — CSS token alignment: zawsze otwórz referencję przed kodem
+### 2026-03-22 - Hydration mismatch from `typeof window !== 'undefined'` in Next.js
 
-**Symptom:** 2h iteracji na dopasowanie UI do mockupu — każda runda poprawek trafiała w coś innego.
+**Symptom:** `Hydration failed because the server rendered HTML didn't match the client`.
 
-**Root cause:** Agent zakładał wartości tokenów z pamięci zamiast porównać 1:1 z `code.html` (Stitch reference). Hardcoded kolory (`#7c3aed`, `rgba(124,58,237,...)`) były pozostałością poprzedniej sesji i nie odpowiadały obecnym tokenom.
+**Root cause:** Client components still render on the server for SSR HTML. `typeof window !== 'undefined'` returned `false` on the server, so SSR and hydration rendered different markup.
 
-**Fix:** Otworzyć `code.html` i porównać każdą wartość CSS z implementacją zanim zaczniesz edytować.
+**Fix:** Use `useState` + `useEffect` for client-only values instead of rendering directly behind a `typeof window` check.
 
-**Jak zapobiec:** Przy zadaniach "dopasuj do mockupu" — **pierwsze działanie to `Read code.html`**, nie screenshot, nie assumption. Hardcoded kolory w CSS to czerwona flaga — zamień na tokeny i sprawdź czy tokeny mają właściwą wartość.
-
----
-
-### 2026-03-22 — Next.js 16 modyfikuje tsconfig.json przy pierwszym uruchomieniu
-
-**Symptom:** Po `npm run dev` Next.js automatycznie zmienia `tsconfig.json` — ustawia `jsx: react-jsx` (było `preserve`) i dodaje `.next/dev/types/**/*.ts` do includes.
-
-**Root cause:** Next.js 16 wymusza własne ustawienia TypeScript przy starcie dev servera.
-
-**Fix:** Nie walczyć z tym — zacommitować zmiany wprowadzone przez Next.js.
-
-**Jak zapobiec:** Przy inicjalizacji nowego projektu Next.js — najpierw uruchom dev server, a dopiero potem commituj `tsconfig.json`. Unikniesz commita z "incorrect" konfiguracją.
+**How to prevent it:** Never use `typeof window !== 'undefined'` to guard rendered values. Use a post-mount state update instead.
 
 ---
 
-### 2026-03-26 - VS Code moze pokazywac zolte warningi z kilku niezaleznych zrodel naraz
+### 2026-03-22 - CSS imports from workspace packages work in Next.js without extra config
 
-**Symptom:** W Markdown caly plik "swieci na zolto" i panel `Problems` wyglada jakby winny byl jeden blad w repo.
+**Symptom:** Uncertainty about whether `import '@party/ui/tokens.css'` would work from a workspace package.
 
-**Root cause:** W praktyce to byly dwa rozne zrodla halasu: `markdownlint` (styl markdownu i reguly typu MD022/MD058/MD060) oraz GitHub Copilot Chat, ktory potrafil osobno zglaszac `Unknown tool` / `Unknown model` ze swojego global storage. To nie jest jeden wspolny problem "VS Code zepsuty", tylko nakladajace sie diagnostyki rozszerzen.
+**Root cause:** Next.js/Turbopack resolves workspace packages through path aliases and treats their CSS like local CSS.
 
-**Fix:** Rozdzielic problem na warstwy. Dla repo ustawic `.vscode/settings.json`, `.markdownlint.json` i `.markdownlintignore`, a dla Copilot Chat patrzec osobno na jego warningi i w razie potrzeby wylaczyc albo przeinstalowac rozszerzenie.
+**Fix:** Add the package source path alias in the consuming app and import normally.
 
-**Jak zapobiec:** Gdy VS Code "swieci na zolto", najpierw ustal z jakiego rozszerzenia pochodzi warning. `markdownlint`, TypeScript, PowerShell i Copilot Chat potrafia generowac diagnostyki niezaleznie, wiec nie wolno zakladac jednego wspolnego root cause bez sprawdzenia zrodla.
+**How to prevent it:** For workspace packages with CSS, set a proper path alias in the app TS config and let Next handle the rest.
+
+---
+
+### 2026-03-23 - Open the design reference before touching UI tokens
+
+**Symptom:** Multiple rounds of UI tweaks missed the target design.
+
+**Root cause:** The implementation guessed token values from memory instead of comparing directly against the source reference.
+
+**Fix:** Open the reference first and compare token-by-token before editing.
+
+**How to prevent it:** For any �match the mockup� task, start by reading the reference source, not by guessing from screenshots or memory.
+
+---
+
+### 2026-03-22 - Next.js 16 rewrites `tsconfig.json` on first run
+
+**Symptom:** Running `npm run dev` changed `tsconfig.json` automatically.
+
+**Root cause:** Next.js 16 enforces its own TypeScript defaults during startup.
+
+**Fix:** Accept and commit the framework-generated `tsconfig.json` changes.
+
+**How to prevent it:** Run the dev server before treating the initial `tsconfig.json` as final.
+
+---
+
+### 2026-03-26 - VS Code warnings can come from multiple independent sources at once
+
+**Symptom:** Markdown files looked globally broken because the editor showed many warnings in parallel.
+
+**Root cause:** The noise came from separate systems: `markdownlint` and GitHub Copilot Chat diagnostics.
+
+**Fix:** Split the problem by source and fix each tool independently.
+
+**How to prevent it:** When VS Code �lights up�, identify which extension or language service is actually reporting each warning before looking for one shared root cause.
+
+---
+
+### 2026-03-26 - Duplicating game ownership between the hub and the module creates drift
+
+**Symptom:** The repo looked like a game was modular, but parts of config, menu, setup, or results still lived in the hub.
+
+**Root cause:** The architecture claimed `hub = shell, game = module`, but implementation kept duplicate knowledge in both places.
+
+**Fix:** If a game is meant to be a real module, the module should own at least config, menu, setup, and results. The hub should stick to routing, registry, and platform glue.
+
+**How to prevent it:** For every new screen, ask whether it belongs to the platform or to a specific game. If it belongs to the game, do not keep a second copy in the hub.

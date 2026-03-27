@@ -1,93 +1,89 @@
 # Scaffolding Checkpoint
 
-> Run this checklist before any new tech stack decision or new service addition.
-> Project Party is hobbyist — **free tiers only, no paid services at launch.**
+> Run this checklist before any new stack decision or new service addition.
+> Project Party is a hobby project - **free tiers only, no paid services at launch.**
 
 ---
 
-## Rule #0 — Free Tier Check (always first)
+## Rule #0 - Free Tier Check
 
 Before evaluating any service:
 - [ ] Does it have a free tier?
-- [ ] What are the free tier limits?
-- [ ] Will we realistically hit those limits in the next 3 months?
+- [ ] What are the free-tier limits?
+- [ ] Are those limits realistic for the next 3 months?
 
-**If no free tier → stop. Do not proceed. Ask product owner.**
-
----
+**If the answer is no free tier: stop and ask the product owner.**
 
 ## 1. Deployment Layer
 
-**Default: Cloudflare Pages** (owner has account, free tier, edge performance)
+**Default: Cloudflare Pages**
 
-- [ ] Using Cloudflare Pages for frontend? ✅ Preferred
-- [ ] Need server-side logic? → Cloudflare Workers (free: 100k req/day)
-- [ ] If considering something else → explain why Cloudflare doesn't work
+- [ ] Use Cloudflare Pages for frontend by default
+- [ ] Need server-side logic? Consider Cloudflare Workers first
+- [ ] If you want anything else, explain why Cloudflare does not fit
 
 ## 2. Database Layer
 
-**Default: Cloudflare D1** (native CF, SQLite, free: 5GB + 5M reads/day)
+**Default: Cloudflare D1**
 
-- [ ] Using Cloudflare D1? ✅ Preferred
-- [ ] If considering Supabase/PlanetScale/Neon → confirm free tier first
-- [ ] If self-hosting Postgres → explain why D1 is insufficient
+- [ ] Use Cloudflare D1 by default
+- [ ] If considering Supabase / PlanetScale / Neon, confirm free-tier details first
+- [ ] If considering self-hosted Postgres, explain why D1 is insufficient
 
-## 3. Real-time Layer
+## 3. Real-Time Layer
 
-**Default: Partykit** (built on Cloudflare, free tier available)
+**Default: Partykit**
 
-- [ ] Using Partykit for multiplayer rooms? ✅ Preferred
-- [ ] If considering Cloudflare Durable Objects directly → more complex, justify
-- [ ] Any other solution → verify free tier limits
+- [ ] Use Partykit for multiplayer rooms by default
+- [ ] If considering Cloudflare Durable Objects directly, justify the extra complexity
+- [ ] Any other solution must pass the free-tier check first
 
 ## 4. Auth Layer
 
-**Default: Clerk** (free: 10k MAU — sufficient for launch)
+**Default: Clerk later**
 
-- [ ] Using Clerk? ✅ Preferred
-- [ ] Guest play without auth is supported — don't force registration
-- [ ] Self-implementing auth → never, too much risk
+- [ ] Clerk is the default auth direction
+- [ ] Guest play must stay supported
+- [ ] Do not self-implement auth
 
 ## 5. Payments Layer
 
-**Default: Stripe stubs** — not connected, architected for future
+**Default: Stripe stubs only**
 
-- [ ] Payment UI exists as stubs only? ✅ Correct
-- [ ] No actual Stripe connection at this stage? ✅ Correct
-- [ ] When ready → Stripe Checkout (% per transaction, no monthly fee)
+- [ ] Payment UI should exist only as stubs at this stage
+- [ ] No live Stripe connection yet
+- [ ] When ready, Stripe Checkout is the expected direction
 
 ## 6. Storage Layer
 
-**Default: Cloudflare R2** if needed (free: 10GB/month)
+**Default: Cloudflare R2 if needed**
 
-- [ ] Need file storage? → Cloudflare R2 first
-- [ ] If considering S3 → explain why R2 is insufficient
+- [ ] If file storage is needed, check R2 first
+- [ ] If considering S3 or anything else, explain why R2 is insufficient
 
 ## 7. Code Size Check
 
-- [ ] Core feature estimated lines: _____ lines
-- [ ] Every single file stays under **300 lines**?
-- [ ] Styles are modular — no single giant CSS file?
-- [ ] If >3000 lines total in a package → should it be split into separate modules?
-
----
+- [ ] Core feature estimated size: _____ lines
+- [ ] Every single file stays under **300 lines**
+- [ ] Styles remain modular - no giant CSS file
+- [ ] If a package grows too large, decide whether it should split into smaller modules
 
 ## Decision Record Template
 
-```markdown
-## Stack Decision — [feature/service name]
+```md
+## Stack Decision - [feature/service]
 
 ### Choice
 [What was chosen]
 
 ### Free tier confirmed
-[Yes / No — limits: ...]
+[Yes / No - limits: ...]
 
 ### Why not the default
-[Reason if deviating from Cloudflare-first defaults]
+[Reason for deviation]
 
-### Fallback if limits hit
-[What to do when free tier runs out]
+### Fallback if limits are hit
+[What to do later]
 ```
 
 ---

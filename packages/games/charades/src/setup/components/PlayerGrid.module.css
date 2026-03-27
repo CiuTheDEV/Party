@@ -6,38 +6,6 @@
   width: 100%;
 }
 
-@media (max-width: 767px) {
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
-
-  .card,
-  .addCard {
-    aspect-ratio: unset;
-    padding: 10px 6px;
-    min-height: 90px;
-  }
-
-  .avatar {
-    font-size: 40px;
-    flex: unset;
-  }
-
-  .namePill {
-    font-size: 12px;
-    padding: 4px 6px;
-  }
-
-  .addIcon {
-    font-size: 20px;
-  }
-
-  .addLabel {
-    font-size: 11px;
-  }
-}
-
 .card {
   position: relative;
   aspect-ratio: 1;
@@ -68,11 +36,6 @@
   align-items: center;
   justify-content: center;
   line-height: 1;
-}
-
-.removeBtn:hover {
-  background: rgba(239, 68, 68, 0.3);
-  color: #fca5a5;
 }
 
 .avatar {
@@ -121,12 +84,6 @@
   justify-content: center;
   gap: 6px;
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
-}
-
-.addCard:hover {
-  border-color: var(--game-color-primary);
-  background: var(--game-color-primary-glow);
 }
 
 .addIcon {
@@ -136,15 +93,31 @@
   line-height: 1;
 }
 
-.addCard:hover .addIcon {
-  color: var(--game-color-primary);
-}
-
 .addLabel {
   font-size: 16px;
   color: var(--color-text-muted);
 }
 
-.addCard:hover .addLabel {
-  color: var(--game-color-primary);
+@media (max-width: 767px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .card,
+  .addCard {
+    aspect-ratio: unset;
+    padding: 10px 6px;
+    min-height: 90px;
+  }
+
+  .avatar {
+    font-size: 40px;
+    flex: unset;
+  }
+
+  .namePill {
+    font-size: 12px;
+    padding: 4px 6px;
+  }
 }

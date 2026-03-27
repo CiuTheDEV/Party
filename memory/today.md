@@ -63,3 +63,17 @@
 - Updated project documentation to reflect the real architecture instead of the older interim state.
 - Next: return to product work - Phase 4 deploy and PartyKit.
 - Experience recorded: yes
+
+### S10 (~late) [Project Party] Charades review notes for next session
+
+- Recorded tomorrow's cleanup targets in `memory/goals.md`.
+- Main review items: stale `send` dependencies in `useGameState`, dead presenter leftovers, and oversized files in results/playboard.
+- Next: start from cleanup before new feature work.
+- Experience recorded: no (review/handoff only)
+
+### S11 (~late) [Project Party] Results polish + session wrap
+
+- Finished the Charades results polish pass: cleaner podium flow, expandable full ranking, animated reveal, and smoother in-view scrolling.
+- Promoted the next cleanup pass into `memory/active-tasks.json` so the next session can start from code quality work instead of rediscovery.
+- Next: begin with Charades cleanup before new feature work.
+- Experience recorded: no

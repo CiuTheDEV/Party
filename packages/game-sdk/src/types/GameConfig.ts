@@ -12,3 +12,16 @@ export type GameConfig = {
   categories: string[]
   gradient?: string
 }
+
+export type GameShellLink = {
+  label: string
+  href: string
+  disabled?: boolean
+  icon?: string
+}
+
+export type GameShellConfig = {
+  gameName: string
+  gameEmoji: string
+  links: GameShellLink[]
+}

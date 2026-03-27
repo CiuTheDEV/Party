@@ -1,44 +1,56 @@
 # Patterns & Reusable Solutions
 
-> Cross-session reusable patterns discovered during development.
-> Add entries when solving non-obvious problems worth remembering.
+> Cross-session reusable solutions discovered during development.
 
 ---
 
-## How to use
+## How to Use This File
 
-- Add when solving a problem that took >10 minutes and is likely to recur
-- Format: title, scenario, solution, code snippet if relevant
-- Reference from `memory/MEMORY.md` if it's a pitfall, here if it's a positive pattern
+- Add entries when a solution took meaningful effort and is likely to recur
+- Use this file for positive patterns, not pitfalls
+- Put pitfalls into `memory/MEMORY.md`
 
 ---
 
 ## Entries
 
-## Config modal jako lokalny stan (nie routing)
+## Config modal as local state, not routing
 
-**Scenario**: Setup gry — modal konfiguracji przed rozpoczęciem rozgrywki.
+**Scenario:** Game setup before starting gameplay.
 
-**Rozwiązanie**: `useState(false)` w `page.tsx`, nie osobna trasa `/config`. Modal renderowany warunkowo w tym samym komponencie co menu.
+**Solution:** Keep setup modal state in `page.tsx` with `useState`, not as a separate `/config` route.
 
-**Dlaczego**: Prostsze, zachowuje stan menu (wybrany tryb), łatwy fallback. Stara trasa `/config` była martwym kodem.
-
----
-
-## SelectedCategories jako Record zamiast Set
-
-**Scenario**: Przekazywanie wybranych kategorii + poziomów trudności przez sessionStorage do strony rozgrywki.
-
-**Rozwiązanie**: `Record<string, ('easy' | 'hard')[]>` zamiast `Record<string, Set<...>>`.
-
-**Dlaczego**: `Set` nie serializuje się do JSON — `JSON.stringify` zwraca `{}`. `Record` z tablicą serializuje się poprawnie.
+**Why:** It preserves menu state, keeps the flow simpler, and avoids dead routing.
 
 ---
 
-## Shake animation reset przez key
+## `SelectedCategories` as a `Record`, not a `Set`
 
-**Scenario**: Animacja shake ma się odtwarzać przy każdym kliknięciu "Rozpocznij" gdy warunki nie są spełnione.
+**Scenario:** Passing selected categories and difficulty levels through `sessionStorage`.
 
-**Rozwiązanie**: `shakeKey` licznik w stanie + `key={`err-${shakeKey}`}` na elemencie z animacją. React odmontowuje i remontuje element, co resetuje animację CSS.
+**Solution:** Use `Record<string, ('easy' | 'hard')[]>` instead of `Record<string, Set<...>>`.
 
-**Dlaczego**: Sama klasa CSS z `animation` nie odpala się ponownie jeśli element już ją ma — trzeba wymusić remount.
+**Why:** `Set` does not serialize to JSON correctly, while arrays inside a record do.
+
+---
+
+## Resetting shake animation with a key
+
+**Scenario:** The shake animation should replay every time the user clicks `Start` while setup requirements are not met.
+
+**Solution:** Keep a `shakeKey` counter in state and use `key={`err-${shakeKey}`}` on the animated element.
+
+**Why:** Remounting the element restarts the CSS animation reliably.
+
+---
+
+## Shared setup skeleton + custom game sections
+
+**Scenario:** Multiple games should share the same menu/setup look and flow, but expose different fields, sections, and validation rules.
+
+**Solution:** Keep the shared shell and setup template outside the game module, while each game provides:
+- one `setupState` object,
+- its own `setupSections`,
+- its own `validateSetup(state)`.
+
+**Why:** This lets setup UI evolve once for all games without forcing every game into the same rigid form builder. Gameplay after `Start` still stays fully game-specific.

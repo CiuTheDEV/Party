@@ -1,7 +1,7 @@
 # Project Setup Guide
 
 > Read this before starting Phase 0.
-> Contains exact commands and config for initializing the monorepo.
+> Contains the exact commands and baseline config for initializing the monorepo.
 
 ---
 
@@ -15,128 +15,53 @@
 
 ---
 
-## Phase 0 — Monorepo Initialization
+## Phase 0 - Monorepo Initialization
 
-### Step 1 — Initialize Turborepo
+### Step 1 - Initialize Turborepo
 
 ```bash
 cd C:\Users\Mateo\Desktop\Party
 pnpm dlx create-turbo@latest . --package-manager pnpm
 ```
 
-Accept all defaults. Then clean up the generated example apps — we build our own structure.
+Accept the defaults, then clean up the generated example apps.
 
-### Step 2 — Final directory structure
+### Step 2 - Target directory structure
 
-```
+```text
 Party/
-├── apps/
-│   └── hub/                    # Next.js app
-├── packages/
-│   ├── ui/                     # Shared components
-│   │   └── game-template/      # Shared game menu layout
-│   ├── game-sdk/               # Module contract (types only)
-│   └── games/
-│       └── charades/           # First game module
-├── content/
-│   └── charades/               # Word lists (JSON)
-├── turbo.json
-├── pnpm-workspace.yaml
-└── package.json                # Root
+|- apps/
+|  `- hub/                    # Next.js app
+|- packages/
+|  |- ui/                     # Shared components
+|  |- game-sdk/               # Module contract
+|  `- games/
+|     `- charades/            # First game module
+|- content/
+|  `- charades/               # Word lists
+|- turbo.json
+|- pnpm-workspace.yaml
+`- package.json
 ```
 
-### Step 3 — Root config files
+### Step 3 - Root config files
 
-**`pnpm-workspace.yaml`**:
-```yaml
-packages:
-  - "apps/*"
-  - "packages/*"
-  - "packages/games/*"
-```
+Keep the root workspace scoped to:
+- `apps/*`
+- `packages/*`
+- `packages/games/*`
 
-**Root `package.json`**:
-```json
-{
-  "name": "project-party",
-  "private": true,
-  "scripts": {
-    "dev": "turbo dev",
-    "build": "turbo build",
-    "lint": "turbo lint",
-    "test": "turbo test"
-  },
-  "devDependencies": {
-    "turbo": "latest",
-    "typescript": "^5",
-    "@types/node": "^20"
-  },
-  "engines": {
-    "node": ">=20"
-  }
-}
-```
-
-**`turbo.json`**:
-```json
-{
-  "$schema": "https://turbo.build/schema.json",
-  "tasks": {
-    "build": {
-      "dependsOn": ["^build"],
-      "outputs": [".next/**", "dist/**"]
-    },
-    "dev": {
-      "cache": false,
-      "persistent": true
-    },
-    "lint": {},
-    "test": {}
-  }
-}
-```
-
-**Root `tsconfig.json`**:
-```json
-{
-  "compilerOptions": {
-    "target": "ES2020",
-    "lib": ["ES2020", "DOM"],
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "resolveJsonModule": true
-  }
-}
-```
+Baseline root scripts should expose:
+- `dev`
+- `build`
+- `lint`
+- `test`
 
 ---
 
-## Hub App (apps/hub)
+## Hub App (`apps/hub`)
 
-### Initialize
-
-```bash
-cd apps
-pnpm create next-app@latest hub --typescript --tailwind --eslint --app --src-dir --import-alias "@/*"
-```
-
-### `apps/hub/package.json` additions
-
-```json
-{
-  "name": "@party/hub",
-  "dependencies": {
-    "@party/ui": "workspace:*",
-    "@party/game-sdk": "workspace:*"
-  }
-}
-```
+Initialize the hub with Next.js, TypeScript, App Router, and strict TS settings.
 
 ### Cloudflare Pages adapter
 
@@ -146,301 +71,97 @@ pnpm add @cloudflare/next-on-pages
 pnpm add -D wrangler
 ```
 
-**`apps/hub/next.config.ts`**:
-```ts
-import { setupDevPlatform } from '@cloudflare/next-on-pages/next-dev'
-
-if (process.env.NODE_ENV === 'development') {
-  await setupDevPlatform()
-}
-
-const nextConfig = {
-  reactStrictMode: true,
-}
-
-export default nextConfig
-```
+The hub should stay Cloudflare-ready from the beginning.
 
 ---
 
 ## Shared Packages
 
-### packages/ui
+### `packages/ui`
 
-```bash
-mkdir -p packages/ui/src/game-template
-```
+Purpose:
+- shared shell,
+- shared setup template,
+- reusable visual primitives.
 
-**`packages/ui/package.json`**:
-```json
-{
-  "name": "@party/ui",
-  "version": "0.0.1",
-  "private": true,
-  "exports": {
-    "./game-template": "./src/game-template/index.tsx",
-    "./styles/*": "./src/styles/*"
-  },
-  "devDependencies": {
-    "typescript": "^5",
-    "react": "^19",
-    "@types/react": "^19"
-  },
-  "peerDependencies": {
-    "react": "^19"
-  }
-}
-```
+### `packages/game-sdk`
 
-### packages/game-sdk
-
-```bash
-mkdir -p packages/game-sdk/src
-```
-
-**`packages/game-sdk/package.json`**:
-```json
-{
-  "name": "@party/game-sdk",
-  "version": "0.0.1",
-  "private": true,
-  "exports": {
-    ".": "./src/index.ts"
-  },
-  "devDependencies": {
-    "typescript": "^5"
-  }
-}
-```
-
-**`packages/game-sdk/src/index.ts`** — module contract:
-```ts
-export interface GameConfig {
-  id: string
-  name: string
-  description: string
-  icon: string
-  color: string
-  minPlayers: number
-  maxPlayers: number
-  modes: GameMode[]
-  categories: GameCategory[]
-  theme: 'dark' | 'light'
-}
-
-export interface GameMode {
-  id: string
-  name: string
-  description: string
-  meta: string
-  available: boolean
-  settings: GameSetting[]
-}
-
-export interface GameCategory {
-  id: string
-  name: string
-  premium: boolean
-}
-
-export interface GameSetting {
-  id: string
-  label: string
-  value: string | number
-}
-
-export interface GameModule {
-  config: GameConfig
-  Menu: React.ComponentType
-  Screen: React.ComponentType
-  Results: React.ComponentType
-}
-```
+Purpose:
+- define the module contract,
+- keep game boundaries explicit,
+- prevent the hub from hardcoding per-game behavior.
 
 ---
 
-## First Game Module (packages/games/charades)
+## First Game Module (`packages/games/charades`)
 
-```bash
-mkdir -p packages/games/charades/src
-```
-
-**`packages/games/charades/package.json`**:
-```json
-{
-  "name": "@party/game-charades",
-  "version": "0.0.1",
-  "private": true,
-  "exports": {
-    ".": "./src/index.ts"
-  },
-  "dependencies": {
-    "@party/ui": "workspace:*",
-    "@party/game-sdk": "workspace:*"
-  },
-  "devDependencies": {
-    "typescript": "^5",
-    "react": "^19",
-    "@types/react": "^19"
-  }
-}
-```
+The first game module should own:
+- config,
+- menu content,
+- setup sections,
+- setup validation/state,
+- results,
+- later: gameplay entrypoints/runtime.
 
 ---
 
-## Cloudflare Pages — Deployment
+## Cloudflare Pages - Deployment
 
-### Connect repo to Cloudflare Pages
-
-1. Go to Cloudflare Dashboard → Pages → Create project
-2. Connect GitHub → select `Party` repo
-3. Set build settings:
-   - **Framework**: Next.js
-   - **Build command**: `pnpm build`
-   - **Output directory**: `.vercel/output/static`
-   - **Root directory**: `apps/hub`
-4. Add environment variable: `NODE_VERSION = 20`
-
-### `apps/hub/.dev.vars` (local only, never commit)
-
-```
-# Local Cloudflare bindings for development
-# Copy this file — never commit it
-```
-
-### `apps/hub/wrangler.toml`
-
-```toml
-name = "project-party-hub"
-compatibility_date = "2025-01-01"
-compatibility_flags = ["nodejs_compat"]
-
-[[d1_databases]]
-binding = "DB"
-database_name = "project-party"
-database_id = "FILL_IN_AFTER_CREATING"
-```
+Default direction:
+1. Connect the GitHub repo to Cloudflare Pages
+2. Use Next.js build settings appropriate for the hub
+3. Keep local Cloudflare bindings in local-only files
+4. Never commit secrets or local binding files
 
 ---
 
-## Cloudflare D1 — Database
+## Cloudflare D1
 
-```bash
-# Create database (run once)
-pnpm dlx wrangler d1 create project-party
+Use D1 as the default database layer.
 
-# Copy the database_id into wrangler.toml
-```
-
-### Initial schema (`apps/hub/schema.sql`)
-
-```sql
-CREATE TABLE IF NOT EXISTS users (
-  id TEXT PRIMARY KEY,
-  created_at INTEGER NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS rooms (
-  id TEXT PRIMARY KEY,
-  game_id TEXT NOT NULL,
-  host_id TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'waiting',
-  created_at INTEGER NOT NULL
-);
-```
-
-```bash
-# Apply schema locally
-pnpm dlx wrangler d1 execute project-party --local --file=apps/hub/schema.sql
-```
+Initial schema should stay minimal:
+- users,
+- rooms,
+- only what is needed for the current phase.
 
 ---
 
-## Auth — Clerk
+## Auth - Clerk
 
-1. Create account at clerk.com (free tier)
-2. Create new application
-3. Copy keys to `apps/hub/.dev.vars`:
-
-```
-CLERK_SECRET_KEY=sk_test_...
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-```
-
-```bash
-cd apps/hub
-pnpm add @clerk/nextjs
-```
+Clerk is planned, but should only be wired into runtime once real test keys exist.
 
 ---
 
-## Real-time — Partykit
+## Real-Time - Partykit
 
-```bash
-cd apps/hub
-pnpm add partykit partysocket
-```
-
-**`apps/hub/party/index.ts`** — basic room server:
-```ts
-import type * as Party from 'partykit/server'
-
-export default class GameRoom implements Party.Server {
-  constructor(readonly room: Party.Room) {}
-
-  onConnect(conn: Party.Connection) {
-    this.room.broadcast(`player joined`, [conn.id])
-  }
-
-  onMessage(message: string, sender: Party.Connection) {
-    this.room.broadcast(message, [sender.id])
-  }
-
-  onClose(conn: Party.Connection) {
-    this.room.broadcast(`player left`, [conn.id])
-  }
-}
-```
-
----
-
-## Git Setup
-
-```bash
-# .gitignore additions
-echo ".dev.vars" >> .gitignore
-echo ".env.local" >> .gitignore
-echo ".wrangler/" >> .gitignore
-echo "*.local" >> .gitignore
-```
+Partykit is the default direction for room-based multiplayer and presenter/host flows.
 
 ---
 
 ## First Run Verification
 
 ```bash
-# Install all dependencies
 pnpm install
-
-# Run dev server
 pnpm dev
-
-# Should start:
-# - apps/hub on localhost:3000
 ```
+
+Expected result:
+- the hub starts locally,
+- shared packages resolve correctly,
+- the workspace can build without hidden paid dependencies.
 
 ---
 
-## Environment Variables Reference
+## Environment Variable Reference
 
 | Variable | Where | Purpose |
 |----------|-------|---------|
-| `CLERK_SECRET_KEY` | `.dev.vars` | Clerk auth (server) |
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | `.dev.vars` | Clerk auth (client) |
-| `NODE_VERSION` | Cloudflare Pages dashboard | Build environment |
+| `CLERK_SECRET_KEY` | local env only | Clerk server auth |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | local env only | Clerk client auth |
+| `NODE_VERSION` | Cloudflare Pages | Build environment |
 
-> Never commit `.dev.vars` or any file containing real keys.
+> Never commit real secrets.
 
 ---
 
-*Read before Phase 0. Questions → ask product owner before deviating from this setup.*
+*Read before Phase 0. If the setup needs to deviate, ask the product owner first.*

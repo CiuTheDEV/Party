@@ -22,6 +22,7 @@ export type HostEvent =
   | { type: 'TIMER_TICK'; turnId: string; remaining: number }
   | { type: 'TURN_END'; turnId: string; reason: 'timeout' | 'verdict' | 'manual-stop' }
   | { type: 'BETWEEN_TURNS'; nextPresenterName: string; nextPresenterAvatar: string }
+  | { type: 'PRESENTER_DISCONNECTED' }
   | { type: 'GAME_END' }
   | { type: 'GAME_RESET' }
 
@@ -49,6 +50,7 @@ export type RoomState = {
   currentCategory: string
   currentDifficulty: PresenterWordDifficulty
   currentPresenter: string
+  presenterConnected: boolean
   timerRemaining: number
   timerDuration: number
   revealRemaining: number
