@@ -46,15 +46,15 @@
 - Next: verify the local editor state after reload, but do not treat editor cleanup as product work.
 - Experience recorded: yes
 
-### S9 (~2026-03-27) [Project Party] Pre-MVP cleanup - polskie znaki + refaktory
+### S9 (~2026-03-27) [Project Party] Pre-MVP cleanup - Polish characters + refactors
 
-- Usunięto martwy duplikat `Podium` z `apps/hub/src/components/charades/Podium/` (zero importów)
-- Wyodrębniono stałą `CLEARED_WORD` w `game-state-transitions.ts` - eliminacja 6 powtórzeń
-- Poprawiono 80+ błędów polskich znaków w 13 plikach (brakujące ą/ę/ó/ś/ź/ż/ć/ń/ł)
-- Naprawiono HTML entities w `CharadesMenuContent.tsx` - React renderował je dosłownie
-- Naprawiono Unicode escapes w `PairingPanel.tsx` - zamienione na bezpośrednie znaki
-- Zidentyfikowano i zapisano listę pre-MVP issues do `memory/goals.md`
-- Experience recorded: no (zmiany mechaniczne, brak wzorców do zapamiętania)
+- Removed dead duplicate `Podium` from `apps/hub/src/components/charades/Podium/` (zero imports)
+- Extracted `CLEARED_WORD` constant in `game-state-transitions.ts` — eliminated 6 repetitions
+- Fixed 80+ missing Polish diacritic characters across 13 UI files
+- Fixed HTML entities in `CharadesMenuContent.tsx` — React was rendering them as literal text
+- Fixed Unicode escapes in `PairingPanel.tsx` — replaced with direct characters
+- Identified and recorded pre-MVP issues list in `memory/goals.md`
+- Experience recorded: no (mechanical changes, no reusable patterns)
 
 ### S8 (~23:40) [Project Party] Module architecture cleanup + docs realignment
 

@@ -130,8 +130,8 @@ This means:
 <!-- handoff:start -->
 ## Session Handoff
 - Last: 2026-03-27 by Claude (Sonnet)
-- Task: Pre-MVP cleanup - refaktory i polskie znaki.
-- Did: Usunięto martwy duplikat Podium z hub, wyodrębniono stałą CLEARED_WORD w game-state-transitions, naprawiono 80+ błędów polskich znaków w 13 plikach (w tym HTML entities i Unicode escapes). Zidentyfikowano listę pre-MVP issues i zapisano do goals.md.
-- Next: Zaimplementować pre-MVP issues: pusty PlayTopBar (brak exit), "Zmień hasło" disabled na telefonie, obsługa rozłączenia prezentera. Potem Phase 4 deploy.
-- Blocker: Brak.
+- Task: Pre-MVP cleanup — refactors and Polish character fixes.
+- Did: Removed dead Podium duplicate from hub, extracted CLEARED_WORD constant, fixed 80+ missing Polish diacritics across 13 files (including HTML entities and Unicode escapes). Identified and saved pre-MVP issues list to goals.md.
+- Next: Implement pre-MVP issues — empty PlayTopBar (no exit button), disabled "Zmień hasło" on presenter phone, presenter disconnect handling. Then Phase 4 deploy.
+- Blocker: None.
 <!-- handoff:end -->

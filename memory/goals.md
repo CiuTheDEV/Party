@@ -8,19 +8,19 @@
 
 1. ~~Close architecture cleanup for the first game module~~ ✅
 2. ~~Re-align documentation with the new module/setup vision~~ ✅
-3. ~~Charades pre-MVP polish~~ — polskie znaki ✅, pozostałe issues poniżej
+3. ~~Charades pre-MVP polish~~ — Polish characters ✅, remaining issues below
 4. Move forward with Phase 4 deploy path
 
-## Charades - przed MVP
+## Charades - pre-MVP blockers
 
-### Krytyczne (blokują grę)
-- [ ] PlayTopBar - dodać przycisk wyjścia z gry (teraz host nie może wyjść bez resetu)
-- [ ] "Zmień hasło" na telefonie prezentera - zaimplementować lub usunąć przycisk
-- [ ] Obsługa rozłączenia prezentera - fallback gdy telefon zgubi sieć podczas gry
+### Critical (game is broken without these)
+- [ ] PlayTopBar — add exit button (host currently cannot leave without a page reset)
+- [ ] "Zmień hasło" on presenter phone — implement or remove the disabled button
+- [ ] Presenter disconnect handling — fallback when phone loses connection during play
 
-### Ważne (obniżają jakość)
-- [ ] Error boundaries dla WebSocket/Partykit - crash strony zamiast graceful error
-- [ ] Odporność na page refresh - teraz refresh w trakcie gry niszczy sesję
+### Important (quality degraders)
+- [ ] Error boundaries for WebSocket/Partykit — unhandled errors crash the page
+- [ ] Page refresh resilience — refresh during gameplay destroys the session
 
 ## This Month
 
