@@ -130,9 +130,9 @@ This means:
 
 <!-- handoff:start -->
 ## Session Handoff
-- Last: 2026-03-27 by Codex (GPT-5.4)
-- Task: Charades pre-MVP polish and results UX cleanup.
-- Did: Finished play-screen settings/pause flow, presenter disconnect pause/reconnect flow, back/refresh guards, timer and score-rail fixes, and a broader results redesign with podium plus expandable full ranking. Recorded next cleanup pass in goals, today, and active tasks.
-- Next: Run the queued Charades cleanup pass: reconnect-safe `useGameState` dependencies, remove dead presenter/runtime leftovers, and split oversized files (`ResultsGroups.module.css`, `PlayBoard.tsx`, `PlayBoard.module.css`). After that return to remaining pre-MVP hardening and Phase 4 deploy.
+- Last: 2026-03-29 by Codex (GPT-5.4)
+- Task: Hub redesign polish, single-page navigation behavior, and rule cleanup around file splitting.
+- Did: Matched the Hub much closer to the visual reference, added a real hero carousel, replaced raw hash jumps with app-controlled section scrolling, synchronized rail active state with scroll position, and refactored Hub navigation/content logic into smaller focused files. Also updated project rules so 300 lines is a review threshold, not an automatic split trigger.
+- Next: Continue Hub polish on content and visual details, then return to the queued Charades cleanup pass (`useGameState` dependencies, dead presenter/runtime leftovers, oversized files) before broader Phase 4 work.
 - Blocker: None.
 <!-- handoff:end -->

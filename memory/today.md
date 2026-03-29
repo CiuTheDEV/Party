@@ -77,3 +77,11 @@
 - Promoted the next cleanup pass into `memory/active-tasks.json` so the next session can start from code quality work instead of rediscovery.
 - Next: begin with Charades cleanup before new feature work.
 - Experience recorded: no
+
+### S12 (14:15~) [Project Party] Hub redesign, navigation polish, and rule sync
+
+- Reworked the Hub toward the target reference: cinematic hero, refined rail behavior, hero carousel, section navigation without URL hash pollution, and scroll-synced active rail state.
+- Refactored Hub structure so page composition, scroll behavior, section activity tracking, and content definitions are separated into focused files instead of living inside one growing page component.
+- Updated project rules so the 300-line limit is treated as a cohesion review threshold rather than an automatic instruction to split files.
+- Next: continue visual/content polish on the Hub instead of more navigation plumbing.
+- Experience recorded: yes

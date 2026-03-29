@@ -54,3 +54,16 @@
 - its own `validateSetup(state)`.
 
 **Why:** This lets setup UI evolve once for all games without forcing every game into the same rigid form builder. Gameplay after `Start` still stays fully game-specific.
+
+---
+
+## Single-page hub navigation should own scroll and active-section state
+
+**Scenario:** A landing-style hub uses section navigation (`hero`, `library`, `showcase`, `footer`) with a fixed header and highlighted rail state.
+
+**Solution:** Keep section navigation app-controlled:
+- use a shared section-link primitive for local section jumps,
+- use a dedicated scroll helper that applies the correct top offset,
+- use a small hook to derive the active section from scroll position.
+
+**Why:** Raw `#hash` anchors are too brittle for polished app shells because they can fight fixed headers, leak hash state into the URL, and make active navigation styling harder to keep in sync.
