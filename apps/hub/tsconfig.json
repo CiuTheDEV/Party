@@ -38,6 +38,12 @@
       "@party/charades/*": [
         "../../packages/games/charades/src/*"
       ],
+      "@party/codenames": [
+        "../../packages/games/codenames/src"
+      ],
+      "@party/codenames/*": [
+        "../../packages/games/codenames/src/*"
+      ],
       "@content/*": [
         "../../content/*"
       ]
@@ -52,6 +58,8 @@
     "../../content/**/*.ts",
     "../../packages/ui/src/**/*.ts",
     "../../packages/ui/src/**/*.tsx",
+    "../../packages/games/codenames/src/**/*.ts",
+    "../../packages/games/codenames/src/**/*.tsx",
     "../../packages/games/charades/src/**/*.ts",
     "../../packages/games/charades/src/**/*.tsx"
   ],

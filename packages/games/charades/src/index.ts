@@ -51,6 +51,23 @@ export const charadesModule: GameModule<CharadesSetupState, CharadesSetupHelpers
 
 export { config, createInitialCharadesSetupState, validateCharadesSetup }
 export { CharadesResultsScreen }
+export { default as CharadesDeviceListener } from './runtime/setup/DeviceListener'
+export { HostGameScreen } from './runtime/play/HostGameScreen'
+export { PresenterScreen } from './runtime/presenter/PresenterScreen'
+export { useGameState } from './runtime/hooks/useGameState'
+export { usePresenter } from './runtime/hooks/usePresenter'
+export { useWordPool } from './runtime/hooks/useWordPool'
+export {
+  clearPresenterSession,
+  createCharadesRoomId,
+  getPresenterHeartbeatMs,
+  isPresenterSessionFresh,
+  readCharadesSetup,
+  readPresenterSession,
+  writeCharadesSetup,
+  writePresenterSession,
+} from './runtime/shared/charades-storage'
+export { getPartykitHost, getPresenterOrigin, isLocalPresenterOrigin } from './runtime/shared/charades-runtime'
 export type {
   CharadesCategoryDifficulty,
   CharadesGameSettings,
@@ -59,6 +76,7 @@ export type {
   CharadesSetupState,
 } from './setup/state'
 export type { CharadesResultPlayer } from './results/types'
+export type { GameSettings, Player } from './runtime/hooks/useGameState'
 export type {
   CharadesDeviceListenerProps,
   CharadesSetupHelpers,

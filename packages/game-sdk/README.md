@@ -18,7 +18,10 @@ Each game module should expose:
 
 - `config`
   - game identity and metadata,
-  - labels, description, player limits, theme-level info.
+  - labels, description, player limits, theme-level info,
+  - explicit availability via `status`:
+    - `live` = playable now,
+    - `coming-soon` = visible in the hub, but not yet playable.
 - `shell`
   - navigation links and shell-level labels for the game area.
 - `createInitialSetupState`
@@ -70,16 +73,25 @@ What belongs in the module:
 - results,
 - eventually gameplay entrypoints/runtime.
 
+## Availability Rule
+
+The hub should not guess whether a module is ready by checking missing routes or placeholder components.
+
+Every game declares `config.status`:
+- `live` means the hub may route into the game now,
+- `coming-soon` means the hub may list or promote the game, but should gate entry with platform UI such as a modal, disabled card, or teaser state.
+
 ## Current Repo Status
 
-`charades` is currently the reference implementation.
+`charades` is currently the reference live implementation.
 
 Today it already owns:
 - config,
 - menu,
 - setup,
-- results.
+- results,
+- runtime/gameplay.
 
-It does **not** fully own gameplay runtime yet; host gameplay code still lives partly in `apps/hub`.
+`codenames` is scaffolded as the second module and registered as `coming-soon`.
 
-So the module system is now credible, but still not fully complete end-to-end.
+So the module system is now credible end-to-end for one live game and ready to host additional games before their gameplay is implemented.

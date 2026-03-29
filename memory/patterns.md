@@ -67,3 +67,13 @@
 - use a small hook to derive the active section from scroll position.
 
 **Why:** Raw `#hash` anchors are too brittle for polished app shells because they can fight fixed headers, leak hash state into the URL, and make active navigation styling harder to keep in sync.
+
+---
+
+## Module availability should be explicit in the SDK
+
+**Scenario:** The hub needs to register future games before their gameplay and routes are ready.
+
+**Solution:** Put an explicit `status` on `GameConfig` and let the hub treat modules as either `live` or `coming-soon`.
+
+**Why:** This keeps rollout logic out of ad hoc UI checks and lets the repo expose a second game in the catalog without pretending it is already playable.

@@ -1,8 +1,11 @@
+export type GameAvailabilityStatus = 'live' | 'coming-soon'
+
 export type GameConfig = {
   id: string
   name: string
   description: string
   icon: string
+  status: GameAvailabilityStatus
   minPlayers: number
   maxPlayers: number
   isPremium: boolean

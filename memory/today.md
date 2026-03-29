@@ -85,3 +85,12 @@
 - Updated project rules so the 300-line limit is treated as a cohesion review threshold rather than an automatic instruction to split files.
 - Next: continue visual/content polish on the Hub instead of more navigation plumbing.
 - Experience recorded: yes
+
+### S13 (~2026-03-29) [Project Party] Repo architecture cleanup + docs sync
+
+- Moved Charades runtime ownership out of `apps/hub` into `packages/games/charades/src/runtime`, leaving Hub routes as thin platform wrappers.
+- Moved Hub homepage feature code into `apps/hub/src/features/hub` and moved `PremiumModal` into `@party/ui`, so `apps/hub/src` now reads as `app + data + features`.
+- Added `@party/codenames` scaffold, registered it in the module registry, and introduced explicit `GameConfig.status` (`live` / `coming-soon`) in `@party/game-sdk`.
+- Updated architecture docs so they describe the current split instead of the older interim state.
+- Next: either add a teaser route for `codenames` or return to Phase 4 multiplayer/deploy work.
+- Experience recorded: yes

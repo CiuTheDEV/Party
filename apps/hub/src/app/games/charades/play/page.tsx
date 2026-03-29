@@ -3,10 +3,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { allCategories } from '@content/charades/index'
-import { HostGameScreen } from '../../../../components/charades/play/HostGameScreen'
-import { useWordPool } from '../../../../hooks/charades/useWordPool'
-import { useGameState } from '../../../../hooks/charades/useGameState'
-import type { Player, GameSettings } from '../../../../hooks/charades/useGameState'
+import { HostGameScreen, useGameState, useWordPool, type Player, type GameSettings } from '@party/charades'
 import styles from './page.module.css'
 
 type Config = {

@@ -2,8 +2,7 @@
 
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
-import { PresenterScreen } from '../../../../components/charades/presenter/PresenterScreen'
-import { usePresenter } from '../../../../hooks/charades/usePresenter'
+import { PresenterScreen, usePresenter } from '@party/charades'
 import styles from './page.module.css'
 
 export default function PresentPage() {

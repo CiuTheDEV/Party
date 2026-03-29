@@ -11,14 +11,14 @@ import {
   Search,
   Share2,
 } from 'lucide-react'
-import { PremiumModal } from '@/components/PremiumModal/PremiumModal'
-import { games } from '@/data/games'
-import { HeroCarousel } from './components/HeroCarousel'
-import { SectionLink } from './components/SectionLink'
-import { libraryCards, railItems } from './hub-content'
-import { useActiveSection } from './hooks/useActiveSection'
-import layoutStyles from './page-layout.module.css'
-import sectionStyles from './page-sections.module.css'
+import { PremiumModal } from '@party/ui'
+import { games, liveGames } from '@/data/games'
+import { HeroCarousel } from '@/features/hub/components/HeroCarousel'
+import { SectionLink } from '@/features/hub/components/SectionLink'
+import { libraryCards, railItems } from '@/features/hub/content/hub-content'
+import { useActiveSection } from '@/features/hub/hooks/useActiveSection'
+import layoutStyles from '@/features/hub/styles/layout.module.css'
+import sectionStyles from '@/features/hub/styles/sections.module.css'
 
 const headingFont = Epilogue({ subsets: ['latin'], weight: ['700', '800', '900'] })
 const bodyFont = Manrope({ subsets: ['latin'], weight: ['400', '500', '600', '700', '800'] })
@@ -35,7 +35,8 @@ const railSectionHrefs = railItems.map((item) => item.href)
 export default function HomePage() {
   const { activeHref: activeRailHref, setActiveHref: setActiveRailHref } = useActiveSection(railSectionHrefs)
   const [showPremium, setShowPremium] = useState(false)
-  const featuredGame = games[0]
+  const featuredGame = liveGames[0]
+  const gamesById = new Map(games.map((game) => [game.id, game]))
 
   return (
     <>
@@ -125,22 +126,23 @@ export default function HomePage() {
 
             <div className={sectionStyles.libraryGrid}>
               {libraryCards.map((card, index) => {
-                const isPlayable = index === 0 && featuredGame
+                const linkedGame = card.gameId ? gamesById.get(card.gameId) : undefined
+                const isFeaturedCard = index === 0 && featuredGame
+                const isPlayable = linkedGame?.status === 'live' || isFeaturedCard
+                const href = linkedGame?.status === 'live' ? linkedGame.href : featuredGame?.href
                 const cardBody = (
-                    <div
-                      className={`${sectionStyles.cardVisual} ${libraryCardToneClassNames[card.tone]}`}
-                    >
-                      <div className={sectionStyles.cardFade} />
-                      <div className={sectionStyles.cardCaption}>
-                        <span className={sectionStyles.cardTag}>{card.label}</span>
-                        <h3 className={`${sectionStyles.cardTitle} ${headingFont.className}`}>{card.name}</h3>
-                      </div>
+                  <div className={`${sectionStyles.cardVisual} ${libraryCardToneClassNames[card.tone]}`}>
+                    <div className={sectionStyles.cardFade} />
+                    <div className={sectionStyles.cardCaption}>
+                      <span className={sectionStyles.cardTag}>{card.label}</span>
+                      <h3 className={`${sectionStyles.cardTitle} ${headingFont.className}`}>{card.name}</h3>
                     </div>
+                  </div>
                 )
 
-                if (isPlayable) {
+                if (isPlayable && href) {
                   return (
-                    <Link key={card.name} href={featuredGame.href} className={sectionStyles.cardShell}>
+                    <Link key={card.name} href={href} className={sectionStyles.cardShell}>
                       {cardBody}
                     </Link>
                   )

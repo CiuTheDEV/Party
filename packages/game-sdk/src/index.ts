@@ -1,4 +1,4 @@
-export type { GameConfig, GameShellConfig, GameShellLink } from './types/GameConfig'
+export type { GameAvailabilityStatus, GameConfig, GameShellConfig, GameShellLink } from './types/GameConfig'
 export type { GameModule, GameResultsProps } from './types/GameModule'
 export type {
   GameMenuContentProps,

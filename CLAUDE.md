@@ -99,10 +99,11 @@ project-party/
 |- apps/
 |  `- hub/                  # Next.js platform shell
 |- packages/
-|  |- ui/                   # Shared UI and shell components
-|  |- game-sdk/             # Game module contract
+|  |- ui/                   # Shared UI, shell, setup chrome, modal primitives
+|  |- game-sdk/             # Game module contract + module availability status
 |  `- games/
-|     `- charades/          # First game module
+|     |- charades/          # First live game module
+|     `- codenames/         # Coming-soon game scaffold
 `- content/
    `- charades/             # Word lists and categories
 ```
@@ -129,16 +130,17 @@ project-party/
 | Module | Status | Description |
 |--------|--------|-------------|
 | `charades` | MVP | Pantomime - gestures, expressions, body language. No drawing, no words. |
-| `[next-game]` | TBD | To be defined with the product owner |
+| `codenames` | Scaffold | Registered in hub as `coming-soon`; gameplay not started yet. |
 
 ### Module Contract
 
 Each module should own:
 - `GameConfig`
+- explicit availability via `GameConfig.status` (`live` or `coming-soon`)
 - menu content
 - setup sections and validation
 - results UI
-- eventually gameplay entrypoints and runtime
+- gameplay entrypoints and runtime
 
 Details live in `packages/game-sdk/README.md`.
 

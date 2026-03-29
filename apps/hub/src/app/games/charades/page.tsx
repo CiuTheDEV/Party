@@ -5,22 +5,21 @@ import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 import {
   charadesModule,
+  CharadesDeviceListener,
   type CharadesSetupHelpers,
   type CharadesSetupState,
-} from '@party/charades'
-import { GameSetupTemplate } from '@party/ui'
-import { allCategories } from '@content/charades/index'
-import {
   clearPresenterSession,
   createCharadesRoomId,
   isPresenterSessionFresh,
   readCharadesSetup,
   readPresenterSession,
   writeCharadesSetup,
-} from '../../../utils/charades-storage'
+} from '@party/charades'
+import { GameSetupTemplate } from '@party/ui'
+import { allCategories } from '@content/charades/index'
 
 const DeviceListener = dynamic(
-  () => import('../../../components/charades/DeviceListener'),
+  async () => CharadesDeviceListener,
   { ssr: false },
 )
 

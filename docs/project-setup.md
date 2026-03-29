@@ -33,10 +33,11 @@ Party/
 |- apps/
 |  `- hub/                    # Next.js app
 |- packages/
-|  |- ui/                     # Shared components
-|  |- game-sdk/               # Module contract
+|  |- ui/                     # Shared shell, setup chrome, modal primitives
+|  |- game-sdk/               # Module contract + availability status
 |  `- games/
-|     `- charades/            # First game module
+|     |- charades/            # First live game module
+|     `- codenames/           # Coming-soon game scaffold
 |- content/
 |  `- charades/               # Word lists
 |- turbo.json
@@ -82,6 +83,7 @@ The hub should stay Cloudflare-ready from the beginning.
 Purpose:
 - shared shell,
 - shared setup template,
+- shared modal primitives,
 - reusable visual primitives.
 
 ### `packages/game-sdk`
@@ -101,7 +103,11 @@ The first game module should own:
 - setup sections,
 - setup validation/state,
 - results,
-- later: gameplay entrypoints/runtime.
+- gameplay entrypoints/runtime.
+
+Every module config should also declare `status`:
+- `live` for playable games,
+- `coming-soon` for games visible in the hub but not ready yet.
 
 ---
 

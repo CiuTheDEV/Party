@@ -16,7 +16,7 @@ export function GameCard({ game, onPremiumClick }: GameCardProps) {
     return (
       <button className={styles.card} onClick={onPremiumClick} aria-label={`${game.name} - Premium`}>
         <div className={styles.hero} style={{ background: gradient, opacity: 0.4 }}>
-          <span className={styles.heroIcon}>{'\uD83D\uDD12'}</span>
+          <span className={styles.heroIcon} aria-hidden="true">{'\uD83D\uDD12'}</span>
         </div>
         <div className={styles.body}>
           <div className={styles.name}>{game.name}</div>
@@ -33,7 +33,7 @@ export function GameCard({ game, onPremiumClick }: GameCardProps) {
   return (
     <Link href={game.href} className={styles.card}>
       <div className={styles.hero} style={{ background: gradient }}>
-        <span className={styles.heroIcon}>{game.icon}</span>
+        <span className={styles.heroIcon} aria-hidden="true">{game.icon}</span>
       </div>
       <div className={styles.body}>
         <div className={styles.name}>{game.name}</div>
