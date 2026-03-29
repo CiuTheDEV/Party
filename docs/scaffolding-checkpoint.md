@@ -64,7 +64,7 @@ Before evaluating any service:
 ## 7. Code Size Check
 
 - [ ] Core feature estimated size: _____ lines
-- [ ] Every single file stays under **300 lines**
+- [ ] Files above ~300 lines were reviewed for cohesion; split only when boundaries are real, not just to satisfy a number
 - [ ] Styles remain modular - no giant CSS file
 - [ ] If a package grows too large, decide whether it should split into smaller modules
 

@@ -1,0 +1,269 @@
+.heroSection {
+  padding: 0 40px;
+  margin-bottom: 80px;
+}
+
+.heroFrame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 21 / 9;
+  border-radius: 32px;
+  overflow: hidden;
+  background: #000;
+}
+
+.heroSlide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  transition:
+    opacity 0.55s ease,
+    transform 0.55s ease;
+}
+
+.heroSlideActive {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+.heroSlideInactive {
+  opacity: 0;
+  transform: scale(1.02);
+  pointer-events: none;
+}
+
+.heroOverlay,
+.heroBackdrop {
+  position: absolute;
+  inset: 0;
+}
+
+.heroOverlay {
+  z-index: 10;
+  padding: 0 64px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  background: linear-gradient(90deg, rgba(5, 5, 5, 1) 0%, rgba(5, 5, 5, 0.72) 44%, rgba(5, 5, 5, 0) 82%);
+}
+
+.heroEyebrow {
+  color: #a78bfa;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  font-size: 0.72rem;
+  font-weight: 800;
+  margin-bottom: 24px;
+}
+
+.heroTitle {
+  color: #fff;
+  font-size: clamp(4rem, 7vw, 5.6rem);
+  line-height: 0.92;
+  letter-spacing: -0.05em;
+  margin: 0 0 16px;
+}
+
+.heroText {
+  max-width: 38rem;
+  color: #94a3b8;
+  font-size: 1.08rem;
+  line-height: 1.8;
+  margin: 0 0 32px;
+}
+
+.playNow {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 16px 28px;
+  border: 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #a78bfa, #8b5cf6);
+  color: #050505;
+  text-decoration: none;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 0 30px rgba(167, 139, 250, 0.2);
+}
+
+.heroBackdrop {
+  background:
+    radial-gradient(circle at 72% 32%, rgba(42, 132, 181, 0.14), transparent 18%),
+    linear-gradient(135deg, #181d28 0%, #111827 28%, #0b0d14 52%, #1a2436 76%, #0b0d14 100%);
+}
+
+.toneCharades {
+  background:
+    radial-gradient(circle at 72% 32%, rgba(42, 132, 181, 0.18), transparent 18%),
+    linear-gradient(135deg, #181d28 0%, #111827 28%, #0b0d14 52%, #1a2436 76%, #0b0d14 100%);
+}
+
+.toneRotation {
+  background:
+    radial-gradient(circle at 70% 28%, rgba(167, 139, 250, 0.2), transparent 18%),
+    linear-gradient(135deg, #1a1422 0%, #110f1d 24%, #0a0d16 52%, #132539 76%, #090c14 100%);
+}
+
+.toneShowcase {
+  background:
+    radial-gradient(circle at 74% 24%, rgba(56, 189, 248, 0.18), transparent 18%),
+    linear-gradient(135deg, #0e1722 0%, #09111a 22%, #07090f 52%, #1a2030 78%, #090b11 100%);
+}
+
+.heroImagePlane,
+.heroRidgeOne,
+.heroRidgeTwo,
+.heroRidgeThree,
+.heroGlowPrimary,
+.heroGlowSecondary,
+.heroMesh {
+  position: absolute;
+}
+
+.heroImagePlane {
+  inset: 0;
+  background:
+    linear-gradient(105deg, transparent 46%, rgba(17, 42, 68, 0.42) 60%, rgba(8, 12, 20, 0.12) 72%, transparent 82%),
+    linear-gradient(90deg, transparent 58%, rgba(9, 23, 36, 0.6) 76%, rgba(7, 10, 16, 0.72) 100%);
+}
+
+.heroRidgeOne {
+  right: 18%;
+  top: -12%;
+  width: 12rem;
+  height: 140%;
+  transform: rotate(14deg);
+  background: linear-gradient(180deg, rgba(20, 44, 76, 0.05), rgba(43, 117, 171, 0.32), rgba(13, 19, 27, 0));
+  filter: blur(4px);
+}
+
+.heroRidgeTwo {
+  right: 9%;
+  top: -16%;
+  width: 10rem;
+  height: 145%;
+  transform: rotate(12deg);
+  background: linear-gradient(180deg, rgba(18, 39, 58, 0.04), rgba(56, 161, 185, 0.28), rgba(13, 19, 27, 0));
+}
+
+.heroRidgeThree {
+  right: 2%;
+  top: -10%;
+  width: 8rem;
+  height: 130%;
+  transform: rotate(10deg);
+  background: linear-gradient(180deg, rgba(24, 49, 70, 0.06), rgba(74, 173, 176, 0.22), rgba(13, 19, 27, 0));
+}
+
+.heroGlowPrimary {
+  inset: auto auto -12% 56%;
+  width: 18rem;
+  height: 18rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(167, 139, 250, 0.18), transparent 70%);
+}
+
+.heroGlowSecondary {
+  inset: 10% 12% auto auto;
+  width: 12rem;
+  height: 12rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.12), transparent 70%);
+}
+
+.heroMesh {
+  inset: 0;
+  background:
+    linear-gradient(120deg, transparent 52%, rgba(167, 139, 250, 0.1) 64%, transparent 74%),
+    linear-gradient(80deg, transparent 58%, rgba(34, 211, 238, 0.08) 72%, transparent 84%);
+}
+
+.heroFooterControls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 18px;
+  z-index: 12;
+  padding: 0 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.heroDots {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.heroDot,
+.heroDotActive {
+  width: 22px;
+  height: 4px;
+  border-radius: 999px;
+  border: 0;
+  background: rgba(255, 255, 255, 0.24);
+  padding: 0;
+  cursor: pointer;
+}
+
+.heroDotActive {
+  background: #a78bfa;
+}
+
+.heroArrows {
+  display: flex;
+  gap: 12px;
+}
+
+.circleAction {
+  width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.05);
+  color: #f4eff7;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.circleAction:hover,
+.circleAction:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+@media (max-width: 767px) {
+  .heroSection {
+    padding: 0 18px;
+    margin-bottom: 56px;
+  }
+
+  .heroFrame {
+    aspect-ratio: auto;
+    min-height: 460px;
+    border-radius: 24px;
+  }
+
+  .heroOverlay {
+    padding: 28px 20px;
+    background: linear-gradient(180deg, rgba(5, 5, 5, 0.9) 0%, rgba(5, 5, 5, 0.58) 52%, rgba(5, 5, 5, 0.24) 100%);
+  }
+
+  .heroTitle {
+    font-size: clamp(3rem, 15vw, 4.3rem);
+  }
+
+  .heroText {
+    font-size: 0.96rem;
+    line-height: 1.6;
+  }
+}

@@ -1,0 +1,203 @@
+.skipLink {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  z-index: 300;
+  padding: 11px 16px;
+  border-radius: 999px;
+  background: rgba(17, 17, 20, 0.92);
+  color: var(--color-text);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  transform: translateY(-220%);
+  transition: transform 0.2s ease;
+}
+
+.skipLink:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid rgba(183, 159, 255, 0.65);
+  outline-offset: 2px;
+}
+
+.shell {
+  --rail-collapsed-width: 80px;
+  --rail-expanded-width: 256px;
+  --rail-motion: 320ms cubic-bezier(0.22, 1, 0.36, 1);
+  min-height: 100vh;
+  background: #050505;
+  color: #f4eff7;
+}
+
+.topbar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 50;
+  background: rgba(5, 5, 5, 0.8);
+  backdrop-filter: blur(40px);
+}
+
+.topbarInner {
+  width: 100%;
+  padding: 24px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.topbarBrand {
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  color: #a78bfa;
+}
+
+.loginButton {
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  cursor: pointer;
+}
+
+.rail {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 40;
+  width: var(--rail-collapsed-width);
+  height: 100vh;
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(5, 5, 5, 0.4);
+  backdrop-filter: blur(40px);
+  transition: width var(--rail-motion);
+  overflow: hidden;
+  will-change: width;
+}
+
+.rail:hover,
+.rail:focus-within {
+  width: var(--rail-expanded-width);
+}
+
+.railInner {
+  height: 100%;
+  padding: 96px 16px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.railSpacer {
+  flex: 1;
+}
+
+.railLink,
+.railLinkActive {
+  appearance: none;
+  width: 100%;
+  min-height: 52px;
+  padding: 12px 28px;
+  border: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0;
+  background: transparent;
+  font: inherit;
+  border-radius: 0 999px 999px 0;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 0.3s ease,
+    color 0.3s ease,
+    gap 0.25s ease,
+    padding 0.25s ease;
+}
+
+.railLink {
+  color: #64748b;
+}
+
+.railLink:hover,
+.railLink:focus-visible {
+  background: rgba(167, 139, 250, 0.05);
+  color: #ffffff;
+  outline: none;
+}
+
+.railLinkActive {
+  color: #a78bfa;
+  background: rgba(167, 139, 250, 0.1);
+}
+
+.iconWrap {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+}
+
+.railLabel {
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  visibility: hidden;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.7rem;
+  font-weight: 700;
+  transform: translateX(-6px);
+  transition:
+    opacity 0.14s ease,
+    transform 0.14s ease,
+    max-width 0s linear 0.14s,
+    visibility 0s linear 0.14s;
+}
+
+.rail:hover .railLink,
+.rail:hover .railLinkActive,
+.rail:focus-within .railLink,
+.rail:focus-within .railLinkActive {
+  gap: 16px;
+  padding: 12px 18px;
+}
+
+.rail:hover .railLabel,
+.rail:focus-within .railLabel {
+  max-width: 140px;
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+  transition:
+    max-width var(--rail-motion),
+    opacity 0.18s ease 0.08s,
+    transform 0.22s ease 0.05s,
+    visibility 0s linear 0s;
+}
+
+.main {
+  min-height: 100vh;
+  padding-left: 92px;
+  padding-top: 96px;
+}
+
+@media (max-width: 767px) {
+  .topbarInner {
+    padding: 20px 18px;
+  }
+
+  .rail {
+    display: none;
+  }
+
+  .main {
+    padding-left: 0;
+    padding-top: 84px;
+  }
+}

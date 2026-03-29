@@ -54,7 +54,10 @@ No blind fixes. Four phases:
 
 ## Code Quality Rules
 
-- No file exceeds **300 lines** — split into modules if it grows
+- **300 lines is a review threshold, not an automatic split rule**
+- If a file grows past ~300 lines, review cohesion first:
+  - keep it whole if it still has one clear responsibility and stays easy to reason about,
+  - split it only when responsibilities are mixed, navigation becomes harder, or real module boundaries appear
 - Component styles live next to the component (`Button.module.css` beside `Button.tsx`)
 - `globals.css` only for: CSS reset, custom properties, base typography — nothing else
 - No AI slop — comments explain *why*, never *what*

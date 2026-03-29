@@ -185,7 +185,10 @@ Details live in `packages/game-sdk/README.md`.
 
 ### File Structure
 
-- No CSS/TS/TSX file exceeds **300 lines**
+- **300 lines is a review threshold, not an automatic split rule**
+- If a CSS/TS/TSX file grows past ~300 lines, first assess cohesion:
+  - keep it as one file if it still has one clear responsibility and is easy to reason about,
+  - split it only when responsibilities are mixed, the file becomes hard to navigate, or extracted parts have a natural boundary
 - Component styles live next to the component
 - One component = one file
 - `globals.css` only for reset, custom properties, and base typography

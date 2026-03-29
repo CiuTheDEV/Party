@@ -1,0 +1,351 @@
+.librarySection {
+  padding: 0 40px 80px;
+  scroll-margin-top: 110px;
+}
+
+.libraryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.libraryTitle {
+  margin: 0 0 8px;
+  font-size: 2.05rem;
+  letter-spacing: -0.04em;
+}
+
+.libraryLead {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 0.92rem;
+}
+
+.libraryTools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.searchWrap {
+  min-width: 220px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  color: #94a3b8;
+}
+
+.searchInput {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #f4eff7;
+  font: inherit;
+}
+
+.toolCircle {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f4eff7;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.libraryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 32px;
+}
+
+.cardShell {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.cardVisual {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border-radius: 24px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cardMystery {
+  background: linear-gradient(160deg, #285b58 0%, #162126 72%, #0a0a0d 100%);
+}
+
+.cardSeconds {
+  background: linear-gradient(160deg, #d6d8da 0%, #7d8ca3 42%, #151b25 100%);
+}
+
+.cardMafia {
+  background: linear-gradient(160deg, #705639 0%, #231a15 42%, #0a0a0d 100%);
+}
+
+.cardShips {
+  background: linear-gradient(160deg, #395769 0%, #182635 42%, #0a0a0d 100%);
+}
+
+.cardFade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 34%, rgba(5, 5, 5, 0.78) 100%);
+}
+
+.cardCaption {
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  bottom: 22px;
+}
+
+.cardTag {
+  display: block;
+  color: #a78bfa;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.62rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 1.9rem;
+  letter-spacing: -0.04em;
+}
+
+.showcaseSection {
+  padding: 48px 40px 0;
+  scroll-margin-top: 110px;
+  display: grid;
+  grid-template-columns: minmax(320px, 0.9fr) minmax(0, 1.1fr);
+  gap: 80px;
+  align-items: center;
+}
+
+.showcaseVisual {
+  position: relative;
+}
+
+.showcaseGlow {
+  position: absolute;
+  inset: -80px;
+  border-radius: 999px;
+  background: rgba(167, 139, 250, 0.05);
+  filter: blur(100px);
+}
+
+.showcasePanel {
+  position: relative;
+  padding: 4px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(10, 10, 10, 0.4);
+  backdrop-filter: blur(40px);
+}
+
+.showcaseBust {
+  height: 600px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(167, 139, 250, 0.22), transparent 16%),
+    radial-gradient(circle at 48% 34%, rgba(77, 70, 112, 0.72), transparent 18%),
+    radial-gradient(circle at 50% 54%, rgba(38, 37, 53, 0.86), transparent 22%),
+    linear-gradient(180deg, rgba(14, 14, 18, 0.96), rgba(6, 6, 8, 0.98));
+}
+
+.showcaseCopy {
+  max-width: 34rem;
+}
+
+.showcaseEyebrow {
+  display: block;
+  color: #a78bfa;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-size: 0.78rem;
+  font-weight: 800;
+  margin-bottom: 24px;
+}
+
+.showcaseTitle {
+  margin: 0 0 24px;
+  font-size: clamp(3.2rem, 6vw, 4.8rem);
+  letter-spacing: -0.05em;
+  line-height: 1.05;
+}
+
+.showcaseText {
+  margin: 0 0 32px;
+  color: #94a3b8;
+  font-size: 1.08rem;
+  line-height: 1.8;
+}
+
+.ghostButton {
+  padding: 15px 24px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: #f4eff7;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  cursor: pointer;
+}
+
+.footer {
+  margin-top: 80px;
+  padding: 80px 40px;
+  scroll-margin-top: 110px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.footerTop,
+.footerBottom {
+  display: flex;
+  justify-content: space-between;
+  gap: 48px;
+}
+
+.footerBrandBlock {
+  max-width: 20rem;
+}
+
+.footerBrand {
+  display: block;
+  color: #a78bfa;
+  font-size: 1.35rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  margin-bottom: 24px;
+}
+
+.footerText {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+.footerLinks {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 80px;
+}
+
+.footerColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.footerColumnTitle,
+.footerMeta {
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.64rem;
+  font-weight: 800;
+}
+
+.footerColumn a,
+.footerColumn button {
+  color: #64748b;
+  text-decoration: none;
+  font-size: 0.92rem;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+.footerBottom {
+  margin-top: 80px;
+  padding-top: 32px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  align-items: center;
+}
+
+.footerIcons {
+  display: flex;
+  gap: 24px;
+}
+
+.footerIcons a,
+.footerIcons button {
+  color: #64748b;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+@media (max-width: 1100px) {
+  .libraryGrid,
+  .showcaseSection,
+  .footerTop,
+  .footerBottom {
+    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 767px) {
+  .librarySection,
+  .showcaseSection,
+  .footer {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .libraryGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .libraryHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .libraryTools,
+  .footerLinks {
+    width: 100%;
+    grid-template-columns: 1fr;
+  }
+
+  .searchWrap {
+    min-width: 100%;
+  }
+
+  .showcaseSection {
+    gap: 32px;
+  }
+
+  .showcaseBust {
+    height: 360px;
+  }
+}
