@@ -94,3 +94,11 @@
 - Updated architecture docs so they describe the current split instead of the older interim state.
 - Next: either add a teaser route for `codenames` or return to Phase 4 multiplayer/deploy work.
 - Experience recorded: yes
+
+### S14 (~2026-03-29) [Project Party] Session wrap + push
+
+- Committed the architecture/docs batch and pushed it to `origin/main`.
+- Added a separate cleanup commit removing tracked local artifacts from `.codex/skills` and `apps/hub/tsconfig.tsbuildinfo`.
+- Left only local `.vscode/mcp.json` outside git, intentionally.
+- Next: resume product work from the refreshed architecture, not from repo cleanup.
+- Experience recorded: no

@@ -138,8 +138,8 @@ This means:
 <!-- handoff:start -->
 ## Session Handoff
 - Last: 2026-03-29 by Codex (GPT-5.4)
-- Task: Repo architecture cleanup after Hub redesign.
-- Did: Moved Charades runtime out of `apps/hub` into `packages/games/charades`, moved Hub homepage code into `src/features/hub`, moved `PremiumModal` into `@party/ui`, added explicit module availability status to `@party/game-sdk`, scaffolded and registered `@party/codenames`, and updated docs toward the new split.
-- Next: Return to product work. Most natural next steps are either a teaser route for `codenames` or Phase 4 multiplayer/deploy work.
+- Task: Repo architecture cleanup, docs sync, and wrap-up.
+- Did: Finished the architecture pass, committed and pushed the repo split (`hub` / `ui` / `games`), added the `codenames` scaffold and explicit module status in the SDK, cleaned tracked local artifacts, and synchronized the main architecture docs with the new structure.
+- Next: Return to product work. Most natural next steps are either a teaser route for `codenames`, making Hub library cards fully registry-driven, or Phase 4 multiplayer/deploy work.
 - Blocker: None.
 <!-- handoff:end -->
