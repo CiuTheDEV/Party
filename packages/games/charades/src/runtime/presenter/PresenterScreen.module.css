@@ -153,8 +153,8 @@
 }
 
 .messageNextAvatar {
-  font-size: clamp(1.5rem, 4vw, 2rem);
-  line-height: 1;
+  width: clamp(36px, 7vw, 44px);
+  height: clamp(36px, 7vw, 44px);
 }
 
 .messageNextName {

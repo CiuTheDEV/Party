@@ -9,11 +9,12 @@ type Params = {
   send: (event: HostEvent) => void
   timerSeconds: number
   currentTurnIdRef: MutableRefObject<string>
+  onRevealCommit?: () => void
 }
 
 type PhaseTimerMode = 'timer-running' | 'reveal-buffer' | null
 
-export function usePhaseTimers({ setState, send, timerSeconds, currentTurnIdRef }: Params) {
+export function usePhaseTimers({ setState, send, timerSeconds, currentTurnIdRef, onRevealCommit }: Params) {
   const phaseTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const phaseTimerModeRef = useRef<PhaseTimerMode>(null)
   const phaseTimerRemainingRef = useRef(0)
@@ -86,6 +87,7 @@ export function usePhaseTimers({ setState, send, timerSeconds, currentTurnIdRef 
 
       if (nextRemaining <= 0) {
         clearPhaseTimer()
+        onRevealCommit?.()
         send({ type: 'REVEAL_BUFFER_END', turnId })
         startTimer()
         return
@@ -94,7 +96,7 @@ export function usePhaseTimers({ setState, send, timerSeconds, currentTurnIdRef 
       send({ type: 'REVEAL_BUFFER_TICK', turnId, remaining: nextRemaining })
       setState((current) => ({ ...current, bufferRemaining: nextRemaining }))
     }, 1000)
-  }, [clearPhaseTimer, send, setState, startTimer])
+  }, [clearPhaseTimer, onRevealCommit, send, setState, startTimer])
 
   const pausePhaseTimer = useCallback(() => {
     if (!phaseTimerModeRef.current) {

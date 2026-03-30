@@ -1,16 +1,15 @@
 'use client'
 
+import { Sparkles, UserRound, Venus, Mars } from 'lucide-react'
 import { useState } from 'react'
+import { AvatarAsset } from '../../avatars/AvatarAsset'
+import {
+  getCharadesAvatarCategories,
+  getCharadesAvatarsByCategory,
+} from '../../avatars/avatar-helpers'
+import type { CharadesAvatarCategory } from '../../avatars/avatar-registry'
 import type { CharadesPlayerDraft } from '../state'
 import styles from './AddPlayerModal.module.css'
-
-const AVATAR_CATEGORIES = {
-  Ludzie: ['😀', '😎', '🤩', '😭', '🥳', '😺', '🤓', '😜', '🧐', '😇', '🤠', '👻'],
-  Zwierzęta: ['🐶', '🐱', '🐻', '🦊', '🐯', '🦁', '🐸', '🐼', '🐨', '🦄', '🐺', '🦉'],
-  Inne: ['🎭', '🎪', '🎨', '🎬', '🎤', '🎸', '🎯', '🎲', '🏆', '⭐', '🔥', '💎'],
-} as const
-
-type Category = keyof typeof AVATAR_CATEGORIES
 
 type Props = {
   onAdd: (player: CharadesPlayerDraft) => void
@@ -18,15 +17,20 @@ type Props = {
   existingPlayers: CharadesPlayerDraft[]
 }
 
+const AVATAR_CATEGORIES = getCharadesAvatarCategories()
+
 export function AddPlayerModal({ onAdd, onClose, existingPlayers }: Props) {
   const [name, setName] = useState('')
   const [avatar, setAvatar] = useState<string | null>(null)
   const [gender, setGender] = useState<CharadesPlayerDraft['gender']>('none')
-  const [category, setCategory] = useState<Category>('Ludzie')
+  const [category, setCategory] = useState<CharadesAvatarCategory>('people')
   const [attempted, setAttempted] = useState(false)
+  const avatars = getCharadesAvatarsByCategory(category)
 
   const nameTooShort = name.trim().length > 0 && name.trim().length < 3
-  const nameTaken = name.trim().length >= 3 && existingPlayers.some((player) => player.name.toLowerCase() === name.trim().toLowerCase())
+  const nameTaken =
+    name.trim().length >= 3 &&
+    existingPlayers.some((player) => player.name.toLowerCase() === name.trim().toLowerCase())
   const nameValid = name.trim().length >= 3 && !nameTaken
   const avatarValid = avatar !== null && !existingPlayers.some((player) => player.avatar === avatar)
   const genderValid = gender !== 'none'
@@ -45,83 +49,122 @@ export function AddPlayerModal({ onAdd, onClose, existingPlayers }: Props) {
   return (
     <div className={styles.backdrop}>
       <div className={styles.modal}>
-        <h2 className={styles.title}>Dodaj gracza</h2>
+        <div className={styles.header}>
+          <div className={styles.headerCopy}>
+            <span className={styles.eyebrow}>Nowy gracz</span>
+            <h2 className={styles.title}>Dodaj gracza</h2>
+            <p className={styles.description}>Ustaw nazwe, avatar i plec, zeby dolaczyc nowa osobe do rundy.</p>
+          </div>
+          <div className={styles.previewChip}>
+            <UserRound size={16} />
+            <span>{existingPlayers.length + 1}. slot</span>
+          </div>
+        </div>
 
         <div className={styles.body}>
           <div className={styles.left}>
-            <p className={styles.label}>Wybrany avatar</p>
-            <div className={`${styles.avatarPreview} ${attempted && !avatarValid ? styles.fieldError : ''}`}>
-              {avatar ? <span className={styles.avatarEmoji}>{avatar}</span> : <span className={styles.avatarPlaceholder}>?</span>}
+            <div className={styles.fieldCard}>
+              <div className={styles.fieldHeader}>
+                <span className={styles.label}>Wybrany avatar</span>
+              </div>
+              <div className={`${styles.avatarPreview} ${attempted && !avatarValid ? styles.fieldError : ''}`}>
+                {avatar ? (
+                  <AvatarAsset avatar={avatar} variant="animated" className={styles.avatarEmoji} />
+                ) : (
+                  <span className={styles.avatarPlaceholder}>?</span>
+                )}
+              </div>
             </div>
 
-            <label className={styles.label} htmlFor="charades-player-name">Nazwa gracza</label>
-            <input
-              id="charades-player-name"
-              className={`${styles.input} ${attempted && !nameValid ? styles.fieldError : ''}`}
-              type="text"
-              placeholder="Nazwa gracza (min. 3 znaki)"
-              value={name}
-              onChange={(event) => setName(event.target.value)}
-              maxLength={20}
-              autoFocus
-            />
-            <p className={styles.inputHint}>
-              {nameTaken ? 'Ta nazwa jest już zajęta' : nameTooShort ? 'Minimum 3 znaki' : ''}
-            </p>
+            <div className={styles.fieldCard}>
+              <label className={styles.label} htmlFor="charades-player-name">
+                Nazwa gracza
+              </label>
+              <input
+                id="charades-player-name"
+                className={`${styles.input} ${attempted && !nameValid ? styles.fieldError : ''}`}
+                type="text"
+                placeholder="Np. Ola"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                maxLength={20}
+                autoFocus
+              />
+              <p className={styles.inputHint}>
+                {nameTaken ? 'Ta nazwa jest juz zajeta.' : nameTooShort ? 'Minimum 3 znaki.' : ' '}
+              </p>
+            </div>
 
-            <p className={styles.label}>Płeć</p>
-            <div className={styles.genderRow}>
-              <button
-                type="button"
-                data-gender="ona"
-                className={`${styles.genderBtn} ${gender === 'ona' ? styles.selected : ''} ${attempted && !genderValid ? styles.fieldError : ''}`}
-                onClick={() => setGender(gender === 'ona' ? 'none' : 'ona')}
-              >
-                ♀
-              </button>
-              <button
-                type="button"
-                data-gender="on"
-                className={`${styles.genderBtn} ${gender === 'on' ? styles.selected : ''} ${attempted && !genderValid ? styles.fieldError : ''}`}
-                onClick={() => setGender(gender === 'on' ? 'none' : 'on')}
-              >
-                ♂
-              </button>
+            <div className={styles.fieldCard}>
+              <span className={styles.label}>Plec</span>
+              <div className={styles.genderRow}>
+                <button
+                  type="button"
+                  data-gender="ona"
+                  className={`${styles.genderBtn} ${gender === 'ona' ? styles.selected : ''} ${attempted && !genderValid ? styles.fieldError : ''}`}
+                  onClick={() => setGender(gender === 'ona' ? 'none' : 'ona')}
+                >
+                  <Venus size={18} />
+                  Ona
+                </button>
+                <button
+                  type="button"
+                  data-gender="on"
+                  className={`${styles.genderBtn} ${gender === 'on' ? styles.selected : ''} ${attempted && !genderValid ? styles.fieldError : ''}`}
+                  onClick={() => setGender(gender === 'on' ? 'none' : 'on')}
+                >
+                  <Mars size={18} />
+                  On
+                </button>
+              </div>
             </div>
           </div>
 
           <div className={styles.right}>
-            <div className={styles.categoryTabs}>
-              {(Object.keys(AVATAR_CATEGORIES) as Category[]).map((currentCategory) => (
-                <button
-                  key={currentCategory}
-                  type="button"
-                  className={`${styles.categoryTab} ${currentCategory === category ? styles.activeTab : ''}`}
-                  onClick={() => setCategory(currentCategory)}
-                >
-                  {currentCategory}
-                </button>
-              ))}
-            </div>
-            <div className={styles.avatarGrid}>
-              {AVATAR_CATEGORIES[category].map((currentAvatar) => {
-                const taken = existingPlayers.some((player) => player.avatar === currentAvatar)
-                return (
+            <div className={styles.avatarPanel}>
+              <div className={styles.avatarPanelHeader}>
+                <span className={styles.label}>Wybierz avatar</span>
+                <span className={styles.avatarPanelMeta}>
+                  <Sparkles size={14} />
+                  Niedostepne sa zajete
+                </span>
+              </div>
+
+              <div className={styles.categoryTabs}>
+                {AVATAR_CATEGORIES.map((currentCategory) => (
                   <button
-                    key={currentAvatar}
+                    key={currentCategory.id}
                     type="button"
-                    className={`${styles.avatarBtn} ${currentAvatar === avatar ? styles.selectedAvatar : ''} ${taken ? styles.takenAvatar : ''}`}
-                    onClick={() => {
-                      if (!taken) {
-                        setAvatar(currentAvatar)
-                      }
-                    }}
-                    disabled={taken}
+                    className={`${styles.categoryTab} ${currentCategory.id === category ? styles.activeTab : ''}`}
+                    onClick={() => setCategory(currentCategory.id)}
                   >
-                    {currentAvatar}
+                    {currentCategory.label}
                   </button>
-                )
-              })}
+                ))}
+              </div>
+
+              <div className={styles.avatarGrid}>
+                {avatars.map((currentAvatar) => {
+                  const taken = existingPlayers.some((player) => player.avatar === currentAvatar.id)
+
+                  return (
+                    <button
+                      key={currentAvatar.id}
+                      type="button"
+                      className={`${styles.avatarBtn} ${currentAvatar.id === avatar ? styles.selectedAvatar : ''} ${taken ? styles.takenAvatar : ''}`}
+                      onClick={() => {
+                        if (!taken) {
+                          setAvatar(currentAvatar.id)
+                        }
+                      }}
+                      disabled={taken}
+                      title={currentAvatar.label}
+                    >
+                      <AvatarAsset avatar={currentAvatar.id} className={styles.avatarBtnAsset} />
+                    </button>
+                  )
+                })}
+              </div>
             </div>
           </div>
         </div>
@@ -130,7 +173,13 @@ export function AddPlayerModal({ onAdd, onClose, existingPlayers }: Props) {
           <button className={styles.cancelBtn} type="button" onClick={onClose}>
             Anuluj
           </button>
-          <button className={styles.submitBtn} type="button" data-ready={canSubmit ? 'true' : 'false'} onClick={handleSubmit}>
+          <button
+            className={styles.submitBtn}
+            type="button"
+            data-ready={canSubmit ? 'true' : 'false'}
+            disabled={!canSubmit}
+            onClick={handleSubmit}
+          >
             Gotowe
           </button>
         </div>

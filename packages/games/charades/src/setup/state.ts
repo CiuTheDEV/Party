@@ -2,13 +2,24 @@ import type { GameSetupValidation } from '@party/game-sdk'
 
 export type CharadesPlayerDraft = {
   name: string
-  avatar: string
+  avatar: CharadesAvatarId
   gender: 'on' | 'ona' | 'none'
 }
+
+export type CharadesAvatarId = string
 
 export type CharadesGameSettings = {
   rounds: number
   timerSeconds: number
+  wordChange: CharadesWordChangeSettings
+}
+
+export type CharadesWordChangeScope = 'word-only' | 'word-and-category'
+
+export type CharadesWordChangeSettings = {
+  enabled: boolean
+  changesPerPlayer: number
+  rerollScope: CharadesWordChangeScope
 }
 
 export type CharadesCategoryDifficulty = 'easy' | 'hard'
@@ -23,16 +34,25 @@ export type CharadesSetupState = {
   settings: CharadesGameSettings
 }
 
+export function createDefaultCharadesSettings(): CharadesGameSettings {
+  return {
+    rounds: 3,
+    timerSeconds: 60,
+    wordChange: {
+      enabled: false,
+      changesPerPlayer: 1,
+      rerollScope: 'word-only',
+    },
+  }
+}
+
 export function createInitialCharadesSetupState(): CharadesSetupState {
   return {
     roomId: '',
     isDeviceConnected: false,
     players: [],
     selectedCategories: {},
-    settings: {
-      rounds: 3,
-      timerSeconds: 60,
-    },
+    settings: createDefaultCharadesSettings(),
   }
 }
 

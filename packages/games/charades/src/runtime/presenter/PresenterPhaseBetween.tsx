@@ -1,5 +1,6 @@
 'use client'
 
+import { AvatarAsset } from '../../avatars/AvatarAsset'
 import type { PresenterNextStep } from '../shared/charades-events'
 import phaseStyles from './PresenterPhaseShared.module.css'
 
@@ -32,14 +33,14 @@ export function PresenterPhaseBetween({
       ? 'Ekran jest gotowy na kolejną turę. Upewnij się tylko, że nowy prezenter ma telefon w ręku.'
       : nextStep === 'round-summary'
         ? 'Nie przekazuj już telefonu dalej. Zaczekaj, aż host zamknie podsumowanie i rozpocznie kolejną rundę.'
-        : 'Nie przekazuj już telefonu dalej. Zaczekaj na finalny ekran albo powrót do lobby.'
+        : 'Nie przekazuj już telefonu dalej. Zaczekaj na finałowy ekran albo powrót do lobby.'
 
   return (
     <div className={phaseStyles.phaseStack}>
       <section className={phaseStyles.phaseCard}>
         <p className={phaseStyles.phaseEyebrow}>Zmiana prezentera</p>
         <div className={phaseStyles.passCard}>
-          {isPassingToNextPresenter ? <span className={phaseStyles.passAvatar}>{nextPresenterAvatar}</span> : null}
+          {isPassingToNextPresenter ? <AvatarAsset avatar={nextPresenterAvatar} className={phaseStyles.passAvatar} /> : null}
           <div className={phaseStyles.passMeta}>
             <h2 className={phaseStyles.phaseTitle}>{title}</h2>
             <p className={phaseStyles.phaseLead}>{lead}</p>

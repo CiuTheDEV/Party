@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { AvatarAsset } from '../avatars/AvatarAsset'
 import styles from './ResultsGroups.module.css'
 import type { CharadesResultPlayer } from './types'
 
@@ -105,7 +106,7 @@ export function ResultsGroups({
               <div className={styles.groupPlayers}>
                 {group.players.map((player) => (
                   <article key={player.name} className={styles.playerChip} data-rank={group.rank}>
-                    <span className={styles.playerAvatar}>{player.avatar}</span>
+                    <AvatarAsset avatar={player.avatar} className={styles.playerAvatar} />
                     <span className={styles.playerName}>{player.name}</span>
                   </article>
                 ))}
@@ -155,7 +156,7 @@ export function ResultsGroups({
                   <article key={player.name} className={styles.tableRow}>
                     <span className={styles.tablePlace}>{findRankForPlayer(rankGroups, player.name)}.</span>
                     <span className={styles.tablePlayer}>
-                      <span className={styles.tableAvatar}>{player.avatar}</span>
+                      <AvatarAsset avatar={player.avatar} className={styles.tableAvatar} />
                       <span className={styles.tableName}>{player.name}</span>
                     </span>
                     <span className={styles.tableScore}>{player.score} pkt</span>

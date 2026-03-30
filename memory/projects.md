@@ -1,6 +1,6 @@
 # Projects Overview
 
-*Last updated: 2026-03-26*
+*Last updated: 2026-03-30*
 
 ---
 
@@ -8,7 +8,7 @@
 
 | Project | Status | Phase | Last Updated |
 |---------|--------|-------|--------------|
-| Project Party | Active | Phase 4 in progress, architecture cleanup done | 2026-03-26 |
+| Project Party | Active | Phase 4 in progress, charades runtime and setup polish expanded | 2026-03-30 |
 
 ---
 
@@ -23,9 +23,9 @@
 - setup shell is shared, gameplay remains custom per game.
 
 **Current implementation truth**:
-- `charades` owns config, menu, setup and results,
-- gameplay host runtime is still partly in hub,
-- Phase 4 deploy/multiplayer is the next product milestone.
+- `charades` owns config, menu, setup, results, and its runtime hooks/components,
+- charades now has presenter word change, weighted reroll logic, browser-side word history, and a custom avatar asset system,
+- Phase 4 deploy/multiplayer is still the next product milestone.
 
 **Stack**: Next.js + Turborepo + Cloudflare Pages + Partykit + D1 + Clerk later + Stripe stub
 

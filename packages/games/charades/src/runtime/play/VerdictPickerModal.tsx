@@ -1,3 +1,4 @@
+import { AvatarAsset } from '../../avatars/AvatarAsset'
 import styles from './HostGameScreen.module.css'
 import type { PlayerSummary } from './playboard-types'
 
@@ -20,12 +21,21 @@ export function VerdictPickerModal({
   onCancel,
   onConfirm,
 }: Props) {
+  const density =
+    players.length === 12
+      ? 'grid-12'
+      : players.length >= 10
+        ? 'grid-10'
+        : players.length === 9
+          ? 'grid-9'
+          : 'default'
+
   return (
     <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-label="Wybierz gracza">
       <div className={styles.modalCard}>
         <span className={styles.modalEyebrow}>Zgadnięto</span>
         <h2 className={styles.modalTitle}>Który gracz odgadł hasło?</h2>
-        <div className={styles.modalList}>
+        <div className={styles.modalList} data-density={density}>
           {players.map((player) => {
             const isSelected = selectedPlayerIdx === player.index
             return (
@@ -35,7 +45,7 @@ export function VerdictPickerModal({
                 className={isSelected ? styles.playerOptionSelected : styles.playerOption}
                 onClick={() => onSelectPlayer(player.index)}
               >
-                <span className={styles.playerAvatar}>{player.avatar}</span>
+                <AvatarAsset avatar={player.avatar} className={styles.playerAvatar} />
                 <span className={styles.playerName} data-gender={player.gender}>
                   {player.name}
                 </span>

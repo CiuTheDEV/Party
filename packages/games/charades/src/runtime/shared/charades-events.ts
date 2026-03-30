@@ -10,6 +10,8 @@ export type HostEvent =
       word: string
       category: string
       difficulty: PresenterWordDifficulty
+      canChangeWord: boolean
+      remainingWordChanges: number
       presenterName: string
       timerSeconds: number
       nextPresenterName: string
@@ -19,6 +21,14 @@ export type HostEvent =
   | { type: 'REVEAL_BUFFER_START'; turnId: string; remaining: number }
   | { type: 'REVEAL_BUFFER_TICK'; turnId: string; remaining: number }
   | { type: 'REVEAL_BUFFER_END'; turnId: string }
+  | {
+      type: 'WORD_CHANGED'
+      turnId: string
+      word: string
+      category: string
+      difficulty: PresenterWordDifficulty
+      remainingWordChanges: number
+    }
   | { type: 'TIMER_TICK'; turnId: string; remaining: number }
   | { type: 'TURN_END'; turnId: string; reason: 'timeout' | 'verdict' | 'manual-stop' }
   | { type: 'BETWEEN_TURNS'; nextPresenterName: string; nextPresenterAvatar: string }
@@ -29,6 +39,7 @@ export type HostEvent =
 // Eventy wysyłane przez TELEFON PREZENTERA do hosta
 export type PresenterEvent =
   | { type: 'WORD_REVEALED'; turnId: string }
+  | { type: 'CHANGE_WORD'; turnId: string }
   | { type: 'DEVICE_CONNECTED' }
 
 export type CharadesEvent = HostEvent | PresenterEvent
@@ -49,6 +60,8 @@ export type RoomState = {
   currentWord: string
   currentCategory: string
   currentDifficulty: PresenterWordDifficulty
+  canChangeWord: boolean
+  remainingWordChanges: number
   currentPresenter: string
   presenterConnected: boolean
   timerRemaining: number

@@ -1,5 +1,6 @@
 import { ChevronLeft } from 'lucide-react'
 import type { MutableRefObject } from 'react'
+import { AvatarAsset } from '../../avatars/AvatarAsset'
 import styles from './PlayBoard.module.css'
 import { PresenterCard } from './PlayBoardCards'
 import type { PlayerSummary, RankedPlayer } from './playboard-types'
@@ -140,7 +141,7 @@ export function RoundSummaryView({
             {rankedPlayers.map((player) => (
               <div key={player.name} className={styles.summaryRow} data-rank={player.rank}>
                 <span className={styles.summaryRank}>#{player.rank}</span>
-                <span className={styles.summaryAvatar}>{player.avatar}</span>
+                <AvatarAsset avatar={player.avatar} className={styles.summaryAvatar} />
                 <span className={styles.summaryName} data-gender={player.gender}>
                   {player.name}
                 </span>
@@ -222,7 +223,7 @@ export function PrepareView({
                   className={styles.scoreRailItem}
                   data-rank={displayedScoredPlayers[0]?.score === (player.score ?? 0) ? 'leader' : 'chasing'}
                 >
-                  <span className={styles.scoreRailAvatar}>{player.avatar}</span>
+                  <AvatarAsset avatar={player.avatar} className={styles.scoreRailAvatar} />
                   <span className={styles.scoreRailName} data-gender={player.gender}>
                     {player.name}
                   </span>

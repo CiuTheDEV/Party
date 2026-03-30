@@ -6,6 +6,9 @@ type PresenterPhaseRevealProps = {
   word: string
   category: string
   difficulty: 'easy' | 'hard' | ''
+  canChangeWord: boolean
+  remainingWordChanges: number
+  onChangeWord: () => boolean
   revealRemaining: number
   revealDuration: number
 }
@@ -14,9 +17,21 @@ export function PresenterPhaseReveal({
   word,
   category,
   difficulty,
+  canChangeWord,
+  remainingWordChanges,
+  onChangeWord,
   revealDuration: _revealDuration,
   revealRemaining: _revealRemaining,
 }: PresenterPhaseRevealProps) {
+  const isGloballyDisabled = !canChangeWord
+  const isExhausted = canChangeWord && remainingWordChanges <= 0
+  const isDisabled = !canChangeWord || remainingWordChanges <= 0
+  const buttonLabel = isGloballyDisabled
+    ? 'Zmień hasło'
+    : isExhausted
+      ? 'Brak dostępnych zmian'
+      : `Zmień hasło (${remainingWordChanges})`
+
   return (
     <div className={styles.revealLayout}>
       <section className={styles.wordHeroCard}>
@@ -38,8 +53,14 @@ export function PresenterPhaseReveal({
         </div>
       </section>
 
-      <button className={styles.revealMetaCard} type="button" aria-disabled="true">
-        <span className={styles.changeButtonLabel}>Zmień hasło</span>
+      <button
+        className={`${styles.revealMetaCard} ${isDisabled ? styles.revealMetaCardDisabled : ''}`}
+        type="button"
+        disabled={isDisabled}
+        aria-disabled={isDisabled}
+        onClick={onChangeWord}
+      >
+        <span className={styles.changeButtonLabel}>{buttonLabel}</span>
       </button>
     </div>
   )

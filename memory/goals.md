@@ -1,6 +1,6 @@
 # Goals & Focus
 
-*Last updated: 2026-03-27*
+*Last updated: 2026-03-30*
 
 ---
 
@@ -15,7 +15,7 @@
 
 ### Critical (game is broken without these)
 - [x] PlayTopBar - safe in-game settings/exit flow
-- [ ] "Zmień hasło" on presenter phone - implement or remove the disabled button
+- [x] "Zmień hasło" on presenter phone - implemented with limits, weighted reroll, and browser word history
 - [x] Presenter disconnect handling - pause + reconnect modal when phone drops during play
 
 ### Important (quality degraders)

@@ -1,3 +1,4 @@
+import { AvatarAsset } from '../../avatars/AvatarAsset'
 import styles from './PlayBoard.module.css'
 import type { PlayerSummary } from './playboard-types'
 
@@ -18,7 +19,7 @@ export function SettledCard({
         </div>
         <div className={styles.orderCardFront}>
           <span className={styles.orderIndex}>{index + 1}</span>
-          <span className={styles.orderAvatar}>{player?.avatar ?? '??'}</span>
+          <AvatarAsset avatar={player?.avatar} className={styles.orderAvatar} />
           <span className={styles.namePill} data-gender={player?.gender ?? 'none'}>
             {player?.name ?? 'Brak gracza'}
           </span>
@@ -58,9 +59,11 @@ export function PresenterCard({
       }
     >
       <span className={featured ? styles.presenterBadgeFeatured : styles.presenterSubtitle}>{subtitle}</span>
-      <span className={featured ? styles.presenterAvatarFeatured : styles.presenterAvatar}>
-        {presenter?.avatar ?? '??'}
-      </span>
+      <AvatarAsset
+        avatar={presenter?.avatar}
+        variant={featured ? 'animated' : 'static'}
+        className={featured ? styles.presenterAvatarFeatured : styles.presenterAvatar}
+      />
       <div className={styles.presenterMeta}>
         <span
           className={featured ? styles.presenterNamePill : styles.presenterName}

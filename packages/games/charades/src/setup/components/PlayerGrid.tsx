@@ -1,3 +1,5 @@
+import { Plus, X } from 'lucide-react'
+import { AvatarAsset } from '../../avatars/AvatarAsset'
 import type { CharadesPlayerDraft } from '../state'
 import styles from './PlayerGrid.module.css'
 
@@ -19,15 +21,15 @@ export function PlayerGrid({ players, onRemove, onAdd, max = 12 }: Props) {
             onClick={() => onRemove(index)}
             aria-label={`Usun ${player.name}`}
           >
-            &times;
+            <X size={12} />
           </button>
-          <span className={styles.avatar}>{player.avatar}</span>
+          <AvatarAsset avatar={player.avatar} className={styles.avatar} />
           <span className={styles.namePill} data-gender={player.gender}>{player.name}</span>
         </div>
       ))}
       {players.length < max ? (
         <button type="button" className={styles.addCard} onClick={onAdd} aria-label="Dodaj gracza">
-          <span className={styles.addIcon}>+</span>
+          <span className={styles.addIcon}><Plus size={24} /></span>
           <span className={styles.addLabel}>Dodaj</span>
         </button>
       ) : null}

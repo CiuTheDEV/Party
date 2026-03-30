@@ -1,6 +1,6 @@
 # Project Party - Project Context
 
-*Last updated: 2026-03-29*
+*Last updated: 2026-03-30*
 
 ---
 
@@ -137,9 +137,9 @@ This means:
 
 <!-- handoff:start -->
 ## Session Handoff
-- Last: 2026-03-29 by Codex (GPT-5.4)
-- Task: Repo architecture cleanup, docs sync, and wrap-up.
-- Did: Finished the architecture pass, committed and pushed the repo split (`hub` / `ui` / `games`), added the `codenames` scaffold and explicit module status in the SDK, cleaned tracked local artifacts, and synchronized the main architecture docs with the new structure.
-- Next: Return to product work. Most natural next steps are either a teaser route for `codenames`, making Hub library cards fully registry-driven, or Phase 4 multiplayer/deploy work.
+- Last: 2026-03-30 by Codex (GPT-5.4)
+- Task: Charades presenter word change, weighted reroll, browser word history, and setup/runtime polish.
+- Did: Implemented presenter word change end-to-end, replaced consume-on-draw with candidate-on-commit behavior, added weighted reroll and browser-side word history for repeated games, restored setup category actions/counters, and expanded avatar/runtime UI polish. Fixed review findings around reconnect state, button labeling, stale history writes, and history session lifecycle; build verification passes for `@party/charades` and `@party/hub`.
+- Next: Run a manual browser smoke test for reroll limits, reveal reconnects, repeated games in one browser session, and category counter shrinkage; then decide whether to merge or do one more hardening pass.
 - Blocker: None.
 <!-- handoff:end -->

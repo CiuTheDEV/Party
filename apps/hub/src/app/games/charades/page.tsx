@@ -9,8 +9,11 @@ import {
   type CharadesSetupHelpers,
   type CharadesSetupState,
   clearPresenterSession,
+  ensureCharadesWordHistorySession,
+  startNewCharadesWordHistorySession,
   createCharadesRoomId,
   isPresenterSessionFresh,
+  normalizeCharadesSettings,
   readCharadesSetup,
   readPresenterSession,
   writeCharadesSetup,
@@ -33,12 +36,18 @@ export default function CharadesMenuPage() {
     const storedSetup = readCharadesSetup()
     const nextRoomId = storedSetup?.roomId || createCharadesRoomId()
 
+    if (storedSetup?.roomId) {
+      ensureCharadesWordHistorySession()
+    } else {
+      startNewCharadesWordHistorySession()
+    }
+
     setSetupState((current) => ({
       ...current,
       roomId: nextRoomId,
       players: storedSetup?.players ?? current.players,
       selectedCategories: storedSetup?.selectedCategories ?? current.selectedCategories,
-      settings: storedSetup?.settings ?? current.settings,
+      settings: normalizeCharadesSettings(storedSetup?.settings),
       isDeviceConnected: isPresenterSessionFresh(readPresenterSession(), nextRoomId),
     }))
     setIsSetupReady(true)
@@ -75,6 +84,7 @@ export default function CharadesMenuPage() {
     DeviceListener,
     onDisconnectDevice: () => {
       clearPresenterSession()
+      startNewCharadesWordHistorySession()
       setSetupState((current) => ({
         ...current,
         roomId: createCharadesRoomId(),

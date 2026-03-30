@@ -177,7 +177,7 @@
   aspect-ratio: 1;
   border-radius: 30px;
   background: rgba(124, 58, 237, 0.18);
-  font-size: clamp(2.8rem, 10vw, 4rem);
+  padding: clamp(14px, 3vw, 20px);
 }
 
 .passMeta {
@@ -209,7 +209,7 @@
   width: clamp(42px, 9vw, 56px);
   border-radius: 0;
   background: transparent;
-  font-size: clamp(1.6rem, 5vw, 2.1rem);
+  padding: 0;
 }
 
 .timeoutNextName {

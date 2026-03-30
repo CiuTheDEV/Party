@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { CharadesResultsScreen, type CharadesResultPlayer } from '@party/charades'
+import { CharadesResultsScreen, normalizeCharadesPlayers, type CharadesResultPlayer } from '@party/charades'
 
 export default function CharadesResultsPage() {
   const router = useRouter()
@@ -16,7 +16,7 @@ export default function CharadesResultsPage() {
       return
     }
 
-    setPlayers(JSON.parse(raw))
+    setPlayers(normalizeCharadesPlayers(JSON.parse(raw) as CharadesResultPlayer[]))
   }, [router])
 
   function handlePlayAgain() {

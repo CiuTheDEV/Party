@@ -1,13 +1,13 @@
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { CharadesCategoryDifficulty } from '../../setup/state'
 import usePartySocket from 'partysocket/react'
 import type { HostEvent, PresenterEvent } from '../shared/charades-events'
 import { getPartykitHost } from '../shared/charades-runtime'
 import {
   createInitialGameState,
-  GameSettings,
-  GameState,
-  Player,
+  type GameSettings,
+  type GameState,
+  type Player,
 } from './game-state-model'
 import {
   buildPreparedTurnState,
@@ -19,16 +19,37 @@ import {
   getPendingTurnDescriptor,
 } from './game-state-transitions'
 import { usePhaseTimers } from './usePhaseTimers'
+import { toPlayerHistoryKey } from './word-history-helpers'
+import { resolveWordChangeRequest } from './word-change-helpers'
+import type { TurnPrompt } from './word-pool-helpers'
+
 export type { GameSettings, Player } from './game-state-model'
 
 export function useGameState(
   roomId: string,
   players: Player[],
   settings: GameSettings,
-  getNextWord: () => { word: string; category: string; difficulty: CharadesCategoryDifficulty },
+  getNextWord: (playerKey: string) => { word: string; category: string; difficulty: CharadesCategoryDifficulty },
+  getWordOnlyReroll: (params: {
+    playerKey: string
+    currentPrompt: TurnPrompt
+    rejectedPromptKeysThisTurn: string[]
+  }) => TurnPrompt | null,
+  getWordAndCategoryReroll: (params: {
+    playerKey: string
+    currentPrompt: TurnPrompt
+    rejectedPromptKeysThisTurn: string[]
+  }) => TurnPrompt | null,
+  recordRejectedPrompt: (playerKey: string, prompt: TurnPrompt) => void,
+  commitPrompt: (prompt: TurnPrompt) => void,
 ) {
   const [state, setState] = useState<GameState>(() => createInitialGameState(players, settings))
   const currentTurnIdRef = useRef('')
+  const stateRef = useRef(state)
+
+  useEffect(() => {
+    stateRef.current = state
+  }, [state])
 
   const socket = usePartySocket({
     host: getPartykitHost(),
@@ -64,7 +85,67 @@ export function useGameState(
         }
 
         startRevealBuffer(msg.turnId)
+        return
       }
+
+      if (msg.type !== 'CHANGE_WORD') {
+        return
+      }
+
+      const currentState = stateRef.current
+
+      if (
+        currentState.phase !== 'reveal-buffer' ||
+        msg.turnId !== currentTurnIdRef.current ||
+        !settings.wordChange.enabled ||
+        currentState.currentDifficulty === ''
+      ) {
+        return
+      }
+
+      const currentPrompt: TurnPrompt = {
+        word: currentState.currentWord,
+        category: currentState.currentCategory,
+        difficulty: currentState.currentDifficulty,
+      }
+      const presenterIdx = currentState.order[currentState.currentOrderIdx]
+      const presenter = presenterIdx === undefined ? undefined : currentState.players[presenterIdx]
+      const playerKey = presenter ? toPlayerHistoryKey(presenter) : ''
+      const nextPrompt =
+        settings.wordChange.rerollScope === 'word-only'
+          ? getWordOnlyReroll({
+              playerKey,
+              currentPrompt,
+              rejectedPromptKeysThisTurn: currentState.rejectedPromptKeysThisTurn,
+            })
+          : getWordAndCategoryReroll({
+              playerKey,
+              currentPrompt,
+              rejectedPromptKeysThisTurn: currentState.rejectedPromptKeysThisTurn,
+            })
+      const result = resolveWordChangeRequest({
+        state: currentState,
+        settings,
+        currentTurnId: currentTurnIdRef.current,
+        requestedTurnId: msg.turnId,
+        nextPrompt,
+      })
+
+      if (!result.sync) {
+        return
+      }
+
+      recordRejectedPrompt(playerKey, currentPrompt)
+      stateRef.current = result.nextState
+      setState(result.nextState)
+      send({
+        type: 'WORD_CHANGED',
+        turnId: msg.turnId,
+        word: result.sync.word,
+        category: result.sync.category,
+        difficulty: result.sync.difficulty,
+        remainingWordChanges: result.sync.remainingWordChanges,
+      })
     },
     onError() {
       setState((current) => ({ ...current, isRoomConnected: false }))
@@ -86,6 +167,31 @@ export function useGameState(
     send,
     timerSeconds: settings.timerSeconds,
     currentTurnIdRef,
+    onRevealCommit: () => {
+      const currentState = stateRef.current
+
+      if (
+        currentState.phase !== 'reveal-buffer' ||
+        !currentState.currentWord ||
+        !currentState.currentCategory ||
+        !currentState.currentDifficulty
+      ) {
+        return
+      }
+
+      commitPrompt({
+        word: currentState.currentWord,
+        category: currentState.currentCategory,
+        difficulty: currentState.currentDifficulty,
+      })
+
+      const nextState = {
+        ...currentState,
+        rejectedPromptKeysThisTurn: [],
+      }
+      stateRef.current = nextState
+      setState(nextState)
+    },
   })
 
   const startRound = useCallback(() => {
@@ -103,12 +209,15 @@ export function useGameState(
     }
 
     const pendingTurn = getPendingTurnDescriptor(state)
+
     if (!pendingTurn) {
       return
     }
 
-    const { word, category, difficulty } = getNextWord()
+    const playerKey = toPlayerHistoryKey(pendingTurn.presenter)
+    const { word, category, difficulty } = getNextWord(playerKey)
     const turnId = crypto.randomUUID()
+    const presenterIdx = state.order[state.currentOrderIdx]
     currentTurnIdRef.current = turnId
 
     send({
@@ -117,6 +226,8 @@ export function useGameState(
       word,
       category,
       difficulty,
+      canChangeWord: settings.wordChange.enabled,
+      remainingWordChanges: state.remainingWordChangesByPlayer[presenterIdx] ?? 0,
       presenterName: pendingTurn.presenter.name,
       timerSeconds: settings.timerSeconds,
       nextPresenterName: pendingTurn.nextPresenter.name,
@@ -127,19 +238,22 @@ export function useGameState(
     setState((current) => buildPreparedTurnState(current, settings, { word, category, difficulty }))
   }, [
     getNextWord,
-    settings.timerSeconds,
+    send,
+    settings,
     state.currentOrderIdx,
     state.currentWord,
     state.order,
     state.phase,
-    state.players,
+    state.remainingWordChangesByPlayer,
+    commitPrompt,
+    recordRejectedPrompt,
   ])
 
   const stopRoundEarly = useCallback(() => {
     clearPhaseTimer()
     send({ type: 'TURN_END', turnId: currentTurnIdRef.current, reason: 'manual-stop' })
     setState((current) => buildStoppedRoundState(current))
-  }, [clearPhaseTimer])
+  }, [clearPhaseTimer, send])
 
   const giveVerdict = useCallback((correct: boolean, guessedPlayerIdx?: number) => {
     clearPhaseTimer()
@@ -162,7 +276,7 @@ export function useGameState(
 
       return result.nextState
     })
-  }, [clearPhaseTimer, settings])
+  }, [clearPhaseTimer, send, settings])
 
   const isGameOver = state.currentRound > state.totalRounds
 

@@ -17,6 +17,8 @@ export type GamePhase =
 export type GameState = {
   phase: GamePhase
   players: Player[]
+  remainingWordChangesByPlayer: number[]
+  rejectedPromptKeysThisTurn: string[]
   order: number[]
   isRoundOrderRevealing: boolean
   currentOrderIdx: number
@@ -37,6 +39,8 @@ export function createInitialGameState(players: Player[], settings: GameSettings
   return {
     phase: 'round-order',
     players: players.map((player) => ({ ...player, score: 0 })),
+    remainingWordChangesByPlayer: players.map(() => settings.wordChange.changesPerPlayer),
+    rejectedPromptKeysThisTurn: [],
     order: [],
     isRoundOrderRevealing: false,
     currentOrderIdx: 0,

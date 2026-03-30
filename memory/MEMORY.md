@@ -1,4 +1,4 @@
-# Technical Pitfalls & Lessons Learned
+Ôªø# Technical Pitfalls & Lessons Learned
 
 > Written by agents during sessions.
 > This is the SSOT for technical gotchas - never store these in `today.md`.
@@ -71,7 +71,7 @@
 
 **Fix:** Open the reference first and compare token-by-token before editing.
 
-**How to prevent it:** For any ìmatch the mockupî task, start by reading the reference source, not by guessing from screenshots or memory.
+**How to prevent it:** For any ‚Äúmatch the mockup‚Äù task, start by reading the reference source, not by guessing from screenshots or memory.
 
 ---
 
@@ -95,7 +95,7 @@
 
 **Fix:** Split the problem by source and fix each tool independently.
 
-**How to prevent it:** When VS Code ìlights upî, identify which extension or language service is actually reporting each warning before looking for one shared root cause.
+**How to prevent it:** When VS Code ‚Äúlights up‚Äù, identify which extension or language service is actually reporting each warning before looking for one shared root cause.
 
 ---
 
@@ -108,3 +108,15 @@
 **Fix:** If a game is meant to be a real module, the module should own at least config, menu, setup, and results. The hub should stick to routing, registry, and platform glue.
 
 **How to prevent it:** For every new screen, ask whether it belongs to the platform or to a specific game. If it belongs to the game, do not keep a second copy in the hub.
+
+---
+
+### 2026-03-30 - Persistent game history must be written only after host-side validation
+
+**Symptom:** Weighted reroll logic started poisoning future selections even when a reroll request should have been rejected.
+
+**Root cause:** Rejected-prompt history was being written from the selection helper before the host finished validating the action, so failed or disallowed rerolls still mutated persistent browser state.
+
+**Fix:** Move persistent history writes behind the host-authoritative success path. Compute candidate prompts first, but record rejected or used prompts only after business validation succeeds and the host commits the state transition.
+
+**How to prevent it:** For any feature that writes durable game state, preferences, or history, do not persist from low-level helpers before the authoritative layer accepts the action. Selection can be speculative; persistence cannot.

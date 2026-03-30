@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { ExternalLink, Smartphone, X } from 'lucide-react'
+import { ExternalLink, Link2, Smartphone, X } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { getPresenterOrigin, isLocalPresenterOrigin } from '../runtime'
 import styles from './PairingPanel.module.css'
@@ -35,9 +35,9 @@ export function PairingPanel({ roomId, isConnected, onDisconnect }: Props) {
       <div className={styles.wrapper}>
         <div className={styles.header}>
           <div className={styles.headerLeft}>
-            <span className={styles.label}>DODATKOWE URZĄDZENIA</span>
+            <span className={styles.label}>Dodatkowe urządzenia</span>
             <p className={styles.desc}>
-              Podłącz telefon prezentera. Zobaczy hasło i odliczanie czasu.
+              Podłącz telefon prezentera. Zobaczy hasło, odliczanie i ekran swojej tury.
             </p>
           </div>
           <span className={`${styles.badge} ${isConnected ? styles.badgeConnected : ''}`}>
@@ -47,15 +47,24 @@ export function PairingPanel({ roomId, isConnected, onDisconnect }: Props) {
 
         {isConnected ? (
           <div className={styles.connectedRow}>
-            <Smartphone size={20} className={styles.connectedIcon} />
-            <span className={styles.connectedText}>Urządzenie połączone</span>
+            <div className={styles.connectedInfo}>
+              <span className={styles.connectedIconWrap}>
+                <Smartphone size={18} className={styles.connectedIcon} />
+              </span>
+              <div className={styles.connectedCopy}>
+                <span className={styles.connectedText}>Urządzenie połączone</span>
+                <span className={styles.connectedSubtle}>Telefon prezentera jest gotowy do gry.</span>
+              </div>
+            </div>
             <button type="button" className={styles.disconnectBtn} onClick={onDisconnect}>
               Rozłącz
             </button>
           </div>
         ) : (
           <button type="button" className={styles.addBtn} onClick={() => setShowModal(true)}>
-            <span className={styles.addBtnIcon}>+</span>
+            <span className={styles.addBtnIcon}>
+              <Link2 size={18} />
+            </span>
             Dodaj urządzenia
           </button>
         )}
@@ -65,7 +74,10 @@ export function PairingPanel({ roomId, isConnected, onDisconnect }: Props) {
         <div className={styles.backdrop} onClick={() => setShowModal(false)}>
           <div className={styles.modal} onClick={(event) => event.stopPropagation()}>
             <div className={styles.modalHeader}>
-              <span className={styles.modalTitle}>Podłącz urządzenia</span>
+              <div className={styles.modalHeaderCopy}>
+                <span className={styles.modalEyebrow}>Parowanie</span>
+                <span className={styles.modalTitle}>Podłącz urządzenie prezentera</span>
+              </div>
               <div className={styles.modalActions}>
                 <button
                   type="button"
@@ -90,18 +102,18 @@ export function PairingPanel({ roomId, isConnected, onDisconnect }: Props) {
               <div className={styles.qrRow}>
                 {presenterUrl ? (
                   <div className={styles.qrBox}>
-                    <QRCodeSVG value={presenterUrl} size={140} bgColor="#1a1a1a" fgColor="#f0f0f0" />
+                    <QRCodeSVG value={presenterUrl} size={140} bgColor="#17171c" fgColor="#f0f0f0" />
                   </div>
                 ) : null}
                 <div className={styles.qrInfo}>
-                  <span className={styles.roleLabel}>TRYB: PREZENTER</span>
+                  <span className={styles.roleLabel}>Tryb: prezenter</span>
                   <p className={styles.roleDesc}>
-                    Zeskanuj telefonem prezentera. Zobaczy hasło do odegrania i odliczanie czasu.
+                    Zeskanuj kod telefonem prezentera. Na ekranie pojawi się karta hasła i czas tury.
                   </p>
                   {showLocalhostWarning ? (
                     <p className={styles.warning}>
-                      {'Ten QR wskazuje na localhost. Na prawdziwym telefonie otwórz hosta po adresie '}
-                      {'sieciowym albo ustaw `NEXT_PUBLIC_PUBLIC_ORIGIN` i `NEXT_PUBLIC_PARTYKIT_HOST`.'}
+                      Ten QR wskazuje na localhost. Na prawdziwym telefonie otwórz hosta po adresie sieciowym albo
+                      ustaw `NEXT_PUBLIC_PUBLIC_ORIGIN` i `NEXT_PUBLIC_PARTYKIT_HOST`.
                     </p>
                   ) : null}
                 </div>

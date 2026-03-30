@@ -102,3 +102,19 @@
 - Left only local `.vscode/mcp.json` outside git, intentionally.
 - Next: resume product work from the refreshed architecture, not from repo cleanup.
 - Experience recorded: no
+
+### S15 (~2026-03-30) [Project Party] Charades presenter word-change protocol
+
+- Added per-player remaining word-change counters to Charades runtime state.
+- Threaded `remainingWordChanges` through `TURN_START`, room state, and presenter view state.
+- Added presenter `CHANGE_WORD` event type to the shared protocol.
+- Next: implement the actual reroll flow using the new counters.
+- Experience recorded: yes
+
+### S16 (13:27~) [Project Party] Charades weighted reroll, browser word history, and setup polish
+
+- Implemented presenter word change end-to-end with candidate-on-commit prompt flow, same-turn reroll exclusion, and softer future reuse for previously rejected prompts.
+- Added host-browser word history for used and rejected prompts, plus history-aware `remaining/all` counters in setup categories and a first session lifecycle with refresh on fresh setup/disconnect and TTL expiry.
+- Key lesson: persistent preference/history writes must happen only after host-side business validation passes, otherwise rejected actions silently poison future state.
+- Next: run a manual browser smoke test for reroll limits, reveal reconnects, repeated games in one browser session, and category counter shrinkage.
+- Experience recorded: yes

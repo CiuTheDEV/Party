@@ -1,5 +1,6 @@
 'use client'
 
+import { AvatarAsset } from '../../avatars/AvatarAsset'
 import { PresenterPhaseReveal } from './PresenterPhaseReveal'
 import { PresenterPhaseTimer } from './PresenterPhaseTimer'
 import { PresenterPhaseBetween } from './PresenterPhaseBetween'
@@ -8,7 +9,7 @@ import { PresenterPhaseYourTurn } from './PresenterPhaseYourTurn'
 import styles from './PresenterScreen.module.css'
 import type { PresenterScreenProps, PresenterViewState } from './types'
 
-export function PresenterScreen({ state, onRevealWord }: PresenterScreenProps) {
+export function PresenterScreen({ state, onRevealWord, onChangeWord }: PresenterScreenProps) {
   const chrome = getPresenterChrome(state)
 
   return (
@@ -19,7 +20,7 @@ export function PresenterScreen({ state, onRevealWord }: PresenterScreenProps) {
             <span className={styles.infoLabel}>{chrome.presenterLabel}</span>
             <strong className={styles.presenterName}>{chrome.presenterName}</strong>
           </div>
-          {chrome.phaseValue ? <strong className={styles.phaseCenterValue}>{chrome.phaseValue}</strong> : <div /> }
+          {chrome.phaseValue ? <strong className={styles.phaseCenterValue}>{chrome.phaseValue}</strong> : <div />}
           <div className={styles.phaseBlock}>
             <span className={styles.phasePill}>{chrome.phaseLabel}</span>
             <p className={styles.phaseSummary}>{chrome.phaseSummary}</p>
@@ -35,18 +36,16 @@ export function PresenterScreen({ state, onRevealWord }: PresenterScreenProps) {
             />
           )}
 
-          {state.phase === 'your-turn' && (
-            <PresenterPhaseYourTurn
-              canReveal={Boolean(state.word)}
-              onRevealWord={onRevealWord}
-            />
-          )}
+          {state.phase === 'your-turn' && <PresenterPhaseYourTurn canReveal={Boolean(state.word)} onRevealWord={onRevealWord} />}
 
           {state.phase === 'reveal-buffer' && (
             <PresenterPhaseReveal
               word={state.word}
               category={state.category}
               difficulty={state.difficulty}
+              canChangeWord={state.canChangeWord}
+              remainingWordChanges={state.remainingWordChanges}
+              onChangeWord={onChangeWord}
               revealRemaining={state.revealRemaining}
               revealDuration={state.revealDuration}
             />
@@ -105,12 +104,12 @@ function MessagePanel({
     <div className={styles.messageCard}>
       <span className={styles.messageAccent}>{accent}</span>
       <p className={styles.messageTitle}>{title}</p>
-      <p className={styles.messageBody}>{body}</p>
+          <p className={styles.messageBody}>{body}</p>
       {nextPresenter ? (
         <div className={styles.messageNextPresenter}>
           <p className={styles.messageNextLabel}>Następny prezenter</p>
           <div className={styles.messageNextRow}>
-            <span className={styles.messageNextAvatar}>{nextPresenter.avatar}</span>
+            <AvatarAsset avatar={nextPresenter.avatar} className={styles.messageNextAvatar} />
             <span className={styles.messageNextName}>{nextPresenter.name}</span>
           </div>
         </div>
@@ -153,13 +152,13 @@ const PRESENTER_PHASE_CHROME: Record<
   },
   'awaiting-verdict': {
     phaseLabel: 'Werdykt',
-    presenterLabel: 'Prezentował',
-    phaseSummary: 'Tura jest zamknięta. Czekaj na decyzję hosta.',
+    presenterLabel: 'Prezentowal',
+    phaseSummary: 'Tura jest zamknieta. Czekaj na decyzje hosta.',
   },
   between: {
     phaseLabel: 'Zmiana prezentera',
     presenterLabel: 'Telefon przejmuje',
-    phaseSummary: 'Przekaż telefon dalej albo poczekaj na finalny ekran.',
+    phaseSummary: 'Przekaż telefon dalej albo poczekaj na finałowy ekran.',
     presenterName: (state) => state.nextPresenterName || 'Koniec sekwencji',
   },
   ended: {

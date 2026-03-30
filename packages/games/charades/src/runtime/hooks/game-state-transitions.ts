@@ -23,6 +23,7 @@ export function buildRoundStartState(current: GameState, settings: GameSettings)
   return {
     ...current,
     order: shuffle(current.players.map((_, index) => index)),
+    rejectedPromptKeysThisTurn: [],
     isRoundOrderRevealing: true,
     currentOrderIdx: 0,
     ...CLEARED_WORD,
@@ -35,6 +36,7 @@ export function buildRoundOrderFinishedState(current: GameState, settings: GameS
   return {
     ...current,
     phase: 'prepare',
+    rejectedPromptKeysThisTurn: [],
     isRoundOrderRevealing: false,
     currentOrderIdx: 0,
     ...CLEARED_WORD,
@@ -50,6 +52,7 @@ export function buildPreparedTurnState(
 ): GameState {
   return {
     ...current,
+    rejectedPromptKeysThisTurn: [],
     currentWord: preparedTurn.word,
     currentCategory: preparedTurn.category,
     currentDifficulty: preparedTurn.difficulty,
@@ -62,6 +65,7 @@ export function buildStoppedRoundState(current: GameState): GameState {
   return {
     ...current,
     phase: 'verdict',
+    rejectedPromptKeysThisTurn: [],
     timerRemaining: Math.max(current.timerRemaining, 0),
   }
 }
@@ -103,6 +107,7 @@ export function buildVerdictState(
         ...current,
         players: updatedPlayers,
         phase: 'prepare',
+        rejectedPromptKeysThisTurn: [],
         currentOrderIdx: current.currentOrderIdx + 1,
         ...CLEARED_WORD,
         bufferRemaining: REVEAL_BUFFER_SECONDS,
@@ -118,6 +123,7 @@ export function buildVerdictState(
         ...current,
         players: updatedPlayers,
         phase: 'round-summary',
+        rejectedPromptKeysThisTurn: [],
         isRoundOrderRevealing: false,
         currentOrderIdx: 0,
         ...CLEARED_WORD,
@@ -133,6 +139,7 @@ export function buildVerdictState(
       ...current,
       players: updatedPlayers,
       phase: 'verdict',
+      rejectedPromptKeysThisTurn: [],
       currentRound: current.currentRound + 1,
       ...CLEARED_WORD,
       bufferRemaining: 0,
@@ -144,6 +151,7 @@ export function buildRoundSummaryFinishedState(current: GameState, settings: Gam
   return {
     ...current,
     phase: 'round-order',
+    rejectedPromptKeysThisTurn: [],
     order: [],
     isRoundOrderRevealing: false,
     currentOrderIdx: 0,

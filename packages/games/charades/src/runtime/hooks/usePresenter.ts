@@ -16,6 +16,8 @@ const INITIAL_PRESENTER_STATE: PresenterViewState = {
   word: '',
   category: '',
   difficulty: '',
+  canChangeWord: false,
+  remainingWordChanges: 0,
   presenterName: '',
   timerRemaining: 0,
   timerDuration: 0,
@@ -98,6 +100,8 @@ export function usePresenter(roomId: string) {
           word: event.word,
           category: event.category,
           difficulty: event.difficulty,
+          canChangeWord: event.canChangeWord,
+          remainingWordChanges: event.remainingWordChanges,
           presenterName: event.presenterName,
           timerRemaining: event.timerSeconds,
           timerDuration: event.timerSeconds,
@@ -127,6 +131,18 @@ export function usePresenter(roomId: string) {
           return { ...s, phase: 'timer-running', revealRemaining: 0 }
         })
         break
+      case 'WORD_CHANGED':
+        setState((s) => {
+          if (event.turnId !== s.currentTurnId) return s
+          return {
+            ...s,
+            word: event.word,
+            category: event.category,
+            difficulty: event.difficulty,
+            remainingWordChanges: event.remainingWordChanges,
+          }
+        })
+        break
       case 'TIMER_TICK':
         setState((s) => {
           if (event.turnId !== s.currentTurnId) return s
@@ -141,6 +157,8 @@ export function usePresenter(roomId: string) {
             phase: 'awaiting-verdict',
             word: '',
             difficulty: '',
+            canChangeWord: false,
+            remainingWordChanges: 0,
             revealRemaining: 0,
             turnEndReason: event.reason,
           }
@@ -154,12 +172,23 @@ export function usePresenter(roomId: string) {
           nextPresenterAvatar: event.nextPresenterAvatar,
           word: '',
           difficulty: '',
+          canChangeWord: false,
+          remainingWordChanges: 0,
           revealRemaining: 0,
           turnEndReason: 'none',
         }))
         break
       case 'GAME_END':
-        setState((s) => ({ ...s, phase: 'ended', word: '', difficulty: '', revealRemaining: 0, turnEndReason: 'none' }))
+        setState((s) => ({
+          ...s,
+          phase: 'ended',
+          word: '',
+          difficulty: '',
+          canChangeWord: false,
+          remainingWordChanges: 0,
+          revealRemaining: 0,
+          turnEndReason: 'none',
+        }))
         break
       case 'GAME_RESET':
         setState(INITIAL_PRESENTER_STATE)
@@ -181,7 +210,27 @@ export function usePresenter(roomId: string) {
     }
   }, [state.currentTurnId, socket])
 
-  return { state, revealWord }
+  const changeWord = useCallback(() => {
+    if (
+      !state.currentTurnId ||
+      state.phase !== 'reveal-buffer' ||
+      !state.canChangeWord ||
+      state.remainingWordChanges <= 0
+    ) {
+      return false
+    }
+
+    const event: PresenterEvent = { type: 'CHANGE_WORD', turnId: state.currentTurnId }
+
+    try {
+      socket.send(JSON.stringify(event))
+      return true
+    } catch {
+      return false
+    }
+  }, [state.canChangeWord, state.currentTurnId, state.phase, state.remainingWordChanges, socket])
+
+  return { state, revealWord, changeWord }
 }
 
 function mapRoomStateToPresenterView(roomState: RoomState): PresenterViewState {
@@ -197,6 +246,8 @@ function mapRoomStateToPresenterView(roomState: RoomState): PresenterViewState {
         word: roomState.currentWord,
         category: roomState.currentCategory,
         difficulty: roomState.currentDifficulty,
+        canChangeWord: roomState.canChangeWord,
+        remainingWordChanges: roomState.remainingWordChanges,
         presenterName: roomState.currentPresenter,
         timerRemaining: roomState.timerRemaining,
         timerDuration: roomState.timerDuration,
@@ -214,6 +265,8 @@ function mapRoomStateToPresenterView(roomState: RoomState): PresenterViewState {
         currentTurnId: roomState.currentTurnId,
         presenterName: roomState.currentPresenter,
         difficulty: roomState.currentDifficulty,
+        canChangeWord: roomState.canChangeWord,
+        remainingWordChanges: roomState.remainingWordChanges,
         nextPresenterName: roomState.nextPresenterName,
         nextPresenterAvatar: roomState.nextPresenterAvatar,
         nextStep: roomState.nextStep,
@@ -226,6 +279,8 @@ function mapRoomStateToPresenterView(roomState: RoomState): PresenterViewState {
         currentTurnId: roomState.currentTurnId,
         presenterName: roomState.currentPresenter,
         difficulty: roomState.currentDifficulty,
+        canChangeWord: roomState.canChangeWord,
+        remainingWordChanges: roomState.remainingWordChanges,
         turnEndReason: roomState.turnEndReason,
       }
     case 'waiting':

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type { GameSetupSectionComponentProps } from '@party/game-sdk'
+import { getCharadesAvatarsByCategory } from '../../avatars/avatar-helpers'
 import type { CharadesSetupHelpers } from '../helpers'
 import type { CharadesSetupState } from '../state'
 import { AddPlayerModal } from '../components/AddPlayerModal'
@@ -10,19 +11,10 @@ import styles from './PlayersSection.module.css'
 
 const TEST_PLAYER_NAMES = ['Antek', 'Basia', 'Celina', 'Dawid', 'Eryk', 'Felka', 'Gabi', 'Hubert', 'Iga', 'Julka', 'Kacper', 'Lena']
 const TEST_AVATARS = [
-  '\uD83D\uDE00',
-  '\uD83D\uDE0E',
-  '\uD83E\uDD29',
-  '\uD83E\uDD73',
-  '\uD83D\uDE3A',
-  '\uD83D\uDC3B',
-  '\uD83E\uDD8A',
-  '\uD83D\uDC3C',
-  '\uD83D\uDC38',
-  '\uD83E\uDD81',
-  '\uD83C\uDFAD',
-  '\uD83C\uDFA8',
-] as const
+  ...getCharadesAvatarsByCategory('people'),
+  ...getCharadesAvatarsByCategory('animals'),
+  ...getCharadesAvatarsByCategory('other'),
+].map((avatar) => avatar.id)
 
 export function PlayersSection({ state, updateState }: GameSetupSectionComponentProps<CharadesSetupState, CharadesSetupHelpers>) {
   const [showAddPlayer, setShowAddPlayer] = useState(false)
@@ -37,7 +29,7 @@ export function PlayersSection({ state, updateState }: GameSetupSectionComponent
       const usedAvatars = new Set(current.players.map((player) => player.avatar))
       const availableName =
         TEST_PLAYER_NAMES.find((name) => !usedNames.has(name.toLowerCase())) ?? `Gracz ${current.players.length + 1}`
-      const availableAvatar = TEST_AVATARS.find((avatar) => !usedAvatars.has(avatar)) ?? '\uD83D\uDE42'
+      const availableAvatar = TEST_AVATARS.find((avatar) => !usedAvatars.has(avatar)) ?? 'smile'
       const gender = Math.random() > 0.5 ? 'on' : 'ona'
 
       return {
@@ -59,7 +51,7 @@ export function PlayersSection({ state, updateState }: GameSetupSectionComponent
               onClick={addRandomPlayer}
               disabled={state.players.length >= 12}
             >
-              + test
+              Szybki test
             </button>
             <span className={styles.sectionCount}>{state.players.length}/12</span>
           </div>
@@ -71,7 +63,7 @@ export function PlayersSection({ state, updateState }: GameSetupSectionComponent
           onAdd={() => setShowAddPlayer(true)}
         />
 
-        {state.players.length < 2 ? <p className={styles.hint}>Dodaj co najmniej 2 graczy</p> : null}
+        {state.players.length < 2 ? <p className={styles.hint}>Dodaj co najmniej 2 graczy, żeby rozpocząć rozgrywkę.</p> : null}
       </section>
 
       {showAddPlayer ? (

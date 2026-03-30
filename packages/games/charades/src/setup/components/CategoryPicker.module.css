@@ -1,123 +1,258 @@
 .accordion {
-  display: flex;
-  flex-direction: column;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.03));
+  overflow: hidden;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+
+.accordionOpen {
+  border-color: rgba(124, 58, 237, 0.32);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .header {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 12px;
-  cursor: pointer;
+  gap: 16px;
+  padding: 18px 18px 17px;
+  border: none;
+  background: transparent;
   color: var(--color-text);
+  cursor: pointer;
+  text-align: left;
 }
 
 .headerLeft {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+  min-width: 0;
+}
+
+.headerIcon {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: rgba(124, 58, 237, 0.14);
+  color: #ddd6fe;
+  flex-shrink: 0;
 }
 
 .headerTitle {
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
-.headerCount {
+.headerRight {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.headerSummary {
   font-size: 14px;
-  color: var(--color-text-muted);
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.62);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 440px;
 }
 
 .arrow {
-  font-size: 18px;
-  transition: transform 0.2s;
+  color: rgba(255, 255, 255, 0.62);
+  flex-shrink: 0;
+  transition: transform 0.2s ease, color 0.2s ease;
 }
 
 .arrowOpen {
   transform: rotate(180deg);
+  color: var(--color-text);
+}
+
+.content {
+  padding: 0 18px 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  padding-top: 16px;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
   gap: 10px;
-  padding-top: 14px;
+  flex-wrap: wrap;
+  padding-top: 18px;
+}
+
+.actionButton {
+  min-height: 40px;
+  padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+
+.actionButton:hover {
+  border-color: rgba(124, 58, 237, 0.42);
+  background: rgba(124, 58, 237, 0.14);
+  color: #f5f3ff;
+  transform: translateY(-1px);
 }
 
 .cardWrapper {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .card {
-  padding: 12px;
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.04);
+  min-height: 76px;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(0, 0, 0, 0.18);
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
 }
 
 .cardEasy {
-  border-color: #f472b6;
-  background: rgba(244, 114, 182, 0.1);
+  border-color: rgba(244, 114, 182, 0.56);
+  background: rgba(244, 114, 182, 0.12);
 }
 
 .cardHard {
-  border-color: #ef4444;
-  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(168, 85, 247, 0.56);
+  background: rgba(168, 85, 247, 0.14);
 }
 
 .cardMixed {
-  border-color: #7c3aed;
-  background: rgba(124, 58, 237, 0.12);
+  border-color: rgba(236, 72, 153, 0.6);
+  background: rgba(236, 72, 153, 0.16);
 }
 
 .name {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  text-align: center;
 }
 
 .diffRow {
   display: flex;
-  gap: 6px;
+  gap: 8px;
 }
 
 .diffBtn {
   flex: 1;
-  height: 34px;
-  border-radius: 8px;
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.04);
-  font-size: 14px;
-  color: #fff;
-  cursor: pointer;
-  display: flex;
+  min-height: 34px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  opacity: 0.4;
+  gap: 6px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.diffBtn:hover {
+  color: #fff;
 }
 
 .diffEasy {
-  border-color: #f472b6;
-  background: rgba(244, 114, 182, 0.15);
-  opacity: 1;
+  border-color: rgba(244, 114, 182, 0.6);
+  background: rgba(244, 114, 182, 0.14);
+  color: #fbcfe8;
 }
 
 .diffHard {
-  border-color: #ef4444;
-  background: rgba(239, 68, 68, 0.15);
-  opacity: 1;
+  border-color: rgba(168, 85, 247, 0.6);
+  background: rgba(168, 85, 247, 0.16);
+  color: #e9d5ff;
 }
 
 .diffCount {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--color-text-muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.22);
+  font-size: 11px;
+  font-weight: 800;
+  color: inherit;
+}
+
+@media (max-width: 767px) {
+  .header {
+    padding: 16px;
+    align-items: flex-start;
+  }
+
+  .headerRight {
+    max-width: 55%;
+    gap: 8px;
+  }
+
+  .headerSummary {
+    max-width: none;
+    font-size: 13px;
+    white-space: normal;
+    text-align: right;
+  }
+
+  .content {
+    padding: 0 16px 16px;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding-top: 14px;
+  }
+
+  .actions {
+    justify-content: stretch;
+  }
+
+  .actionButton {
+    flex: 1 1 calc(33.333% - 8px);
+    min-width: 110px;
+  }
+
+  .card {
+    min-height: 68px;
+  }
+
+  .name {
+    font-size: 16px;
+  }
 }

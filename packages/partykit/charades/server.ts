@@ -10,6 +10,8 @@ const initialState: RoomState = {
   currentWord: '',
   currentCategory: '',
   currentDifficulty: '',
+  canChangeWord: false,
+  remainingWordChanges: 0,
   currentPresenter: '',
   presenterConnected: false,
   timerRemaining: 0,
@@ -57,7 +59,7 @@ export default class CharadesServer implements Party.Server {
   }
 }
 
-function applyEvent(state: RoomState, event: CharadesEvent): RoomState {
+export function applyEvent(state: RoomState, event: CharadesEvent): RoomState {
   switch (event.type) {
     case 'TURN_START':
       return {
@@ -68,6 +70,8 @@ function applyEvent(state: RoomState, event: CharadesEvent): RoomState {
         currentWord: event.word,
         currentCategory: event.category,
         currentDifficulty: event.difficulty,
+        canChangeWord: event.canChangeWord,
+        remainingWordChanges: event.remainingWordChanges,
         currentPresenter: event.presenterName,
         timerRemaining: event.timerSeconds,
         timerDuration: event.timerSeconds,
@@ -96,6 +100,15 @@ function applyEvent(state: RoomState, event: CharadesEvent): RoomState {
     case 'REVEAL_BUFFER_END':
       if (event.turnId !== state.currentTurnId) return state
       return { ...state, phase: 'turn', presenterPhase: 'timer-running', revealRemaining: 0 }
+    case 'WORD_CHANGED':
+      if (event.turnId !== state.currentTurnId) return state
+      return {
+        ...state,
+        currentWord: event.word,
+        currentCategory: event.category,
+        currentDifficulty: event.difficulty,
+        remainingWordChanges: event.remainingWordChanges,
+      }
     case 'TIMER_TICK':
       if (event.turnId !== state.currentTurnId) return state
       return { ...state, phase: 'turn', presenterPhase: 'timer-running', timerRemaining: event.remaining }
@@ -104,7 +117,13 @@ function applyEvent(state: RoomState, event: CharadesEvent): RoomState {
         ...state,
         phase: 'turn',
         presenterPhase: event.reason === 'timeout' ? 'timeout' : 'awaiting-verdict',
+        currentWord: '',
+        currentCategory: '',
+        currentDifficulty: '',
+        canChangeWord: false,
+        remainingWordChanges: 0,
         revealRemaining: 0,
+        revealDuration: 0,
         turnEndReason: event.reason,
       }
     case 'BETWEEN_TURNS':
@@ -117,11 +136,24 @@ function applyEvent(state: RoomState, event: CharadesEvent): RoomState {
         currentWord: '',
         currentCategory: '',
         currentDifficulty: '',
+        canChangeWord: false,
+        remainingWordChanges: 0,
         revealRemaining: 0,
         revealDuration: 0,
       }
     case 'GAME_END':
-      return { ...state, phase: 'ended', presenterPhase: 'ended', currentWord: '', currentDifficulty: '', revealRemaining: 0 }
+      return {
+        ...state,
+        phase: 'ended',
+        presenterPhase: 'ended',
+        currentWord: '',
+        currentCategory: '',
+        currentDifficulty: '',
+        canChangeWord: false,
+        remainingWordChanges: 0,
+        revealRemaining: 0,
+        revealDuration: 0,
+      }
     case 'GAME_RESET':
       return { ...initialState }
     default:

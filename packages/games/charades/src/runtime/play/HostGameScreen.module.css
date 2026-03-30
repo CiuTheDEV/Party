@@ -57,22 +57,34 @@
 
 .modalList {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  justify-content: center;
+  gap: 16px;
+  overflow-y: auto;
+  padding: 4px;
+  min-height: 0;
+}
+
+.modalList[data-density='grid-9'],
+.modalList[data-density='grid-10'],
+.modalList[data-density='grid-12'] {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
-  overflow-y: auto;
-  padding-right: 4px;
-  min-height: 0;
+}
+
+.modalList[data-density='grid-9'] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .playerOption {
   display: grid;
   justify-items: center;
   align-content: center;
-  gap: 10px;
+  gap: 14px;
   width: 100%;
-  min-height: 168px;
-  padding: 14px 12px;
-  border-radius: 20px;
+  min-height: 196px;
+  padding: 18px 16px;
+  border-radius: 24px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02)),
@@ -82,46 +94,74 @@
   transition: transform 0.15s ease, opacity 0.15s ease, border-color 0.15s ease;
 }
 
+.modalList[data-density='grid-9'] .playerOption,
+.modalList[data-density='grid-9'] .playerOptionSelected,
+.modalList[data-density='grid-10'] .playerOption,
+.modalList[data-density='grid-10'] .playerOptionSelected,
+.modalList[data-density='grid-12'] .playerOption,
+.modalList[data-density='grid-12'] .playerOptionSelected {
+  min-height: 144px;
+  gap: 10px;
+  padding: 14px 12px;
+  border-radius: 20px;
+}
+
 .playerOptionSelected {
   composes: playerOption;
   border-color: color-mix(in srgb, var(--game-color-primary) 38%, white);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.05),
     0 0 0 1px color-mix(in srgb, var(--game-color-primary) 22%, transparent),
-    0 16px 28px rgba(0, 0, 0, 0.2);
+    0 20px 34px rgba(0, 0, 0, 0.22);
   background:
+    radial-gradient(circle at 50% 16%, color-mix(in srgb, var(--game-color-primary) 14%, transparent), transparent 52%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.024)),
     color-mix(in srgb, var(--game-color-primary) 10%, rgba(7, 8, 13, 0.68));
 }
 
 .playerOption:hover {
-  transform: translateY(-1px);
-  opacity: 0.96;
+  transform: translateY(-2px);
+  opacity: 0.98;
   border-color: rgba(255, 255, 255, 0.18);
 }
 
 .playerAvatar {
   flex: 0 0 auto;
-  font-size: 3rem;
-  line-height: 1;
+  width: 84px;
+  height: 84px;
+}
+
+.modalList[data-density='grid-9'] .playerAvatar,
+.modalList[data-density='grid-10'] .playerAvatar,
+.modalList[data-density='grid-12'] .playerAvatar {
+  width: 62px;
+  height: 62px;
 }
 
 .playerName {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 36px;
+  min-height: 40px;
   max-width: 100%;
-  padding: 0 12px;
+  padding: 0 14px;
   border-radius: 999px;
   border: 2px solid rgba(255, 255, 255, 0.15);
   background: rgba(0, 0, 0, 0.32);
-  font-size: 0.95rem;
+  font-size: 1.02rem;
   font-weight: 800;
   color: var(--color-text);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.modalList[data-density='grid-9'] .playerName,
+.modalList[data-density='grid-10'] .playerName,
+.modalList[data-density='grid-12'] .playerName {
+  min-height: 34px;
+  padding: 0 12px;
+  font-size: 0.92rem;
 }
 
 .playerName[data-gender='ona'] {
@@ -176,20 +216,37 @@
   }
 
   .modalList {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+
+  .modalList[data-density='grid-9'] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .modalList[data-density='grid-10'],
+  .modalList[data-density='grid-12'] {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 640px) {
-  .modalList {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .playerOption {
+    min-height: 152px;
+    padding: 16px 12px;
   }
 
-  .playerOption {
-    min-height: 132px;
+  .playerAvatar {
+    width: 68px;
+    height: 68px;
   }
 
   .modalActions {
     flex-direction: column;
+  }
+
+  .modalList[data-density='grid-9'],
+  .modalList[data-density='grid-10'],
+  .modalList[data-density='grid-12'] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }

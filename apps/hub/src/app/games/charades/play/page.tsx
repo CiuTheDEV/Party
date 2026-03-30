@@ -1,9 +1,17 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { allCategories } from '@content/charades/index'
-import { HostGameScreen, useGameState, useWordPool, type Player, type GameSettings } from '@party/charades'
+import {
+  ensureCharadesWordHistorySession,
+  HostGameScreen,
+  normalizeCharadesPlayers,
+  useGameState,
+  useWordPool,
+  type Player,
+  type GameSettings,
+} from '@party/charades'
 import styles from './page.module.css'
 
 type Config = {
@@ -23,7 +31,11 @@ export default function CharadesPlayPage() {
       router.replace('/games/charades')
       return
     }
-    setConfig(JSON.parse(raw))
+    const parsed = JSON.parse(raw) as Config
+    setConfig({
+      ...parsed,
+      players: normalizeCharadesPlayers(parsed.players),
+    })
   }, [router])
 
   if (!config) return null
@@ -32,14 +44,17 @@ export default function CharadesPlayPage() {
 
 function PlayScreen({ config }: { config: Config }) {
   const router = useRouter()
-  const cats = allCategories.filter((c) => c.id in config.selectedCategories)
-  const { nextWord } = useWordPool(cats, config.selectedCategories)
-
-  const getNextWord = useCallback(() => {
-    const entry = nextWord()
-    const cat = cats.find((c) => c.wordsEasy.includes(entry.word) || c.wordsHard.includes(entry.word))?.name ?? ''
-    return { word: entry.word, category: cat, difficulty: entry.difficulty }
-  }, [nextWord, cats])
+  const cats = useMemo(
+    () => allCategories.filter((c) => c.id in config.selectedCategories),
+    [config.selectedCategories],
+  )
+  useEffect(() => {
+    ensureCharadesWordHistorySession()
+  }, [])
+  const { selectInitialCandidate, rerollWordOnly, rerollWordAndCategory, recordRejectedPrompt, commitPrompt } = useWordPool(
+    cats,
+    config.selectedCategories,
+  )
 
   const {
     state,
@@ -55,7 +70,11 @@ function PlayScreen({ config }: { config: Config }) {
     config.roomId,
     config.players.map((p) => ({ ...p, score: 0 })),
     config.settings,
-    getNextWord,
+    selectInitialCandidate,
+    rerollWordOnly,
+    rerollWordAndCategory,
+    recordRejectedPrompt,
+    commitPrompt,
   )
 
   useEffect(() => {

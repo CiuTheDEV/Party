@@ -66,8 +66,8 @@
 }
 
 .heroAvatar {
-  font-size: 2.15rem;
-  line-height: 1;
+  width: 42px;
+  height: 42px;
 }
 
 .podiumSection {
@@ -93,7 +93,8 @@
 }
 
 .slotAvatar {
-  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  width: clamp(42px, 5vw, 56px);
+  height: clamp(42px, 5vw, 56px);
 }
 
 .slotName {

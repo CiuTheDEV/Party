@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { gsap } from 'gsap'
+import { AvatarAsset } from '../../avatars/AvatarAsset'
 import styles from './PlayBoard.module.css'
 import { CardBack, SettledCard } from './PlayBoardCards'
 import {
@@ -432,7 +433,7 @@ export function PlayBoard({
                     {flyCardFace === 'front' && flyCardPlayer ? (
                       <>
                         <span className={styles.orderIndex}>{flyCardOrderIndex ?? ''}</span>
-                        <span className={styles.orderAvatar}>{flyCardPlayer.avatar}</span>
+                        <AvatarAsset avatar={flyCardPlayer.avatar} className={styles.orderAvatar} />
                         <span className={styles.namePill} data-gender={flyCardPlayer.gender}>
                           {flyCardPlayer.name}
                         </span>

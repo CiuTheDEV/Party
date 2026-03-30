@@ -15,6 +15,8 @@ export type PresenterViewState = {
   word: string
   category: string
   difficulty: PresenterWordDifficulty
+  canChangeWord: boolean
+  remainingWordChanges: number
   presenterName: string
   timerRemaining: number
   timerDuration: number
@@ -29,4 +31,5 @@ export type PresenterViewState = {
 export type PresenterScreenProps = {
   state: PresenterViewState
   onRevealWord: () => boolean
+  onChangeWord: () => boolean
 }

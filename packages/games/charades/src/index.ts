@@ -57,7 +57,21 @@ export { PresenterScreen } from './runtime/presenter/PresenterScreen'
 export { useGameState } from './runtime/hooks/useGameState'
 export { usePresenter } from './runtime/hooks/usePresenter'
 export { useWordPool } from './runtime/hooks/useWordPool'
+export { AvatarAsset } from './avatars/AvatarAsset'
 export {
+  getCharadesAvatarById,
+  getCharadesAvatarCategories,
+  getCharadesAvatarsByCategory,
+  normalizeCharadesAvatarId,
+  normalizeCharadesPlayers,
+} from './avatars/avatar-helpers'
+export {
+  normalizeCharadesSettings,
+  ensureCharadesWordHistorySession,
+  startNewCharadesWordHistorySession,
+  readCharadesWordHistory,
+  writeCharadesWordHistory,
+  clearCharadesWordHistory,
   clearPresenterSession,
   createCharadesRoomId,
   getPresenterHeartbeatMs,
@@ -69,6 +83,7 @@ export {
 } from './runtime/shared/charades-storage'
 export { getPartykitHost, getPresenterOrigin, isLocalPresenterOrigin } from './runtime/shared/charades-runtime'
 export type {
+  CharadesAvatarId,
   CharadesCategoryDifficulty,
   CharadesGameSettings,
   CharadesPlayerDraft,

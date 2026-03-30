@@ -25,9 +25,9 @@ function PresentRoute() {
 }
 
 function PresenterRouteContent({ roomId }: { roomId: string }) {
-  const { state, revealWord } = usePresenter(roomId)
+  const { state, revealWord, changeWord } = usePresenter(roomId)
 
-  return <PresenterScreen state={state} onRevealWord={revealWord} />
+  return <PresenterScreen state={state} onRevealWord={revealWord} onChangeWord={changeWord} />
 }
 
 function RouteStatus({ eyebrow, message }: { eyebrow: string; message: string }) {

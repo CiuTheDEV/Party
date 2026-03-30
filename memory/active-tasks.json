@@ -28,6 +28,16 @@
       "blocker": "",
       "created": "2026-03-27",
       "updated": "2026-03-27"
+    },
+    {
+      "id": "T002",
+      "title": "Charades weighted reroll smoke test and hardening",
+      "status": "active",
+      "context": "Weighted reroll, browser word-history persistence, and history-aware category counters are implemented on branch `codex/charades-avatar-assets`. Build verification passes, but the feature still needs manual smoke testing across reroll limits, reveal reconnects, and multiple games in one browser session.",
+      "next_action": "Run a browser smoke test for presenter reroll (`0/1/N` changes), reconnect during reveal, second game in the same browser, and confirm category counters shrink as prompts are consumed.",
+      "blocker": "",
+      "created": "2026-03-30",
+      "updated": "2026-03-30"
     }
   ]
 }

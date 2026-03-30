@@ -1,3 +1,4 @@
+import { AvatarAsset } from '../avatars/AvatarAsset'
 import styles from './Podium.module.css'
 import { ResultsGroups, type PlacementGroup } from './ResultsGroups'
 import type { CharadesResultPlayer } from './types'
@@ -36,7 +37,7 @@ export function Podium({ players }: Props) {
         <div className={styles.heroNames}>
           {leaders.map((player) => (
             <span key={player.name} className={styles.heroNameChip}>
-              <span className={styles.heroAvatar}>{player.avatar}</span>
+              <AvatarAsset avatar={player.avatar} variant="animated" className={styles.heroAvatar} />
               <span>{player.name}</span>
             </span>
           ))}
@@ -77,7 +78,7 @@ function PodiumSlot({ player, place }: { player: CharadesResultPlayer; place: 1 
 
   return (
     <div className={`${styles.slot} ${styles[`place${place}`]}`}>
-      <div className={styles.slotAvatar}>{player.avatar}</div>
+      <AvatarAsset avatar={player.avatar} variant="animated" className={styles.slotAvatar} />
       <div className={styles.slotName}>{player.name}</div>
       <div className={styles.slotScore}>{player.score} pkt</div>
       <div className={styles.bar} style={{ height: heights[place] }}>

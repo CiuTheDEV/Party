@@ -32,10 +32,19 @@
   place-items: center;
   align-content: center;
   text-align: center;
-  cursor: default;
+  cursor: pointer;
   background:
     linear-gradient(180deg, #f97316 0%, #ef4444 100%);
   box-shadow: 0 24px 44px rgba(239, 68, 68, 0.28);
+  transition: opacity 0.15s ease, filter 0.15s ease, box-shadow 0.15s ease;
+}
+
+.revealMetaCardDisabled {
+  cursor: not-allowed;
+  background: linear-gradient(180deg, rgba(71, 85, 105, 0.82), rgba(51, 65, 85, 0.9));
+  box-shadow: none;
+  opacity: 0.78;
+  filter: saturate(0.72);
 }
 
 .metaBlock {
