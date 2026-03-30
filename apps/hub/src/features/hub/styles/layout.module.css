@@ -196,6 +196,10 @@
   scrollbar-gutter: stable;
 }
 
+.tabBar {
+  display: none;
+}
+
 @media (max-width: 767px) {
   .topbarInner {
     height: calc(var(--topbar-height-mobile) - 1px);
@@ -210,5 +214,54 @@
     height: calc(100vh - var(--topbar-height-mobile));
     margin-top: var(--topbar-height-mobile);
     padding-left: 0;
+    padding-bottom: 56px;
+  }
+
+  .tabBar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 56px;
+    background: rgba(5, 5, 5, 0.8);
+    backdrop-filter: blur(40px);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    z-index: 100;
+  }
+
+  .tabItem,
+  .tabItemActive {
+    appearance: none;
+    flex: 1;
+    border: 0;
+    background: transparent;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    color: #8ea0bb;
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.15s ease;
+  }
+
+  .tabItemActive {
+    color: #d5b8ff;
+  }
+
+  .tabIcon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tabLabel {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    white-space: nowrap;
   }
 }

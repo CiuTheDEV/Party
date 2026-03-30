@@ -48,10 +48,7 @@ export default function HomePage() {
           </div>
         </header>
 
-        <aside
-          className={layoutStyles.rail}
-          aria-label="Nawigacja Hubu"
-        >
+        <aside className={layoutStyles.rail} aria-label="Nawigacja Hubu">
           <div className={layoutStyles.railInner}>
             {railItems.filter((item) => !item.pinnedBottom).map((item) => {
               const Icon = item.icon
@@ -90,6 +87,26 @@ export default function HomePage() {
             })}
           </div>
         </aside>
+
+        <nav className={layoutStyles.tabBar} aria-label="Dolna nawigacja Hubu">
+          {railItems.map((item) => {
+            const Icon = item.icon
+
+            return (
+              <SectionLink
+                key={item.label}
+                href={item.href}
+                className={item.href === activeRailHref ? layoutStyles.tabItemActive : layoutStyles.tabItem}
+                onNavigate={() => setActiveRailHref(item.href)}
+              >
+                <span className={layoutStyles.tabIcon} aria-hidden="true">
+                  <Icon size={18} />
+                </span>
+                <span className={layoutStyles.tabLabel}>{item.label}</span>
+              </SectionLink>
+            )
+          })}
+        </nav>
 
         <main id="main-content" className={layoutStyles.main}>
           <HeroCarousel
