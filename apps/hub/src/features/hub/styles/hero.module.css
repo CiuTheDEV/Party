@@ -10,6 +10,10 @@
   border-radius: 32px;
   overflow: hidden;
   background: #000;
+  border: 1px solid rgba(167, 139, 250, 0.14);
+  box-shadow:
+    0 24px 64px rgba(0, 0, 0, 0.34),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
 .heroSlide {
@@ -100,14 +104,42 @@
 
 .toneCharades {
   background:
-    radial-gradient(circle at 72% 32%, rgba(42, 132, 181, 0.18), transparent 18%),
-    linear-gradient(135deg, #181d28 0%, #111827 28%, #0b0d14 52%, #1a2436 76%, #0b0d14 100%);
+    linear-gradient(90deg, rgba(5, 5, 5, 0.96) 0%, rgba(5, 5, 5, 0.7) 34%, rgba(5, 5, 5, 0.18) 64%, rgba(5, 5, 5, 0.06) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.04)),
+    url('/images/heroes/charades-hero-main.png');
+  background-size: auto, auto, cover;
+  background-position: center, center, 78% center;
+  background-repeat: no-repeat;
+}
+
+.toneCharades .heroImagePlane,
+.toneCharades .heroRidgeOne,
+.toneCharades .heroRidgeTwo,
+.toneCharades .heroRidgeThree,
+.toneCharades .heroGlowPrimary,
+.toneCharades .heroGlowSecondary,
+.toneCharades .heroMesh {
+  display: none;
 }
 
 .toneRotation {
   background:
-    radial-gradient(circle at 70% 28%, rgba(167, 139, 250, 0.2), transparent 18%),
-    linear-gradient(135deg, #1a1422 0%, #110f1d 24%, #0a0d16 52%, #132539 76%, #090c14 100%);
+    linear-gradient(90deg, rgba(5, 5, 5, 0.96) 0%, rgba(5, 5, 5, 0.72) 34%, rgba(5, 5, 5, 0.22) 64%, rgba(5, 5, 5, 0.08) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.03)),
+    url('/images/heroes/codenames-hero-main.png');
+  background-size: auto, auto, cover;
+  background-position: center, center, 78% center;
+  background-repeat: no-repeat;
+}
+
+.toneRotation .heroImagePlane,
+.toneRotation .heroRidgeOne,
+.toneRotation .heroRidgeTwo,
+.toneRotation .heroRidgeThree,
+.toneRotation .heroGlowPrimary,
+.toneRotation .heroGlowSecondary,
+.toneRotation .heroMesh {
+  display: none;
 }
 
 .toneShowcase {
@@ -215,6 +247,7 @@
 }
 
 .heroDotActive {
+  width: 34px;
   background: #a78bfa;
 }
 

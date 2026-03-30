@@ -6,27 +6,32 @@ export function useActiveSection(sectionHrefs: readonly string[]) {
   const [activeHref, setActiveHref] = useState(sectionHrefs[0] ?? '#hero')
 
   useEffect(() => {
+    const scrollContainer = document.getElementById('main-content')
+
     const updateActiveSection = () => {
-      const topbar = document.querySelector<HTMLElement>('header')
-      const topbarOffset = topbar ? topbar.getBoundingClientRect().height : 0
-      const currentPosition = window.scrollY + topbarOffset + 140
+      if (!scrollContainer) return
+
+      const containerTop = scrollContainer.getBoundingClientRect().top
+      const currentPosition = scrollContainer.scrollTop + 140
 
       const nextActiveHref =
         sectionHrefs.findLast((href) => {
           const section = document.querySelector<HTMLElement>(href)
           if (!section) return false
-          return section.getBoundingClientRect().top + window.scrollY <= currentPosition
+          const sectionTop =
+            section.getBoundingClientRect().top - containerTop + scrollContainer.scrollTop
+          return sectionTop <= currentPosition
         }) ?? sectionHrefs[0] ?? '#hero'
 
       setActiveHref(nextActiveHref)
     }
 
     updateActiveSection()
-    window.addEventListener('scroll', updateActiveSection, { passive: true })
+    scrollContainer?.addEventListener('scroll', updateActiveSection, { passive: true })
     window.addEventListener('resize', updateActiveSection)
 
     return () => {
-      window.removeEventListener('scroll', updateActiveSection)
+      scrollContainer?.removeEventListener('scroll', updateActiveSection)
       window.removeEventListener('resize', updateActiveSection)
     }
   }, [sectionHrefs])

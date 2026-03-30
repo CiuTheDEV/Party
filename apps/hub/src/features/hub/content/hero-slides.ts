@@ -1,28 +1,28 @@
 export const heroSlides = [
   {
-    eyebrow: 'Polecane wrazenia',
+    eyebrow: 'Polecane wrażenia',
     title: 'Kalambury',
     description:
-      'Rysuj, zgaduj i smiej sie. Klasyczna gra towarzyska wymyslona na nowo w cyfrowej pustce. Polacz sie ze znajomymi i pokaz swoj artystyczny chaos.',
+      'Pokazuj, zgaduj i śmiej się. Klasyczna gra towarzyska oparta na geście, mimice i szybkim skojarzeniu. Usiądźcie razem na kanapie i rozkręćcie rundę bez użycia słów.',
     ctaLabel: 'Graj teraz',
     href: '/games/charades',
     tone: 'charades',
   },
   {
-    eyebrow: 'Wieczor z przyjaciolmi',
-    title: 'Szybka rotacja',
+    eyebrow: 'Niedługo w hubie',
+    title: 'Tajniacy',
     description:
-      'Przelaczaj gry bez rozbijania klimatu. Jeden wieczor, kilka rund i zero tarcia przy starcie kolejnej planszy.',
-    ctaLabel: 'Wejdz do lobby',
+      'Drużynowa gra skojarzeń i dedukcji już się przygotowuje. Wkrótce dołączy do biblioteki Project Party.',
+    ctaLabel: 'Wkrótce',
     href: '#library',
     tone: 'rotation',
   },
   {
-    eyebrow: 'Na duzy ekran',
-    title: 'Pokoj pelen chaosu',
+    eyebrow: 'Na duży ekran',
+    title: 'Pokój pełen chaosu',
     description:
-      'Hub zbiera najlepsze tytuly w jednym miejscu, zebys mogl odpalic kolejna gre zanim ekipa zdazy stracic tempo.',
-    ctaLabel: 'Zobacz biblioteke',
+      'Hub zbiera najlepsze tytuły w jednym miejscu, żebyś mógł odpalić kolejną grę zanim ekipa zdąży stracić tempo.',
+    ctaLabel: 'Zobacz bibliotekę',
     href: '#library',
     tone: 'showcase',
   },

@@ -1,25 +1,26 @@
 import Link from 'next/link'
-import { Gamepad2, User } from 'lucide-react'
+import { Epilogue, Manrope } from 'next/font/google'
 import styles from './Topbar.module.css'
 
 type TopbarProps = {
   gameName?: string
 }
 
-export function Topbar({ gameName }: TopbarProps) {
+const headingFont = Epilogue({ subsets: ['latin'], weight: ['700', '800', '900'] })
+const bodyFont = Manrope({ subsets: ['latin'], weight: ['400', '500', '600', '700', '800'] })
+
+export function Topbar({ gameName: _gameName }: TopbarProps) {
   return (
     <header className={styles.topbar}>
-      <Link href="/" className={styles.logo}>
-        <span className={styles.logoMark} aria-hidden="true"><Gamepad2 size={20} /></span>
-        <span className={styles.logoText}>
-          <span className={styles.logoLabel}>PROJECT PARTY</span>
-          {gameName && <span className={styles.logoGame}>{gameName}</span>}
-        </span>
-      </Link>
-      <button className={styles.authBtn} aria-label="Zaloguj się">
-        <User size={16} aria-hidden="true" />
-        <span className={styles.authBtnText}>Zaloguj się</span>
-      </button>
+      <div className={styles.topbarInner}>
+        <Link href="/" className={`${styles.topbarBrand} ${headingFont.className}`}>
+          {`PROJECT PARTY${_gameName ? ` / ${_gameName.toUpperCase()}` : ''}`}
+        </Link>
+
+        <button className={`${styles.loginButton} ${bodyFont.className}`} type="button" aria-label="Zaloguj">
+          Zaloguj
+        </button>
+      </div>
     </header>
   )
 }

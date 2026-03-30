@@ -1,87 +1,45 @@
 .topbar {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: var(--topbar-height);
+  inset: 0 0 auto 0;
+  z-index: 50;
+  background: rgba(5, 5, 5, 0.92);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(40px);
+}
+
+.topbarInner {
+  width: 100%;
+  height: 72px;
+  padding: 0 40px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 24px;
-  background: rgba(9, 9, 11, 0.4);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  z-index: 100;
 }
 
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.topbarBrand {
+  font-size: 1.5rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: #a78bfa;
   text-decoration: none;
 }
 
-.logoMark {
-  width: 44px;
-  height: 44px;
-  border-radius: 11px;
-  background: var(--game-color-primary, #7c3aed);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  flex-shrink: 0;
-}
-
-.logoText {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.logoLabel {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  color: var(--game-color-primary);
+.loginButton {
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  font-weight: 800;
   line-height: 1;
   text-transform: uppercase;
-}
-
-.logoGame {
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--color-text);
-  line-height: 1;
-}
-
-.authBtn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 11px 22px;
-  border-radius: 999px;
-  border: 1px solid var(--color-outline-variant);
-  background: var(--color-surface-elevated);
-  color: var(--color-text);
-  font-size: 1rem;
-  font-weight: 500;
+  letter-spacing: 0.18em;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
-}
-
-.authBtn:hover {
-  background: var(--color-surface-hover);
-  border-color: rgba(255, 255, 255, 0.25);
-}
-
-.authBtn:focus-visible {
-  outline: 2px solid var(--color-focus-outline);
-  outline-offset: 2px;
 }
 
 @media (max-width: 767px) {
-  .authBtnText {
-    display: none;
+  .topbarInner {
+    height: 63px;
+    padding: 0 18px;
   }
 }

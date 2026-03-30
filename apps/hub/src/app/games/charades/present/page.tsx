@@ -7,7 +7,7 @@ import styles from './page.module.css'
 
 export default function PresentPage() {
   return (
-    <Suspense fallback={<RouteStatus eyebrow="Prezenter" message="Laczenie..." />}>
+    <Suspense fallback={<RouteStatus eyebrow="Prezenter" message="Łączenie..." />}>
       <PresentRoute />
     </Suspense>
   )
@@ -18,7 +18,7 @@ function PresentRoute() {
   const roomId = params.get('room') ?? ''
 
   if (!roomId) {
-    return <RouteStatus eyebrow="Brak pokoju" message="Zeskanuj QR ponownie, aby otworzyc ekran prezentera." />
+    return <RouteStatus eyebrow="Brak pokoju" message="Zeskanuj QR ponownie, aby otworzyć ekran prezentera." />
   }
 
   return <PresenterRouteContent roomId={roomId} />

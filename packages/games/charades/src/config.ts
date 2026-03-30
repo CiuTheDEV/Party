@@ -3,7 +3,7 @@ import type { GameConfig } from '@party/game-sdk'
 export const config: GameConfig = {
   id: 'charades',
   name: 'Kalambury',
-  description: 'Pokazuj hasla bez slow, tylko gestem i mimika.',
+  description: 'Pokazuj hasła bez słów, tylko gestem i mimiką.',
   icon: '\uD83C\uDFAD',
   status: 'live',
   minPlayers: 2,

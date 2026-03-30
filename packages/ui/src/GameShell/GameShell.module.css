@@ -1,8 +1,13 @@
 .root {
+  --rail-collapsed-width: 80px;
+  --topbar-height: 73px;
+  --topbar-height-mobile: 64px;
   height: 100vh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  background: #050505;
+  color: var(--color-text);
 }
 
 .body {
@@ -16,6 +21,7 @@
   flex: 1;
   min-width: 0;
   min-height: 0;
+  padding-left: calc(var(--rail-collapsed-width) + 12px);
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -39,6 +45,11 @@
 
 @media (max-width: 767px) {
   .main {
+    padding-left: 0;
     padding-bottom: 56px;
+  }
+
+  .body {
+    margin-top: var(--topbar-height-mobile);
   }
 }

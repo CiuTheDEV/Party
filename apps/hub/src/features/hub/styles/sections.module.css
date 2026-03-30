@@ -6,7 +6,7 @@
 .libraryHeader {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 24px;
   margin-bottom: 28px;
 }
@@ -23,50 +23,40 @@
   font-size: 0.92rem;
 }
 
-.libraryTools {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.searchWrap {
-  min-width: 220px;
-  height: 40px;
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 14px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.02);
-  color: #94a3b8;
-}
-
-.searchInput {
-  width: 100%;
-  border: 0;
-  outline: 0;
-  background: transparent;
-  color: #f4eff7;
-  font: inherit;
-}
-
-.toolCircle {
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  background: rgba(255, 255, 255, 0.04);
-  color: #f4eff7;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-}
-
 .libraryGrid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 32px;
+}
+
+.libraryCtaRow {
+  display: flex;
+  justify-content: center;
+  margin-top: 36px;
+}
+
+.libraryCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 24px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f4eff7;
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+
+.libraryCta:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
+  transform: translateY(-1px);
 }
 
 .cardShell {
@@ -86,28 +76,47 @@
   border-radius: 24px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.05);
+  background-image: var(--card-image), var(--card-tone);
+  background-size: cover, auto;
+  background-position: center, center;
+  background-repeat: no-repeat;
+  transition:
+    transform 0.22s ease,
+    border-color 0.22s ease,
+    box-shadow 0.22s ease,
+    filter 0.22s ease;
+}
+
+.cardShell:hover .cardVisual,
+.cardShell:focus-visible .cardVisual {
+  transform: translateY(-6px) scale(1.01);
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 26px 48px rgba(0, 0, 0, 0.34);
+  filter: saturate(1.06) brightness(1.04);
 }
 
 .cardMystery {
-  background: linear-gradient(160deg, #285b58 0%, #162126 72%, #0a0a0d 100%);
+  --card-tone: linear-gradient(160deg, #285b58 0%, #162126 72%, #0a0a0d 100%);
 }
 
 .cardSeconds {
-  background: linear-gradient(160deg, #d6d8da 0%, #7d8ca3 42%, #151b25 100%);
+  --card-tone: linear-gradient(160deg, #d6d8da 0%, #7d8ca3 42%, #151b25 100%);
 }
 
 .cardMafia {
-  background: linear-gradient(160deg, #705639 0%, #231a15 42%, #0a0a0d 100%);
+  --card-tone: linear-gradient(160deg, #705639 0%, #231a15 42%, #0a0a0d 100%);
 }
 
 .cardShips {
-  background: linear-gradient(160deg, #395769 0%, #182635 42%, #0a0a0d 100%);
+  --card-tone: linear-gradient(160deg, #395769 0%, #182635 42%, #0a0a0d 100%);
 }
 
 .cardFade {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 34%, rgba(5, 5, 5, 0.78) 100%);
+  background:
+    linear-gradient(180deg, rgba(5, 5, 5, 0.04) 0%, rgba(5, 5, 5, 0.18) 34%, rgba(5, 5, 5, 0.78) 100%),
+    linear-gradient(0deg, rgba(5, 5, 5, 0.12), rgba(5, 5, 5, 0.12));
 }
 
 .cardCaption {
@@ -115,6 +124,12 @@
   left: 20px;
   right: 20px;
   bottom: 22px;
+  transition: transform 0.22s ease;
+}
+
+.cardShell:hover .cardCaption,
+.cardShell:focus-visible .cardCaption {
+  transform: translateY(-4px);
 }
 
 .cardTag {
@@ -331,14 +346,9 @@
     align-items: flex-start;
   }
 
-  .libraryTools,
   .footerLinks {
     width: 100%;
     grid-template-columns: 1fr;
-  }
-
-  .searchWrap {
-    min-width: 100%;
   }
 
   .showcaseSection {

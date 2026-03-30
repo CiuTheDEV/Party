@@ -22,47 +22,61 @@ type GameSidebarProps = {
 export function GameSidebar({ gameName, gameEmoji, links }: GameSidebarProps) {
   const pathname = usePathname()
 
+  const handleNavigate = () => {
+    requestAnimationFrame(() => {
+      const activeElement = document.activeElement
+
+      if (activeElement instanceof HTMLElement) {
+        activeElement.blur()
+      }
+    })
+  }
+
   return (
     <>
-      {/* Desktop sidebar */}
-      <aside className={styles.sidebar}>
-        <nav className={styles.nav}>
+      <aside className={styles.sidebar} aria-label={`Nawigacja gry ${gameName}`}>
+        <div className={styles.railInner}>
           {links.map((link) =>
             link.disabled ? (
               <span
                 key={link.href}
                 className={`${styles.navLink} ${styles.navLinkDisabled}`}
+                aria-disabled="true"
               >
                 {link.icon && <span className={styles.navIcon}>{link.icon}</span>}
-                {link.label}
+                <span className={styles.navLabel}>{link.label}</span>
               </span>
             ) : (
               <Link
                 key={link.href}
                 href={link.href}
                 className={`${styles.navLink} ${pathname === link.href ? styles.active : ''}`}
+                onClick={handleNavigate}
               >
                 {link.icon && <span className={styles.navIcon}>{link.icon}</span>}
-                {link.label}
+                <span className={styles.navLabel}>{link.label}</span>
               </Link>
             )
           )}
-        </nav>
-        <div className={styles.bottom}>
-          <Link href="/" className={styles.backLink}>
-            <ArrowLeft size={14} />
-            Wróć do lobby
+
+          <div className={styles.railSpacer} />
+
+          <Link href="/" className={styles.backLink} onClick={handleNavigate}>
+            <span className={styles.navIcon} aria-hidden="true">
+              <ArrowLeft size={18} />
+            </span>
+            <span className={styles.navLabel}>Wróć do lobby</span>
           </Link>
         </div>
       </aside>
 
-      {/* Mobile tab bar */}
-      <nav className={styles.tabBar}>
+      <nav className={styles.tabBar} aria-label={`Dolna nawigacja gry ${gameName}`}>
         {links.map((link) =>
           link.disabled ? (
             <span
               key={link.href}
               className={`${styles.tabItem} ${styles.tabDisabled}`}
+              aria-disabled="true"
             >
               {link.icon && <span className={styles.tabIcon}>{link.icon}</span>}
               <span className={styles.tabLabel}>{link.label}</span>
@@ -72,14 +86,18 @@ export function GameSidebar({ gameName, gameEmoji, links }: GameSidebarProps) {
               key={link.href}
               href={link.href}
               className={`${styles.tabItem} ${pathname === link.href ? styles.tabActive : ''}`}
+              onClick={handleNavigate}
             >
               {link.icon && <span className={styles.tabIcon}>{link.icon}</span>}
               <span className={styles.tabLabel}>{link.label}</span>
             </Link>
           )
         )}
-        <Link href="/" className={styles.tabItem}>
-          <span className={styles.tabIcon}><Home size={18} /></span>
+
+        <Link href="/" className={styles.tabItem} aria-label={`Wróć do lobby ${gameEmoji}`} onClick={handleNavigate}>
+          <span className={styles.tabIcon}>
+            <Home size={18} />
+          </span>
           <span className={styles.tabLabel}>Lobby</span>
         </Link>
       </nav>

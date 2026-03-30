@@ -36,10 +36,10 @@ export function PremiumModal({ onClose }: PremiumModalProps) {
           {'\uD83D\uDD12'}
         </div>
         <h2 className={styles.title} id="premium-modal-title">
-          Tresc premium
+          Treść premium
         </h2>
         <p className={styles.description}>
-          Ta gra bedzie dostepna wkrotce. Wroc za jakis czas.
+          Ta gra będzie dostępna wkrótce. Wróć za jakiś czas.
         </p>
         <button
           ref={closeButtonRef}
