@@ -1,6 +1,21 @@
 # Auto detect text files and perform LF normalization
 * text=auto
 
-# Codex config — track config but never auth credentials
+# Keep source and config files on UTF-8/LF to reduce mojibake on Windows toolchains
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.mjs text eol=lf
+*.cjs text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.json text eol=lf
+*.jsonc text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+
+# Codex config - track config but never auth credentials
 .codex/config.toml text=auto
 .codex/auth.json linguist-generated

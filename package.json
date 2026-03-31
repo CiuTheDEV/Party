@@ -5,6 +5,7 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
+    "encoding:check": "powershell -ExecutionPolicy Bypass -File ./scripts/check-text-encoding.ps1",
     "docs:normalize": "powershell -ExecutionPolicy Bypass -File ./scripts/normalize-markdown.ps1",
     "docs:check-encoding": "powershell -ExecutionPolicy Bypass -File ./scripts/check-markdown-encoding.ps1"
   },

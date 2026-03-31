@@ -14,7 +14,7 @@
 
 ### Code / Project Search: Two-stage RAG
 
-When finding “where is this feature”:
+When finding "where is this feature":
 1. **L0** Run `ls` or `find . -maxdepth 2` first to locate candidate directories (5 or fewer)
 2. **L1** Search only within those candidates using `grep`
 
@@ -32,3 +32,4 @@ Do not trigger this if context is still clear - avoid wasting tokens.
 ---
 
 *Split from `rules/behaviors.md`.*
+

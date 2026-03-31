@@ -18,7 +18,7 @@ Source: [URL] - Paragraph X / Line Y
 ```
 
 **Banned behaviors**:
-- outputting unattributed “N key points from source”
+- outputting unattributed "N key points from source"
 - pattern-completing and disguising it as source content
 - continuing without warning the user when verification failed
 
@@ -57,3 +57,4 @@ Is this correct? Please point out any drift.
 
 - More than 20 turns or more than 50 tool calls -> proactively suggest a fresh session
 - Critical business code -> must list 3 potential risk points
+
