@@ -1,0 +1,62 @@
+.section {
+  display: grid;
+  gap: 12px;
+}
+
+.inlineWarning {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(251, 146, 60, 0.26);
+  background:
+    radial-gradient(circle at top left, rgba(251, 146, 60, 0.16), transparent 52%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015)),
+    rgba(20, 14, 10, 0.78);
+}
+
+.inlineWarningCopy {
+  display: grid;
+  gap: 6px;
+}
+
+.inlineWarningEyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fdba74;
+}
+
+.inlineWarningText {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.inlineWarningButton {
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(251, 146, 60, 0.24);
+  background: rgba(251, 146, 60, 0.12);
+  color: #ffedd5;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+  .inlineWarning {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .inlineWarningButton {
+    width: 100%;
+  }
+}

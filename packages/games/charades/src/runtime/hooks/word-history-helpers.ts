@@ -169,6 +169,27 @@ export function getRemainingPromptCount(prompts: TurnPrompt[], usedPromptKeys: S
   return prompts.filter((prompt) => !usedPromptKeys.has(toPromptKey(prompt))).length
 }
 
+export function getTotalUniqueWordCount(prompts: TurnPrompt[]) {
+  return new Set(prompts.map((prompt) => prompt.word.trim())).size
+}
+
+export function getRemainingUniqueWordCount(
+  prompts: TurnPrompt[],
+  usedPromptKeys: Set<StoredPromptKey>,
+) {
+  const usedWords = new Set(
+    Array.from(usedPromptKeys)
+      .map(getWordFromPromptKey)
+      .filter(Boolean),
+  )
+
+  return new Set(
+    prompts
+      .map((prompt) => prompt.word.trim())
+      .filter((word) => word && !usedWords.has(word)),
+  ).size
+}
+
 function touchWordHistory(history: StoredWordHistory): StoredWordHistory {
   return {
     ...history,
@@ -182,4 +203,14 @@ function createSessionId() {
   }
 
   return Math.random().toString(36).slice(2)
+}
+
+function getWordFromPromptKey(promptKey: StoredPromptKey) {
+  const parts = promptKey.split('::')
+
+  if (parts.length < 3) {
+    return promptKey.trim()
+  }
+
+  return parts.slice(0, -2).join('::').trim()
 }

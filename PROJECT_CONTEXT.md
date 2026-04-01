@@ -1,6 +1,6 @@
 # Project Party - Project Context
 
-*Last updated: 2026-03-30*
+*Last updated: 2026-03-31*
 
 ---
 
@@ -137,9 +137,16 @@ This means:
 
 <!-- handoff:start -->
 ## Session Handoff
-- Last: 2026-03-30 by Codex (GPT-5.4)
-- Task: Charades presenter word change, weighted reroll, browser word history, and setup/runtime polish.
-- Did: Implemented presenter word change end-to-end, replaced consume-on-draw with candidate-on-commit behavior, added weighted reroll and browser-side word history for repeated games, restored setup category actions/counters, and expanded avatar/runtime UI polish. Fixed review findings around reconnect state, button labeling, stale history writes, and history session lifecycle; build verification passes for `@party/charades` and `@party/hub`.
-- Next: Run a manual browser smoke test for reroll limits, reveal reconnects, repeated games in one browser session, and category counter shrinkage; then decide whether to merge or do one more hardening pass.
+- Last: 2026-04-01 11:51 by Codex (GPT-5.4)
+- Task: Charades warning modal polish and long-word handling across reveal and verdict screens.
+- Did: Reworked the low-pool warning modal into a more spacious hero-plus-stats layout, cleaned several touched files back to UTF-8, and split word rendering into normal static display for short words plus autoscale for long phrases. Also fixed the shared autoscale wrapper so visibility state reaches the outer shell. Build verification passes for `@party/charades` and `@party/hub`.
+- Next: Run a real browser smoke test for the host `verdict` panel with a very long developer prompt. User screenshots still show the right-hand verdict card as visually broken, so the next session should inspect the live DOM/CSS/state instead of making more blind code-only adjustments.
+- Blocker: None.
+
+## Previous Handoff
+- Last: 2026-03-31 by Codex (GPT-5.4)
+- Task: Charades pool management, low-pool warning, safe merge to `main`, and repo/worktree cleanup.
+- Did: Added `Zarządzaj pulą` with full-pool and per-category resets, confirmation before reset, real pool-state visibility in the management modal, and a pre-start warning when active pool size is lower than `players × rounds`. Safely merged the active Charades branch into `main`, pushed `main`, pruned stale worktree metadata, and cleaned local Git noise from `.vscode/mcp.json`. Build verification passes for `@party/charades` and `@party/hub`.
+- Next: Run a manual browser smoke test for weighted reroll, repeated games in one browser session, pool reset flows, and the `Wróć / Zarządzaj pulą / Start` warning path before any more Charades gameplay features.
 - Blocker: None.
 <!-- handoff:end -->

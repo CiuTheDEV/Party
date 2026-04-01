@@ -6,7 +6,11 @@ import type {
 import { createDefaultCharadesSettings } from '../../setup/state'
 import { normalizeCharadesPlayers } from '../../avatars/avatar-helpers'
 import type { StoredWordHistory } from './charades-word-history'
-import { createEmptyWordHistory } from './charades-word-history'
+import {
+  createEmptyWordHistory,
+  resetStoredWordHistory,
+  resetStoredWordHistoryCategory,
+} from './charades-word-history'
 
 const SETUP_STORAGE_KEY = 'charades:setup'
 const PRESENTER_SESSION_STORAGE_KEY = 'charades:presenter-session'
@@ -128,6 +132,20 @@ export function clearCharadesWordHistory() {
   }
 
   window.localStorage.removeItem(WORD_HISTORY_STORAGE_KEY)
+}
+
+export function resetCharadesWordHistory() {
+  const history = ensureCharadesWordHistorySession()
+  const nextHistory = resetStoredWordHistory(history)
+  writeCharadesWordHistory(nextHistory)
+  return nextHistory
+}
+
+export function resetCharadesWordHistoryCategory(categoryName: string) {
+  const history = ensureCharadesWordHistorySession()
+  const nextHistory = resetStoredWordHistoryCategory(history, categoryName)
+  writeCharadesWordHistory(nextHistory)
+  return nextHistory
 }
 
 export function ensureCharadesWordHistorySession() {

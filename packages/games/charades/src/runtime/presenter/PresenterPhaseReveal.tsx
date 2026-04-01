@@ -1,5 +1,6 @@
 'use client'
 
+import { AutoscaledWord } from '../shared/AutoscaledWord'
 import styles from './PresenterPhaseReveal.module.css'
 
 type PresenterPhaseRevealProps = {
@@ -11,6 +12,13 @@ type PresenterPhaseRevealProps = {
   onChangeWord: () => boolean
   revealRemaining: number
   revealDuration: number
+}
+
+function shouldAutoscaleWord(word: string) {
+  const normalized = word.trim()
+  const wordCount = normalized.split(/\s+/).filter(Boolean).length
+
+  return normalized.length > 26 || wordCount > 3
 }
 
 export function PresenterPhaseReveal({
@@ -26,6 +34,7 @@ export function PresenterPhaseReveal({
   const isGloballyDisabled = !canChangeWord
   const isExhausted = canChangeWord && remainingWordChanges <= 0
   const isDisabled = !canChangeWord || remainingWordChanges <= 0
+  const useAutoscale = shouldAutoscaleWord(word)
   const buttonLabel = isGloballyDisabled
     ? 'Zmień hasło'
     : isExhausted
@@ -49,7 +58,19 @@ export function PresenterPhaseReveal({
           </div>
         </div>
         <div className={styles.wordHero}>
-          <div className={styles.word}>{word}</div>
+          {useAutoscale ? (
+            <AutoscaledWord
+              text={word}
+              className={styles.wordScaleRoot}
+              textClassName={styles.word}
+              minFontSize={18}
+              maxFontSize={164}
+            />
+          ) : (
+            <div className={styles.wordStaticWrap}>
+              <div className={`${styles.word} ${styles.wordStatic}`}>{word}</div>
+            </div>
+          )}
         </div>
       </section>
 

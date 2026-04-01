@@ -13,7 +13,7 @@ export { professions } from './professions'
 export { places } from './places'
 export { famous } from './famous'
 export { activities } from './activities'
-export { objects } from './objects'
+export { developer } from './developer'
 
 import { animals } from './animals'
 import { movies } from './movies'
@@ -23,7 +23,7 @@ import { professions } from './professions'
 import { places } from './places'
 import { famous } from './famous'
 import { activities } from './activities'
-import { objects } from './objects'
+import { developer } from './developer'
 
 export const allCategories: WordCategory[] = [
   animals,
@@ -34,5 +34,5 @@ export const allCategories: WordCategory[] = [
   places,
   famous,
   activities,
-  objects,
+  developer,
 ]

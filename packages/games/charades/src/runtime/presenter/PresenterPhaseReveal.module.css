@@ -118,16 +118,35 @@
   align-content: center;
   justify-items: center;
   gap: clamp(10px, 1.8vw, 14px);
+  padding-inline: clamp(12px, 2.2vw, 24px);
   text-align: center;
+  overflow: hidden;
 }
 
 .word {
-  font-size: clamp(2.4rem, 11vw, 5.2rem);
+  max-width: min(100%, 14ch);
   font-weight: 900;
   line-height: 0.92;
-  text-wrap: balance;
-  overflow-wrap: anywhere;
   color: #f8fafc;
+}
+
+.wordScaleRoot {
+  height: 100%;
+  width: 100%;
+}
+
+.wordStaticWrap {
+  width: 100%;
+  display: grid;
+  place-items: center;
+  min-height: 0;
+}
+
+.wordStatic {
+  width: auto;
+  max-width: min(100%, 12ch);
+  font-size: clamp(4.8rem, 11vw, 10.25rem);
+  text-wrap: balance;
 }
 
 .changeButtonLabel {
@@ -170,10 +189,6 @@
 
   .wordHeroCard {
     padding-block: 16px;
-  }
-
-  .word {
-    font-size: clamp(2rem, 8vw, 4rem);
   }
 
   .changeButtonLabel {

@@ -1,6 +1,7 @@
 import { ChevronLeft } from 'lucide-react'
 import type { MutableRefObject } from 'react'
 import { AvatarAsset } from '../../avatars/AvatarAsset'
+import { AutoscaledWord } from '../shared/AutoscaledWord'
 import styles from './PlayBoard.module.css'
 import { PresenterCard } from './PlayBoardCards'
 import type { PlayerSummary, RankedPlayer } from './playboard-types'
@@ -40,6 +41,13 @@ type BufferViewProps = SharedPhaseProps & {
   bufferRemaining: number
 }
 
+function shouldAutoscaleWord(word: string) {
+  const normalized = word.trim()
+  const wordCount = normalized.split(/\s+/).filter(Boolean).length
+
+  return normalized.length > 22 || wordCount > 2
+}
+
 export function TimerRunningView({ presenter, timerRemaining }: TimerRunningViewProps) {
   return (
     <main className={styles.board}>
@@ -68,6 +76,8 @@ export function VerdictView({
   isVerdictWordVisible,
   onToggleWordVisibility,
 }: VerdictViewProps) {
+  const useAutoscale = shouldAutoscaleWord(currentWord)
+
   return (
     <main className={styles.board}>
       <section className={styles.stage}>
@@ -90,13 +100,23 @@ export function VerdictView({
                     {isVerdictWordVisible ? 'Ukryj hasło' : 'Pokaż hasło'}
                   </button>
                   <div className={styles.verdictWordSlot}>
-                    <div
-                      className={styles.verdictWord}
-                      data-visible={isVerdictWordVisible}
-                      aria-hidden={!isVerdictWordVisible}
-                    >
-                      {currentWord}
-                    </div>
+                    {useAutoscale ? (
+                      <AutoscaledWord
+                        text={currentWord}
+                        className={`${styles.verdictWordShell} ${styles.verdictWordScaleRoot}`}
+                        textClassName={styles.verdictWord}
+                        isVisible={isVerdictWordVisible}
+                        minFontSize={14}
+                        maxFontSize={54}
+                      />
+                    ) : (
+                      <div
+                        className={`${styles.verdictWordShell} ${styles.verdictWordStaticWrap}`}
+                        data-visible={String(isVerdictWordVisible)}
+                      >
+                        <div className={`${styles.verdictWord} ${styles.verdictWordStatic}`}>{currentWord}</div>
+                      </div>
+                    )}
                   </div>
                 </>
               ) : null}

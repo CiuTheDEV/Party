@@ -1,6 +1,6 @@
 # Projects Overview
 
-*Last updated: 2026-03-30*
+*Last updated: 2026-03-31*
 
 ---
 
@@ -8,7 +8,7 @@
 
 | Project | Status | Phase | Last Updated |
 |---------|--------|-------|--------------|
-| Project Party | Active | Phase 4 in progress, charades runtime and setup polish expanded | 2026-03-30 |
+| Project Party | Active | Phase 4 in progress, charades runtime/setup polish and pool management expanded | 2026-03-31 |
 
 ---
 
@@ -24,7 +24,7 @@
 
 **Current implementation truth**:
 - `charades` owns config, menu, setup, results, and its runtime hooks/components,
-- charades now has presenter word change, weighted reroll logic, browser-side word history, and a custom avatar asset system,
+- charades now has presenter word change, weighted reroll logic, browser-side word history, prompt-pool management/reset UI, low-pool start warning, and a custom avatar asset system,
 - Phase 4 deploy/multiplayer is still the next product milestone.
 
 **Stack**: Next.js + Turborepo + Cloudflare Pages + Partykit + D1 + Clerk later + Stripe stub

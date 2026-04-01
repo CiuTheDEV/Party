@@ -25,7 +25,12 @@ export function buildPromptPool(
   selected: CharadesSelectedCategories,
 ): TurnPrompt[] {
   const prompts = categories.flatMap((category) => {
-    const difficulties: CharadesCategoryDifficulty[] = selected[category.id] ?? ['easy']
+    const difficulties = selected[category.id]
+
+    if (!difficulties || difficulties.length === 0) {
+      return []
+    }
+
     const nextPrompts: TurnPrompt[] = []
 
     if (difficulties.includes('easy')) {

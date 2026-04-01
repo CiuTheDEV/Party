@@ -120,3 +120,27 @@
 **Fix:** Move persistent history writes behind the host-authoritative success path. Compute candidate prompts first, but record rejected or used prompts only after business validation succeeds and the host commits the state transition.
 
 **How to prevent it:** For any feature that writes durable game state, preferences, or history, do not persist from low-level helpers before the authoritative layer accepts the action. Selection can be speculative; persistence cannot.
+
+---
+
+### 2026-03-31 - Stale worktree metadata can look like huge local diffs in the IDE
+
+**Symptom:** The IDE kept showing very large `+/-` diff counts even though `git status` on the main repo was nearly clean.
+
+**Root cause:** Old Git worktree entries were still registered as `prunable`, so the editor UI was surfacing branch/worktree comparison noise instead of actual working-tree changes.
+
+**Fix:** Run `git worktree prune`, then verify `git worktree list` only shows the active workspace. Also check `.gitignore` for accidentally unignored local editor files like `.vscode/mcp.json`.
+
+**How to prevent it:** When the IDE shows huge diff counts that don't match `git status`, check worktree metadata before assuming the repo is dirty.
+
+---
+
+### 2026-04-01 - Autoscale is a fallback, not the default display mode
+
+**Symptom:** Short words became visually tiny after adding a shared autoscale component meant to protect only very long phrases.
+
+**Root cause:** The UI treated every displayed word as an autoscale candidate, so the defensive layout logic degraded the normal case instead of activating only when a word actually threatened the card layout.
+
+**Fix:** Split rendering into two modes: a large static display for normal short words and autoscale only for genuinely long words.
+
+**How to prevent it:** For adaptive typography, design the common case first and treat autoscaling as an exception path. Never let a safety mechanism lower the baseline quality of ordinary content.

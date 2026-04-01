@@ -21,6 +21,7 @@
 ### Important (quality degraders)
 - [ ] Error boundaries for WebSocket/Partykit - unhandled errors crash the page
 - [ ] Page refresh/back resilience - gameplay still needs broader hardening
+- [ ] Manual smoke test for prompt-history flow - reroll, pool resets, start warning, and repeated-game behavior still need real browser verification
 
 ### Cleanup / code quality (next pass)
 - [ ] Review `useGameState` callback/effect dependencies around `send` after socket reconnects

@@ -57,6 +57,13 @@ export { PresenterScreen } from './runtime/presenter/PresenterScreen'
 export { useGameState } from './runtime/hooks/useGameState'
 export { usePresenter } from './runtime/hooks/usePresenter'
 export { useWordPool } from './runtime/hooks/useWordPool'
+export { buildPromptPool, buildCategoryPromptPool } from './runtime/hooks/word-pool-helpers'
+export {
+  getRemainingPromptCount,
+  getRemainingUniqueWordCount,
+  getTotalUniqueWordCount,
+} from './runtime/hooks/word-history-helpers'
+export { openCharadesPoolManager } from './setup/components/CategoryPicker'
 export { AvatarAsset } from './avatars/AvatarAsset'
 export {
   getCharadesAvatarById,

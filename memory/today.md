@@ -11,6 +11,13 @@
 - Next: build the first Charades module.
 - Experience recorded: yes
 
+### S18 (11:51~) [Project Party] Charades warning modal and long-word UI hardening
+
+- Reworked the low-pool warning modal into a clearer hero-plus-stats layout and cleaned the menu page file back to proper UTF-8 text.
+- Hardened long-word handling by splitting normal short-word display from autoscale and by forwarding visibility state through the shared autoscale wrapper, instead of relying on autoscale for every word.
+- Next: run a real browser smoke test for the host `verdict` panel with a very long developer prompt, because the verdict card still appears wrong in user screenshots even after the code-side fixes.
+- Experience recorded: yes
+
 ### S2 (~daytime) [Project Party] Phase 3 - Charades MVP
 
 - Implemented the first playable Charades module with content, PartyKit server, gameplay hooks, and all core routes.
@@ -117,4 +124,12 @@
 - Added host-browser word history for used and rejected prompts, plus history-aware `remaining/all` counters in setup categories and a first session lifecycle with refresh on fresh setup/disconnect and TTL expiry.
 - Key lesson: persistent preference/history writes must happen only after host-side business validation passes, otherwise rejected actions silently poison future state.
 - Next: run a manual browser smoke test for reroll limits, reveal reconnects, repeated games in one browser session, and category counter shrinkage.
+- Experience recorded: yes
+
+### S17 (13:23~) [Project Party] Charades pool management, start warning, and repo cleanup
+
+- Added `Zarządzaj pulą` in Charades categories with reset-all and per-category reset actions, plus immediate refresh of real `pozostałe / wszystkie` pool state in the management modal.
+- Simplified the main category accordion by removing remaining-count pills from `Łatwe / Trudne`, added confirmation before resets, and added a start-time warning when the active pool is smaller than `gracze × rundy`.
+- Cleaned Git noise by pruning stale worktree metadata, ignoring local `.vscode/mcp.json`, and merging the active charades branch safely into `main`.
+- Next: run a manual browser smoke test for pool management, start warning flow, and weighted reroll/session history behavior in real UI.
 - Experience recorded: yes
