@@ -12,6 +12,7 @@ export type CharadesGameSettings = {
   rounds: number
   timerSeconds: number
   wordChange: CharadesWordChangeSettings
+  hints: CharadesHintsSettings
 }
 
 export type CharadesWordChangeScope = 'word-only' | 'word-and-category'
@@ -20,6 +21,12 @@ export type CharadesWordChangeSettings = {
   enabled: boolean
   changesPerPlayer: number
   rerollScope: CharadesWordChangeScope
+}
+
+export type CharadesHintsSettings = {
+  enabled: boolean
+  showCategory: boolean
+  showWordCount: boolean
 }
 
 export type CharadesCategoryDifficulty = 'easy' | 'hard'
@@ -42,6 +49,11 @@ export function createDefaultCharadesSettings(): CharadesGameSettings {
       enabled: false,
       changesPerPlayer: 1,
       rerollScope: 'word-only',
+    },
+    hints: {
+      enabled: false,
+      showCategory: true,
+      showWordCount: true,
     },
   }
 }

@@ -26,6 +26,10 @@ export function SettingsPanel({ settings, onOpen }: Props) {
           <span className={styles.settingsTileLabel}>Zmiana hasła</span>
           <span className={styles.settingsTileValue}>{settings.wordChange.enabled ? 'Włączona' : 'Wyłączona'}</span>
         </div>
+        <div className={styles.settingsTile}>
+          <span className={styles.settingsTileLabel}>Podpowiedzi</span>
+          <span className={styles.settingsTileValue}>{settings.hints.enabled ? 'Włączone' : 'Wyłączone'}</span>
+        </div>
       </div>
     </div>
   )

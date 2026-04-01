@@ -102,7 +102,7 @@ The approved direction is:
 - every game uses the same setup skeleton/chrome,
 - each game injects its own setup sections,
 - setup state is one shared object per game,
-- gameplay after clicking `Start` stays fully custom per game.
+- gameplay after clicking `Start` stays fully custom.
 
 This means:
 - UI updates to setup shell propagate to all games,
@@ -137,16 +137,16 @@ This means:
 
 <!-- handoff:start -->
 ## Session Handoff
+- Last: 2026-04-01 by Codex (GPT-5.4)
+- Task: Charades settings modal polish, custom slider alignment, and new hints settings tab.
+- Did: Replaced the fragile native settings sliders with a custom discrete slider so thumb and labels share the same geometry, then polished the settings modal layout: refined the right-column hierarchy, removed duplicated descriptions, tightened the `Zmiana hasła` tab to avoid unnecessary scrolling, and changed the left tab list so details expand only on the active item. Added a persisted `Podpowiedzi` settings tab with `enabled`, `showCategory`, and `showWordCount`, and surfaced the hints state in the compact settings panel. Build verification passes for `@party/charades` and `@party/hub`.
+- Next: Wire the new hints settings into actual gameplay/presenter runtime and run a real browser smoke test across the final host/setup flow to confirm the modal proportions and interactions in live DOM.
+- Blocker: None.
+
+## Previous Handoff
 - Last: 2026-04-01 11:51 by Codex (GPT-5.4)
 - Task: Charades warning modal polish and long-word handling across reveal and verdict screens.
 - Did: Reworked the low-pool warning modal into a more spacious hero-plus-stats layout, cleaned several touched files back to UTF-8, and split word rendering into normal static display for short words plus autoscale for long phrases. Also fixed the shared autoscale wrapper so visibility state reaches the outer shell. Build verification passes for `@party/charades` and `@party/hub`.
 - Next: Run a real browser smoke test for the host `verdict` panel with a very long developer prompt. User screenshots still show the right-hand verdict card as visually broken, so the next session should inspect the live DOM/CSS/state instead of making more blind code-only adjustments.
-- Blocker: None.
-
-## Previous Handoff
-- Last: 2026-03-31 by Codex (GPT-5.4)
-- Task: Charades pool management, low-pool warning, safe merge to `main`, and repo/worktree cleanup.
-- Did: Added `Zarządzaj pulą` with full-pool and per-category resets, confirmation before reset, real pool-state visibility in the management modal, and a pre-start warning when active pool size is lower than `players × rounds`. Safely merged the active Charades branch into `main`, pushed `main`, pruned stale worktree metadata, and cleaned local Git noise from `.vscode/mcp.json`. Build verification passes for `@party/charades` and `@party/hub`.
-- Next: Run a manual browser smoke test for weighted reroll, repeated games in one browser session, pool reset flows, and the `Wróć / Zarządzaj pulą / Start` warning path before any more Charades gameplay features.
 - Blocker: None.
 <!-- handoff:end -->

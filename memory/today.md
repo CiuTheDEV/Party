@@ -18,6 +18,13 @@
 - Next: run a real browser smoke test for the host `verdict` panel with a very long developer prompt, because the verdict card still appears wrong in user screenshots even after the code-side fixes.
 - Experience recorded: yes
 
+### S19 (2026-04-01 ~) [Project Party] Charades settings modal polish + hints tab
+
+- Rebuilt the settings modal slider UI into a custom discrete control so the thumb and labels finally share the same geometry, then polished the right column hierarchy and simplified the left tab list to show details only on the active item.
+- Added a new `Podpowiedzi` settings tab with persisted setup state for `enabled`, `showCategory`, and `showWordCount`, plus surfaced the hints state in the compact settings panel.
+- Next: wire the new hints settings into actual Charades runtime/presenter surfaces and do a real browser pass on the final settings modal proportions and interaction polish.
+- Experience recorded: yes
+
 ### S2 (~daytime) [Project Party] Phase 3 - Charades MVP
 
 - Implemented the first playable Charades module with content, PartyKit server, gameplay hooks, and all core routes.

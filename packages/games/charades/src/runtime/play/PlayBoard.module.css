@@ -68,6 +68,10 @@
   margin-inline: auto;
 }
 
+.verdictLayout {
+  align-items: center;
+}
+
 .preparePlayerPane {
   display: flex;
   justify-content: center;
@@ -428,12 +432,14 @@
 
 .verdictContent {
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
   width: min(100%, 620px);
   gap: 16px;
   text-align: center;
-  align-content: start;
+  align-content: center;
   justify-items: center;
-  min-height: 500px;
+  height: clamp(520px, 66dvh, 640px);
+  min-height: 0;
   padding-block: 12px;
   position: relative;
   z-index: 1;
@@ -488,9 +494,12 @@
 .verdictHero {
   width: 100%;
   display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
   justify-items: center;
+  align-content: start;
   gap: 18px;
-  padding: 28px 26px 30px;
+  height: 100%;
+  padding: 28px 26px 24px;
   border-radius: 30px;
   background:
     radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--game-color-primary) 14%, transparent), transparent 58%),
@@ -500,7 +509,7 @@
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.04),
     0 24px 42px rgba(0, 0, 0, 0.16);
-  min-height: 300px;
+  min-height: 0;
 }
 
 .verdictRevealButton {
@@ -531,24 +540,24 @@
   width: 100%;
   min-height: 120px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   overflow: hidden;
 }
 
 .verdictWordShell {
-  width: 100%;
-  max-width: min(100%, 22ch);
-  padding: 16px 20px;
-  border-radius: 20px;
+  justify-self: center;
+  padding: 18px 24px;
+  border-radius: 26px;
   background:
-    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--game-color-primary) 12%, transparent), transparent 60%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.025)),
-    rgba(8, 10, 16, 0.72);
+    radial-gradient(circle at 50% -12%, color-mix(in srgb, var(--game-color-primary) 22%, transparent), transparent 62%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02)),
+    rgba(10, 11, 18, 0.84);
   border: 1px solid color-mix(in srgb, var(--game-color-primary) 24%, rgba(255, 255, 255, 0.1));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 16px 28px rgba(0, 0, 0, 0.18);
+    0 18px 36px rgba(0, 0, 0, 0.2),
+    0 0 0 1px color-mix(in srgb, var(--game-color-primary) 8%, transparent);
   opacity: 0;
   transform: translateY(6px);
   pointer-events: none;
@@ -556,32 +565,36 @@
 }
 
 .verdictWord {
+  width: 100%;
+  max-width: 100%;
+  text-align: center;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
   color: var(--color-text);
   font-weight: 800;
   line-height: 1.04;
 }
 
 .verdictWordScaleRoot {
-  width: 100%;
-  max-width: min(100%, 22ch);
   min-height: 112px;
+  height: auto;
 }
 
-.verdictWordStaticWrap {
-  width: 100%;
-  max-width: min(100%, 22ch);
-  min-height: 112px;
-  display: grid;
-  place-items: center;
-}
-
-.verdictWordStatic {
+.verdictWordShellCompact {
   width: auto;
-  max-width: min(100%, 16ch);
-  font-size: clamp(2.4rem, 5.2vw, 4.8rem);
-  line-height: 0.94;
-  text-align: center;
-  text-wrap: balance;
+  min-width: clamp(220px, 16vw, 280px);
+  max-width: min(100%, 28rem);
+}
+
+.verdictWordShellExpanded {
+  width: min(100%, 34rem);
+}
+
+.verdictWordAutoscaled {
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  font-weight: 900;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.18);
 }
 
 .verdictWordShell[data-visible='true'] {
@@ -600,11 +613,11 @@
 }
 
 .verdictTitle {
-  max-width: 9ch;
+  max-width: 16ch;
   margin: 0;
-  font-size: clamp(1.9rem, 2.35vw, 3rem);
+  font-size: clamp(1.6rem, 1.8vw, 2.5rem);
   font-weight: 800;
-  line-height: 0.92;
+  line-height: 1;
   letter-spacing: -0.03em;
   color: var(--color-text);
   text-wrap: balance;
@@ -781,6 +794,7 @@
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.04),
     0 16px 24px rgba(0, 0, 0, 0.14);
+  align-self: end;
 }
 
 .verdictNoteLabel {

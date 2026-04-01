@@ -8,6 +8,7 @@ type AutoscaledWordProps = {
   className?: string
   textClassName?: string
   isVisible?: boolean
+  wrapMode?: 'balance' | 'nowrap'
   minFontSize?: number
   maxFontSize: number
   step?: number
@@ -18,6 +19,7 @@ export function AutoscaledWord({
   className,
   textClassName,
   isVisible,
+  wrapMode = 'balance',
   minFontSize = 14,
   maxFontSize,
   step = 2,
@@ -72,12 +74,13 @@ export function AutoscaledWord({
     >
       <div
         ref={textRef}
-        className={`${styles.text}${textClassName ? ` ${textClassName}` : ''}`}
-        data-visible={typeof isVisible === 'boolean' ? String(isVisible) : undefined}
-        style={{ fontSize }}
-      >
-        {text}
-      </div>
+      className={`${styles.text}${textClassName ? ` ${textClassName}` : ''}`}
+      data-visible={typeof isVisible === 'boolean' ? String(isVisible) : undefined}
+      data-wrap-mode={wrapMode}
+      style={{ fontSize }}
+    >
+      {text}
+    </div>
     </div>
   )
 }

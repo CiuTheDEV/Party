@@ -33,8 +33,8 @@
       "id": "T002",
       "title": "Charades weighted reroll smoke test and hardening",
       "status": "active",
-      "context": "Weighted reroll, browser word-history persistence, pool management (`Zarządzaj pulą unikalnych haseł`), and low-pool start warning are implemented and merged to `main`. Warning modal layout and long-word handling were further hardened, but the host `verdict` panel still shows a broken right-hand card in user screenshots for long developer prompts despite code-side fixes and passing builds.",
-      "next_action": "Run a real browser smoke test for the host flow with a very long developer word, inspect whether `VerdictView` content is missing from DOM or hidden by CSS/state, then fix the verdict card before more gameplay polish.",
+      "context": "Weighted reroll, browser word-history persistence, pool management, low-pool start warning, and the latest setup modal UI pass are implemented. Verdict and modal layout issues were iteratively polished to an acceptable state, and setup now also includes persisted `Podpowiedzi` controls (`enabled`, `showCategory`, `showWordCount`).",
+      "next_action": "Run a real browser smoke test across the host/setup flow, then wire the new hints settings into runtime/presenter surfaces so they affect actual gameplay instead of only setup state.",
       "blocker": "",
       "created": "2026-03-30",
       "updated": "2026-04-01"

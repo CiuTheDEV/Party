@@ -88,6 +88,11 @@ export function normalizeCharadesSettings(
       changesPerPlayer: settings?.wordChange?.changesPerPlayer ?? defaults.wordChange.changesPerPlayer,
       rerollScope: settings?.wordChange?.rerollScope ?? defaults.wordChange.rerollScope,
     },
+    hints: {
+      enabled: settings?.hints?.enabled ?? defaults.hints.enabled,
+      showCategory: settings?.hints?.showCategory ?? defaults.hints.showCategory,
+      showWordCount: settings?.hints?.showWordCount ?? defaults.hints.showWordCount,
+    },
   }
 }
 

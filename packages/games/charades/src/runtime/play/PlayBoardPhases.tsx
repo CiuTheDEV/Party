@@ -48,6 +48,13 @@ function shouldAutoscaleWord(word: string) {
   return normalized.length > 22 || wordCount > 2
 }
 
+function shouldWrapVerdictWord(word: string) {
+  const normalized = word.trim()
+  const wordCount = normalized.split(/\s+/).filter(Boolean).length
+
+  return wordCount > 1
+}
+
 export function TimerRunningView({ presenter, timerRemaining }: TimerRunningViewProps) {
   return (
     <main className={styles.board}>
@@ -76,12 +83,13 @@ export function VerdictView({
   isVerdictWordVisible,
   onToggleWordVisibility,
 }: VerdictViewProps) {
-  const useAutoscale = shouldAutoscaleWord(currentWord)
+  const useExpandedWordShell = shouldAutoscaleWord(currentWord)
+  const wrapVerdictWord = shouldWrapVerdictWord(currentWord)
 
   return (
     <main className={styles.board}>
       <section className={styles.stage}>
-        <div className={styles.prepareLayout}>
+        <div className={`${styles.prepareLayout} ${styles.verdictLayout}`}>
           <div className={styles.preparePlayerPane}>
             <PresenterCard presenter={presenter} subtitle="Prezenter" featured />
           </div>
@@ -100,23 +108,17 @@ export function VerdictView({
                     {isVerdictWordVisible ? 'Ukryj hasło' : 'Pokaż hasło'}
                   </button>
                   <div className={styles.verdictWordSlot}>
-                    {useAutoscale ? (
-                      <AutoscaledWord
-                        text={currentWord}
-                        className={`${styles.verdictWordShell} ${styles.verdictWordScaleRoot}`}
-                        textClassName={styles.verdictWord}
-                        isVisible={isVerdictWordVisible}
-                        minFontSize={14}
-                        maxFontSize={54}
-                      />
-                    ) : (
-                      <div
-                        className={`${styles.verdictWordShell} ${styles.verdictWordStaticWrap}`}
-                        data-visible={String(isVerdictWordVisible)}
-                      >
-                        <div className={`${styles.verdictWord} ${styles.verdictWordStatic}`}>{currentWord}</div>
-                      </div>
-                    )}
+                    <AutoscaledWord
+                      text={currentWord}
+                      className={`${styles.verdictWordShell} ${styles.verdictWordScaleRoot} ${
+                        useExpandedWordShell ? styles.verdictWordShellExpanded : styles.verdictWordShellCompact
+                      }`}
+                      textClassName={`${styles.verdictWord} ${styles.verdictWordAutoscaled}`}
+                      isVisible={isVerdictWordVisible}
+                      wrapMode={wrapVerdictWord ? 'balance' : 'nowrap'}
+                      minFontSize={18}
+                      maxFontSize={wrapVerdictWord ? 58 : 82}
+                    />
                   </div>
                 </>
               ) : null}

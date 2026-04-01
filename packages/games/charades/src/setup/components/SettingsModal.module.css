@@ -93,7 +93,7 @@
 
 .sidebarCopy {
   display: grid;
-  gap: 4px;
+  gap: 0;
   min-width: 0;
 }
 
@@ -106,34 +106,128 @@
 
 .sidebarDescription {
   display: block;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
   font-size: 12px;
   line-height: 1.35;
   color: rgba(255, 255, 255, 0.55);
+  transform: translateY(-2px);
+  transition:
+    max-height 0.18s ease,
+    opacity 0.14s ease,
+    transform 0.18s ease,
+    margin-top 0.18s ease;
 }
 
 .sidebarActive .sidebarDescription {
+  max-height: 2.2em;
+  opacity: 1;
+  margin-top: 4px;
   color: rgba(255, 255, 255, 0.74);
+  transform: translateY(0);
 }
 
 .content {
-  padding: 26px 30px;
+  padding: 24px 28px 28px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 20px;
   min-height: 0;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.012), transparent 22%),
+    radial-gradient(circle at top center, rgba(124, 58, 237, 0.08), transparent 38%);
+}
+
+.contentCompact {
+  padding-block: 20px 24px;
+  gap: 14px;
+  overflow-y: hidden;
+}
+
+.contentCompact .contentSection {
+  gap: 14px;
+}
+
+.contentCompact .sectionHeader {
+  padding-top: 2px;
+}
+
+.contentCompact .optionStack {
+  gap: 12px;
+}
+
+.contentCompact .optionCard {
+  padding: 18px 20px;
+  gap: 16px;
+}
+
+.contentCompact .optionDescription {
+  line-height: 1.42;
+}
+
+.contentSection {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+
+.sectionHeader {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  padding: 4px 2px 2px;
+}
+
+.sectionHeader::after {
+  content: '';
+  width: 84px;
+  height: 1px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--game-color-primary) 72%, white), transparent);
+}
+
+.sectionCopy {
+  display: grid;
+  gap: 4px;
+  max-width: 58ch;
+}
+
+.sectionEyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--game-color-primary) 72%, white);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  color: var(--color-text);
+}
+
+.optionStack {
+  display: grid;
+  gap: 16px;
 }
 
 .optionCard {
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.03));
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 18px;
-  padding: 20px 22px;
+    radial-gradient(circle at top right, rgba(124, 58, 237, 0.1), transparent 42%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.048), rgba(255, 255, 255, 0.026));
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 20px;
+  padding: 21px 22px 20px;
   display: flex;
   flex-direction: column;
   gap: 18px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.035),
+    0 18px 40px rgba(0, 0, 0, 0.14);
 }
 
 .optionHeader {
@@ -152,9 +246,9 @@
 .optionLabel {
   font-size: 12px;
   font-weight: 800;
-  color: rgba(255, 255, 255, 0.62);
+  color: rgba(255, 255, 255, 0.58);
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
 }
 
 .optionDescription {
@@ -170,27 +264,154 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 56px;
-  padding: 10px 14px;
-  border-radius: 14px;
-  background: rgba(124, 58, 237, 0.14);
-  border: 1px solid rgba(124, 58, 237, 0.28);
-  font-size: 24px;
+  min-width: 62px;
+  min-height: 56px;
+  padding: 10px 16px;
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(124, 58, 237, 0.18), rgba(124, 58, 237, 0.08));
+  border: 1px solid rgba(124, 58, 237, 0.34);
+  font-size: 22px;
   font-weight: 800;
   color: var(--color-text);
   letter-spacing: -0.03em;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 10px 22px rgba(124, 58, 237, 0.14);
 }
 
-.slider {
+.discreteSlider {
+  --slider-thumb-size: 24px;
+  --slider-track-height: 8px;
+  --slider-side-inset: calc(var(--slider-thumb-size) / 2);
   width: 100%;
-  accent-color: var(--game-color-primary);
-  height: 4px;
-  cursor: pointer;
 }
 
-.slider:disabled {
-  cursor: not-allowed;
+.discreteSliderDisabled {
   opacity: 0.65;
+}
+
+.discreteSliderDisabled .sliderTrackWrap {
+  cursor: not-allowed;
+}
+
+.sliderTrackWrap {
+  width: 100%;
+  padding-block: 8px;
+  cursor: pointer;
+  outline: none;
+}
+
+.sliderTrackWrap:focus-visible .sliderThumb {
+  box-shadow:
+    0 8px 20px color-mix(in srgb, var(--game-color-primary) 30%, rgba(0, 0, 0, 0.18)),
+    0 0 0 4px color-mix(in srgb, var(--game-color-primary) 12%, transparent),
+    0 0 0 8px rgba(255, 255, 255, 0.08);
+}
+
+.sliderTrack {
+  position: relative;
+  width: calc(100% - (var(--slider-side-inset) * 2));
+  margin-inline: var(--slider-side-inset);
+  height: var(--slider-track-height);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.sliderTrackFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--game-color-primary) 88%, white);
+}
+
+.sliderThumb {
+  position: absolute;
+  top: 50%;
+  width: var(--slider-thumb-size);
+  height: var(--slider-thumb-size);
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  background:
+    radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.72) 42%, color-mix(in srgb, var(--game-color-primary) 82%, white) 100%);
+  box-shadow:
+    0 8px 20px color-mix(in srgb, var(--game-color-primary) 30%, rgba(0, 0, 0, 0.18)),
+    0 0 0 4px color-mix(in srgb, var(--game-color-primary) 12%, transparent);
+  transform: translate(-50%, -50%);
+}
+
+.sliderScale {
+  position: relative;
+  height: 42px;
+  margin-top: 2px;
+  width: calc(100% - (var(--slider-side-inset) * 2));
+  margin-inline: var(--slider-side-inset);
+}
+
+.sliderScaleOption {
+  position: absolute;
+  top: 0;
+  left: var(--slider-position);
+  transform: translateX(-50%);
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.48);
+  cursor: pointer;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.sliderScaleOption[data-edge='start'] {
+  transform: translateX(-50%);
+}
+
+.sliderScaleOption[data-edge='end'] {
+  transform: translateX(-50%);
+}
+
+.sliderScaleOption:hover {
+  color: rgba(255, 255, 255, 0.82);
+  margin-top: -1px;
+}
+
+.sliderScaleOption:disabled {
+  cursor: not-allowed;
+  margin-top: 0;
+  color: rgba(255, 255, 255, 0.24);
+}
+
+.sliderScaleOptionActive {
+  color: var(--color-text);
+}
+
+.sliderScaleTick {
+  width: 2px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.sliderScaleOptionActive .sliderScaleTick {
+  background: color-mix(in srgb, var(--game-color-primary) 72%, white);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--game-color-primary) 24%, transparent);
+}
+
+.sliderScaleValue {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.01em;
+}
+
+.quickButtons,
+.scopeButtons {
+  width: 100%;
 }
 
 .quickButtons,
@@ -238,6 +459,7 @@
 .optionCardDisabled {
   background: rgba(255, 255, 255, 0.02);
   border-color: rgba(255, 255, 255, 0.05);
+  box-shadow: none;
 }
 
 .optionCardDisabled .optionLabel,
@@ -431,6 +653,20 @@
     padding: 18px 16px;
     flex: 1;
     overflow-y: auto;
+  }
+
+  .contentCompact {
+    padding: 18px 16px;
+    gap: 16px;
+    overflow-y: auto;
+  }
+
+  .contentSection {
+    gap: 16px;
+  }
+
+  .sectionTitle {
+    font-size: 23px;
   }
 
   .optionCard {

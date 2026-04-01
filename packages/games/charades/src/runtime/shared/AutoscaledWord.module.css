@@ -14,8 +14,17 @@
   width: auto;
   max-width: 100%;
   margin: 0;
-  white-space: normal;
   text-align: center;
+}
+
+.text[data-wrap-mode='balance'] {
+  white-space: normal;
   text-wrap: balance;
   overflow-wrap: anywhere;
+}
+
+.text[data-wrap-mode='nowrap'] {
+  white-space: nowrap;
+  text-wrap: nowrap;
+  overflow-wrap: normal;
 }
