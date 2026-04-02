@@ -1,9 +1,7 @@
 import type * as Party from 'partykit/server'
-// Typy skopiowane lokalnie żeby uniknąć cross-workspace relative import
-// (Partykit CLI może nie rozwiązać ścieżek między workspace'ami)
 import type { RoomState, CharadesEvent } from './types'
 
-const initialState: RoomState = {
+export const initialState: RoomState = {
   phase: 'waiting',
   presenterPhase: 'waiting',
   currentTurnId: '',
@@ -24,8 +22,19 @@ const initialState: RoomState = {
   turnEndReason: 'none',
 }
 
+type AuthorityState = {
+  state: RoomState
+  hostConnectionId: string | null
+  presenterConnectionId: string | null
+}
+
+type IncomingEventResult = AuthorityState & {
+  accepted: boolean
+}
+
 export default class CharadesServer implements Party.Server {
   state: RoomState = { ...initialState }
+  hostConnectionId: string | null = null
   presenterConnectionId: string | null = null
 
   constructor(readonly room: Party.Room) {}
@@ -36,27 +45,109 @@ export default class CharadesServer implements Party.Server {
 
   onMessage(message: string, sender: Party.Connection) {
     const event = JSON.parse(message) as CharadesEvent
+    const next = reduceIncomingEvent(
+      {
+        state: this.state,
+        hostConnectionId: this.hostConnectionId,
+        presenterConnectionId: this.presenterConnectionId,
+      },
+      sender.id,
+      event,
+    )
 
-    if (event.type === 'DEVICE_CONNECTED') {
-      this.presenterConnectionId = sender.id
+    this.state = next.state
+    this.hostConnectionId = next.hostConnectionId
+    this.presenterConnectionId = next.presenterConnectionId
+
+    if (!next.accepted) {
+      return
     }
 
-    this.state = applyEvent(this.state, event)
     this.room.broadcast(message, [sender.id])
   }
 
   onClose(conn: Party.Connection) {
-    if (conn.id !== this.presenterConnectionId) {
-      return
+    const presenterDisconnected = conn.id === this.presenterConnectionId
+    const next = handleConnectionClosed(
+      {
+        state: this.state,
+        hostConnectionId: this.hostConnectionId,
+        presenterConnectionId: this.presenterConnectionId,
+      },
+      conn.id,
+    )
+
+    this.state = next.state
+    this.hostConnectionId = next.hostConnectionId
+    this.presenterConnectionId = next.presenterConnectionId
+
+    if (presenterDisconnected) {
+      this.room.broadcast(JSON.stringify({ type: 'PRESENTER_DISCONNECTED' }))
+    }
+  }
+}
+
+export function reduceIncomingEvent(current: AuthorityState, senderId: string, event: CharadesEvent): IncomingEventResult {
+  if (event.type === 'DEVICE_CONNECTED') {
+    return {
+      accepted: true,
+      state: applyEvent(current.state, event),
+      hostConnectionId: current.hostConnectionId,
+      presenterConnectionId: senderId,
+    }
+  }
+
+  if (isPresenterEvent(event)) {
+    if (senderId !== current.presenterConnectionId) {
+      return {
+        ...current,
+        accepted: false,
+      }
     }
 
-    this.presenterConnectionId = null
-    this.state = {
-      ...this.state,
-      presenterConnected: false,
+    return {
+      accepted: true,
+      state: applyEvent(current.state, event),
+      hostConnectionId: current.hostConnectionId,
+      presenterConnectionId: current.presenterConnectionId,
     }
-    this.room.broadcast(JSON.stringify({ type: 'PRESENTER_DISCONNECTED' }))
   }
+
+  const resolvedHostConnectionId = current.hostConnectionId ?? senderId
+
+  if (senderId !== resolvedHostConnectionId) {
+    return {
+      ...current,
+      accepted: false,
+    }
+  }
+
+  return {
+    accepted: true,
+    state: applyEvent(current.state, event),
+    hostConnectionId: resolvedHostConnectionId,
+    presenterConnectionId: current.presenterConnectionId,
+  }
+}
+
+export function handleConnectionClosed(current: AuthorityState, connectionId: string): AuthorityState {
+  const isPresenter = connectionId === current.presenterConnectionId
+  const isHost = connectionId === current.hostConnectionId
+
+  return {
+    state: isPresenter
+      ? {
+          ...current.state,
+          presenterConnected: false,
+        }
+      : current.state,
+    hostConnectionId: isHost ? null : current.hostConnectionId,
+    presenterConnectionId: isPresenter ? null : current.presenterConnectionId,
+  }
+}
+
+function isPresenterEvent(event: CharadesEvent) {
+  return event.type === 'WORD_REVEALED' || event.type === 'CHANGE_WORD'
 }
 
 export function applyEvent(state: RoomState, event: CharadesEvent): RoomState {

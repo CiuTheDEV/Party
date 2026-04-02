@@ -12,7 +12,8 @@
     }
   },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test:runtime-host": "tsc --target es2022 --module commonjs --moduleResolution node --types node --skipLibCheck --outDir ../../../output/charades-runtime-host ./src/runtime/shared/charades-runtime.ts && node ./src/runtime/shared/charades-runtime.check.cjs ../../../output/charades-runtime-host/charades-runtime.js"
   },
   "dependencies": {
     "@party/game-sdk": "*",

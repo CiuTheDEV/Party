@@ -40,8 +40,8 @@ export function ReconnectPresenterModal({ roomId, onBackToMenu }: Props) {
             <div className={styles.info}>
               <span className={styles.eyebrow}>Gra wstrzymana</span>
               <p className={styles.description}>
-                Podłącz ponownie telefon prezentera. Po odzyskaniu połączenia rozgrywka wznowi się
-                od tego samego momentu.
+                Podłącz ponownie telefon prezentera. Po odzyskaniu połączenia rozgrywka wznowi się od tego samego
+                momentu.
               </p>
               <div className={styles.connectedRow}>
                 <Smartphone size={18} />
@@ -49,8 +49,8 @@ export function ReconnectPresenterModal({ roomId, onBackToMenu }: Props) {
               </div>
               {showLocalhostWarning ? (
                 <p className={styles.warning}>
-                  Ten QR wskazuje na localhost. Na prawdziwym telefonie użyj adresu sieciowego albo
-                  ustaw `NEXT_PUBLIC_PUBLIC_ORIGIN` i `NEXT_PUBLIC_PARTYKIT_HOST`.
+                  Ten QR wskazuje na localhost. Na prawdziwym telefonie użyj adresu sieciowego albo ustaw
+                  `NEXT_PUBLIC_PUBLIC_ORIGIN` i `NEXT_PUBLIC_PARTYKIT_HOST`.
                 </p>
               ) : null}
             </div>

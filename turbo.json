@@ -5,6 +5,9 @@
       "dependsOn": ["^build"],
       "outputs": [".next/**", "dist/**"]
     },
+    "@party/ui#build": {
+      "outputs": []
+    },
     "dev": {
       "cache": false,
       "persistent": true

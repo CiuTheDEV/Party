@@ -52,7 +52,7 @@ Documentation must stay readable for all agents so session handoff remains seaml
 
 ### MCP Defaults
 
-- Use `playwright` MCP for browser flows, UI verification, and stateful interaction in the real app
+- Do not use `playwright` MCP in this project; prefer build/lint verification and manual in-browser checks when needed
 - Use `context7` MCP for current framework and library docs instead of stale model memory
 - Use `github` MCP for issues, PRs, and repo context when `GITHUB_MCP_PAT` or IDE auth is configured
 
@@ -307,4 +307,3 @@ Handoff block format:
 ---
 
 *Last updated: 2026-03-26*
-

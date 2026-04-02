@@ -137,11 +137,11 @@ This means:
 
 <!-- handoff:start -->
 ## Session Handoff
-- Last: 2026-04-02 16:35 by Codex (GPT-5.4)
-- Task: Session wrap after Charades MVP hardening and final Hub topbar polish.
-- Did: Finished the runtime reconnect/error hardening, got a full manual Charades end-to-end smoke test from the user with no reported regressions, and fixed the missing login-button outline in the Hub by patching the actual Hub layout topbar styles. Added repo-level encoding guardrails and left the repo building cleanly.
-- Next: Start Phase 4 from deploy/Partykit production hardening. Secondary backlog remains the Charades cleanup pass around `useGameState` dependencies, dead runtime leftovers, and oversized files.
-- Blocker: None.
+- Last: 2026-04-02 23:10 by Codex (GPT-5.4)
+- Task: Phase 4 readiness pass across shared chrome, PartyKit authority/config, encoding, and dependency risk.
+- Did: Migrated Hub-derived chrome into shared `@party/ui` so Hub and game menus now use the same topbar/rail shell, then polished the shared login button. Closed the biggest multiplayer blocker by adding server-side PartyKit authority rules and a regression harness, then added a production-safe PartyKit host resolver with a dedicated test so non-local deploys fail fast unless `NEXT_PUBLIC_PARTYKIT_HOST` is configured. Cleaned visible UTF-8/mojibake issues in Hub and Charades presenter/pairing surfaces, removed unused Clerk from `@party/hub`, refreshed the lockfile, and cleaned Turbo build warnings except for the remaining upstream PartyKit advisory chain. Fresh checks passing: `npm run test:authority --workspace @party/partykit`, `npm run test:runtime-host --workspace @party/charades`, `npm run verify:encoding`, and `npm run build`.
+- Next: Start actual Phase 4 deploy work. First recommended slice is Cloudflare/Partykit deployment wiring and env setup, with one explicit known risk carried forward: upstream `partykit` still brings `undici`/`miniflare`/`esbuild` advisories and currently has no simple npm upgrade path beyond `0.0.115`.
+- Blocker: No code-level blocker in repo. Remaining blocker is external/upstream dependency risk in the current PartyKit toolchain.
 ## Previous Handoff
 - Last: 2026-04-01 11:51 by Codex (GPT-5.4)
 - Task: Charades warning modal polish and long-word handling across reveal and verdict screens.

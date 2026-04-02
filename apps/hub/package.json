@@ -9,7 +9,6 @@
     "start": "next start"
   },
   "dependencies": {
-    "@clerk/nextjs": "^7",
     "@party/charades": "*",
     "@party/codenames": "*",
     "@party/game-sdk": "*",

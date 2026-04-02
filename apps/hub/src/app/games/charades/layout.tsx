@@ -2,8 +2,8 @@
 
 import { charadesModule } from '@party/charades'
 import { GameShell } from '@party/ui'
-import type { NavLink } from '@party/ui'
-import { BarChart2, Play, Settings } from 'lucide-react'
+import type { NavLink, SidebarFooterLink } from '@party/ui'
+import { ArrowLeft, BarChart2, Home, Play, Settings } from 'lucide-react'
 import { useSelectedLayoutSegment } from 'next/navigation'
 import './theme.css'
 
@@ -26,6 +26,14 @@ export default function CharadesLayout({ children }: { children: React.ReactNode
     ...link,
     icon: mapNavIcon(link.icon),
   }))
+  const footerLink: SidebarFooterLink = {
+    href: '/',
+    label: 'Wróć do lobby',
+    mobileLabel: 'Lobby',
+    icon: <ArrowLeft size={18} />,
+    mobileIcon: <Home size={18} />,
+    ariaLabel: 'Wróć do lobby',
+  }
 
   if (segment === 'play' || segment === 'present') {
     return <>{children}</>
@@ -33,9 +41,10 @@ export default function CharadesLayout({ children }: { children: React.ReactNode
 
   return (
     <GameShell
-      gameName={charadesModule.shell.gameName}
-      gameEmoji={charadesModule.shell.gameEmoji}
+      brandLabel={`PROJECT PARTY / ${charadesModule.shell.gameName.toUpperCase()}`}
+      footerLink={footerLink}
       links={links}
+      navAriaLabel={`Nawigacja gry ${charadesModule.shell.gameName}`}
     >
       {children}
     </GameShell>

@@ -161,3 +161,14 @@
 - Added an encoding pre-commit guardrail earlier in the session, then confirmed the repo still builds cleanly after the final UI touch-up.
 - Next: start Phase 4 work from deploy/Partykit production hardening, with Charades treated as smoke-tested and MVP-hardened.
 - Experience recorded: yes
+
+### S23 (2026-04-02 ~) [Project Party] Phase 4 readiness hardening
+
+- Promoted the Hub chrome into shared `@party/ui`, so the Hub homepage and Charades main menu now use the same topbar and rail/tab navigation shell, then polished the shared `Zaloguj` button to better fit the visual weight of the page.
+- Added PartyKit authority protection in `packages/partykit/charades/server.ts`: the first host sender now owns host-authoritative events, presenter-only events are locked to the active presenter connection, and host authority is released on disconnect. Added a dedicated authority regression harness and verified it passes.
+- Added a production-safe PartyKit host resolver for Charades: localhost still falls back to `:1999`, but production-like hostnames now throw unless `NEXT_PUBLIC_PARTYKIT_HOST` is explicitly configured. Added a dedicated resolver test and verified it passes.
+- Cleaned visible UTF-8/mojibake regressions in Hub and Charades presenter/pairing flows, removed the unused Clerk dependency from `@party/hub`, refreshed the lockfile, and reduced npm audit findings from 5 to 4 by eliminating the Clerk SSRF advisory entirely.
+- Remaining risk before deploy: upstream PartyKit currently still carries `undici`/`miniflare`/`esbuild` advisories with no simple newer npm release available than `0.0.115`.
+- Verification run this session: `npm run test:authority --workspace @party/partykit`, `npm run test:runtime-host --workspace @party/charades`, `npm run verify:encoding`, and `npm run build`.
+- Next: start Phase 4 deployment wiring for Cloudflare Pages + PartyKit with explicit environment setup and deployment path decisions.
+- Experience recorded: yes

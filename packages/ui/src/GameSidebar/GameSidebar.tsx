@@ -3,7 +3,6 @@
 import type { ReactNode } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ArrowLeft, Home } from 'lucide-react'
 import styles from './GameSidebar.module.css'
 
 export type NavLink = {
@@ -11,18 +10,37 @@ export type NavLink = {
   href: string
   icon?: ReactNode
   disabled?: boolean
+  pinnedBottom?: boolean
+  onSelect?: () => void
+}
+
+export type SidebarFooterLink = {
+  href: string
+  label: string
+  icon?: ReactNode
+  mobileIcon?: ReactNode
+  mobileLabel?: string
+  ariaLabel?: string
 }
 
 type GameSidebarProps = {
-  gameName: string
-  gameEmoji: string
+  activeHref?: string
+  ariaLabel: string
+  footerLink?: SidebarFooterLink
   links: NavLink[]
+  onNavigate?: (href: string) => void
 }
 
-export function GameSidebar({ gameName, gameEmoji, links }: GameSidebarProps) {
+export function GameSidebar({ activeHref, ariaLabel, footerLink, links, onNavigate }: GameSidebarProps) {
   const pathname = usePathname()
+  const resolvedActiveHref = activeHref ?? pathname
+  const topLinks = links.filter((link) => !link.pinnedBottom)
+  const bottomLinks = links.filter((link) => link.pinnedBottom)
 
-  const handleNavigate = () => {
+  const handleNavigate = (href: string, onSelect?: () => void) => {
+    onNavigate?.(href)
+    onSelect?.()
+
     requestAnimationFrame(() => {
       const activeElement = document.activeElement
 
@@ -32,74 +50,125 @@ export function GameSidebar({ gameName, gameEmoji, links }: GameSidebarProps) {
     })
   }
 
+  const getDesktopClassName = (href: string) =>
+    href === resolvedActiveHref ? `${styles.navLink} ${styles.navLinkActive}` : styles.navLink
+
+  const getMobileClassName = (href: string) =>
+    href === resolvedActiveHref ? `${styles.tabItem} ${styles.tabActive}` : styles.tabItem
+
+  const renderDesktopItem = (link: NavLink) => {
+    if (link.disabled) {
+      return (
+        <span key={link.href} className={`${styles.navLink} ${styles.navLinkDisabled}`} aria-disabled="true">
+          {link.icon ? <span className={styles.navIcon}>{link.icon}</span> : null}
+          <span className={styles.navLabel}>{link.label}</span>
+        </span>
+      )
+    }
+
+    if (link.onSelect) {
+      return (
+        <button
+          key={link.href}
+          className={getDesktopClassName(link.href)}
+          type="button"
+          onClick={() => handleNavigate(link.href, link.onSelect)}
+        >
+          {link.icon ? <span className={styles.navIcon}>{link.icon}</span> : null}
+          <span className={styles.navLabel}>{link.label}</span>
+        </button>
+      )
+    }
+
+    return (
+      <Link
+        key={link.href}
+        href={link.href}
+        className={getDesktopClassName(link.href)}
+        onClick={() => handleNavigate(link.href)}
+      >
+        {link.icon ? <span className={styles.navIcon}>{link.icon}</span> : null}
+        <span className={styles.navLabel}>{link.label}</span>
+      </Link>
+    )
+  }
+
+  const renderMobileItem = (link: NavLink) => {
+    if (link.disabled) {
+      return (
+        <span key={link.href} className={`${styles.tabItem} ${styles.tabDisabled}`} aria-disabled="true">
+          {link.icon ? <span className={styles.tabIcon}>{link.icon}</span> : null}
+          <span className={styles.tabLabel}>{link.label}</span>
+        </span>
+      )
+    }
+
+    if (link.onSelect) {
+      return (
+        <button
+          key={link.href}
+          className={getMobileClassName(link.href)}
+          type="button"
+          onClick={() => handleNavigate(link.href, link.onSelect)}
+        >
+          {link.icon ? <span className={styles.tabIcon}>{link.icon}</span> : null}
+          <span className={styles.tabLabel}>{link.label}</span>
+        </button>
+      )
+    }
+
+    return (
+      <Link
+        key={link.href}
+        href={link.href}
+        className={getMobileClassName(link.href)}
+        onClick={() => handleNavigate(link.href)}
+      >
+        {link.icon ? <span className={styles.tabIcon}>{link.icon}</span> : null}
+        <span className={styles.tabLabel}>{link.label}</span>
+      </Link>
+    )
+  }
+
   return (
     <>
-      <aside className={styles.sidebar} aria-label={`Nawigacja gry ${gameName}`}>
+      <aside className={styles.sidebar} aria-label={ariaLabel}>
         <div className={styles.railInner}>
-          {links.map((link) =>
-            link.disabled ? (
-              <span
-                key={link.href}
-                className={`${styles.navLink} ${styles.navLinkDisabled}`}
-                aria-disabled="true"
-              >
-                {link.icon && <span className={styles.navIcon}>{link.icon}</span>}
-                <span className={styles.navLabel}>{link.label}</span>
-              </span>
-            ) : (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`${styles.navLink} ${pathname === link.href ? styles.active : ''}`}
-                onClick={handleNavigate}
-              >
-                {link.icon && <span className={styles.navIcon}>{link.icon}</span>}
-                <span className={styles.navLabel}>{link.label}</span>
-              </Link>
-            )
-          )}
+          {topLinks.map(renderDesktopItem)}
 
           <div className={styles.railSpacer} />
 
-          <Link href="/" className={styles.backLink} onClick={handleNavigate}>
-            <span className={styles.navIcon} aria-hidden="true">
-              <ArrowLeft size={18} />
-            </span>
-            <span className={styles.navLabel}>Wróć do lobby</span>
-          </Link>
+          {bottomLinks.map(renderDesktopItem)}
+
+          {footerLink ? (
+            <Link
+              href={footerLink.href}
+              className={styles.backLink}
+              aria-label={footerLink.ariaLabel}
+              onClick={() => handleNavigate(footerLink.href)}
+            >
+              {footerLink.icon ? <span className={styles.navIcon}>{footerLink.icon}</span> : null}
+              <span className={styles.navLabel}>{footerLink.label}</span>
+            </Link>
+          ) : null}
         </div>
       </aside>
 
-      <nav className={styles.tabBar} aria-label={`Dolna nawigacja gry ${gameName}`}>
-        {links.map((link) =>
-          link.disabled ? (
-            <span
-              key={link.href}
-              className={`${styles.tabItem} ${styles.tabDisabled}`}
-              aria-disabled="true"
-            >
-              {link.icon && <span className={styles.tabIcon}>{link.icon}</span>}
-              <span className={styles.tabLabel}>{link.label}</span>
-            </span>
-          ) : (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`${styles.tabItem} ${pathname === link.href ? styles.tabActive : ''}`}
-              onClick={handleNavigate}
-            >
-              {link.icon && <span className={styles.tabIcon}>{link.icon}</span>}
-              <span className={styles.tabLabel}>{link.label}</span>
-            </Link>
-          )
-        )}
+      <nav className={styles.tabBar} aria-label={ariaLabel}>
+        {topLinks.map(renderMobileItem)}
+        {bottomLinks.map(renderMobileItem)}
 
-        <Link href="/" className={styles.tabItem} aria-label={`Wróć do lobby ${gameEmoji}`} onClick={handleNavigate}>
-          <span className={styles.tabIcon}>
-            <Home size={18} />
-          </span>
-          <span className={styles.tabLabel}>Lobby</span>
-        </Link>
+        {footerLink ? (
+          <Link
+            href={footerLink.href}
+            className={styles.tabItem}
+            aria-label={footerLink.ariaLabel}
+            onClick={() => handleNavigate(footerLink.href)}
+          >
+            {footerLink.mobileIcon ? <span className={styles.tabIcon}>{footerLink.mobileIcon}</span> : null}
+            <span className={styles.tabLabel}>{footerLink.mobileLabel ?? footerLink.label}</span>
+          </Link>
+        ) : null}
       </nav>
     </>
   )
