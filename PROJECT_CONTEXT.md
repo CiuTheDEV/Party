@@ -137,10 +137,10 @@ This means:
 
 <!-- handoff:start -->
 ## Session Handoff
-- Last: 2026-04-02 16:10 by Codex (GPT-5.4)
-- Task: Charades MVP hardening before Phase 4.
-- Did: Added host/presenter connection-state hardening and user-facing fallback UI for PartyKit/WebSocket failures, including a blocking host overlay for lost room connection and a presenter reconnect/error overlay that preserves the last known screen state. Reworked the presenter reveal card word fitting so short words stay readable while long phrases still scale to fit, then user completed a manual end-to-end smoke test across setup, runtime, reconnect, verdict, hints, and results with no reported regressions. Build verification passes for @party/charades and @party/hub.
-- Next: Treat Charades as ready to enter Phase 4, then either start deploy/Partykit production hardening or return to the remaining cleanup task around `useGameState` dependencies and oversized runtime files.
+- Last: 2026-04-02 16:35 by Codex (GPT-5.4)
+- Task: Session wrap after Charades MVP hardening and final Hub topbar polish.
+- Did: Finished the runtime reconnect/error hardening, got a full manual Charades end-to-end smoke test from the user with no reported regressions, and fixed the missing login-button outline in the Hub by patching the actual Hub layout topbar styles. Added repo-level encoding guardrails and left the repo building cleanly.
+- Next: Start Phase 4 from deploy/Partykit production hardening. Secondary backlog remains the Charades cleanup pass around `useGameState` dependencies, dead runtime leftovers, and oversized files.
 - Blocker: None.
 ## Previous Handoff
 - Last: 2026-04-01 11:51 by Codex (GPT-5.4)

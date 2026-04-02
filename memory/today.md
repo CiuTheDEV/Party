@@ -154,3 +154,10 @@
 - User completed a manual end-to-end smoke test across setup, hints, reroll, reconnect, verdict, and results with no reported regressions.
 - Next: move Charades into Phase 4 work and return either to deploy/Partykit production hardening or the remaining runtime cleanup pass.
 - Experience recorded: yes
+
+### S22 (2026-04-02 ~) [Project Party] Session wrap + hub topbar consistency
+
+- Fixed the missing login-button outline in the Hub topbar by patching the actual Hub layout styles instead of the already-correct shared runtime topbar.
+- Added an encoding pre-commit guardrail earlier in the session, then confirmed the repo still builds cleanly after the final UI touch-up.
+- Next: start Phase 4 work from deploy/Partykit production hardening, with Charades treated as smoke-tested and MVP-hardened.
+- Experience recorded: yes
