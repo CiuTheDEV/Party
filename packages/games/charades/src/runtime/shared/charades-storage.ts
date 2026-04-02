@@ -1,10 +1,10 @@
+import { normalizePartyPlayers } from '@party/ui'
 import type {
   CharadesGameSettings,
   CharadesPlayerDraft,
   CharadesSelectedCategories,
 } from '../../setup/state'
 import { createDefaultCharadesSettings } from '../../setup/state'
-import { normalizeCharadesPlayers } from '../../avatars/avatar-helpers'
 import type { StoredWordHistory } from './charades-word-history'
 import {
   createEmptyWordHistory,
@@ -66,7 +66,7 @@ export function readCharadesSetup() {
 
   return {
     ...stored,
-    players: normalizeCharadesPlayers(stored.players),
+    players: normalizePartyPlayers(stored.players),
     settings: normalizeCharadesSettings(stored.settings),
   }
 }

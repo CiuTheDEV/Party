@@ -1,0 +1,120 @@
+.root {
+  --slider-thumb-size: 24px;
+  --slider-track-height: 8px;
+  --slider-side-inset: calc(var(--slider-thumb-size) / 2);
+  width: 100%;
+}
+
+.disabled {
+  opacity: 0.65;
+}
+
+.disabled .trackWrap {
+  cursor: not-allowed;
+}
+
+.trackWrap {
+  width: 100%;
+  padding-block: 8px;
+  cursor: pointer;
+  outline: none;
+}
+
+.trackWrap:focus-visible .thumb {
+  box-shadow:
+    0 8px 20px color-mix(in srgb, var(--game-color-primary) 30%, rgba(0, 0, 0, 0.18)),
+    0 0 0 4px color-mix(in srgb, var(--game-color-primary) 12%, transparent),
+    0 0 0 8px rgba(255, 255, 255, 0.08);
+}
+
+.track {
+  position: relative;
+  width: calc(100% - (var(--slider-side-inset) * 2));
+  margin-inline: var(--slider-side-inset);
+  height: var(--slider-track-height);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+
+.trackFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--game-color-primary) 88%, white);
+}
+
+.thumb {
+  position: absolute;
+  top: 50%;
+  width: var(--slider-thumb-size);
+  height: var(--slider-thumb-size);
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.85);
+  background:
+    radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.72) 42%, color-mix(in srgb, var(--game-color-primary) 82%, white) 100%);
+  box-shadow:
+    0 8px 20px color-mix(in srgb, var(--game-color-primary) 30%, rgba(0, 0, 0, 0.18)),
+    0 0 0 4px color-mix(in srgb, var(--game-color-primary) 12%, transparent);
+  transform: translate(-50%, -50%);
+}
+
+.scale {
+  position: relative;
+  height: 42px;
+  margin-top: 2px;
+  width: calc(100% - (var(--slider-side-inset) * 2));
+  margin-inline: var(--slider-side-inset);
+}
+
+.scaleOption {
+  position: absolute;
+  top: 0;
+  left: var(--slider-position);
+  transform: translateX(-50%);
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.48);
+  cursor: pointer;
+  transition: color 0.15s ease, transform 0.15s ease;
+}
+
+.scaleOption:hover {
+  color: rgba(255, 255, 255, 0.82);
+  margin-top: -1px;
+}
+
+.scaleOption:disabled {
+  cursor: not-allowed;
+  margin-top: 0;
+  color: rgba(255, 255, 255, 0.24);
+}
+
+.scaleOptionActive {
+  color: var(--color-text);
+}
+
+.scaleTick {
+  width: 2px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.scaleOptionActive .scaleTick {
+  background: color-mix(in srgb, var(--game-color-primary) 72%, white);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--game-color-primary) 24%, transparent);
+}
+
+.scaleValue {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.01em;
+}

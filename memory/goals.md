@@ -1,6 +1,6 @@
-# Goals & Focus
+﻿# Goals & Focus
 
-*Last updated: 2026-03-30*
+*Last updated: 2026-04-02*
 
 ---
 
@@ -15,7 +15,7 @@
 
 ### Critical (game is broken without these)
 - [x] PlayTopBar - safe in-game settings/exit flow
-- [x] "Zmień hasło" on presenter phone - implemented with limits, weighted reroll, and browser word history
+- [x] "ZmieĹ„ hasĹ‚o" on presenter phone - implemented with limits, weighted reroll, and browser word history
 - [x] Presenter disconnect handling - pause + reconnect modal when phone drops during play
 
 ### Important (quality degraders)
@@ -46,3 +46,4 @@
 - Real-time multiplayer with room codes
 - Architecture validated on at least one more game module
 - Optional accounts via Clerk after multiplayer base is stable
+

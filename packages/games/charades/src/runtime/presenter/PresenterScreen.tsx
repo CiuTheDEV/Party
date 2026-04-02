@@ -1,6 +1,6 @@
 'use client'
 
-import { AvatarAsset } from '../../avatars/AvatarAsset'
+import { AvatarAsset } from '@party/ui'
 import { PresenterPhaseReveal } from './PresenterPhaseReveal'
 import { PresenterPhaseTimer } from './PresenterPhaseTimer'
 import { PresenterPhaseBetween } from './PresenterPhaseBetween'

@@ -1,3 +1,5 @@
+import type { CharadesGameSettings } from '../../setup/state'
+
 export type PlayerSummary = {
   name: string
   avatar: string
@@ -20,6 +22,8 @@ export type PlayBoardProps = {
   currentOrderIdx: number
   presenter: PlayerSummary | undefined
   currentWord: string
+  currentCategory: string
+  settings: CharadesGameSettings
   isRoundOrderRevealing: boolean
   onRoundOrderSettled: () => void
   timerRemaining: number

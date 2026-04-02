@@ -1,7 +1,7 @@
 'use client'
 
+import { AvatarAsset } from '@party/ui'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { AvatarAsset } from '../avatars/AvatarAsset'
 import styles from './ResultsGroups.module.css'
 import type { CharadesResultPlayer } from './types'
 

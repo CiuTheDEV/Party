@@ -1,6 +1,6 @@
+import { AvatarAsset } from '@party/ui'
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { gsap } from 'gsap'
-import { AvatarAsset } from '../../avatars/AvatarAsset'
 import styles from './PlayBoard.module.css'
 import { CardBack, SettledCard } from './PlayBoardCards'
 import {
@@ -31,6 +31,8 @@ export function PlayBoard({
   currentOrderIdx,
   presenter,
   currentWord,
+  currentCategory,
+  settings,
   isRoundOrderRevealing,
   onRoundOrderSettled,
   timerRemaining,
@@ -450,7 +452,15 @@ export function PlayBoard({
   }
 
   if (phase === 'timer-running') {
-    return <TimerRunningView presenter={presenter} timerRemaining={timerRemaining} />
+    return (
+      <TimerRunningView
+        presenter={presenter}
+        timerRemaining={timerRemaining}
+        currentWord={currentWord}
+        currentCategory={currentCategory}
+        settings={settings}
+      />
+    )
   }
 
   if (phase === 'verdict') {
@@ -492,4 +502,3 @@ export function PlayBoard({
 
   return <BufferView presenter={presenter} bufferRemaining={bufferRemaining} />
 }
-

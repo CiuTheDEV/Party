@@ -1,11 +1,11 @@
-export type CharadesAvatarCategory = 'people' | 'animals' | 'other'
+export type PartyAvatarCategory = 'people' | 'animals' | 'other'
 
-export type CharadesAvatarVariant = 'static' | 'animated'
+export type PartyAvatarVariant = 'static' | 'animated'
 
-export type CharadesAvatarAsset = {
+export type PartyAvatarAsset = {
   id: string
   label: string
-  category: CharadesAvatarCategory
+  category: PartyAvatarCategory
   codepoint: string
   staticSrc: string
   animatedSrc: string
@@ -24,10 +24,10 @@ function buildAsset({
 }: {
   id: string
   label: string
-  category: CharadesAvatarCategory
+  category: PartyAvatarCategory
   codepoint: string
   legacyGlyph?: string
-}): CharadesAvatarAsset {
+}): PartyAvatarAsset {
   return {
     id,
     label,
@@ -40,15 +40,15 @@ function buildAsset({
   }
 }
 
-export const CHARADES_AVATAR_CATEGORY_LABELS: Record<CharadesAvatarCategory, string> = {
+export const PARTY_AVATAR_CATEGORY_LABELS: Record<PartyAvatarCategory, string> = {
   people: 'Ludzie',
   animals: 'Zwierzeta',
   other: 'Inne',
 }
 
-export const DEFAULT_CHARADES_AVATAR_ID = 'smile'
+export const DEFAULT_PARTY_AVATAR_ID = 'smile'
 
-export const CHARADES_AVATARS: readonly CharadesAvatarAsset[] = [
+export const PARTY_AVATARS: readonly PartyAvatarAsset[] = [
   buildAsset({ id: 'smile', label: 'Usmiech', category: 'people', codepoint: '1f600', legacyGlyph: '\u{1F600}' }),
   buildAsset({ id: 'sunglasses', label: 'Okulary', category: 'people', codepoint: '1f60e', legacyGlyph: '\u{1F60E}' }),
   buildAsset({ id: 'star-struck', label: 'Zachwyt', category: 'people', codepoint: '1f929', legacyGlyph: '\u{1F929}' }),
@@ -76,7 +76,6 @@ export const CHARADES_AVATARS: readonly CharadesAvatarAsset[] = [
   buildAsset({ id: 'robot-face', label: 'Robot', category: 'people', codepoint: '1f916', legacyGlyph: '\u{1F916}' }),
   buildAsset({ id: 'clown-face', label: 'Klaun', category: 'people', codepoint: '1f921', legacyGlyph: '\u{1F921}' }),
   buildAsset({ id: 'poop', label: 'Glupek', category: 'people', codepoint: '1f4a9', legacyGlyph: '\u{1F4A9}' }),
-
   buildAsset({ id: 'dog', label: 'Pudel', category: 'animals', codepoint: '1f429', legacyGlyph: '\u{1F429}' }),
   buildAsset({ id: 'cat', label: 'Kot', category: 'animals', codepoint: '1f431', legacyGlyph: '\u{1F431}' }),
   buildAsset({ id: 'bear', label: 'Niedzwiedz', category: 'animals', codepoint: '1f43b', legacyGlyph: '\u{1F43B}' }),
@@ -105,7 +104,6 @@ export const CHARADES_AVATARS: readonly CharadesAvatarAsset[] = [
   buildAsset({ id: 'lady-beetle', label: 'Biedronka', category: 'animals', codepoint: '1f41e', legacyGlyph: '\u{1F41E}' }),
   buildAsset({ id: 'whale', label: 'Wieloryb', category: 'animals', codepoint: '1f433', legacyGlyph: '\u{1F433}' }),
   buildAsset({ id: 'dolphin', label: 'Delfin', category: 'animals', codepoint: '1f42c', legacyGlyph: '\u{1F42C}' }),
-
   buildAsset({ id: 'theater', label: 'Maski', category: 'other', codepoint: '1f3ad', legacyGlyph: '\u{1F3AD}' }),
   buildAsset({ id: 'circus', label: 'Blask', category: 'other', codepoint: '1f31f', legacyGlyph: '\u{1F31F}' }),
   buildAsset({ id: 'palette', label: 'Tecza', category: 'other', codepoint: '1f308', legacyGlyph: '\u{1F308}' }),

@@ -1,6 +1,6 @@
 'use client'
 
-import { AvatarAsset } from '../../avatars/AvatarAsset'
+import { AvatarAsset } from '@party/ui'
 import type { PresenterNextStep } from '../shared/charades-events'
 import phaseStyles from './PresenterPhaseShared.module.css'
 

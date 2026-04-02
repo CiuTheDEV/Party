@@ -1,11 +1,12 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { RuntimeTopBar } from '@party/ui'
+import type { CharadesGameSettings } from '../../setup/state'
 import { PlayBoard } from './PlayBoard'
 import { PlayBottomBar } from './PlayBottomBar'
 import { ReconnectPresenterModal } from './ReconnectPresenterModal'
 import { PlaySettingsModal } from './PlaySettingsModal'
-import { PlayTopBar } from './PlayTopBar'
 import { VerdictPickerModal } from './VerdictPickerModal'
 import type { Phase, PlayerSummary } from './playboard-types'
 import { useRoundOrderCountdown } from './useRoundOrderCountdown'
@@ -25,6 +26,8 @@ type HostGameScreenProps = {
   presenter: PlayerSummary | undefined
   roomId: string
   currentWord: string
+  currentCategory: string
+  settings: CharadesGameSettings
   timerRemaining: number
   bufferRemaining: number
   isDeviceConnected: boolean
@@ -124,7 +127,7 @@ export function HostGameScreen(props: HostGameScreenProps) {
 
   return (
     <div className={styles.screen}>
-      <PlayTopBar onOpenSettings={() => setIsSettingsOpen(true)} />
+      <RuntimeTopBar gameName="Kalambury" onOpenSettings={() => setIsSettingsOpen(true)} />
 
       <PlayBoard
         animationsEnabled={animationsEnabled}
@@ -134,6 +137,8 @@ export function HostGameScreen(props: HostGameScreenProps) {
         players={props.players}
         presenter={props.presenter}
         currentWord={props.currentWord}
+        currentCategory={props.currentCategory}
+        settings={props.settings}
         isRoundOrderRevealing={props.isRoundOrderRevealing}
         onRoundOrderSettled={handleRoundOrderSettled}
         timerRemaining={props.timerRemaining}

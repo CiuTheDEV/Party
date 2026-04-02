@@ -1,4 +1,4 @@
-# Project Party - Project Context
+﻿# Project Party - Project Context
 
 *Last updated: 2026-03-31*
 
@@ -137,16 +137,17 @@ This means:
 
 <!-- handoff:start -->
 ## Session Handoff
-- Last: 2026-04-01 by Codex (GPT-5.4)
-- Task: Charades settings modal polish, custom slider alignment, and new hints settings tab.
-- Did: Replaced the fragile native settings sliders with a custom discrete slider so thumb and labels share the same geometry, then polished the settings modal layout: refined the right-column hierarchy, removed duplicated descriptions, tightened the `Zmiana hasła` tab to avoid unnecessary scrolling, and changed the left tab list so details expand only on the active item. Added a persisted `Podpowiedzi` settings tab with `enabled`, `showCategory`, and `showWordCount`, and surfaced the hints state in the compact settings panel. Build verification passes for `@party/charades` and `@party/hub`.
-- Next: Wire the new hints settings into actual gameplay/presenter runtime and run a real browser smoke test across the final host/setup flow to confirm the modal proportions and interactions in live DOM.
+- Last: 2026-04-02 09:26 by Codex (GPT-5.4)
+- Task: Shared UI extraction for Charades runtime and settings plus post-refactor cleanup.
+- Did: Finished wiring Podpowiedzi into the host gameplay flow, added a 2-player podium variant, then extracted more shared UI into @party/ui: RuntimeTopBar, avatar renderer with avatar catalog/helpers, settings modal scaffold (GameSettingsModalShell, GameSettingsTabs, GameSettingsSection, GameSettingsCard), and SegmentedChoice. Rebuilt the charades settings modal on top of those shared primitives, fixed broken Polish strings after the refactor, and removed dead local avatar files plus stale modal CSS. Build verification passes for @party/ui, @party/charades, and @party/hub.
+- Next: Run a real browser smoke test across the host/setup/results flow after the shared UI extraction, then decide whether to keep extracting shared runtime/setup primitives or return to Phase 4 deploy and multiplayer hardening.
 - Blocker: None.
-
 ## Previous Handoff
 - Last: 2026-04-01 11:51 by Codex (GPT-5.4)
 - Task: Charades warning modal polish and long-word handling across reveal and verdict screens.
-- Did: Reworked the low-pool warning modal into a more spacious hero-plus-stats layout, cleaned several touched files back to UTF-8, and split word rendering into normal static display for short words plus autoscale for long phrases. Also fixed the shared autoscale wrapper so visibility state reaches the outer shell. Build verification passes for `@party/charades` and `@party/hub`.
-- Next: Run a real browser smoke test for the host `verdict` panel with a very long developer prompt. User screenshots still show the right-hand verdict card as visually broken, so the next session should inspect the live DOM/CSS/state instead of making more blind code-only adjustments.
+- Did: Reworked the low-pool warning modal into a more spacious hero-plus-stats layout, cleaned several touched files back to UTF-8, and split word rendering into normal static display for short words plus autoscale for long phrases. Also fixed the shared autoscale wrapper so visibility state reaches the outer shell. Build verification passes for @party/charades and @party/hub.
+- Next: Run a real browser smoke test for the host verdict panel with a very long developer prompt. User screenshots still show the right-hand verdict card as visually broken, so the next session should inspect the live DOM/CSS/state instead of making more blind code-only adjustments.
 - Blocker: None.
 <!-- handoff:end -->
+
+

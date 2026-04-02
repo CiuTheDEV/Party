@@ -140,3 +140,9 @@
 - Cleaned Git noise by pruning stale worktree metadata, ignoring local `.vscode/mcp.json`, and merging the active charades branch safely into `main`.
 - Next: run a manual browser smoke test for pool management, start warning flow, and weighted reroll/session history behavior in real UI.
 - Experience recorded: yes
+### S20 (2026-04-02 ~) [Project Party] Shared UI extraction for Charades runtime and settings
+- Wired Podpowiedzi into the actual host gameplay flow and added a 2-player podium variant.
+- Extracted more shared UI into @party/ui: RuntimeTopBar, avatar renderer plus avatar catalog/helpers, settings modal scaffold primitives, and SegmentedChoice.
+- Rebuilt the Charades settings modal on top of shared primitives, fixed broken Polish strings after the refactor, and removed dead local avatar files plus stale modal CSS.
+- Next: run a real browser smoke test across host/setup/results after the shared extraction, then decide whether to continue shared UI extraction or return to Phase 4 deploy work.
+- Experience recorded: yes

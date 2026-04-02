@@ -1,13 +1,9 @@
 'use client'
 
+import { AvatarAsset, getPartyAvatarCategories, getPartyAvatarsByCategory } from '@party/ui'
 import { Sparkles, UserRound, Venus, Mars } from 'lucide-react'
 import { useState } from 'react'
-import { AvatarAsset } from '../../avatars/AvatarAsset'
-import {
-  getCharadesAvatarCategories,
-  getCharadesAvatarsByCategory,
-} from '../../avatars/avatar-helpers'
-import type { CharadesAvatarCategory } from '../../avatars/avatar-registry'
+import type { PartyAvatarCategory } from '@party/ui'
 import type { CharadesPlayerDraft } from '../state'
 import styles from './AddPlayerModal.module.css'
 
@@ -17,15 +13,15 @@ type Props = {
   existingPlayers: CharadesPlayerDraft[]
 }
 
-const AVATAR_CATEGORIES = getCharadesAvatarCategories()
+const AVATAR_CATEGORIES = getPartyAvatarCategories()
 
 export function AddPlayerModal({ onAdd, onClose, existingPlayers }: Props) {
   const [name, setName] = useState('')
   const [avatar, setAvatar] = useState<string | null>(null)
   const [gender, setGender] = useState<CharadesPlayerDraft['gender']>('none')
-  const [category, setCategory] = useState<CharadesAvatarCategory>('people')
+  const [category, setCategory] = useState<PartyAvatarCategory>('people')
   const [attempted, setAttempted] = useState(false)
-  const avatars = getCharadesAvatarsByCategory(category)
+  const avatars = getPartyAvatarsByCategory(category)
 
   const nameTooShort = name.trim().length > 0 && name.trim().length < 3
   const nameTaken =

@@ -1,4 +1,4 @@
-import { AvatarAsset } from '../../avatars/AvatarAsset'
+import { AvatarAsset } from '@party/ui'
 import styles from './PlayBoard.module.css'
 import type { PlayerSummary } from './playboard-types'
 

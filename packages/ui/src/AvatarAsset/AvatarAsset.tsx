@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
+import { getPartyAvatarById } from '../avatars/party-avatar-helpers'
+import type { PartyAvatarVariant } from '../avatars/party-avatar-registry'
 import styles from './AvatarAsset.module.css'
-import { getCharadesAvatarById } from './avatar-helpers'
-import type { CharadesAvatarVariant } from './avatar-registry'
 
 type Props = {
   avatar: string | null | undefined
-  variant?: CharadesAvatarVariant
+  variant?: PartyAvatarVariant
   alt?: string
   className?: string
   imageClassName?: string
@@ -24,7 +24,7 @@ export function AvatarAsset({
   className,
   imageClassName,
 }: Props) {
-  const resolvedAvatar = getCharadesAvatarById(avatar)
+  const resolvedAvatar = getPartyAvatarById(avatar)
   const [mode, setMode] = useState<RenderMode>(variant === 'animated' ? 'animated' : 'static')
 
   useEffect(() => {

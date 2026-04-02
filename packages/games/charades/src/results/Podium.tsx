@@ -1,4 +1,4 @@
-import { AvatarAsset } from '../avatars/AvatarAsset'
+import { AvatarAsset } from '@party/ui'
 import styles from './Podium.module.css'
 import { ResultsGroups, type PlacementGroup } from './ResultsGroups'
 import type { CharadesResultPlayer } from './types'
@@ -23,10 +23,17 @@ export function Podium({ players }: Props) {
     groups[0].players.length === 1 &&
     groups[1].players.length === 1 &&
     groups[2].players.length === 1
+  const showTwoPlayerPodium =
+    !showClassicPodium &&
+    groups.length >= 2 &&
+    groups[0].players.length === 1 &&
+    groups[1].players.length === 1
   const podiumPlayers = showClassicPodium
     ? [groups[1].players[0], groups[0].players[0], groups[2].players[0]]
-    : []
-  const detailGroups = showClassicPodium ? groups.slice(3) : groups.slice(1)
+    : showTwoPlayerPodium
+      ? [groups[1].players[0], groups[0].players[0]]
+      : []
+  const detailGroups = showClassicPodium ? groups.slice(3) : showTwoPlayerPodium ? groups.slice(2) : groups.slice(1)
 
   return (
     <div className={styles.wrapper}>
@@ -55,9 +62,16 @@ export function Podium({ players }: Props) {
             <PodiumSlot player={podiumPlayers[2]} place={3} />
           </div>
         </section>
+      ) : showTwoPlayerPodium ? (
+        <section className={styles.podiumSection}>
+          <div className={`${styles.podium} ${styles.podiumTwoPlayers}`}>
+            <PodiumSlot player={podiumPlayers[0]} place={2} />
+            <PodiumSlot player={podiumPlayers[1]} place={1} />
+          </div>
+        </section>
       ) : null}
 
-      {showClassicPodium ? (
+      {showClassicPodium || showTwoPlayerPodium ? (
         <ResultsGroups
           groups={[]}
           sortedPlayers={sorted}

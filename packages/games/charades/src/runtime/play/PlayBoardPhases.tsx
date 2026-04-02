@@ -1,6 +1,7 @@
+import { AvatarAsset } from '@party/ui'
 import { ChevronLeft } from 'lucide-react'
 import type { MutableRefObject } from 'react'
-import { AvatarAsset } from '../../avatars/AvatarAsset'
+import type { CharadesGameSettings } from '../../setup/state'
 import { AutoscaledWord } from '../shared/AutoscaledWord'
 import styles from './PlayBoard.module.css'
 import { PresenterCard } from './PlayBoardCards'
@@ -12,6 +13,9 @@ type SharedPhaseProps = {
 
 type TimerRunningViewProps = SharedPhaseProps & {
   timerRemaining: number
+  currentWord: string
+  currentCategory: string
+  settings: CharadesGameSettings
 }
 
 type VerdictViewProps = SharedPhaseProps & {
@@ -55,7 +59,11 @@ function shouldWrapVerdictWord(word: string) {
   return wordCount > 1
 }
 
-export function TimerRunningView({ presenter, timerRemaining }: TimerRunningViewProps) {
+export function TimerRunningView({ presenter, timerRemaining, currentWord, currentCategory, settings }: TimerRunningViewProps) {
+  const wordCount = currentWord.trim().split(/\s+/).filter(Boolean).length
+  const activeHintsCount = Number(settings.hints.showCategory) + Number(settings.hints.showWordCount)
+  const showHints = settings.hints.enabled && activeHintsCount > 0
+
   return (
     <main className={styles.board}>
       <section className={styles.stage}>
@@ -70,6 +78,22 @@ export function TimerRunningView({ presenter, timerRemaining }: TimerRunningView
               <h1 className={styles.timerTitle}>Czas do końca prezentowania</h1>
               <div className={styles.timer}>{timerRemaining}</div>
             </div>
+            {showHints ? (
+              <div className={styles.timerHints} data-single={activeHintsCount === 1}>
+                {settings.hints.showCategory ? (
+                  <div className={styles.timerHintItem}>
+                    <span className={styles.timerHintLabel}>Kategoria</span>
+                    <span className={styles.timerHintValue}>{currentCategory || 'Brak'}</span>
+                  </div>
+                ) : null}
+                {settings.hints.showWordCount ? (
+                  <div className={styles.timerHintItem}>
+                    <span className={styles.timerHintLabel}>Liczba słów</span>
+                    <span className={styles.timerHintValue}>{wordCount > 0 ? wordCount : 'Brak'}</span>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         </div>
       </section>

@@ -1,5 +1,5 @@
+import { AvatarAsset } from '@party/ui'
 import { Plus, X } from 'lucide-react'
-import { AvatarAsset } from '../../avatars/AvatarAsset'
 import type { CharadesPlayerDraft } from '../state'
 import styles from './PlayerGrid.module.css'
 

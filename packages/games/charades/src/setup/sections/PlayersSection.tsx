@@ -1,8 +1,8 @@
 'use client'
 
+import { getPartyAvatarsByCategory } from '@party/ui'
 import { useState } from 'react'
 import type { GameSetupSectionComponentProps } from '@party/game-sdk'
-import { getCharadesAvatarsByCategory } from '../../avatars/avatar-helpers'
 import type { CharadesSetupHelpers } from '../helpers'
 import type { CharadesSetupState } from '../state'
 import { AddPlayerModal } from '../components/AddPlayerModal'
@@ -11,9 +11,9 @@ import styles from './PlayersSection.module.css'
 
 const TEST_PLAYER_NAMES = ['Antek', 'Basia', 'Celina', 'Dawid', 'Eryk', 'Felka', 'Gabi', 'Hubert', 'Iga', 'Julka', 'Kacper', 'Lena']
 const TEST_AVATARS = [
-  ...getCharadesAvatarsByCategory('people'),
-  ...getCharadesAvatarsByCategory('animals'),
-  ...getCharadesAvatarsByCategory('other'),
+  ...getPartyAvatarsByCategory('people'),
+  ...getPartyAvatarsByCategory('animals'),
+  ...getPartyAvatarsByCategory('other'),
 ].map((avatar) => avatar.id)
 
 export function PlayersSection({ state, updateState }: GameSetupSectionComponentProps<CharadesSetupState, CharadesSetupHelpers>) {

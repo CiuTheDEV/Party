@@ -127,6 +127,7 @@ function PlayScreen({ config }: { config: Config }) {
         currentOrderIdx={state.currentOrderIdx}
         currentRound={state.currentRound}
         currentWord={state.currentWord}
+        currentCategory={state.currentCategory}
         isDeviceConnected={state.isDeviceConnected}
         isRoomConnected={state.isRoomConnected}
         isRoundOrderRevealing={state.isRoundOrderRevealing}
@@ -143,6 +144,7 @@ function PlayScreen({ config }: { config: Config }) {
         players={state.players}
         presenter={presenter}
         roomId={config.roomId}
+        settings={config.settings}
         bufferRemaining={state.bufferRemaining}
         timerRemaining={state.timerRemaining}
         totalRounds={state.totalRounds}

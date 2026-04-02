@@ -1,3 +1,11 @@
+export { AvatarAsset } from '@party/ui'
+export {
+  getPartyAvatarById as getCharadesAvatarById,
+  getPartyAvatarCategories as getCharadesAvatarCategories,
+  getPartyAvatarsByCategory as getCharadesAvatarsByCategory,
+  normalizePartyAvatarId as normalizeCharadesAvatarId,
+  normalizePartyPlayers as normalizeCharadesPlayers,
+} from '@party/ui'
 import type { GameModule, GameResultsProps } from '@party/game-sdk'
 import { config } from './config'
 import { CharadesMenuContent } from './menu/CharadesMenuContent'
@@ -64,14 +72,6 @@ export {
   getTotalUniqueWordCount,
 } from './runtime/hooks/word-history-helpers'
 export { openCharadesPoolManager } from './setup/components/CategoryPicker'
-export { AvatarAsset } from './avatars/AvatarAsset'
-export {
-  getCharadesAvatarById,
-  getCharadesAvatarCategories,
-  getCharadesAvatarsByCategory,
-  normalizeCharadesAvatarId,
-  normalizeCharadesPlayers,
-} from './avatars/avatar-helpers'
 export {
   normalizeCharadesSettings,
   ensureCharadesWordHistorySession,
