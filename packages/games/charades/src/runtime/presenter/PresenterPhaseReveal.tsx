@@ -14,11 +14,32 @@ type PresenterPhaseRevealProps = {
   revealDuration: number
 }
 
-function shouldAutoscaleWord(word: string) {
+function getRevealWordSizing(word: string) {
   const normalized = word.trim()
   const wordCount = normalized.split(/\s+/).filter(Boolean).length
+  const length = normalized.length
 
-  return normalized.length > 26 || wordCount > 3
+  if (wordCount <= 1) {
+    return {
+      wrapMode: 'nowrap' as const,
+      minFontSize: length > 14 ? 42 : 58,
+      maxFontSize: length > 14 ? 120 : 164,
+    }
+  }
+
+  if (wordCount === 2) {
+    return {
+      wrapMode: 'balance' as const,
+      minFontSize: 40,
+      maxFontSize: 120,
+    }
+  }
+
+  return {
+    wrapMode: 'balance' as const,
+    minFontSize: length > 26 ? 26 : 32,
+    maxFontSize: length > 26 ? 82 : 96,
+  }
 }
 
 export function PresenterPhaseReveal({
@@ -34,7 +55,7 @@ export function PresenterPhaseReveal({
   const isGloballyDisabled = !canChangeWord
   const isExhausted = canChangeWord && remainingWordChanges <= 0
   const isDisabled = !canChangeWord || remainingWordChanges <= 0
-  const useAutoscale = shouldAutoscaleWord(word)
+  const revealSizing = getRevealWordSizing(word)
   const buttonLabel = isGloballyDisabled
     ? 'Zmień hasło'
     : isExhausted
@@ -58,19 +79,14 @@ export function PresenterPhaseReveal({
           </div>
         </div>
         <div className={styles.wordHero}>
-          {useAutoscale ? (
-            <AutoscaledWord
-              text={word}
-              className={styles.wordScaleRoot}
-              textClassName={styles.word}
-              minFontSize={18}
-              maxFontSize={164}
-            />
-          ) : (
-            <div className={styles.wordStaticWrap}>
-              <div className={`${styles.word} ${styles.wordStatic}`}>{word}</div>
-            </div>
-          )}
+          <AutoscaledWord
+            text={word}
+            className={styles.wordScaleRoot}
+            textClassName={styles.word}
+            wrapMode={revealSizing.wrapMode}
+            minFontSize={revealSizing.minFontSize}
+            maxFontSize={revealSizing.maxFontSize}
+          />
         </div>
       </section>
 

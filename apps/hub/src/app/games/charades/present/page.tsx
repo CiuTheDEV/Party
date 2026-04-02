@@ -25,9 +25,29 @@ function PresentRoute() {
 }
 
 function PresenterRouteContent({ roomId }: { roomId: string }) {
-  const { state, revealWord, changeWord } = usePresenter(roomId)
+  const { state, connectionState, hasSyncedState, revealWord, changeWord } = usePresenter(roomId)
 
-  return <PresenterScreen state={state} onRevealWord={revealWord} onChangeWord={changeWord} />
+  if (!hasSyncedState && connectionState !== 'connected') {
+    return (
+      <RouteStatus
+        eyebrow={connectionState === 'error' ? 'Problem z połączeniem' : 'Prezenter'}
+        message={
+          connectionState === 'error'
+            ? 'Nie udało się połączyć z pokojem. Odśwież ekran prezentera albo zeskanuj QR ponownie.'
+            : 'Łączenie z pokojem gry...'
+        }
+      />
+    )
+  }
+
+  return (
+    <PresenterScreen
+      state={state}
+      connectionState={connectionState}
+      onRevealWord={revealWord}
+      onChangeWord={changeWord}
+    />
+  )
 }
 
 function RouteStatus({ eyebrow, message }: { eyebrow: string; message: string }) {

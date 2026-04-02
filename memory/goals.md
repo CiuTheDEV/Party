@@ -1,4 +1,4 @@
-﻿# Goals & Focus
+# Goals & Focus
 
 *Last updated: 2026-04-02*
 
@@ -6,27 +6,46 @@
 
 ## This Week
 
-1. ~~Close architecture cleanup for the first game module~~
-2. ~~Re-align documentation with the new module/setup vision~~
-3. ~~Charades pre-MVP polish~~ - Polish characters fixed, remaining cleanup below
-4. Move forward with Phase 4 deploy path
+1. Stabilize Charades after the shared UI extraction
+2. Run a real browser smoke test across setup, host, presenter, and results
+3. Fix the highest-risk runtime and reconnect issues before pushing further
+4. Move Phase 4 deploy work back onto the critical path
 
-## Charades - pre-MVP blockers
+## Charades - MVP hardening
 
-### Critical (game is broken without these)
-- [x] PlayTopBar - safe in-game settings/exit flow
-- [x] "ZmieĹ„ hasĹ‚o" on presenter phone - implemented with limits, weighted reroll, and browser word history
-- [x] Presenter disconnect handling - pause + reconnect modal when phone drops during play
+### Ship blockers
+- [x] Run a real browser smoke test for the full Charades flow
+  Scope: setup modal, pairing, presenter reconnect, reroll flow, hints visibility, verdict flow, and results/podium
+- [x] Harden page refresh / back / reconnect behavior across host and presenter
+  Scope: mid-round refresh, reconnect after disconnect, and stale session recovery
+- [x] Add graceful error handling for WebSocket / Partykit failures
+  Scope: user-facing fallback instead of page-level crash or silent broken state
 
-### Important (quality degraders)
-- [ ] Error boundaries for WebSocket/Partykit - unhandled errors crash the page
-- [ ] Page refresh/back resilience - gameplay still needs broader hardening
-- [ ] Manual smoke test for prompt-history flow - reroll, pool resets, start warning, and repeated-game behavior still need real browser verification
+### Important quality work
+- [x] Safe in-game settings / exit flow
+- [x] Presenter-side "Zmień hasło" with limits, weighted reroll, and browser word history
+- [x] Presenter disconnect handling with pause + reconnect modal
+- [x] Host hints settings wired into actual gameplay UI
+- [x] 2-player podium variant
 
-### Cleanup / code quality (next pass)
+### Code quality / cleanup
 - [ ] Review `useGameState` callback/effect dependencies around `send` after socket reconnects
-- [ ] Remove dead presenter/runtime leftovers: `PresenterTimerBar`, ignored timer props, stale refs after recent UI refactors
-- [ ] Split oversized Charades files back under repo limits (`ResultsGroups.module.css`, `PlayBoard.tsx`, `PlayBoard.module.css`)
+- [ ] Remove dead presenter/runtime leftovers
+  Scope: `PresenterTimerBar`, ignored timer props, stale refs after recent UI refactors
+- [ ] Split oversized Charades files that are still hard to maintain
+  Targets: `ResultsGroups.module.css`, `PlayBoard.tsx`, `PlayBoard.module.css`
+
+## Shared UI follow-up
+
+### Done
+- [x] Shared shell in `@party/ui`
+- [x] Shared setup framework with custom game sections
+- [x] Shared runtime top bar
+- [x] Shared avatar layer
+- [x] Shared settings modal primitives
+
+### Next
+- [ ] Decide whether to extract more shared runtime/setup primitives now or pause extraction and return to deploy hardening
 
 ## This Month
 
@@ -34,10 +53,8 @@
 - [x] Phase 1 - hub shell and game list
 - [x] Phase 2 - `game-sdk` contract
 - [x] Phase 3 - first playable Charades MVP
-- [x] Shared shell in `@party/ui`
-- [x] Shared setup framework with custom game sections
-- [x] `charades` ownership for menu, setup and results
-- [x] Gameplay cleanup in host-side runtime (`useGameState`, `PlayBoard`, `HostGameScreen`)
+- [x] `charades` ownership for menu, setup, results, and runtime
+- [x] Shared UI extraction for topbar, avatars, and settings modal primitives
 - [ ] Phase 4 - deploy hub and Partykit
 
 ## This Quarter
@@ -46,4 +63,3 @@
 - Real-time multiplayer with room codes
 - Architecture validated on at least one more game module
 - Optional accounts via Clerk after multiplayer base is stable
-

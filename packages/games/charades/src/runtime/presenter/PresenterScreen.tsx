@@ -7,9 +7,9 @@ import { PresenterPhaseBetween } from './PresenterPhaseBetween'
 import { PresenterPhaseEnded } from './PresenterPhaseEnded'
 import { PresenterPhaseYourTurn } from './PresenterPhaseYourTurn'
 import styles from './PresenterScreen.module.css'
-import type { PresenterScreenProps, PresenterViewState } from './types'
+import type { PresenterConnectionState, PresenterScreenProps, PresenterViewState } from './types'
 
-export function PresenterScreen({ state, onRevealWord, onChangeWord }: PresenterScreenProps) {
+export function PresenterScreen({ state, connectionState, onRevealWord, onChangeWord }: PresenterScreenProps) {
   const chrome = getPresenterChrome(state)
 
   return (
@@ -81,6 +81,10 @@ export function PresenterScreen({ state, onRevealWord, onChangeWord }: Presenter
 
           {state.phase === 'ended' && <PresenterPhaseEnded />}
         </section>
+
+        {connectionState !== 'connected' ? (
+          <ConnectionOverlay connectionState={connectionState} />
+        ) : null}
       </main>
     </div>
   )
@@ -104,7 +108,7 @@ function MessagePanel({
     <div className={styles.messageCard}>
       <span className={styles.messageAccent}>{accent}</span>
       <p className={styles.messageTitle}>{title}</p>
-          <p className={styles.messageBody}>{body}</p>
+      <p className={styles.messageBody}>{body}</p>
       {nextPresenter ? (
         <div className={styles.messageNextPresenter}>
           <p className={styles.messageNextLabel}>Następny prezenter</p>
@@ -114,6 +118,26 @@ function MessagePanel({
           </div>
         </div>
       ) : null}
+    </div>
+  )
+}
+
+function ConnectionOverlay({ connectionState }: { connectionState: PresenterConnectionState }) {
+  const isRecovering = connectionState === 'reconnecting' || connectionState === 'connecting'
+
+  return (
+    <div className={styles.connectionOverlay}>
+      <div className={styles.connectionCard}>
+        <span className={styles.connectionEyebrow}>{isRecovering ? 'Łączenie' : 'Problem z połączeniem'}</span>
+        <p className={styles.connectionTitle}>
+          {isRecovering ? 'Łączę ponownie z pokojem' : 'Nie udało się utrzymać połączenia'}
+        </p>
+        <p className={styles.connectionBody}>
+          {isRecovering
+            ? 'Zachowujemy ostatni widok tury. Ekran prezentera wznowi się automatycznie po odzyskaniu połączenia.'
+            : 'Odśwież ekran prezentera albo zeskanuj kod QR ponownie, jeśli problem nie zniknie po chwili.'}
+        </p>
+      </div>
     </div>
   )
 }
@@ -142,7 +166,7 @@ const PRESENTER_PHASE_CHROME: Record<
   'reveal-buffer': {
     phaseLabel: 'Zapamiętaj hasło',
     presenterLabel: 'Prezentuje teraz',
-    phaseSummary: 'Zapamiętaj hasło zanim zniknie.',
+    phaseSummary: 'Zapamiętaj hasło, zanim zniknie.',
     phaseValue: (state) => `${state.revealRemaining}s`,
   },
   'timer-running': {
@@ -152,8 +176,8 @@ const PRESENTER_PHASE_CHROME: Record<
   },
   'awaiting-verdict': {
     phaseLabel: 'Werdykt',
-    presenterLabel: 'Prezentowal',
-    phaseSummary: 'Tura jest zamknieta. Czekaj na decyzje hosta.',
+    presenterLabel: 'Prezentował',
+    phaseSummary: 'Tura jest zamknięta. Czekaj na decyzję hosta.',
   },
   between: {
     phaseLabel: 'Zmiana prezentera',

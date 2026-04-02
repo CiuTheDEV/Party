@@ -146,3 +146,11 @@
 - Rebuilt the Charades settings modal on top of shared primitives, fixed broken Polish strings after the refactor, and removed dead local avatar files plus stale modal CSS.
 - Next: run a real browser smoke test across host/setup/results after the shared extraction, then decide whether to continue shared UI extraction or return to Phase 4 deploy work.
 - Experience recorded: yes
+
+### S21 (2026-04-02 ~) [Project Party] Charades runtime hardening + end-to-end smoke test
+
+- Added explicit connection-state handling for host and presenter, including a blocking host fallback when the room connection drops and a presenter reconnect/error overlay that preserves the last known runtime screen.
+- Reworked the presenter reveal card word fitting so short words stay readable while longer phrases still scale down to fit without scroll or overflow.
+- User completed a manual end-to-end smoke test across setup, hints, reroll, reconnect, verdict, and results with no reported regressions.
+- Next: move Charades into Phase 4 work and return either to deploy/Partykit production hardening or the remaining runtime cleanup pass.
+- Experience recorded: yes

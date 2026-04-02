@@ -66,6 +66,7 @@ function PlayScreen({ config }: { config: Config }) {
     pausePhaseTimer,
     resumePhaseTimer,
     isGameOver,
+    roomConnectionState,
   } = useGameState(
     config.roomId,
     config.players.map((p) => ({ ...p, score: 0 })),
@@ -130,6 +131,7 @@ function PlayScreen({ config }: { config: Config }) {
         currentCategory={state.currentCategory}
         isDeviceConnected={state.isDeviceConnected}
         isRoomConnected={state.isRoomConnected}
+        roomConnectionState={roomConnectionState}
         isRoundOrderRevealing={state.isRoundOrderRevealing}
         onFinishRoundOrder={finishRoundOrder}
         onFinishRoundSummary={finishRoundSummary}

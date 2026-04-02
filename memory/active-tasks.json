@@ -28,16 +28,6 @@
                       "blocker":  "",
                       "created":  "2026-03-27",
                       "updated":  "2026-03-27"
-                  },
-                  {
-                      "id":  "T002",
-                      "title":  "Charades weighted reroll smoke test and hardening",
-                      "status":  "active",
-                      "context":  "Weighted reroll, browser word-history persistence, pool management, low-pool start warning, and the latest setup modal UI pass are implemented. `Podpowiedzi` are now also wired into the host gameplay flow, and the recent Charades UI refactor extracted shared runtime/settings primitives into `@party/ui`.",
-                      "next_action":  "Run a real browser smoke test across the host/setup/results flow after the shared UI extraction, focusing on settings modal interactions, hints visibility, reroll flow, and results/podium rendering.",
-                      "blocker":  "",
-                      "created":  "2026-03-30",
-                      "updated":  "2026-04-02"
                   }
               ]
 }

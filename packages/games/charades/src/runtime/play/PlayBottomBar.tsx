@@ -11,6 +11,7 @@ type Phase =
 type PlayBottomBarProps = {
   phase: Phase
   isRoomConnected: boolean
+  roomConnectionState: 'connected' | 'reconnecting' | 'error'
   isDeviceConnected: boolean
   isRoundOrderRevealing: boolean
   roundOrderCountdown: number | null
@@ -25,6 +26,7 @@ type PlayBottomBarProps = {
 export function PlayBottomBar({
   phase,
   isRoomConnected,
+  roomConnectionState,
   isDeviceConnected,
   isRoundOrderRevealing,
   roundOrderCountdown,
@@ -41,8 +43,9 @@ export function PlayBottomBar({
 
       {!isRoomConnected ? (
         <p className={styles.connectionAlert}>
-          Problem z połączeniem z pokojem. Odśwież stronę albo wróć do menu, jeśli stan gry się nie
-          odświeża.
+          {roomConnectionState === 'reconnecting'
+            ? 'Łączę ponownie z pokojem gry. Tura jest chwilowo wstrzymana.'
+            : 'Problem z połączeniem z pokojem. Jeśli stan nie wróci po chwili, wróć do menu i uruchom rozgrywkę ponownie.'}
         </p>
       ) : null}
 

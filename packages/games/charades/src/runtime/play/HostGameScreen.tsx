@@ -6,6 +6,7 @@ import type { CharadesGameSettings } from '../../setup/state'
 import { PlayBoard } from './PlayBoard'
 import { PlayBottomBar } from './PlayBottomBar'
 import { ReconnectPresenterModal } from './ReconnectPresenterModal'
+import { RoomConnectionModal } from './RoomConnectionModal'
 import { PlaySettingsModal } from './PlaySettingsModal'
 import { VerdictPickerModal } from './VerdictPickerModal'
 import type { Phase, PlayerSummary } from './playboard-types'
@@ -25,6 +26,7 @@ type HostGameScreenProps = {
   players: PlayerSummary[]
   presenter: PlayerSummary | undefined
   roomId: string
+  roomConnectionState: 'connected' | 'reconnecting' | 'error'
   currentWord: string
   currentCategory: string
   settings: CharadesGameSettings
@@ -53,7 +55,13 @@ export function HostGameScreen(props: HostGameScreenProps) {
   const isPresenterReconnectRequired =
     !props.isDeviceConnected &&
     (props.phase === 'prepare' || props.phase === 'reveal-buffer' || props.phase === 'timer-running')
-  const isPauseOverlayOpen = isSettingsOpen || isPresenterReconnectRequired
+  const isRoomReconnectRequired = props.roomConnectionState !== 'connected'
+  const roomConnectionModalState: 'reconnecting' | 'error' | null = isRoomReconnectRequired
+    ? props.roomConnectionState === 'error'
+      ? 'error'
+      : 'reconnecting'
+    : null
+  const isPauseOverlayOpen = isSettingsOpen || isPresenterReconnectRequired || isRoomReconnectRequired
   const { roundOrderCountdown, startRoundOrderCountdown } = useRoundOrderCountdown({
     shouldRun: props.phase === 'round-order' && props.isRoundOrderRevealing,
     isPaused: isPauseOverlayOpen,
@@ -149,6 +157,7 @@ export function HostGameScreen(props: HostGameScreenProps) {
 
       <PlayBottomBar
         isRoomConnected={props.isRoomConnected}
+        roomConnectionState={props.roomConnectionState}
         isDeviceConnected={props.isDeviceConnected}
         isRoundOrderRevealing={props.isRoundOrderRevealing}
         phase={props.phase}
@@ -193,6 +202,13 @@ export function HostGameScreen(props: HostGameScreenProps) {
       {isPresenterReconnectRequired ? (
         <ReconnectPresenterModal
           roomId={props.roomId}
+          onBackToMenu={props.onExitToMenu}
+        />
+      ) : null}
+
+      {roomConnectionModalState ? (
+        <RoomConnectionModal
+          connectionState={roomConnectionModalState}
           onBackToMenu={props.onExitToMenu}
         />
       ) : null}

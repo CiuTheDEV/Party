@@ -1,6 +1,6 @@
 ﻿# Project Party - Project Context
 
-*Last updated: 2026-03-31*
+*Last updated: 2026-04-02*
 
 ---
 
@@ -137,10 +137,10 @@ This means:
 
 <!-- handoff:start -->
 ## Session Handoff
-- Last: 2026-04-02 09:26 by Codex (GPT-5.4)
-- Task: Shared UI extraction for Charades runtime and settings plus post-refactor cleanup.
-- Did: Finished wiring Podpowiedzi into the host gameplay flow, added a 2-player podium variant, then extracted more shared UI into @party/ui: RuntimeTopBar, avatar renderer with avatar catalog/helpers, settings modal scaffold (GameSettingsModalShell, GameSettingsTabs, GameSettingsSection, GameSettingsCard), and SegmentedChoice. Rebuilt the charades settings modal on top of those shared primitives, fixed broken Polish strings after the refactor, and removed dead local avatar files plus stale modal CSS. Build verification passes for @party/ui, @party/charades, and @party/hub.
-- Next: Run a real browser smoke test across the host/setup/results flow after the shared UI extraction, then decide whether to keep extracting shared runtime/setup primitives or return to Phase 4 deploy and multiplayer hardening.
+- Last: 2026-04-02 16:10 by Codex (GPT-5.4)
+- Task: Charades MVP hardening before Phase 4.
+- Did: Added host/presenter connection-state hardening and user-facing fallback UI for PartyKit/WebSocket failures, including a blocking host overlay for lost room connection and a presenter reconnect/error overlay that preserves the last known screen state. Reworked the presenter reveal card word fitting so short words stay readable while long phrases still scale to fit, then user completed a manual end-to-end smoke test across setup, runtime, reconnect, verdict, hints, and results with no reported regressions. Build verification passes for @party/charades and @party/hub.
+- Next: Treat Charades as ready to enter Phase 4, then either start deploy/Partykit production hardening or return to the remaining cleanup task around `useGameState` dependencies and oversized runtime files.
 - Blocker: None.
 ## Previous Handoff
 - Last: 2026-04-01 11:51 by Codex (GPT-5.4)

@@ -124,7 +124,8 @@
 }
 
 .word {
-  max-width: min(100%, 14ch);
+  width: 100%;
+  max-width: 100%;
   font-weight: 900;
   line-height: 0.92;
   color: #f8fafc;
@@ -133,20 +134,6 @@
 .wordScaleRoot {
   height: 100%;
   width: 100%;
-}
-
-.wordStaticWrap {
-  width: 100%;
-  display: grid;
-  place-items: center;
-  min-height: 0;
-}
-
-.wordStatic {
-  width: auto;
-  max-width: min(100%, 12ch);
-  font-size: clamp(4.8rem, 11vw, 10.25rem);
-  text-wrap: balance;
 }
 
 .changeButtonLabel {

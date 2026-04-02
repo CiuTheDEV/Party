@@ -1,0 +1,4 @@
+#!/bin/sh
+
+echo "Running encoding checks..."
+npm run verify:encoding

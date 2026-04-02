@@ -24,6 +24,7 @@ import { resolveWordChangeRequest } from './word-change-helpers'
 import type { TurnPrompt } from './word-pool-helpers'
 
 export type { GameSettings, Player } from './game-state-model'
+export type HostRoomConnectionState = 'connected' | 'reconnecting' | 'error'
 
 export function useGameState(
   roomId: string,
@@ -44,6 +45,7 @@ export function useGameState(
   commitPrompt: (prompt: TurnPrompt) => void,
 ) {
   const [state, setState] = useState<GameState>(() => createInitialGameState(players, settings))
+  const [roomConnectionState, setRoomConnectionState] = useState<HostRoomConnectionState>('connected')
   const currentTurnIdRef = useRef('')
   const stateRef = useRef(state)
 
@@ -55,12 +57,14 @@ export function useGameState(
     host: getPartykitHost(),
     room: roomId,
     onOpen() {
+      setRoomConnectionState('connected')
       setState((current) => ({ ...current, isRoomConnected: true }))
     },
     onMessage(event) {
       const msg = JSON.parse(event.data) as PresenterEvent | HostEvent | { type: 'ROOM_STATE'; state: { presenterConnected: boolean } }
 
       if (msg.type === 'ROOM_STATE') {
+        setRoomConnectionState('connected')
         setState((current) => ({
           ...current,
           isDeviceConnected: msg.state.presenterConnected,
@@ -148,9 +152,11 @@ export function useGameState(
       })
     },
     onError() {
+      setRoomConnectionState('error')
       setState((current) => ({ ...current, isRoomConnected: false }))
     },
     onClose() {
+      setRoomConnectionState((current) => (current === 'error' ? current : 'reconnecting'))
       setState((current) => ({
         ...current,
         isRoomConnected: false,
@@ -159,7 +165,12 @@ export function useGameState(
   })
 
   const send = useCallback((event: HostEvent) => {
-    socket.send(JSON.stringify(event))
+    try {
+      socket.send(JSON.stringify(event))
+    } catch {
+      setRoomConnectionState('error')
+      setState((current) => ({ ...current, isRoomConnected: false }))
+    }
   }, [socket])
 
   const { clearPhaseTimer, pausePhaseTimer, resumePhaseTimer, startRevealBuffer } = usePhaseTimers({
@@ -294,5 +305,6 @@ export function useGameState(
     pausePhaseTimer,
     resumePhaseTimer,
     isGameOver,
+    roomConnectionState,
   }
 }

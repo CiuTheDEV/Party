@@ -9,6 +9,8 @@ export type PresenterPhase =
   | 'between'
   | 'ended'
 
+export type PresenterConnectionState = 'connecting' | 'connected' | 'reconnecting' | 'error'
+
 export type PresenterViewState = {
   phase: PresenterPhase
   currentTurnId: string
@@ -30,6 +32,7 @@ export type PresenterViewState = {
 
 export type PresenterScreenProps = {
   state: PresenterViewState
+  connectionState: PresenterConnectionState
   onRevealWord: () => boolean
   onChangeWord: () => boolean
 }

@@ -1,6 +1,6 @@
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import usePartySocket from 'partysocket/react'
-import type { PresenterViewState } from '../presenter/types'
+import type { PresenterConnectionState, PresenterViewState } from '../presenter/types'
 import type { HostEvent, PresenterEvent, RoomState, RoomStateMessage } from '../shared/charades-events'
 import { getPartykitHost } from '../shared/charades-runtime'
 import {
@@ -38,27 +38,11 @@ export function usePresenter(roomId: string) {
     return Math.random().toString(36).slice(2)
   }, [])
 
+  const hasSyncedStateRef = useRef(false)
   const [state, setState] = useState<PresenterViewState>(INITIAL_PRESENTER_STATE)
+  const [connectionState, setConnectionState] = useState<PresenterConnectionState>('connecting')
 
-  const socket = usePartySocket({
-    host: getPartykitHost(),
-    room: roomId,
-    onOpen() {
-      writeHeartbeat()
-      const event: PresenterEvent = { type: 'DEVICE_CONNECTED' }
-      socket.send(JSON.stringify(event))
-    },
-    onMessage(event) {
-      const msg = JSON.parse(event.data) as HostEvent | RoomStateMessage
-      if (msg.type === 'ROOM_STATE') {
-        setState(mapRoomStateToPresenterView(msg.state))
-        return
-      }
-      handleHostEvent(msg as HostEvent)
-    },
-  })
-
-  const writeHeartbeat = useCallback(() => {
+  const writeHeartbeat = useCallback((connected = true) => {
     if (!roomId) {
       return
     }
@@ -66,10 +50,47 @@ export function usePresenter(roomId: string) {
     writePresenterSession({
       roomId,
       sessionId,
-      connected: true,
+      connected,
       lastSeenAt: Date.now(),
     })
   }, [roomId, sessionId])
+
+  const socket = usePartySocket({
+    host: getPartykitHost(),
+    room: roomId,
+    onOpen() {
+      writeHeartbeat()
+      setConnectionState('connected')
+      const event: PresenterEvent = { type: 'DEVICE_CONNECTED' }
+      socket.send(JSON.stringify(event))
+    },
+    onMessage(event) {
+      const msg = JSON.parse(event.data) as HostEvent | RoomStateMessage
+      hasSyncedStateRef.current = true
+      setConnectionState('connected')
+
+      if (msg.type === 'ROOM_STATE') {
+        setState(mapRoomStateToPresenterView(msg.state))
+        return
+      }
+
+      handleHostEvent(msg as HostEvent)
+    },
+    onError() {
+      writeHeartbeat(false)
+      setConnectionState('error')
+    },
+    onClose() {
+      writeHeartbeat(false)
+      setConnectionState((current) => {
+        if (current === 'error') {
+          return current
+        }
+
+        return hasSyncedStateRef.current ? 'reconnecting' : 'connecting'
+      })
+    },
+  })
 
   useEffect(() => {
     if (!roomId) {
@@ -78,7 +99,7 @@ export function usePresenter(roomId: string) {
 
     writeHeartbeat()
 
-    const interval = window.setInterval(writeHeartbeat, getPresenterHeartbeatMs())
+    const interval = window.setInterval(() => writeHeartbeat(connectionState === 'connected'), getPresenterHeartbeatMs())
 
     return () => {
       window.clearInterval(interval)
@@ -88,7 +109,7 @@ export function usePresenter(roomId: string) {
         clearPresenterSession()
       }
     }
-  }, [roomId, sessionId, writeHeartbeat])
+  }, [connectionState, roomId, sessionId, writeHeartbeat])
 
   function handleHostEvent(event: HostEvent) {
     switch (event.type) {
@@ -197,7 +218,7 @@ export function usePresenter(roomId: string) {
   }
 
   const revealWord = useCallback(() => {
-    if (!state.currentTurnId) {
+    if (!state.currentTurnId || connectionState !== 'connected') {
       return false
     }
 
@@ -206,16 +227,18 @@ export function usePresenter(roomId: string) {
       socket.send(JSON.stringify(event))
       return true
     } catch {
+      setConnectionState('error')
       return false
     }
-  }, [state.currentTurnId, socket])
+  }, [connectionState, state.currentTurnId, socket])
 
   const changeWord = useCallback(() => {
     if (
       !state.currentTurnId ||
       state.phase !== 'reveal-buffer' ||
       !state.canChangeWord ||
-      state.remainingWordChanges <= 0
+      state.remainingWordChanges <= 0 ||
+      connectionState !== 'connected'
     ) {
       return false
     }
@@ -226,11 +249,18 @@ export function usePresenter(roomId: string) {
       socket.send(JSON.stringify(event))
       return true
     } catch {
+      setConnectionState('error')
       return false
     }
-  }, [state.canChangeWord, state.currentTurnId, state.phase, state.remainingWordChanges, socket])
+  }, [connectionState, state.canChangeWord, state.currentTurnId, state.phase, state.remainingWordChanges, socket])
 
-  return { state, revealWord, changeWord }
+  return {
+    state,
+    connectionState,
+    hasSyncedState: hasSyncedStateRef.current,
+    revealWord,
+    changeWord,
+  }
 }
 
 function mapRoomStateToPresenterView(roomState: RoomState): PresenterViewState {
