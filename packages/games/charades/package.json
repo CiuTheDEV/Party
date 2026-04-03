@@ -13,7 +13,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "test:runtime-host": "tsc --target es2022 --module commonjs --moduleResolution node --types node --skipLibCheck --outDir ../../../output/charades-runtime-host ./src/runtime/shared/charades-runtime.ts && node ./src/runtime/shared/charades-runtime.check.cjs ../../../output/charades-runtime-host/charades-runtime.js"
+    "test:runtime-host": "tsc --target es2022 --module commonjs --moduleResolution node --types node --skipLibCheck --outDir ../../../output/charades-runtime-host ./src/runtime/shared/charades-runtime.ts && node ./src/runtime/shared/charades-runtime.check.cjs ../../../output/charades-runtime-host/charades-runtime.js",
+    "test:menu-view": "tsc --target es2022 --module commonjs --moduleResolution node --types node --skipLibCheck --outDir ../../../output/charades-menu-view ./src/menu/menu-view.ts && node ./src/menu/menu-view.check.cjs ../../../output/charades-menu-view/menu-view.js"
   },
   "dependencies": {
     "@party/game-sdk": "*",

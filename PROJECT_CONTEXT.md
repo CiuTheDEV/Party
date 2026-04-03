@@ -137,17 +137,17 @@ This means:
 
 <!-- handoff:start -->
 ## Session Handoff
+- Last: 2026-04-03 23:59 by Codex (GPT-5.4)
+- Task: Charades main-menu settings overlay, real control rebinding, controller handling, and compact right-column polish.
+- Did: Added the local `Ustawienia` overlay to Charades main menu and evolved it into a real controls screen with persistent rebinding. Implemented equal binding boxes, click-to-listen only on the binding chip, clear-on-hover, local persistence, keyboard capture, controller capture through Gamepad API, and auto-swap on conflicts. Debugged controller selection by discovering that browser HID ordering could expose non-controller devices like HyperX headphones first, then added preferred-controller ranking, manual controller selection, and a draggable `DEV` popup only for `Sterowanie > Pad`. Iterated the right column from a heavy card stack into a more compact inspector and replaced placeholder control names with a smaller contextual action model. Fresh checks during this session repeatedly passed on `npm run build --workspace @party/hub`.
+- Next: Open the latest settings overlay in a real browser and do one final visual pass on the right column if any keyboard/pad switch jump still remains. After that, either wire these bindings into actual runtime controls or return to Phase 4 deployment work.
+- Blocker: No code-level blocker. Remaining open item is visual QA of the compact right column in live UI.
+## Previous Handoff
 - Last: 2026-04-02 23:10 by Codex (GPT-5.4)
 - Task: Phase 4 readiness pass across shared chrome, PartyKit authority/config, encoding, and dependency risk.
 - Did: Migrated Hub-derived chrome into shared `@party/ui` so Hub and game menus now use the same topbar/rail shell, then polished the shared login button. Closed the biggest multiplayer blocker by adding server-side PartyKit authority rules and a regression harness, then added a production-safe PartyKit host resolver with a dedicated test so non-local deploys fail fast unless `NEXT_PUBLIC_PARTYKIT_HOST` is configured. Cleaned visible UTF-8/mojibake issues in Hub and Charades presenter/pairing surfaces, removed unused Clerk from `@party/hub`, refreshed the lockfile, and cleaned Turbo build warnings except for the remaining upstream PartyKit advisory chain. Fresh checks passing: `npm run test:authority --workspace @party/partykit`, `npm run test:runtime-host --workspace @party/charades`, `npm run verify:encoding`, and `npm run build`.
 - Next: Start actual Phase 4 deploy work. First recommended slice is Cloudflare/Partykit deployment wiring and env setup, with one explicit known risk carried forward: upstream `partykit` still brings `undici`/`miniflare`/`esbuild` advisories and currently has no simple npm upgrade path beyond `0.0.115`.
 - Blocker: No code-level blocker in repo. Remaining blocker is external/upstream dependency risk in the current PartyKit toolchain.
-## Previous Handoff
-- Last: 2026-04-01 11:51 by Codex (GPT-5.4)
-- Task: Charades warning modal polish and long-word handling across reveal and verdict screens.
-- Did: Reworked the low-pool warning modal into a more spacious hero-plus-stats layout, cleaned several touched files back to UTF-8, and split word rendering into normal static display for short words plus autoscale for long phrases. Also fixed the shared autoscale wrapper so visibility state reaches the outer shell. Build verification passes for @party/charades and @party/hub.
-- Next: Run a real browser smoke test for the host verdict panel with a very long developer prompt. User screenshots still show the right-hand verdict card as visually broken, so the next session should inspect the live DOM/CSS/state instead of making more blind code-only adjustments.
-- Blocker: None.
 <!-- handoff:end -->
 
 

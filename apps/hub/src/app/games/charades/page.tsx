@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
+import { useEffect, useMemo, useState } from 'react'
 import {
   buildPromptPool,
   charadesModule,
+  CharadesMenuContent,
   CharadesDeviceListener,
   clearPresenterSession,
   createCharadesRoomId,
@@ -23,8 +24,9 @@ import {
   type CharadesSetupHelpers,
   type CharadesSetupState,
 } from '@party/charades'
-import { GameSetupTemplate } from '@party/ui'
 import { allCategories } from '@content/charades/index'
+import { GameSetupTemplate } from '@party/ui'
+import { useCharadesMenuView } from './menu-view-context'
 import styles from './page.module.css'
 
 const DeviceListener = dynamic(async () => CharadesDeviceListener, { ssr: false })
@@ -37,6 +39,7 @@ type StartWarningState = {
 
 export default function CharadesMenuPage() {
   const router = useRouter()
+  const { activeMenuView, setActiveMenuView } = useCharadesMenuView()
   const [showSetup, setShowSetup] = useState(false)
   const [isSetupReady, setIsSetupReady] = useState(false)
   const [setupState, setSetupState] = useState<CharadesSetupState>(() => charadesModule.createInitialSetupState())
@@ -71,8 +74,9 @@ export default function CharadesMenuPage() {
     const params = new URLSearchParams(window.location.search)
     if (params.get('setup') === '1') {
       setShowSetup(true)
+      setActiveMenuView('mode')
     }
-  }, [])
+  }, [setActiveMenuView])
 
   useEffect(() => {
     if (!isSetupReady || !setupState.roomId) {
@@ -171,7 +175,14 @@ export default function CharadesMenuPage() {
 
   return (
     <>
-      <charadesModule.GameMenuContent onOpenSetup={() => setShowSetup(true)} />
+      <CharadesMenuContent
+        activeView={activeMenuView}
+        onChangeView={setActiveMenuView}
+        onOpenSetup={() => {
+          setActiveMenuView('mode')
+          setShowSetup(true)
+        }}
+      />
 
       {showSetup ? (
         <GameSetupTemplate

@@ -5,7 +5,17 @@
   align-items: center;
   justify-content: space-between;
   min-height: 100%;
+  gap: 28px;
   padding: 40px 24px;
+}
+
+.pageSettings {
+  align-items: stretch;
+  justify-content: flex-start;
+  min-height: 100%;
+  height: 100%;
+  padding: 20px 24px;
+  overflow: hidden;
 }
 
 .iconWrapper {
@@ -155,19 +165,30 @@
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  width: min(480px, 100%);
+  width: min(1040px, 100%);
 }
 
 .footerLinks {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 24px;
 }
 
 .footerLink {
+  padding: 0;
+  border: 0;
+  background: transparent;
   font-size: 13px;
   color: var(--color-text-muted);
   opacity: 0.5;
-  cursor: default;
+  transition: opacity 0.18s ease, color 0.18s ease;
+  cursor: pointer;
+}
+
+.footerLink:hover {
+  color: #fff;
+  opacity: 0.86;
 }
 
 .infoBar {
@@ -185,7 +206,10 @@
     min-height: unset;
     padding: 20px 16px;
     gap: 16px;
-    overflow: hidden;
+  }
+
+  .pageSettings {
+    padding: 16px;
   }
 
   .hero {

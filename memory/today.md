@@ -172,3 +172,12 @@
 - Verification run this session: `npm run test:authority --workspace @party/partykit`, `npm run test:runtime-host --workspace @party/charades`, `npm run verify:encoding`, and `npm run build`.
 - Next: start Phase 4 deployment wiring for Cloudflare Pages + PartyKit with explicit environment setup and deployment path decisions.
 - Experience recorded: yes
+
+### S24 (2026-04-03 ~) [Project Party] Charades settings overlay, real rebinding, and controller selection
+
+- Turned the Charades main-menu `Ustawienia` overlay into a real controls surface: equal binding boxes, click-to-listen only on the binding chip, hover `x` to clear, local persistence in `localStorage`, keyboard rebinding, controller rebinding via Gamepad API, and automatic swap on conflicts.
+- Debugged controller detection end-to-end: changed gamepad capture from static baseline logic to edge-based polling, discovered the browser was exposing HyperX headphones as the first HID/gamepad entry, then added preferred-controller ranking plus manual device selection for pad mode.
+- Iterated the right column several times toward a more compact inspector: moved debug into a draggable `DEV` popup, moved controller tools into the detail panel, stabilized the device slot to reduce layout jumps, and replaced placeholder action names with a smaller contextual control model (`left/right/up/down`, confirm/back, settings, primary/secondary action, rail toggle).
+- Fresh verification during this session repeatedly passed on `npm run build --workspace @party/hub`.
+- Next: visually inspect the latest compact right-column layout in a real browser and do one final polish pass if the keyboard/pad switch still shows any residual UI shift.
+- Experience recorded: yes

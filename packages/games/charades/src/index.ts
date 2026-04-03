@@ -6,9 +6,11 @@ export {
   normalizePartyAvatarId as normalizeCharadesAvatarId,
   normalizePartyPlayers as normalizeCharadesPlayers,
 } from '@party/ui'
-import type { GameModule, GameResultsProps } from '@party/game-sdk'
+import type { GameMenuContentProps, GameModule, GameResultsProps } from '@party/game-sdk'
+import type { ComponentType } from 'react'
 import { config } from './config'
 import { CharadesMenuContent } from './menu/CharadesMenuContent'
+import { getCharadesMenuActiveHref, resolveCharadesMenuViewFromHref } from './menu/menu-view'
 import { CharadesResults } from './results/CharadesResults'
 import { CategoriesSection } from './setup/sections/CategoriesSection'
 import { PairingSection } from './setup/sections/PairingSection'
@@ -41,7 +43,7 @@ export const charadesModule: GameModule<CharadesSetupState, CharadesSetupHelpers
     gameEmoji: '\uD83C\uDFAD',
     links: [
       { label: 'Menu gry', href: '/games/charades', icon: 'play' },
-      { label: 'Ustawienia', href: '/games/charades/settings', icon: 'settings', disabled: true },
+      { label: 'Ustawienia', href: '/games/charades/settings', icon: 'settings' },
       { label: 'Rankingi', href: '/games/charades/rankings', icon: 'rankings', disabled: true },
     ],
   },
@@ -53,18 +55,21 @@ export const charadesModule: GameModule<CharadesSetupState, CharadesSetupHelpers
     { id: 'pairing', render: PairingSection, unstyled: true },
   ],
   validateSetup: validateCharadesSetup,
-  GameMenuContent: CharadesMenuContent,
+  GameMenuContent: CharadesMenuContent as ComponentType<GameMenuContentProps>,
   GameResults: CharadesResultsFallback,
 }
 
 export { config, createInitialCharadesSetupState, validateCharadesSetup }
 export { CharadesResultsScreen }
+export { CharadesMenuContent }
 export { default as CharadesDeviceListener } from './runtime/setup/DeviceListener'
 export { HostGameScreen } from './runtime/play/HostGameScreen'
 export { PresenterScreen } from './runtime/presenter/PresenterScreen'
 export { useGameState } from './runtime/hooks/useGameState'
 export { usePresenter } from './runtime/hooks/usePresenter'
 export { useWordPool } from './runtime/hooks/useWordPool'
+export { getCharadesMenuActiveHref, resolveCharadesMenuViewFromHref }
+export type { CharadesMenuView } from './menu/menu-view'
 export { buildPromptPool, buildCategoryPromptPool } from './runtime/hooks/word-pool-helpers'
 export {
   getRemainingPromptCount,
