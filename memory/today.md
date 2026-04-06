@@ -181,3 +181,22 @@
 - Fresh verification during this session repeatedly passed on `npm run build --workspace @party/hub`.
 - Next: visually inspect the latest compact right-column layout in a real browser and do one final polish pass if the keyboard/pad switch still shows any residual UI shift.
 - Experience recorded: yes
+
+### S25 (2026-04-06 ~) [Project Party] Shared settings UI extraction and docs refresh
+
+- Moved the Charades main-menu settings chrome toward reusable `@party/ui` primitives: added shared alert dialogs plus shared settings shell/footer/tabs/status/placeholder/header/hero components while keeping game-specific bindings logic local to `@party/charades`.
+- Reworked unsaved-changes and reset-to-default flows around the new shared alert primitive, then cleaned dead local CSS left after the extraction.
+- Documented the new `@party/ui` scope in `packages/ui/README.md` and updated project context so the architecture notes now mention shared settings-screen primitives explicitly.
+- Verification passing after the extraction: `npm run build --workspace @party/ui` and `npm run build --workspace @party/hub`.
+- Next: decide whether to keep the controls bindings table local to Charades or generalize it only after a second game proves the same pattern.
+- Experience recorded: yes
+
+### S26 (2026-04-06 ~) [Project Party] Gemini asset prompts, hub video cards, and Charades alert cleanup
+
+- Added Gemini resource files in `prompts/` for separate image and short-video generators, based on the existing Project Party visual prompt system instead of a generic Gem instruction.
+- Swapped hub library cards to support looped video assets with image fallback posters, and wired the current Charades and Codenames cards to `.mp4` loops from `apps/hub/public/videos/game-cards/`.
+- Replaced remaining native `window.confirm` flows in Charades setup pool management with shared `AlertDialog`, replaced browser-back confirmation during active Charades play with a custom in-app alert, and then did a cleanup pass removing dead settings helpers.
+- Key lesson: older mojibake/encoding history in some files makes targeted patching unreliable; when that happens, a controlled full-file rewrite is safer than forcing brittle partial edits.
+- Verification passing this session: `npm run test:library-card-media --workspace @party/hub`, `npm run build --workspace @party/hub`, `npm run build --workspace @party/charades`, and `npm run test:controls-bindings --workspace @party/charades`.
+- Next: either continue Phase 4 deployment work, or do a browser-only polish/smoke pass over the new alert flows and looped hub cards.
+- Experience recorded: yes

@@ -3,6 +3,7 @@ import { Gamepad2, LayoutGrid, Settings, UsersRound } from 'lucide-react'
 type LibraryCard = {
   gameId?: string
   imagePath?: string
+  videoPath?: string
   name: string
   label: string
   tone: 'mystery' | 'seconds' | 'mafia' | 'ships'
@@ -14,6 +15,7 @@ const allLibraryCards: readonly LibraryCard[] = [
     name: 'Kalambury',
     label: 'Pokaż bez słów',
     imagePath: '/images/game-cards/charades-card-main.png',
+    videoPath: '/videos/game-cards/charades-card-main.mp4',
     tone: 'mystery',
   },
   {
@@ -21,6 +23,7 @@ const allLibraryCards: readonly LibraryCard[] = [
     name: 'Tajniacy',
     label: 'Zagadka słowna',
     imagePath: '/images/game-cards/codenames-card-main.png',
+    videoPath: '/videos/game-cards/codenames-card-main.mp4',
     tone: 'ships',
   },
   {

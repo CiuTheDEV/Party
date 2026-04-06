@@ -6,6 +6,12 @@ import type { CharadesMenuView } from '@party/charades'
 type CharadesMenuViewContextValue = {
   activeMenuView: CharadesMenuView
   setActiveMenuView: (view: CharadesMenuView) => void
+  requestMenuViewChange: (view: CharadesMenuView) => void
+  hasUnsavedSettingsChanges: boolean
+  setHasUnsavedSettingsChanges: (value: boolean) => void
+  isSettingsExitConfirmOpen: boolean
+  cancelSettingsExitConfirm: () => void
+  commitPendingMenuViewChange: () => void
 }
 
 const CharadesMenuViewContext = createContext<CharadesMenuViewContextValue | null>(null)
@@ -17,10 +23,27 @@ type ProviderProps = CharadesMenuViewContextValue & {
 export function CharadesMenuViewProvider({
   activeMenuView,
   setActiveMenuView,
+  requestMenuViewChange,
+  hasUnsavedSettingsChanges,
+  setHasUnsavedSettingsChanges,
+  isSettingsExitConfirmOpen,
+  cancelSettingsExitConfirm,
+  commitPendingMenuViewChange,
   children,
-}: ProviderProps) {
+}: ProviderProps & Omit<CharadesMenuViewContextValue, 'activeMenuView' | 'setActiveMenuView'>) {
   return (
-    <CharadesMenuViewContext.Provider value={{ activeMenuView, setActiveMenuView }}>
+    <CharadesMenuViewContext.Provider
+      value={{
+        activeMenuView,
+        setActiveMenuView,
+        requestMenuViewChange,
+        hasUnsavedSettingsChanges,
+        setHasUnsavedSettingsChanges,
+        isSettingsExitConfirmOpen,
+        cancelSettingsExitConfirm,
+        commitPendingMenuViewChange,
+      }}
+    >
       {children}
     </CharadesMenuViewContext.Provider>
   )

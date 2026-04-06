@@ -1,5 +1,6 @@
 'use client'
 
+import { AlertDialog } from '@party/ui'
 import { Check, CheckCheck, ChevronDown, Dices, Eraser, LibraryBig } from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import {
@@ -28,6 +29,7 @@ type PoolStats = {
 }
 
 type DifficultyMode = 'easy' | 'hard' | 'both' | null
+type PoolResetTarget = { type: 'all' } | { type: 'category'; categoryName: string }
 
 const OPEN_POOL_MANAGER_EVENT = 'charades:open-pool-manager'
 
@@ -35,6 +37,7 @@ export function CategoryPicker({ categories, selected, onChange }: Props) {
   const [open, setOpen] = useState(false)
   const [isPoolManagerOpen, setIsPoolManagerOpen] = useState(false)
   const [historyVersion, setHistoryVersion] = useState(0)
+  const [poolResetTarget, setPoolResetTarget] = useState<PoolResetTarget | null>(null)
 
   const usedPromptKeys = useMemo(
     () => new Set(readCharadesWordHistory()?.usedPrompts ?? []),
@@ -89,10 +92,7 @@ export function CategoryPicker({ categories, selected, onChange }: Props) {
       return
     }
 
-    updated[categoryId] =
-      resolvedMode === 'both'
-        ? ['easy', 'hard']
-        : [resolvedMode]
+    updated[categoryId] = resolvedMode === 'both' ? ['easy', 'hard'] : [resolvedMode]
 
     onChange(updated)
   }
@@ -131,26 +131,25 @@ export function CategoryPicker({ categories, selected, onChange }: Props) {
   }
 
   function handleResetAllPoolHistory() {
-    if (
-      typeof window !== 'undefined' &&
-      !window.confirm('Resetować całą historię puli? Wszystkie zużyte i odrzucone hasła wrócą do użycia.')
-    ) {
-      return
-    }
-
-    resetCharadesWordHistory()
-    refreshHistory()
+    setPoolResetTarget({ type: 'all' })
   }
 
   function handleResetCategoryPoolHistory(categoryName: string) {
-    if (
-      typeof window !== 'undefined' &&
-      !window.confirm(`Resetować historię kategorii "${categoryName}" dla całej sesji?`)
-    ) {
+    setPoolResetTarget({ type: 'category', categoryName })
+  }
+
+  function confirmPoolHistoryReset() {
+    if (!poolResetTarget) {
       return
     }
 
-    resetCharadesWordHistoryCategory(categoryName)
+    if (poolResetTarget.type === 'all') {
+      resetCharadesWordHistory()
+    } else {
+      resetCharadesWordHistoryCategory(poolResetTarget.categoryName)
+    }
+
+    setPoolResetTarget(null)
     refreshHistory()
   }
 
@@ -390,6 +389,35 @@ export function CategoryPicker({ categories, selected, onChange }: Props) {
           </div>
         </div>
       ) : null}
+
+      <AlertDialog
+        open={poolResetTarget !== null}
+        variant="danger"
+        eyebrow="Reset puli"
+        title={
+          poolResetTarget?.type === 'all'
+            ? 'Przywrócić całą historię puli?'
+            : `Przywrócić kategorię "${poolResetTarget?.categoryName}"?`
+        }
+        description={
+          poolResetTarget?.type === 'all'
+            ? 'Wszystkie zużyte i odrzucone hasła wrócą do użycia w tej sesji.'
+            : 'Zużyte i odrzucone hasła z tej kategorii wrócą do użycia dla całej sesji.'
+        }
+        actions={[
+          {
+            label: 'Anuluj',
+            onClick: () => setPoolResetTarget(null),
+            variant: 'secondary',
+          },
+          {
+            label: 'Resetuj',
+            onClick: confirmPoolHistoryReset,
+            variant: 'danger',
+            fullWidth: true,
+          },
+        ]}
+      />
     </div>
   )
 }

@@ -1,14 +1,28 @@
 'use client'
 
-import { Gamepad2, Keyboard, RotateCcw, SlidersHorizontal, Sparkles, X } from 'lucide-react'
+import { AlertTriangle, Gamepad2, Keyboard, RotateCcw, Save, SlidersHorizontal, Sparkles, X } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react'
+import {
+  AlertDialog,
+  SettingsDetailHero,
+  SettingsPanelFooter,
+  SettingsPanelShell,
+  SettingsPanelTabs,
+  SettingsListHeader,
+  SettingsPlaceholderCard,
+  SettingsStatusPill,
+} from '@party/ui'
 import styles from './CharadesSettingsOverlay.module.css'
 import {
   applyBindingAssignment,
-  clearPersistedBindings,
   createGamepadSnapshot,
   createDefaultBindings,
+  detectGamepadProfile,
   getBindingDevice,
+  getBindingSlotKey,
+  getBindingValue,
+  hasBindingChanges,
+  formatControllerLabelForProfile,
   getCurrentGamepadInputLabel,
   getGamepadInputLabel,
   listConnectedGamepads,
@@ -16,6 +30,7 @@ import {
   normalizeKeyboardInput,
   pickPreferredGamepad,
   persistBindings,
+  type BindingSlot,
   type GamepadSnapshot,
 } from './charades-controls-bindings'
 import {
@@ -27,6 +42,10 @@ import {
 
 type Props = {
   onBack: () => void
+  onExitToMenu?: () => void
+  isExitConfirmOpenExternal?: boolean
+  onCloseExternalExitConfirm?: () => void
+  onUnsavedChangesChange?: (value: boolean) => void
 }
 
 type GamepadDebugState = {
@@ -55,14 +74,23 @@ type DragState = {
 }
 
 const DEFAULT_DEBUG_POSITION: PopupPosition = { x: 24, y: 24 }
+const defaultBindingsSnapshot = createDefaultBindings()
 
-export function CharadesSettingsOverlay({ onBack }: Props) {
+export function CharadesSettingsOverlay({
+  onBack,
+  onExitToMenu,
+  isExitConfirmOpenExternal = false,
+  onCloseExternalExitConfirm,
+  onUnsavedChangesChange,
+}: Props) {
   const [activeCategoryId, setActiveCategoryId] = useState<'general' | 'audio' | 'controls'>('controls')
   const [bindings, setBindings] = useState<Record<string, string>>(() => createDefaultBindings())
+  const [savedBindings, setSavedBindings] = useState<Record<string, string>>(() => createDefaultBindings())
   const [activeControlsDevice, setActiveControlsDevice] = useState<'keyboard' | 'controller'>('keyboard')
   const [activeBindingId, setActiveBindingId] = useState('')
-  const [listeningBindingId, setListeningBindingId] = useState<string | null>(null)
-  const [isBindingsReady, setIsBindingsReady] = useState(false)
+  const [listeningBindingKey, setListeningBindingKey] = useState<string | null>(null)
+  const [isExitConfirmOpenInternal, setIsExitConfirmOpenInternal] = useState(false)
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false)
   const [gamepadDebug, setGamepadDebug] = useState<GamepadDebugState>({
     connected: false,
     id: '',
@@ -88,21 +116,23 @@ export function CharadesSettingsOverlay({ onBack }: Props) {
   const AccentIcon = charadesSettingsAccentIcons[activeCategory.id]
   const isControlsView = activeCategory.id === 'controls'
   const isPadView = isControlsView && activeControlsDevice === 'controller'
+  const activeControllerProfile = isPadView ? detectGamepadProfile(gamepadDebug.id || '') : 'generic'
+  const listeningBindingId = listeningBindingKey?.split(':')[0] ?? null
+  const listeningBindingSlot = (listeningBindingKey?.split(':')[1] as BindingSlot | undefined) ?? null
   const listeningBindingDevice = listeningBindingId ? getBindingDevice(listeningBindingId) : null
+  const hasUnsavedChanges = useMemo(() => hasBindingChanges(savedBindings, bindings), [bindings, savedBindings])
+  const hasDefaultChanges = useMemo(() => hasBindingChanges(defaultBindingsSnapshot, bindings), [bindings])
+  const isExitConfirmOpen = isExitConfirmOpenExternal || isExitConfirmOpenInternal
 
   useEffect(() => {
     const initialBindings = loadPersistedBindings()
+    setSavedBindings(initialBindings)
     setBindings(initialBindings)
-    setIsBindingsReady(true)
   }, [])
 
   useEffect(() => {
-    if (!isBindingsReady) {
-      return
-    }
-
-    persistBindings(bindings)
-  }, [bindings, isBindingsReady])
+    onUnsavedChangesChange?.(hasUnsavedChanges)
+  }, [hasUnsavedChanges, onUnsavedChangesChange])
 
   useEffect(() => {
     if (!activeBindingId && activeCategory.bindings?.[0]) {
@@ -169,7 +199,10 @@ export function CharadesSettingsOverlay({ onBack }: Props) {
         index: selectedGamepad.index,
         buttons: selectedGamepad.buttons.length,
         axes: selectedGamepad.axes.length,
-        currentInput: getCurrentGamepadInputLabel(selectedGamepad),
+        currentInput: formatControllerLabelForProfile(
+          getCurrentGamepadInputLabel(selectedGamepad) ?? '',
+          detectGamepadProfile(selectedGamepad.id || ''),
+        ),
       })
 
       frameId = window.requestAnimationFrame(tick)
@@ -183,9 +216,11 @@ export function CharadesSettingsOverlay({ onBack }: Props) {
   }, [isPadView, selectedGamepadIndex])
 
   useEffect(() => {
-    if (listeningBindingDevice !== 'keyboard' || !listeningBindingId) {
+    if (listeningBindingDevice !== 'keyboard' || !listeningBindingId || !listeningBindingSlot) {
       return
     }
+
+    const slot = listeningBindingSlot
 
     function handleKeyDown(event: globalThis.KeyboardEvent) {
       const normalized = normalizeKeyboardInput(event.key)
@@ -200,20 +235,22 @@ export function CharadesSettingsOverlay({ onBack }: Props) {
         return
       }
 
-      setBindings((current) => applyBindingAssignment(current, binding, normalized))
+      setBindings((current) => applyBindingAssignment(current, binding, slot, normalized))
       setActiveBindingId(binding.id)
-      setListeningBindingId(null)
+      setListeningBindingKey(null)
     }
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [activeCategory.bindings, listeningBindingDevice, listeningBindingId])
+  }, [activeCategory.bindings, listeningBindingDevice, listeningBindingId, listeningBindingSlot])
 
   useEffect(() => {
-    if (listeningBindingDevice !== 'controller' || !listeningBindingId) {
+    if (listeningBindingDevice !== 'controller' || !listeningBindingId || !listeningBindingSlot) {
       gamepadSnapshotRef.current = null
       return
     }
+
+    const slot = listeningBindingSlot
 
     let frameId = 0
 
@@ -247,9 +284,9 @@ export function CharadesSettingsOverlay({ onBack }: Props) {
         return
       }
 
-      setBindings((current) => applyBindingAssignment(current, binding, nextInput))
+      setBindings((current) => applyBindingAssignment(current, binding, slot, nextInput))
       setActiveBindingId(binding.id)
-      setListeningBindingId(null)
+      setListeningBindingKey(null)
       gamepadSnapshotRef.current = null
     }
 
@@ -259,7 +296,7 @@ export function CharadesSettingsOverlay({ onBack }: Props) {
       window.cancelAnimationFrame(frameId)
       gamepadSnapshotRef.current = null
     }
-  }, [activeCategory.bindings, listeningBindingDevice, listeningBindingId, selectedGamepadIndex])
+  }, [activeCategory.bindings, listeningBindingDevice, listeningBindingId, listeningBindingSlot, selectedGamepadIndex])
 
   useEffect(() => {
     function handlePointerMove(event: PointerEvent) {
@@ -293,7 +330,7 @@ export function CharadesSettingsOverlay({ onBack }: Props) {
   function handleCategoryChange(category: CharadesSettingsCategory) {
     setActiveCategoryId(category.id)
     setActiveBindingId(category.bindings?.[0]?.id ?? '')
-    setListeningBindingId(null)
+    setListeningBindingKey(null)
     if (category.id === 'controls') {
       setActiveControlsDevice('keyboard')
     }
@@ -312,26 +349,70 @@ export function CharadesSettingsOverlay({ onBack }: Props) {
     setActiveBindingId(binding.id)
   }
 
-  function handleBindingListen(binding: CharadesControlsBinding) {
+  function handleBindingListen(binding: CharadesControlsBinding, slot: BindingSlot) {
     setActiveBindingId(binding.id)
     gamepadSnapshotRef.current = null
-    setListeningBindingId((current) => (current === binding.id ? null : binding.id))
+    const nextKey = getBindingSlotKey(binding.id, slot)
+    setListeningBindingKey((current) => (current === nextKey ? null : nextKey))
   }
 
-  function handleBindingClear(binding: CharadesControlsBinding) {
+  function handleBindingClear(binding: CharadesControlsBinding, slot: BindingSlot) {
     setBindings((current) => ({
       ...current,
-      [binding.id]: '',
+      [getBindingSlotKey(binding.id, slot)]: '',
     }))
     setActiveBindingId(binding.id)
-    setListeningBindingId((current) => (current === binding.id ? null : current))
+    setListeningBindingKey((current) => (current === getBindingSlotKey(binding.id, slot) ? null : current))
   }
 
   function handleResetBindings() {
+    if (!hasDefaultChanges) {
+      return
+    }
+
+    setIsResetConfirmOpen(true)
+  }
+
+  function handleConfirmResetBindings() {
     const defaults = createDefaultBindings()
     setBindings(defaults)
-    setListeningBindingId(null)
-    clearPersistedBindings()
+    setListeningBindingKey(null)
+    setIsResetConfirmOpen(false)
+  }
+
+  function handleSaveBindings() {
+    persistBindings(bindings)
+    setSavedBindings(bindings)
+    setIsExitConfirmOpenInternal(false)
+    onCloseExternalExitConfirm?.()
+  }
+
+  function handleRequestBack() {
+    setListeningBindingKey(null)
+
+    if (!hasUnsavedChanges) {
+      ;(onExitToMenu ?? onBack)()
+      return
+    }
+
+    setIsExitConfirmOpenInternal(true)
+  }
+
+  function handleDiscardAndExit() {
+    setBindings(savedBindings)
+    setListeningBindingKey(null)
+    setIsExitConfirmOpenInternal(false)
+    onCloseExternalExitConfirm?.()
+    ;(onExitToMenu ?? onBack)()
+  }
+
+  function handleSaveAndExit() {
+    persistBindings(bindings)
+    setSavedBindings(bindings)
+    setListeningBindingKey(null)
+    setIsExitConfirmOpenInternal(false)
+    onCloseExternalExitConfirm?.()
+    ;(onExitToMenu ?? onBack)()
   }
 
   function handleDebugPointerDown(event: ReactPointerEvent<HTMLDivElement>) {
@@ -354,13 +435,11 @@ export function CharadesSettingsOverlay({ onBack }: Props) {
       groups[binding.section].push(binding)
       return groups
     }, {})
+    const currentSectionLabel = Object.keys(groupedBindings)[0] ?? (activeControlsDevice === 'controller' ? 'Kontroler' : 'Klawiatura')
 
     return (
       <>
-        <div className={styles.listHeader}>
-          <span className={styles.listEyebrow}>Mapowanie wejsc</span>
-          <strong className={styles.listTitle}>Sterowanie</strong>
-        </div>
+        <SettingsListHeader eyebrow="Mapowanie wejsc" title="Sterowanie" />
 
         <div className={styles.deviceSegmentRow}>
           <div className={styles.deviceSegment} role="tablist" aria-label="Urzadzenie sterowania">
@@ -379,7 +458,7 @@ export function CharadesSettingsOverlay({ onBack }: Props) {
                 if (firstKeyboardBinding) {
                   setActiveBindingId(firstKeyboardBinding.id)
                 }
-                setListeningBindingId(null)
+                setListeningBindingKey(null)
               }}
             >
               <span className={styles.deviceSegmentIcon}>
@@ -404,7 +483,7 @@ export function CharadesSettingsOverlay({ onBack }: Props) {
                 if (firstControllerBinding) {
                   setActiveBindingId(firstControllerBinding.id)
                 }
-                setListeningBindingId(null)
+                setListeningBindingKey(null)
               }}
             >
               <span className={styles.deviceSegmentIcon}>
@@ -416,17 +495,17 @@ export function CharadesSettingsOverlay({ onBack }: Props) {
 
         </div>
 
+        <div className={styles.controlsColumnsHeader} aria-hidden="true">
+          <span className={styles.controlsColumnsSection}>{currentSectionLabel}</span>
+          <span className={styles.controlsColumnLabel}>Glowny</span>
+          <span className={styles.controlsColumnLabel}>Alternatywny</span>
+        </div>
+
         <div className={styles.listScroller}>
           {Object.entries(groupedBindings).map(([section, bindingsInSection]) => (
             <div key={section} className={styles.sectionGroup}>
-              <h3 className={styles.sectionTitle}>{section}</h3>
-
               {bindingsInSection.map((binding) => {
                 const isActive = binding.id === activeBinding?.id
-                const isListening = binding.id === listeningBindingId
-                const bindingValue = bindings[binding.id]
-                const hasBinding = Boolean(bindingValue)
-                const bindingLabel = isListening ? 'Nasluchiwanie...' : bindingValue || 'Nieprzypisany'
                 const BindingIcon = binding.device === 'keyboard' ? Keyboard : Gamepad2
 
                 return (
@@ -443,39 +522,55 @@ export function CharadesSettingsOverlay({ onBack }: Props) {
                       <span className={styles.optionMeta}>{binding.device === 'keyboard' ? 'Klawiatura' : 'Kontroler'}</span>
                     </span>
                     <span className={styles.optionControl}>
-                      <span className={styles.bindingChipShell}>
-                        <button
-                          type="button"
-                          className={[
-                            styles.bindingChip,
-                            isListening ? styles.bindingChipListening : '',
-                            hasBinding && !isListening ? styles.bindingChipClearable : '',
-                            !hasBinding && !isListening ? styles.bindingChipEmpty : '',
-                          ]
-                            .filter(Boolean)
-                            .join(' ')}
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            handleBindingListen(binding)
-                          }}
-                        >
-                          <BindingIcon size={14} />
-                          <span className={styles.bindingChipText}>{bindingLabel}</span>
-                        </button>
-                        {hasBinding && !isListening ? (
-                          <button
-                            type="button"
-                            aria-label={`Odbinduj ${binding.title}`}
-                            className={styles.bindingChipClear}
-                            onClick={(event) => {
-                              event.stopPropagation()
-                              handleBindingClear(binding)
-                            }}
-                          >
-                            <X size={13} />
-                          </button>
-                        ) : null}
-                      </span>
+                      {(['primary', 'secondary'] as BindingSlot[]).map((slot) => {
+                        const chipKey = getBindingSlotKey(binding.id, slot)
+                        const isListening = chipKey === listeningBindingKey
+                        const bindingValue = getBindingValue(bindings, binding.id, slot)
+                        const hasBinding = Boolean(bindingValue)
+                        const displayedBindingValue =
+                          binding.device === 'controller'
+                            ? formatControllerLabelForProfile(bindingValue, activeControllerProfile)
+                            : bindingValue
+                        const bindingLabel = isListening ? 'Nasluchiwanie...' : displayedBindingValue || 'Nieprzypisany'
+
+                        return (
+                          <span key={chipKey} className={styles.bindingChipStack}>
+                            <span className={styles.bindingChipShell}>
+                              <button
+                                type="button"
+                                className={[
+                                  styles.bindingChip,
+                                  isListening ? styles.bindingChipListening : '',
+                                  hasBinding && !isListening ? styles.bindingChipClearable : '',
+                                  !hasBinding && !isListening ? styles.bindingChipEmpty : '',
+                                ]
+                                  .filter(Boolean)
+                                  .join(' ')}
+                                onClick={(event) => {
+                                  event.stopPropagation()
+                                  handleBindingListen(binding, slot)
+                                }}
+                              >
+                                <BindingIcon size={14} />
+                                <span className={styles.bindingChipText}>{bindingLabel}</span>
+                              </button>
+                              {hasBinding && !isListening ? (
+                                <button
+                                  type="button"
+                                  aria-label={`Odbinduj ${binding.title} ${slot === 'primary' ? 'glowny' : 'alternatywny'}`}
+                                  className={styles.bindingChipClear}
+                                  onClick={(event) => {
+                                    event.stopPropagation()
+                                    handleBindingClear(binding, slot)
+                                  }}
+                                >
+                                  <X size={13} />
+                                </button>
+                              ) : null}
+                            </span>
+                          </span>
+                        )
+                      })}
                     </span>
                   </div>
                 )
@@ -490,78 +585,54 @@ export function CharadesSettingsOverlay({ onBack }: Props) {
   function renderPlaceholderList() {
     return (
       <>
-        <div className={styles.listHeader}>
-          <span className={styles.listEyebrow}>Sekcja przygotowana</span>
-          <strong className={styles.listTitle}>{activeCategory.label}</strong>
-        </div>
-
-        <div className={styles.placeholderPanel}>
-          <div className={styles.placeholderCard}>
-            <div className={styles.placeholderIcon}>
-              <AccentIcon size={22} />
-            </div>
-            <h3 className={styles.placeholderTitle}>{activeCategory.label}</h3>
-            <p className={styles.placeholderText}>{activeCategory.description}</p>
-          </div>
-        </div>
+        <SettingsListHeader eyebrow="Sekcja przygotowana" title={activeCategory.label} />
+        <SettingsPlaceholderCard icon={AccentIcon} title={activeCategory.label} description={activeCategory.description} />
       </>
     )
   }
 
   return (
-    <section className={styles.panel} aria-labelledby="charades-settings-title">
-      <div className={styles.topbar}>
-        <div className={styles.titleGroup}>
-          <span className={styles.eyebrow}>
-            <SlidersHorizontal size={14} />
-            Panel systemowy
-          </span>
-          <div className={styles.titleRow}>
-            <h2 id="charades-settings-title" className={styles.title}>
-              Ustawienia
-            </h2>
-            <div className={styles.statusPill}>Lokalny zapis / bez runtime</div>
-          </div>
-          <p className={styles.subtitle}>
-            Ekran preferencji produktu i interfejsu. Nadal nie dotyka zasad meczu ani ustawien trybu gry.
-          </p>
-        </div>
-      </div>
-
-      <div className={styles.categoryTabs} role="tablist" aria-label="Kategorie ustawien">
-        {charadesSettingsCategories.map((category) => {
-          const Icon = category.icon
-          const isActive = category.id === activeCategory.id
-
-          return (
-            <button
-              key={category.id}
-              type="button"
-              role="tab"
-              aria-selected={isActive}
-              className={isActive ? `${styles.categoryTab} ${styles.categoryTabActive}` : styles.categoryTab}
-              onClick={() => handleCategoryChange(category)}
-            >
-              <Icon size={18} />
-              <span className={styles.categoryTabLabel}>{category.label}</span>
-            </button>
-          )
-        })}
-      </div>
-
-      <div className={styles.contentGrid}>
-        <div className={styles.listPanel}>{isControlsView ? renderControlsList() : renderPlaceholderList()}</div>
-
-        <aside className={styles.detailPanel} aria-live="polite">
-          <div className={styles.detailHero}>
-            <div className={styles.detailIcon}>
-              <AccentIcon size={22} />
-            </div>
-            <div className={styles.detailHeroBody}>
-              <span className={styles.detailLabel}>{activeCategory.label}</span>
-              <h3 className={styles.detailTitle}>{isControlsView ? activeBinding?.title : activeCategory.label}</h3>
-            </div>
-          </div>
+    <>
+      <SettingsPanelShell
+      eyebrow={
+        <>
+          <SlidersHorizontal size={14} />
+          Panel systemowy
+        </>
+      }
+      title="Ustawienia"
+      subtitle="Ekran preferencji produktu i interfejsu. Nadal nie dotyka zasad meczu ani ustawien trybu gry."
+      status={
+        <SettingsStatusPill
+          label={hasUnsavedChanges ? 'Niezapisane zmiany' : 'Wszystkie zmiany zapisane'}
+          variant={hasUnsavedChanges ? 'warning' : 'default'}
+        />
+      }
+      tabs={
+        <SettingsPanelTabs
+          items={charadesSettingsCategories.map((category) => ({
+            id: category.id,
+            label: category.label,
+            icon: category.icon,
+          }))}
+          activeTab={activeCategory.id}
+          onChange={(tabId) => {
+            const nextCategory = charadesSettingsCategories.find((category) => category.id === tabId)
+            if (nextCategory) {
+              handleCategoryChange(nextCategory)
+            }
+          }}
+          ariaLabel="Kategorie ustawien"
+        />
+      }
+      main={isControlsView ? renderControlsList() : renderPlaceholderList()}
+      aside={
+        <div aria-live="polite">
+          <SettingsDetailHero
+            icon={AccentIcon}
+            label={activeCategory.label}
+            title={isControlsView ? activeBinding?.title ?? activeCategory.label : activeCategory.label}
+          />
 
           <p className={styles.detailCopy}>
             {isControlsView ? activeBinding?.description : activeCategory.description}
@@ -576,11 +647,19 @@ export function CharadesSettingsOverlay({ onBack }: Props) {
                     ? listeningBindingId === activeBinding?.id
                       ? 'Nasluchiwanie...'
                       : activeBinding
-                        ? bindings[activeBinding.id] || 'Nieprzypisany'
+                        ? `${
+                            activeBinding.device === 'controller'
+                              ? formatControllerLabelForProfile(getBindingValue(bindings, activeBinding.id, 'primary'), activeControllerProfile)
+                              : getBindingValue(bindings, activeBinding.id, 'primary')
+                          } / ${
+                            (activeBinding.device === 'controller'
+                              ? formatControllerLabelForProfile(getBindingValue(bindings, activeBinding.id, 'secondary'), activeControllerProfile)
+                              : getBindingValue(bindings, activeBinding.id, 'secondary')) || 'Brak'
+                          }`
                         : ''
                     : 'W przygotowaniu'}
                 </span>
-                <span className={styles.detailMetricMeta}>{isControlsView ? 'wejscie aktywne' : 'placeholder'}</span>
+                <span className={styles.detailMetricMeta}>{isControlsView ? 'glowny / alternatywny' : 'placeholder'}</span>
               </div>
             </div>
 
@@ -668,8 +747,39 @@ export function CharadesSettingsOverlay({ onBack }: Props) {
                 : 'Ta zakladka zostala celowo uproszczona. Docelowa zawartosc wroci tu dopiero przy wdrazaniu realnych ustawien.'}
             </p>
           </div>
-        </aside>
-      </div>
+        </div>
+      }
+      footer={
+        <SettingsPanelFooter
+          meta={
+            <>
+              <span className={styles.footerNote}>
+                {hasUnsavedChanges
+                  ? 'Masz niezapisane zmiany w ustawieniach.'
+                  : isControlsView
+                    ? 'Sterowanie jest zapisane lokalnie na tym urzadzeniu.'
+                    : `${activeCategory.label} / placeholder`}
+              </span>
+              <button type="button" className={styles.footerLinkButton} onClick={handleRequestBack}>
+                Powrot do menu gry
+              </button>
+            </>
+          }
+          actions={
+            <>
+              <button type="button" className={styles.secondaryButton} onClick={handleResetBindings} disabled={!hasDefaultChanges}>
+                <RotateCcw size={14} />
+                Przywroc domyslne
+              </button>
+              <button type="button" className={styles.primaryButton} onClick={handleSaveBindings} disabled={!hasUnsavedChanges}>
+                <Save size={14} />
+                Zapisz
+              </button>
+            </>
+          }
+        />
+      }
+      />
 
       {isPadView && isDebugOpen ? (
         <div
@@ -693,19 +803,58 @@ export function CharadesSettingsOverlay({ onBack }: Props) {
         </div>
       ) : null}
 
-      <div className={styles.footer}>
-        <span className={styles.footerNote}>{isControlsView ? 'Sterowanie / lokalny rebinding' : `${activeCategory.label} / placeholder`}</span>
+      <AlertDialog
+        open={isExitConfirmOpen}
+        variant="danger"
+        eyebrow="Alert zapisu"
+        title="Masz niezapisane zmiany"
+        description="Zapisz je przed wyjsciem albo odrzuc i wroc do ostatniego zapisu."
+        icon={<AlertTriangle size={18} />}
+        actions={[
+          {
+            label: 'Zapisz i wyjdz',
+            variant: 'primary',
+            fullWidth: true,
+            onClick: handleSaveAndExit,
+          },
+          {
+            label: 'Odrzuc zmiany',
+            variant: 'danger',
+            onClick: handleDiscardAndExit,
+          },
+          {
+            label: 'Wroc do ustawien',
+            variant: 'secondary',
+            onClick: () => {
+              setIsExitConfirmOpenInternal(false)
+              onCloseExternalExitConfirm?.()
+            },
+          },
+        ]}
+      />
 
-        <div className={styles.footerActions}>
-          <button type="button" className={styles.secondaryButton} onClick={handleResetBindings}>
-            <RotateCcw size={14} />
-            Przywroc domyslne
-          </button>
-          <button type="button" className={styles.primaryButton} onClick={onBack}>
-            Wroc do menu gry
-          </button>
-        </div>
-      </div>
-    </section>
+      <AlertDialog
+        open={isResetConfirmOpen}
+        variant="danger"
+        eyebrow="Reset ustawien"
+        title="Przywrocic domyslne ustawienia?"
+        description="To podmieni caly aktualny szkic ustawien na wartosci domyslne. Zmiana nie zapisze sie sama."
+        icon={<AlertTriangle size={18} />}
+        actions={[
+          {
+            label: 'Przywroc domyslne',
+            variant: 'danger',
+            fullWidth: true,
+            onClick: handleConfirmResetBindings,
+          },
+          {
+            label: 'Anuluj',
+            variant: 'secondary',
+            onClick: () => setIsResetConfirmOpen(false),
+          },
+        ]}
+      />
+
+    </>
   )
 }

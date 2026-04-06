@@ -3,6 +3,7 @@ import { ChevronLeft } from 'lucide-react'
 import type { MutableRefObject } from 'react'
 import type { CharadesGameSettings } from '../../setup/state'
 import { AutoscaledWord } from '../shared/AutoscaledWord'
+import { ActionHint } from './ActionHint'
 import styles from './PlayBoard.module.css'
 import { PresenterCard } from './PlayBoardCards'
 import type { PlayerSummary, RankedPlayer } from './playboard-types'
@@ -22,6 +23,7 @@ type VerdictViewProps = SharedPhaseProps & {
   currentWord: string
   isVerdictWordVisible: boolean
   onToggleWordVisibility: () => void
+  revealHintLabel?: string | null
 }
 
 type RoundSummaryViewProps = {
@@ -39,6 +41,7 @@ type PrepareViewProps = SharedPhaseProps & {
   scoreItemRefs: MutableRefObject<Record<string, HTMLDivElement | null>>
   onToggleScoreRail: () => void
   getScoreKey: (player: RankedPlayer) => string
+  railHintLabel?: string | null
 }
 
 type BufferViewProps = SharedPhaseProps & {
@@ -106,6 +109,7 @@ export function VerdictView({
   currentWord,
   isVerdictWordVisible,
   onToggleWordVisibility,
+  revealHintLabel,
 }: VerdictViewProps) {
   const useExpandedWordShell = shouldAutoscaleWord(currentWord)
   const wrapVerdictWord = shouldWrapVerdictWord(currentWord)
@@ -124,12 +128,9 @@ export function VerdictView({
               <h1 className={styles.verdictTitle}>Czy hasło zostało odgadnięte?</h1>
               {currentWord ? (
                 <>
-                  <button
-                    type="button"
-                    className={styles.verdictRevealButton}
-                    onClick={onToggleWordVisibility}
-                  >
-                    {isVerdictWordVisible ? 'Ukryj hasło' : 'Pokaż hasło'}
+                  <button type="button" className={styles.verdictRevealButton} onClick={onToggleWordVisibility}>
+                    <span>{isVerdictWordVisible ? 'Ukryj hasło' : 'Pokaż hasło'}</span>
+                    <ActionHint label={revealHintLabel} muted />
                   </button>
                   <div className={styles.verdictWordSlot}>
                     <AutoscaledWord
@@ -149,9 +150,7 @@ export function VerdictView({
             </div>
             <div className={styles.verdictNote}>
               <span className={styles.verdictNoteLabel}>Decyzja hosta</span>
-              <p className={styles.verdictNoteText}>
-                Wybierz w dolnym pasku, czy prezentowane hasło zostało odgadnięte.
-              </p>
+              <p className={styles.verdictNoteText}>Wybierz w dolnym pasku, czy prezentowane hasło zostało odgadnięte.</p>
             </div>
           </div>
         </div>
@@ -209,6 +208,7 @@ export function PrepareView({
   scoreItemRefs,
   onToggleScoreRail,
   getScoreKey,
+  railHintLabel,
 }: PrepareViewProps) {
   return (
     <main className={`${styles.board} ${styles.boardPrepare}`}>
@@ -252,6 +252,7 @@ export function PrepareView({
             <span className={styles.scoreRailToggleIcon} aria-hidden="true">
               <ChevronLeft size={22} />
             </span>
+            <ActionHint label={railHintLabel} muted />
           </button>
 
           <div className={styles.scoreRailHeader}>
@@ -304,9 +305,7 @@ export function BufferView({ presenter, bufferRemaining }: BufferViewProps) {
             </div>
             <div className={styles.bufferSideNote}>
               <span className={styles.bufferSideNoteLabel}>Na planszy</span>
-              <p className={styles.bufferHint}>
-                To jest moment tylko dla prezentera. Reszta graczy czeka na start tury.
-              </p>
+              <p className={styles.bufferHint}>To jest moment tylko dla prezentera. Reszta graczy czeka na start tury.</p>
             </div>
           </div>
         </div>

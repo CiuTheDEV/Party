@@ -1,4 +1,5 @@
 import { AvatarAsset } from '@party/ui'
+import { ActionHint } from './ActionHint'
 import styles from './HostGameScreen.module.css'
 import type { PlayerSummary } from './playboard-types'
 
@@ -12,6 +13,12 @@ type Props = {
   onSelectPlayer: (playerIdx: number) => void
   onCancel: () => void
   onConfirm: () => void
+  actionHints?: {
+    confirm?: string | null
+    cancel?: string | null
+    previous?: string | null
+    next?: string | null
+  }
 }
 
 export function VerdictPickerModal({
@@ -20,6 +27,7 @@ export function VerdictPickerModal({
   onSelectPlayer,
   onCancel,
   onConfirm,
+  actionHints,
 }: Props) {
   const density =
     players.length === 12
@@ -53,9 +61,15 @@ export function VerdictPickerModal({
             )
           })}
         </div>
+        <div className={styles.modalHintRow}>
+          <span className={styles.modalHintText}>
+            <ActionHint label={actionHints?.previous} muted /> / <ActionHint label={actionHints?.next} muted /> wybór gracza
+          </span>
+        </div>
         <div className={styles.modalActions}>
           <button type="button" className={styles.cancelButton} onClick={onCancel}>
-            Wróć
+            <span>Wróć</span>
+            <ActionHint label={actionHints?.cancel} muted />
           </button>
           <button
             type="button"
@@ -63,7 +77,8 @@ export function VerdictPickerModal({
             disabled={selectedPlayerIdx === null}
             onClick={onConfirm}
           >
-            Przyznaj punkt
+            <span>Przyznaj punkt</span>
+            <ActionHint label={actionHints?.confirm} />
           </button>
         </div>
       </div>

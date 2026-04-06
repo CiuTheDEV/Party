@@ -40,6 +40,9 @@ export function PlayBoard({
   currentRound,
   totalRounds,
   animationsEnabled = true,
+  externalToggleScoreRailSignal = 0,
+  externalToggleVerdictWordSignal = 0,
+  actionHintLabels,
 }: PlayBoardProps) {
   const totalCards = order.length > 0 ? order.length : players.length
   const [centerCount, setCenterCount] = useState(totalCards)
@@ -59,6 +62,8 @@ export function PlayBoard({
   const flyCardRef = useRef<HTMLDivElement | null>(null)
   const flyCardInnerRef = useRef<HTMLDivElement | null>(null)
   const slotRefs = useRef<(HTMLDivElement | null)[]>([])
+  const lastScoreRailToggleSignalRef = useRef(externalToggleScoreRailSignal)
+  const lastVerdictWordToggleSignalRef = useRef(externalToggleVerdictWordSignal)
   const settledPlayers = order.slice(0, settledCount)
   const rankedPlayers = useMemo<RankedPlayer[]>(
     () => getRankedPlayers(players),
@@ -185,6 +190,30 @@ export function PlayBoard({
       setIsVerdictWordVisible(false)
     }
   }, [phase, currentWord])
+
+  useEffect(() => {
+    if (externalToggleScoreRailSignal === lastScoreRailToggleSignalRef.current) {
+      return
+    }
+
+    lastScoreRailToggleSignalRef.current = externalToggleScoreRailSignal
+
+    if (phase === 'prepare' && showPrepareScoreRail) {
+      toggleScoreRail()
+    }
+  }, [externalToggleScoreRailSignal, phase, showPrepareScoreRail, toggleScoreRail])
+
+  useEffect(() => {
+    if (externalToggleVerdictWordSignal === lastVerdictWordToggleSignalRef.current) {
+      return
+    }
+
+    lastVerdictWordToggleSignalRef.current = externalToggleVerdictWordSignal
+
+    if (phase === 'verdict') {
+      setIsVerdictWordVisible((current) => !current)
+    }
+  }, [externalToggleVerdictWordSignal, phase])
 
   useEffect(() => {
     if (
@@ -465,12 +494,13 @@ export function PlayBoard({
 
   if (phase === 'verdict') {
     return (
-      <VerdictView
-        presenter={presenter}
-        currentWord={currentWord}
-        isVerdictWordVisible={isVerdictWordVisible}
-        onToggleWordVisibility={() => setIsVerdictWordVisible((current) => !current)}
-      />
+        <VerdictView
+          presenter={presenter}
+          currentWord={currentWord}
+          isVerdictWordVisible={isVerdictWordVisible}
+          onToggleWordVisibility={() => setIsVerdictWordVisible((current) => !current)}
+          revealHintLabel={actionHintLabels?.rail}
+        />
     )
   }
 
@@ -496,6 +526,7 @@ export function PlayBoard({
         scoreItemRefs={scoreItemRefs}
         onToggleScoreRail={toggleScoreRail}
         getScoreKey={getScoreKey}
+        railHintLabel={actionHintLabels?.rail}
       />
     )
   }

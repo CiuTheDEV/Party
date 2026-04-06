@@ -1,6 +1,8 @@
 import { charadesSettingsCategories, type CharadesControlsBinding, type CharadesControlsDevice } from './charades-settings-overlay-data'
 
 export const CHARADES_BINDINGS_STORAGE_KEY = 'charades:settings:bindings:v1'
+export type BindingSlot = 'primary' | 'secondary'
+export type GamepadProfile = 'xbox' | 'playstation' | 'generic'
 
 export type GamepadSnapshot = {
   axes: number[]
@@ -46,11 +48,89 @@ const controllerButtonLabels = [
   'Home',
 ]
 
+const controllerProfileLabelMap: Record<string, Record<Exclude<GamepadProfile, 'generic'>, string>> = {
+  'A / Cross': { xbox: 'A', playstation: 'Cross' },
+  'B / Circle': { xbox: 'B', playstation: 'Circle' },
+  'X / Square': { xbox: 'X', playstation: 'Square' },
+  'Y / Triangle': { xbox: 'Y', playstation: 'Triangle' },
+  'L1 / LB': { xbox: 'LB', playstation: 'L1' },
+  'R1 / RB': { xbox: 'RB', playstation: 'R1' },
+  'L2 / LT': { xbox: 'LT', playstation: 'L2' },
+  'R2 / RT': { xbox: 'RT', playstation: 'R2' },
+  'Select / View': { xbox: 'View', playstation: 'Create' },
+}
+
 const controlsBindings = charadesSettingsCategories.find((category) => category.id === 'controls')?.bindings ?? []
 const ignoredGamepadIdParts = ['audio', 'headset', 'headphone', 'hyperx', 'cloud', 'mic', 'speaker']
 
 export function createDefaultBindings() {
-  return Object.fromEntries(controlsBindings.map((binding) => [binding.id, binding.inputLabel])) as Record<string, string>
+  return Object.fromEntries(
+    controlsBindings.flatMap((binding) => [
+      [getBindingSlotKey(binding.id, 'primary'), binding.primaryInputLabel],
+      [getBindingSlotKey(binding.id, 'secondary'), binding.secondaryInputLabel ?? ''],
+    ]),
+  ) as Record<string, string>
+}
+
+export function getBindingSlotKey(bindingId: string, slot: BindingSlot) {
+  return `${bindingId}:${slot}`
+}
+
+export function getBindingValue(bindings: Record<string, string>, bindingId: string, slot: BindingSlot) {
+  return bindings[getBindingSlotKey(bindingId, slot)] ?? ''
+}
+
+export function getBindingLabels(bindings: Record<string, string>, bindingId: string) {
+  return {
+    primary: getBindingValue(bindings, bindingId, 'primary'),
+    secondary: getBindingValue(bindings, bindingId, 'secondary'),
+  }
+}
+
+export function hasBindingChanges(savedBindings: Record<string, string>, draftBindings: Record<string, string>) {
+  const allKeys = new Set([...Object.keys(savedBindings), ...Object.keys(draftBindings)])
+
+  for (const key of allKeys) {
+    if ((savedBindings[key] ?? '') !== (draftBindings[key] ?? '')) {
+      return true
+    }
+  }
+
+  return false
+}
+
+export function detectGamepadProfile(gamepadId: string): GamepadProfile {
+  const normalizedId = gamepadId.toLowerCase()
+
+  if (
+    normalizedId.includes('xbox') ||
+    normalizedId.includes('xinput') ||
+    normalizedId.includes('microsoft')
+  ) {
+    return 'xbox'
+  }
+
+  if (
+    normalizedId.includes('playstation') ||
+    normalizedId.includes('dualshock') ||
+    normalizedId.includes('dualsense') ||
+    normalizedId.includes('sony') ||
+    normalizedId.includes('wireless controller') ||
+    normalizedId.includes('ps5') ||
+    normalizedId.includes('ps4')
+  ) {
+    return 'playstation'
+  }
+
+  return 'generic'
+}
+
+export function formatControllerLabelForProfile(label: string, profile: GamepadProfile) {
+  if (!label || profile === 'generic') {
+    return label
+  }
+
+  return controllerProfileLabelMap[label]?.[profile] ?? label
 }
 
 export function getControlsBindings() {
@@ -97,14 +177,6 @@ export function persistBindings(bindings: Record<string, string>) {
   }
 
   window.localStorage.setItem(CHARADES_BINDINGS_STORAGE_KEY, JSON.stringify(bindings))
-}
-
-export function clearPersistedBindings() {
-  if (typeof window === 'undefined') {
-    return
-  }
-
-  window.localStorage.removeItem(CHARADES_BINDINGS_STORAGE_KEY)
 }
 
 export function normalizeKeyboardInput(key: string) {
@@ -212,23 +284,27 @@ export function pickPreferredGamepad(gamepads: Gamepad[]) {
 export function applyBindingAssignment(
   currentBindings: Record<string, string>,
   targetBinding: CharadesControlsBinding,
+  targetSlot: BindingSlot,
   nextLabel: string,
 ) {
   const nextBindings = { ...currentBindings }
-  const previousValue = nextBindings[targetBinding.id] ?? ''
+  const targetKey = getBindingSlotKey(targetBinding.id, targetSlot)
+  const previousValue = nextBindings[targetKey] ?? ''
   const normalizedLabel = nextLabel.trim()
 
-  const conflictingBinding = getControlsBindings().find(
-    (binding) =>
-      binding.id !== targetBinding.id &&
-      binding.device === targetBinding.device &&
-      nextBindings[binding.id] === normalizedLabel,
-  )
+  const conflictingSlot = getControlsBindings()
+    .filter((binding) => binding.device === targetBinding.device)
+    .flatMap((binding) => (['primary', 'secondary'] as BindingSlot[]).map((slot) => ({ binding, slot })))
+    .find(
+      ({ binding, slot }) =>
+        !(binding.id === targetBinding.id && slot === targetSlot) &&
+        getBindingValue(nextBindings, binding.id, slot) === normalizedLabel,
+    )
 
-  nextBindings[targetBinding.id] = normalizedLabel
+  nextBindings[targetKey] = normalizedLabel
 
-  if (conflictingBinding) {
-    nextBindings[conflictingBinding.id] = previousValue
+  if (conflictingSlot) {
+    nextBindings[getBindingSlotKey(conflictingSlot.binding.id, conflictingSlot.slot)] = previousValue
   }
 
   return nextBindings

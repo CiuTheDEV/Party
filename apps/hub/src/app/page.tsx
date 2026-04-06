@@ -12,6 +12,7 @@ import { HeroCarousel } from '@/features/hub/components/HeroCarousel'
 import { SectionLink } from '@/features/hub/components/SectionLink'
 import { featuredLibraryCards, railItems } from '@/features/hub/content/hub-content'
 import { useActiveSection } from '@/features/hub/hooks/useActiveSection'
+import { resolveLibraryCardMedia } from '@/features/hub/lib/library-card-media'
 import { scrollToSection } from '@/features/hub/lib/scrolling'
 import layoutStyles from '@/features/hub/styles/layout.module.css'
 import sectionStyles from '@/features/hub/styles/sections.module.css'
@@ -75,14 +76,29 @@ export default function HomePage() {
               const linkedGame = card.gameId ? gamesById.get(card.gameId) : undefined
               const isPlayable = linkedGame?.status === 'live'
               const href = linkedGame?.status === 'live' ? linkedGame.href : undefined
-              const cardVisualStyle = card.imagePath
-                ? ({ '--card-image': `url('${card.imagePath}')` } as CSSProperties)
+              const cardMedia = resolveLibraryCardMedia(card)
+              const cardVisualStyle = cardMedia?.kind === 'image'
+                ? ({ '--card-image': `url('${cardMedia.src}')` } as CSSProperties)
                 : undefined
               const cardBody = (
                 <div
                   className={`${sectionStyles.cardVisual} ${libraryCardToneClassNames[card.tone]}`}
                   style={cardVisualStyle}
                 >
+                  {cardMedia?.kind === 'video' ? (
+                    <video
+                      className={sectionStyles.cardVideo}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      preload="metadata"
+                      poster={cardMedia.poster}
+                      aria-hidden="true"
+                    >
+                      <source src={cardMedia.src} type="video/mp4" />
+                    </video>
+                  ) : null}
                   <div className={sectionStyles.cardFade} />
                   <div className={sectionStyles.cardCaption}>
                     <span className={sectionStyles.cardTag}>{card.label}</span>

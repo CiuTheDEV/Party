@@ -77,7 +77,8 @@ project-party/
   - sidebar,
   - shell layout,
   - setup modal/template chrome,
-  - shared platform modal primitives.
+  - shared platform modal primitives,
+  - shared settings-screen primitives (`AlertDialog`, settings shell/footer/tabs/status/placeholder/header/hero).
 - `@party/game-sdk` owns the module contract.
 - each game module owns:
   - `config`,
@@ -137,17 +138,17 @@ This means:
 
 <!-- handoff:start -->
 ## Session Handoff
-- Last: 2026-04-03 23:59 by Codex (GPT-5.4)
-- Task: Charades main-menu settings overlay, real control rebinding, controller handling, and compact right-column polish.
-- Did: Added the local `Ustawienia` overlay to Charades main menu and evolved it into a real controls screen with persistent rebinding. Implemented equal binding boxes, click-to-listen only on the binding chip, clear-on-hover, local persistence, keyboard capture, controller capture through Gamepad API, and auto-swap on conflicts. Debugged controller selection by discovering that browser HID ordering could expose non-controller devices like HyperX headphones first, then added preferred-controller ranking, manual controller selection, and a draggable `DEV` popup only for `Sterowanie > Pad`. Iterated the right column from a heavy card stack into a more compact inspector and replaced placeholder control names with a smaller contextual action model. Fresh checks during this session repeatedly passed on `npm run build --workspace @party/hub`.
-- Next: Open the latest settings overlay in a real browser and do one final visual pass on the right column if any keyboard/pad switch jump still remains. After that, either wire these bindings into actual runtime controls or return to Phase 4 deployment work.
-- Blocker: No code-level blocker. Remaining open item is visual QA of the compact right column in live UI.
+- Last: 2026-04-06 by Codex (GPT-5.4)
+- Task: Asset-generation prompt packaging for Gemini, hub card loop support, and finishing alert cleanup around Charades.
+- Did: Added two Gemini-ready resource files in `prompts/` for image and short-video generation, derived from the existing Project Party prompt system. Wired the hub library cards to support video loops with poster fallback and connected the current Charades/Codenames cards to `.mp4` assets. Replaced remaining native confirm dialogs in Charades pool management with shared `AlertDialog`, replaced browser-back confirmation during active play with an in-app alert, reviewed the settings code for dead/duplicate logic, and removed two unused helpers from the bindings/settings layer. Verification passing in this session: `npm run test:library-card-media --workspace @party/hub`, `npm run build --workspace @party/hub`, `npm run build --workspace @party/charades`, and `npm run test:controls-bindings --workspace @party/charades`.
+- Next: Return to Phase 4 deployment work or run a manual browser polish pass on the new hub video cards and Charades alert flows.
+- Blocker: No code blocker. Remaining risk is UX-only: the new alert flows and video cards were build-verified but not manually smoke-tested in browser during this session.
 ## Previous Handoff
-- Last: 2026-04-02 23:10 by Codex (GPT-5.4)
-- Task: Phase 4 readiness pass across shared chrome, PartyKit authority/config, encoding, and dependency risk.
-- Did: Migrated Hub-derived chrome into shared `@party/ui` so Hub and game menus now use the same topbar/rail shell, then polished the shared login button. Closed the biggest multiplayer blocker by adding server-side PartyKit authority rules and a regression harness, then added a production-safe PartyKit host resolver with a dedicated test so non-local deploys fail fast unless `NEXT_PUBLIC_PARTYKIT_HOST` is configured. Cleaned visible UTF-8/mojibake issues in Hub and Charades presenter/pairing surfaces, removed unused Clerk from `@party/hub`, refreshed the lockfile, and cleaned Turbo build warnings except for the remaining upstream PartyKit advisory chain. Fresh checks passing: `npm run test:authority --workspace @party/partykit`, `npm run test:runtime-host --workspace @party/charades`, `npm run verify:encoding`, and `npm run build`.
-- Next: Start actual Phase 4 deploy work. First recommended slice is Cloudflare/Partykit deployment wiring and env setup, with one explicit known risk carried forward: upstream `partykit` still brings `undici`/`miniflare`/`esbuild` advisories and currently has no simple npm upgrade path beyond `0.0.115`.
-- Blocker: No code-level blocker in repo. Remaining blocker is external/upstream dependency risk in the current PartyKit toolchain.
+- Last: 2026-04-06 by Codex (GPT-5.4)
+- Task: Charades settings overlay polish, shared settings UI extraction, and documentation refresh.
+- Did: Finished the main-menu settings overlay flow around manual save/reset and unsaved-changes alerts, then extracted the reusable settings chrome into `@party/ui`: alert dialog, settings shell/footer/tabs/status pill/placeholder/list header/detail hero. Kept Charades-specific binding logic and the controls mapping table local to the game package. Added `packages/ui/README.md` to document the shared UI boundary and updated project docs/memory to reflect the new shared settings primitives. Verification passing in this session: `npm run build --workspace @party/ui` and `npm run build --workspace @party/hub`.
+- Next: Decide whether the controls bindings table should stay game-local until a second game needs it, or whether the next task should return to real settings/runtime work or Phase 4 deployment.
+- Blocker: No code blocker. The main open decision is product/architecture scope: stop the shared extraction here, or generalize more of the settings screen only if reuse is proven.
 <!-- handoff:end -->
 
 

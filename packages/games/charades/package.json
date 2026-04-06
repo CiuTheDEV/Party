@@ -13,6 +13,8 @@
   },
   "scripts": {
     "build": "tsc",
+    "test:controls-bindings": "tsc --target es2022 --module commonjs --moduleResolution node --types node --skipLibCheck --outDir ../../../output/charades-controls-bindings ./src/menu/charades-controls-bindings.ts && node ./src/menu/charades-controls-bindings.check.cjs ../../../output/charades-controls-bindings/charades-controls-bindings.js",
+    "test:host-controls": "tsc --target es2022 --module commonjs --moduleResolution node --types node --skipLibCheck --outDir ../../../output/charades-host-controls ./src/runtime/play/host-controls.ts && node ./src/runtime/play/host-controls.check.cjs ../../../output/charades-host-controls/host-controls.js",
     "test:runtime-host": "tsc --target es2022 --module commonjs --moduleResolution node --types node --skipLibCheck --outDir ../../../output/charades-runtime-host ./src/runtime/shared/charades-runtime.ts && node ./src/runtime/shared/charades-runtime.check.cjs ../../../output/charades-runtime-host/charades-runtime.js",
     "test:menu-view": "tsc --target es2022 --module commonjs --moduleResolution node --types node --skipLibCheck --outDir ../../../output/charades-menu-view ./src/menu/menu-view.ts && node ./src/menu/menu-view.check.cjs ../../../output/charades-menu-view/menu-view.js"
   },

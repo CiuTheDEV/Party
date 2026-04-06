@@ -8,9 +8,21 @@ export type CharadesMenuContentProps = {
   onOpenSetup: () => void
   activeView?: CharadesMenuView
   onChangeView?: (view: CharadesMenuView) => void
+  isSettingsExitConfirmOpen?: boolean
+  onCancelSettingsExitConfirm?: () => void
+  onCommitSettingsExit?: () => void
+  onSettingsDirtyChange?: (value: boolean) => void
 }
 
-export function CharadesMenuContent({ onOpenSetup, activeView, onChangeView }: CharadesMenuContentProps) {
+export function CharadesMenuContent({
+  onOpenSetup,
+  activeView,
+  onChangeView,
+  isSettingsExitConfirmOpen,
+  onCancelSettingsExitConfirm,
+  onCommitSettingsExit,
+  onSettingsDirtyChange,
+}: CharadesMenuContentProps) {
   const isSettingsView = activeView === 'settings'
 
   return (
@@ -31,7 +43,13 @@ export function CharadesMenuContent({ onOpenSetup, activeView, onChangeView }: C
       )}
 
       {isSettingsView ? (
-        <CharadesSettingsOverlay onBack={() => onChangeView?.('mode')} />
+        <CharadesSettingsOverlay
+          onBack={() => onChangeView?.('mode')}
+          onExitToMenu={onCommitSettingsExit ?? (() => onChangeView?.('mode'))}
+          isExitConfirmOpenExternal={isSettingsExitConfirmOpen}
+          onCloseExternalExitConfirm={onCancelSettingsExitConfirm}
+          onUnsavedChangesChange={onSettingsDirtyChange}
+        />
       ) : (
         <section className={styles.modeCard}>
           <div className={styles.modeHeader}>

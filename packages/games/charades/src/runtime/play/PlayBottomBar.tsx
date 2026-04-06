@@ -1,3 +1,4 @@
+import { ActionHint } from './ActionHint'
 import styles from './PlayBottomBar.module.css'
 
 type Phase =
@@ -21,6 +22,11 @@ type PlayBottomBarProps = {
   onStopRound: () => void
   onCorrectVerdict: () => void
   onIncorrectVerdict: () => void
+  actionHints?: {
+    primary?: string | null
+    secondary?: string | null
+    menu?: string | null
+  }
 }
 
 export function PlayBottomBar({
@@ -36,6 +42,7 @@ export function PlayBottomBar({
   onStopRound,
   onCorrectVerdict,
   onIncorrectVerdict,
+  actionHints,
 }: PlayBottomBarProps) {
   return (
     <footer className={styles.bar}>
@@ -51,22 +58,20 @@ export function PlayBottomBar({
 
       {phase === 'round-order' && !isRoundOrderRevealing && (
         <button className={styles.primaryButton} onClick={onStartRound}>
-          Wylosuj kolejność
+          <span>Wylosuj kolejność</span>
+          <ActionHint label={actionHints?.primary} />
         </button>
       )}
 
-      {phase === 'round-order' && isRoundOrderRevealing && (
-        roundOrderCountdown === null ? (
+      {phase === 'round-order' && isRoundOrderRevealing &&
+        (roundOrderCountdown === null ? (
           <p className={styles.infoTextWithSpinner}>
             <span className={styles.spinner} aria-hidden="true" />
             <span>Losowanie...</span>
           </p>
         ) : (
-          <p className={styles.infoText}>
-            Przechodzimy dalej za {roundOrderCountdown} s
-          </p>
-        )
-      )}
+          <p className={styles.infoText}>Przechodzimy dalej za {roundOrderCountdown} s</p>
+        ))}
 
       {phase === 'prepare' && (
         <p className={styles.infoText}>
@@ -76,14 +81,13 @@ export function PlayBottomBar({
         </p>
       )}
 
-      {phase === 'reveal-buffer' && (
-        <p className={styles.infoText}>Prezenter zapoznaje się z hasłem.</p>
-      )}
+      {phase === 'reveal-buffer' && <p className={styles.infoText}>Prezenter zapoznaje się z hasłem.</p>}
 
       {phase === 'timer-running' && (
         <div className={styles.timerActions}>
           <button className={styles.stopButton} onClick={onStopRound}>
-            STOP
+            <span>STOP</span>
+            <ActionHint label={actionHints?.primary} muted />
           </button>
         </div>
       )}
@@ -91,10 +95,12 @@ export function PlayBottomBar({
       {phase === 'round-summary' && (
         <div className={styles.verdictActions}>
           <button className={styles.stopButton} onClick={onExitToMenu}>
-            Powrót do menu
+            <span>Powrót do menu</span>
+            <ActionHint label={actionHints?.secondary ?? actionHints?.menu} muted />
           </button>
           <button className={styles.primaryButton} onClick={onContinueRoundSummary}>
-            Następna runda
+            <span>Następna runda</span>
+            <ActionHint label={actionHints?.primary} />
           </button>
         </div>
       )}
@@ -102,10 +108,12 @@ export function PlayBottomBar({
       {phase === 'verdict' && (
         <div className={styles.verdictActions}>
           <button className={styles.successButton} onClick={onCorrectVerdict}>
-            Zgadnięto
+            <span>Zgadnięto</span>
+            <ActionHint label={actionHints?.primary} />
           </button>
           <button className={styles.dangerButton} onClick={onIncorrectVerdict}>
-            Nie zgadnięto
+            <span>Nie zgadnięto</span>
+            <ActionHint label={actionHints?.secondary} />
           </button>
         </div>
       )}

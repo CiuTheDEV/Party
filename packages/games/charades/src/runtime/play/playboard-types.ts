@@ -31,6 +31,11 @@ export type PlayBoardProps = {
   currentRound: number
   totalRounds: number
   animationsEnabled?: boolean
+  externalToggleScoreRailSignal?: number
+  externalToggleVerdictWordSignal?: number
+  actionHintLabels?: {
+    rail?: string | null
+  }
 }
 
 export type CardPoint = {

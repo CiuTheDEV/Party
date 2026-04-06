@@ -39,7 +39,14 @@ type StartWarningState = {
 
 export default function CharadesMenuPage() {
   const router = useRouter()
-  const { activeMenuView, setActiveMenuView } = useCharadesMenuView()
+  const {
+    activeMenuView,
+    requestMenuViewChange,
+    isSettingsExitConfirmOpen,
+    cancelSettingsExitConfirm,
+    commitPendingMenuViewChange,
+    setHasUnsavedSettingsChanges,
+  } = useCharadesMenuView()
   const [showSetup, setShowSetup] = useState(false)
   const [isSetupReady, setIsSetupReady] = useState(false)
   const [setupState, setSetupState] = useState<CharadesSetupState>(() => charadesModule.createInitialSetupState())
@@ -74,9 +81,9 @@ export default function CharadesMenuPage() {
     const params = new URLSearchParams(window.location.search)
     if (params.get('setup') === '1') {
       setShowSetup(true)
-      setActiveMenuView('mode')
+      requestMenuViewChange('mode')
     }
-  }, [setActiveMenuView])
+  }, [requestMenuViewChange])
 
   useEffect(() => {
     if (!isSetupReady || !setupState.roomId) {
@@ -177,9 +184,13 @@ export default function CharadesMenuPage() {
     <>
       <CharadesMenuContent
         activeView={activeMenuView}
-        onChangeView={setActiveMenuView}
+        onChangeView={requestMenuViewChange}
+        isSettingsExitConfirmOpen={isSettingsExitConfirmOpen}
+        onCancelSettingsExitConfirm={cancelSettingsExitConfirm}
+        onCommitSettingsExit={commitPendingMenuViewChange}
+        onSettingsDirtyChange={setHasUnsavedSettingsChanges}
         onOpenSetup={() => {
-          setActiveMenuView('mode')
+          requestMenuViewChange('mode')
           setShowSetup(true)
         }}
       />

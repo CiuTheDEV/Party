@@ -1,0 +1,141 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(7, 10, 18, 0.72);
+  backdrop-filter: blur(12px);
+}
+
+.dialog {
+  width: min(520px, 100%);
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 24px 48px rgba(0, 0, 0, 0.42),
+    0 0 24px rgba(0, 0, 0, 0.08);
+}
+
+.dialogWarning {
+  background:
+    radial-gradient(circle at top center, rgba(245, 158, 11, 0.14), transparent 42%),
+    linear-gradient(180deg, rgba(24, 24, 27, 0.96), rgba(17, 24, 39, 0.94));
+}
+
+.dialogDanger {
+  background:
+    radial-gradient(circle at top center, rgba(239, 68, 68, 0.14), transparent 42%),
+    linear-gradient(180deg, rgba(24, 24, 27, 0.96), rgba(17, 24, 39, 0.94));
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  flex-shrink: 0;
+}
+
+.dialogWarning .icon {
+  border: 1px solid rgba(245, 158, 11, 0.32);
+  background: linear-gradient(180deg, rgba(245, 158, 11, 0.22), rgba(245, 158, 11, 0.08));
+  color: rgba(255, 244, 214, 0.96);
+}
+
+.dialogDanger .icon {
+  border: 1px solid rgba(239, 68, 68, 0.32);
+  background: linear-gradient(180deg, rgba(239, 68, 68, 0.22), rgba(239, 68, 68, 0.08));
+  color: rgba(255, 231, 231, 0.96);
+}
+
+.body {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.eyebrow {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.48);
+}
+
+.title {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: #fff;
+}
+
+.description {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.actions {
+  display: grid;
+  gap: 10px;
+}
+
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.actionSecondary {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+}
+
+.actionPrimary {
+  border: none;
+  background: linear-gradient(180deg, #8b5cf6, #7c3aed);
+  color: #fff;
+  box-shadow: 0 12px 30px rgba(124, 58, 237, 0.32);
+}
+
+.actionDanger {
+  border: 1px solid rgba(239, 68, 68, 0.24);
+  background: linear-gradient(180deg, rgba(239, 68, 68, 0.18), rgba(239, 68, 68, 0.08));
+  color: #fff;
+}
+
+.actionFullWidth {
+  width: 100%;
+}
+
+@media (max-width: 767px) {
+  .header {
+    flex-direction: column;
+  }
+}

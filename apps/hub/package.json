@@ -6,6 +6,7 @@
     "build": "next build",
     "dev": "next dev --turbopack",
     "lint": "tsc --noEmit",
+    "test:library-card-media": "tsc --target es2022 --module commonjs --moduleResolution node --types node --skipLibCheck --outDir ../../output/hub-library-card-media ./src/features/hub/lib/library-card-media.ts && node ./src/features/hub/lib/library-card-media.check.cjs ../../output/hub-library-card-media/library-card-media.js",
     "start": "next start"
   },
   "dependencies": {

@@ -30,6 +30,37 @@ function mapNavIcon(icon: string | undefined) {
 export default function CharadesLayout({ children }: { children: React.ReactNode }) {
   const segment = useSelectedLayoutSegment()
   const [activeMenuView, setActiveMenuView] = useState<CharadesMenuView>('mode')
+  const [hasUnsavedSettingsChanges, setHasUnsavedSettingsChanges] = useState(false)
+  const [pendingMenuView, setPendingMenuView] = useState<CharadesMenuView | null>(null)
+  const [isSettingsExitConfirmOpen, setIsSettingsExitConfirmOpen] = useState(false)
+
+  function requestMenuViewChange(view: CharadesMenuView) {
+    if (activeMenuView === 'settings' && view !== 'settings' && hasUnsavedSettingsChanges) {
+      setPendingMenuView(view)
+      setIsSettingsExitConfirmOpen(true)
+      return
+    }
+
+    setPendingMenuView(null)
+    setIsSettingsExitConfirmOpen(false)
+    setHasUnsavedSettingsChanges(false)
+    setActiveMenuView(view)
+  }
+
+  function cancelSettingsExitConfirm() {
+    setPendingMenuView(null)
+    setIsSettingsExitConfirmOpen(false)
+  }
+
+  function commitPendingMenuViewChange() {
+    if (pendingMenuView) {
+      setActiveMenuView(pendingMenuView)
+    }
+
+    setPendingMenuView(null)
+    setIsSettingsExitConfirmOpen(false)
+    setHasUnsavedSettingsChanges(false)
+  }
 
   const links: NavLink[] = charadesModule.shell.links.map((link) => {
     const mappedView = resolveCharadesMenuViewFromHref(link.href)
@@ -37,7 +68,7 @@ export default function CharadesLayout({ children }: { children: React.ReactNode
     return {
       ...link,
       icon: mapNavIcon(link.icon),
-      onSelect: mappedView ? () => setActiveMenuView(mappedView) : undefined,
+      onSelect: mappedView ? () => requestMenuViewChange(mappedView) : undefined,
     }
   })
 
@@ -55,7 +86,16 @@ export default function CharadesLayout({ children }: { children: React.ReactNode
   }
 
   return (
-    <CharadesMenuViewProvider activeMenuView={activeMenuView} setActiveMenuView={setActiveMenuView}>
+    <CharadesMenuViewProvider
+      activeMenuView={activeMenuView}
+      setActiveMenuView={setActiveMenuView}
+      requestMenuViewChange={requestMenuViewChange}
+      hasUnsavedSettingsChanges={hasUnsavedSettingsChanges}
+      setHasUnsavedSettingsChanges={setHasUnsavedSettingsChanges}
+      isSettingsExitConfirmOpen={isSettingsExitConfirmOpen}
+      cancelSettingsExitConfirm={cancelSettingsExitConfirm}
+      commitPendingMenuViewChange={commitPendingMenuViewChange}
+    >
       <GameShell
         activeHref={segment ? undefined : getCharadesMenuActiveHref(activeMenuView)}
         brandLabel={`PROJECT PARTY / ${charadesModule.shell.gameName.toUpperCase()}`}

@@ -9,12 +9,20 @@ import { ReconnectPresenterModal } from './ReconnectPresenterModal'
 import { RoomConnectionModal } from './RoomConnectionModal'
 import { PlaySettingsModal } from './PlaySettingsModal'
 import { VerdictPickerModal } from './VerdictPickerModal'
+import { getHostControlActionLabel, type HostControlCommand, type HostControlDevice } from './host-controls'
+import { useHostControls } from './useHostControls'
 import type { Phase, PlayerSummary } from './playboard-types'
 import { useRoundOrderCountdown } from './useRoundOrderCountdown'
 import {
   readCharadesPlayPreferences,
   writeCharadesPlayPreferences,
 } from '../shared/charades-play-preferences'
+import {
+  CHARADES_BINDINGS_STORAGE_KEY,
+  formatControllerLabelForProfile,
+  loadPersistedBindings,
+  type GamepadProfile,
+} from '../../menu/charades-controls-bindings'
 import styles from './HostGameScreen.module.css'
 
 type HostGameScreenProps = {
@@ -48,9 +56,15 @@ type HostGameScreenProps = {
 export function HostGameScreen(props: HostGameScreenProps) {
   const [isVerdictPickerOpen, setIsVerdictPickerOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
+  const [isSettingsExitConfirmOpen, setIsSettingsExitConfirmOpen] = useState(false)
   const [soundEnabled, setSoundEnabled] = useState(true)
   const [animationsEnabled, setAnimationsEnabled] = useState(true)
   const [selectedGuessedPlayerIdx, setSelectedGuessedPlayerIdx] = useState<number | null>(null)
+  const [scoreRailToggleSignal, setScoreRailToggleSignal] = useState(0)
+  const [verdictWordToggleSignal, setVerdictWordToggleSignal] = useState(0)
+  const [activeInputDevice, setActiveInputDevice] = useState<HostControlDevice>('keyboard')
+  const [controllerProfile, setControllerProfile] = useState<GamepadProfile>('generic')
+  const [controlBindings, setControlBindings] = useState<Record<string, string>>({})
   const wasSettingsOpenRef = useRef(false)
   const isPresenterReconnectRequired =
     !props.isDeviceConnected &&
@@ -82,11 +96,30 @@ export function HostGameScreen(props: HostGameScreenProps) {
   }, [])
 
   useEffect(() => {
+    setControlBindings(loadPersistedBindings())
+
+    function handleStorage(event: StorageEvent) {
+      if (event.key === CHARADES_BINDINGS_STORAGE_KEY) {
+        setControlBindings(loadPersistedBindings())
+      }
+    }
+
+    window.addEventListener('storage', handleStorage)
+    return () => window.removeEventListener('storage', handleStorage)
+  }, [])
+
+  useEffect(() => {
     if (props.phase !== 'verdict') {
       setIsVerdictPickerOpen(false)
       setSelectedGuessedPlayerIdx(null)
     }
   }, [props.phase])
+
+  useEffect(() => {
+    if (!isSettingsOpen) {
+      setIsSettingsExitConfirmOpen(false)
+    }
+  }, [isSettingsOpen])
 
   useEffect(() => {
     if (isPauseOverlayOpen) {
@@ -132,6 +165,91 @@ export function HostGameScreen(props: HostGameScreenProps) {
   const guessedPlayers = props.players
     .map((player, index) => ({ ...player, index }))
     .filter((player) => player.index !== presenterIdx)
+  const guessedPlayerIndexes = guessedPlayers.map((player) => player.index)
+  const canToggleScoreRail = props.phase === 'prepare' && props.players.some((player) => (player.score ?? 0) > 0)
+
+  const handleHostControlCommand = useCallback(
+    (command: HostControlCommand) => {
+      switch (command.type) {
+        case 'open-settings':
+          setIsSettingsOpen(true)
+          return
+        case 'close-settings':
+          setIsSettingsExitConfirmOpen(false)
+          setIsSettingsOpen(false)
+          return
+        case 'open-settings-exit-confirm':
+          setIsSettingsExitConfirmOpen(true)
+          return
+        case 'cancel-settings-exit-confirm':
+          setIsSettingsExitConfirmOpen(false)
+          return
+        case 'exit-to-menu':
+          props.onExitToMenu()
+          return
+        case 'start-round-order':
+          props.onStartRound()
+          return
+        case 'stop-round':
+          props.onStopRound()
+          return
+        case 'continue-round-summary':
+          props.onFinishRoundSummary()
+          return
+        case 'open-verdict-picker':
+          setSelectedGuessedPlayerIdx((current) => current ?? guessedPlayerIndexes[0] ?? null)
+          setIsVerdictPickerOpen(true)
+          return
+        case 'close-verdict-picker':
+          setIsVerdictPickerOpen(false)
+          return
+        case 'select-verdict-player':
+          setSelectedGuessedPlayerIdx(command.playerIdx)
+          return
+        case 'confirm-verdict-player':
+          if (selectedGuessedPlayerIdx !== null) {
+            props.onGiveVerdict(true, selectedGuessedPlayerIdx)
+          }
+          return
+        case 'give-incorrect-verdict':
+          props.onGiveVerdict(false)
+          return
+        case 'toggle-score-rail':
+          setScoreRailToggleSignal((current) => current + 1)
+          return
+        case 'toggle-verdict-word':
+          setVerdictWordToggleSignal((current) => current + 1)
+          return
+      }
+    },
+    [guessedPlayerIndexes, props, selectedGuessedPlayerIdx],
+  )
+
+  useHostControls({
+    context: {
+      phase: props.phase,
+      isRoundOrderRevealing: props.isRoundOrderRevealing,
+      isSettingsOpen,
+      isSettingsExitConfirmOpen,
+      isVerdictPickerOpen,
+      selectedGuessedPlayerIdx,
+      guessedPlayerIndexes,
+      isReconnectBlocking: isPresenterReconnectRequired || isRoomReconnectRequired,
+      canToggleScoreRail,
+      isVerdictWordVisible: false,
+    },
+    onCommand: handleHostControlCommand,
+    onDeviceChange: setActiveInputDevice,
+    onControllerProfileChange: setControllerProfile,
+  })
+
+  const getActionHint = useCallback(
+    (action: 'left' | 'right' | 'confirm' | 'back' | 'menu' | 'primary' | 'secondary' | 'rail') => {
+      const label = getHostControlActionLabel(controlBindings, activeInputDevice, action)
+      return activeInputDevice === 'controller' ? formatControllerLabelForProfile(label ?? '', controllerProfile) : label
+    },
+    [activeInputDevice, controlBindings, controllerProfile],
+  )
 
   return (
     <div className={styles.screen}>
@@ -153,6 +271,11 @@ export function HostGameScreen(props: HostGameScreenProps) {
         bufferRemaining={props.bufferRemaining}
         currentRound={props.currentRound}
         totalRounds={props.totalRounds}
+        externalToggleScoreRailSignal={scoreRailToggleSignal}
+        externalToggleVerdictWordSignal={verdictWordToggleSignal}
+        actionHintLabels={{
+          rail: getActionHint('rail'),
+        }}
       />
 
       <PlayBottomBar
@@ -171,6 +294,11 @@ export function HostGameScreen(props: HostGameScreenProps) {
         onIncorrectVerdict={() => props.onGiveVerdict(false)}
         onStartRound={props.onStartRound}
         onStopRound={props.onStopRound}
+        actionHints={{
+          primary: getActionHint('primary'),
+          secondary: getActionHint('secondary'),
+          menu: getActionHint('menu'),
+        }}
       />
 
       {isVerdictPickerOpen ? (
@@ -185,6 +313,12 @@ export function HostGameScreen(props: HostGameScreenProps) {
             }
             props.onGiveVerdict(true, selectedGuessedPlayerIdx)
           }}
+          actionHints={{
+            confirm: getActionHint('confirm'),
+            cancel: getActionHint('back'),
+            previous: getActionHint('left'),
+            next: getActionHint('right'),
+          }}
         />
       ) : null}
 
@@ -192,10 +326,20 @@ export function HostGameScreen(props: HostGameScreenProps) {
         <PlaySettingsModal
           soundEnabled={soundEnabled}
           animationsEnabled={animationsEnabled}
+          isExitConfirmOpen={isSettingsExitConfirmOpen}
           onToggleSound={toggleSound}
           onToggleAnimations={toggleAnimations}
+          onOpenExitConfirm={() => setIsSettingsExitConfirmOpen(true)}
+          onCancelExitConfirm={() => setIsSettingsExitConfirmOpen(false)}
           onExitToMenu={props.onExitToMenu}
-          onContinue={() => setIsSettingsOpen(false)}
+          onContinue={() => {
+            setIsSettingsExitConfirmOpen(false)
+            setIsSettingsOpen(false)
+          }}
+          actionHints={{
+            primary: getActionHint('primary'),
+            secondary: getActionHint('secondary'),
+          }}
         />
       ) : null}
 

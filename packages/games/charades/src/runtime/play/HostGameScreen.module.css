@@ -175,6 +175,10 @@
 }
 
 .cancelButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   justify-self: center;
   min-height: 44px;
   padding: 10px 22px;
@@ -193,7 +197,25 @@
   gap: 12px;
 }
 
+.modalHintRow {
+  display: flex;
+  justify-content: center;
+}
+
+.modalHintText {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
 .confirmButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   min-height: 44px;
   padding: 10px 22px;
   border-radius: 16px;

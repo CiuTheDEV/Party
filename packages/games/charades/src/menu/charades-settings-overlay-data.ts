@@ -10,7 +10,8 @@ export type CharadesControlsBinding = {
   description: string
   device: CharadesControlsDevice
   section: string
-  inputLabel: string
+  primaryInputLabel: string
+  secondaryInputLabel?: string
 }
 
 export type CharadesSettingsCategory = {
@@ -46,7 +47,8 @@ export const charadesSettingsCategories: CharadesSettingsCategory[] = [
         description: 'Przesuwa fokus interfejsu albo wybor o jedna pozycje w lewo.',
         device: 'keyboard',
         section: 'Klawiatura',
-        inputLabel: 'A',
+        primaryInputLabel: 'A',
+        secondaryInputLabel: 'Arrow Left',
       },
       {
         id: 'keyboard-right',
@@ -54,7 +56,8 @@ export const charadesSettingsCategories: CharadesSettingsCategory[] = [
         description: 'Przesuwa fokus interfejsu albo wybor o jedna pozycje w prawo.',
         device: 'keyboard',
         section: 'Klawiatura',
-        inputLabel: 'D',
+        primaryInputLabel: 'D',
+        secondaryInputLabel: 'Arrow Right',
       },
       {
         id: 'keyboard-up',
@@ -62,7 +65,8 @@ export const charadesSettingsCategories: CharadesSettingsCategory[] = [
         description: 'Przesuwa fokus interfejsu albo wybor o jedna pozycje w gore.',
         device: 'keyboard',
         section: 'Klawiatura',
-        inputLabel: 'W',
+        primaryInputLabel: 'W',
+        secondaryInputLabel: 'Arrow Up',
       },
       {
         id: 'keyboard-down',
@@ -70,7 +74,8 @@ export const charadesSettingsCategories: CharadesSettingsCategory[] = [
         description: 'Przesuwa fokus interfejsu albo wybor o jedna pozycje w dol.',
         device: 'keyboard',
         section: 'Klawiatura',
-        inputLabel: 'S',
+        primaryInputLabel: 'S',
+        secondaryInputLabel: 'Arrow Down',
       },
       {
         id: 'keyboard-confirm',
@@ -78,7 +83,7 @@ export const charadesSettingsCategories: CharadesSettingsCategory[] = [
         description: 'Uruchamia glowna zaznaczona akcje i akceptuje wybor.',
         device: 'keyboard',
         section: 'Klawiatura',
-        inputLabel: 'Enter',
+        primaryInputLabel: 'Enter',
       },
       {
         id: 'keyboard-back',
@@ -86,7 +91,7 @@ export const charadesSettingsCategories: CharadesSettingsCategory[] = [
         description: 'Wraca do poprzedniego kroku albo zamyka aktywny panel.',
         device: 'keyboard',
         section: 'Klawiatura',
-        inputLabel: 'Esc',
+        primaryInputLabel: 'Esc',
       },
       {
         id: 'keyboard-menu',
@@ -94,7 +99,7 @@ export const charadesSettingsCategories: CharadesSettingsCategory[] = [
         description: 'Otwiera ustawienia gry lub menu pauzy w zaleznosci od ekranu.',
         device: 'keyboard',
         section: 'Klawiatura',
-        inputLabel: 'Tab',
+        primaryInputLabel: 'Tab',
       },
       {
         id: 'keyboard-primary',
@@ -102,7 +107,7 @@ export const charadesSettingsCategories: CharadesSettingsCategory[] = [
         description: 'Wykonuje najwazniejsza akcje kontekstowa, na przyklad start rundy albo odkrycie hasla.',
         device: 'keyboard',
         section: 'Klawiatura',
-        inputLabel: 'Space',
+        primaryInputLabel: 'Space',
       },
       {
         id: 'keyboard-secondary',
@@ -110,7 +115,7 @@ export const charadesSettingsCategories: CharadesSettingsCategory[] = [
         description: 'Uruchamia druga akcje kontekstowa, gdy ekran ma dwa rownorzedne wybory.',
         device: 'keyboard',
         section: 'Klawiatura',
-        inputLabel: 'Q',
+        primaryInputLabel: 'Q',
       },
       {
         id: 'keyboard-rail',
@@ -118,7 +123,7 @@ export const charadesSettingsCategories: CharadesSettingsCategory[] = [
         description: 'Zwija lub rozwija rail i aktualny ranking bez opuszczania ekranu gry.',
         device: 'keyboard',
         section: 'Klawiatura',
-        inputLabel: 'R',
+        primaryInputLabel: 'R',
       },
       {
         id: 'controller-left',
@@ -126,7 +131,8 @@ export const charadesSettingsCategories: CharadesSettingsCategory[] = [
         description: 'Przesuwa fokus interfejsu albo wybor o jedna pozycje w lewo.',
         device: 'controller',
         section: 'Kontroler',
-        inputLabel: 'D-Pad Left',
+        primaryInputLabel: 'D-Pad Left',
+        secondaryInputLabel: 'L Stick Left',
       },
       {
         id: 'controller-right',
@@ -134,7 +140,8 @@ export const charadesSettingsCategories: CharadesSettingsCategory[] = [
         description: 'Przesuwa fokus interfejsu albo wybor o jedna pozycje w prawo.',
         device: 'controller',
         section: 'Kontroler',
-        inputLabel: 'D-Pad Right',
+        primaryInputLabel: 'D-Pad Right',
+        secondaryInputLabel: 'L Stick Right',
       },
       {
         id: 'controller-up',
@@ -142,7 +149,8 @@ export const charadesSettingsCategories: CharadesSettingsCategory[] = [
         description: 'Przesuwa fokus interfejsu albo wybor o jedna pozycje w gore.',
         device: 'controller',
         section: 'Kontroler',
-        inputLabel: 'D-Pad Up',
+        primaryInputLabel: 'D-Pad Up',
+        secondaryInputLabel: 'L Stick Up',
       },
       {
         id: 'controller-down',
@@ -150,7 +158,8 @@ export const charadesSettingsCategories: CharadesSettingsCategory[] = [
         description: 'Przesuwa fokus interfejsu albo wybor o jedna pozycje w dol.',
         device: 'controller',
         section: 'Kontroler',
-        inputLabel: 'D-Pad Down',
+        primaryInputLabel: 'D-Pad Down',
+        secondaryInputLabel: 'L Stick Down',
       },
       {
         id: 'controller-confirm',
@@ -158,7 +167,7 @@ export const charadesSettingsCategories: CharadesSettingsCategory[] = [
         description: 'Uruchamia glowna zaznaczona akcje i akceptuje wybor.',
         device: 'controller',
         section: 'Kontroler',
-        inputLabel: 'A / Cross',
+        primaryInputLabel: 'A / Cross',
       },
       {
         id: 'controller-back',
@@ -166,7 +175,7 @@ export const charadesSettingsCategories: CharadesSettingsCategory[] = [
         description: 'Wraca do poprzedniego kroku albo zamyka aktywny panel.',
         device: 'controller',
         section: 'Kontroler',
-        inputLabel: 'B / Circle',
+        primaryInputLabel: 'B / Circle',
       },
       {
         id: 'controller-menu',
@@ -174,7 +183,7 @@ export const charadesSettingsCategories: CharadesSettingsCategory[] = [
         description: 'Otwiera ustawienia gry lub menu pauzy w zaleznosci od ekranu.',
         device: 'controller',
         section: 'Kontroler',
-        inputLabel: 'Start',
+        primaryInputLabel: 'Start',
       },
       {
         id: 'controller-primary',
@@ -182,7 +191,7 @@ export const charadesSettingsCategories: CharadesSettingsCategory[] = [
         description: 'Wykonuje najwazniejsza akcje kontekstowa, na przyklad start rundy albo odkrycie hasla.',
         device: 'controller',
         section: 'Kontroler',
-        inputLabel: 'R1 / RB',
+        primaryInputLabel: 'R1 / RB',
       },
       {
         id: 'controller-secondary',
@@ -190,7 +199,7 @@ export const charadesSettingsCategories: CharadesSettingsCategory[] = [
         description: 'Uruchamia druga akcje kontekstowa, gdy ekran ma dwa rownorzedne wybory.',
         device: 'controller',
         section: 'Kontroler',
-        inputLabel: 'L1 / LB',
+        primaryInputLabel: 'L1 / LB',
       },
       {
         id: 'controller-rail',
@@ -198,19 +207,11 @@ export const charadesSettingsCategories: CharadesSettingsCategory[] = [
         description: 'Zwija lub rozwija rail i aktualny ranking bez opuszczania ekranu gry.',
         device: 'controller',
         section: 'Kontroler',
-        inputLabel: 'Y / Triangle',
+        primaryInputLabel: 'Y / Triangle',
       },
     ],
   },
 ]
-
-export function createCharadesControlsBindingsState() {
-  return Object.fromEntries(
-    charadesSettingsCategories.flatMap((category) =>
-      (category.bindings ?? []).map((binding) => [binding.id, binding.inputLabel]),
-    ),
-  ) as Record<string, string>
-}
 
 export const charadesSettingsAccentIcons = {
   general: Sparkles,
