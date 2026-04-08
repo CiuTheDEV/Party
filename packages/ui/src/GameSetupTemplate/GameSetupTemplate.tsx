@@ -9,6 +9,8 @@ export function GameSetupTemplate<TState>({
   onStart,
   onClose,
   startLabel = 'Start',
+  isFocusVisible = true,
+  focusedAction = null,
 }: GameSetupTemplateProps<TState>) {
   return (
     <div className={styles.backdrop}>
@@ -18,7 +20,12 @@ export function GameSetupTemplate<TState>({
             <h2 className={styles.title}>{title}</h2>
             {subtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
           </div>
-          <button type="button" className={styles.closeButton} onClick={onClose} aria-label="Zamknij">
+          <button
+            type="button"
+            className={isFocusVisible && focusedAction === 'close' ? `${styles.closeButton} ${styles.controlFocused}` : styles.closeButton}
+            onClick={onClose}
+            aria-label="Zamknij"
+          >
             &times;
           </button>
         </div>
@@ -50,7 +57,12 @@ export function GameSetupTemplate<TState>({
             </ul>
           ) : null}
 
-          <button type="button" className={styles.primaryButton} onClick={onStart} disabled={!validation.canStart}>
+          <button
+            type="button"
+            className={isFocusVisible && focusedAction === 'start' ? `${styles.primaryButton} ${styles.controlFocused}` : styles.primaryButton}
+            onClick={onStart}
+            disabled={!validation.canStart}
+          >
             {startLabel}
           </button>
         </div>

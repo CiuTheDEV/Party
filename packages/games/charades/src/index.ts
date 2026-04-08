@@ -62,6 +62,39 @@ export const charadesModule: GameModule<CharadesSetupState, CharadesSetupHelpers
 export { config, createInitialCharadesSetupState, validateCharadesSetup }
 export { CharadesResultsScreen }
 export { CharadesMenuContent }
+export {
+  CHARADES_NAVIGATION_COMMANDS,
+} from './navigation/charades-navigation-actions'
+export {
+  CHARADES_NAVIGATION_SCREENS,
+  CHARADES_NAVIGATION_TARGETS,
+  CHARADES_NAVIGATION_ZONES,
+  getCharadesBindingsEntryTarget,
+  getCharadesControlsDeviceTarget,
+  getCharadesMenuEntryTarget,
+  getCharadesRailEntryTarget,
+  getCharadesRailHref,
+  getCharadesRailTargetFromHref,
+  getCharadesRuntimeEntryTarget,
+  getCharadesSettingsEntryTarget,
+  getCharadesSettingsTabTarget,
+  getCharadesSetupEntryTarget,
+} from './navigation/charades-navigation-targets'
+export {
+  charadesMenuNavigationProfile,
+} from './navigation/charades-menu-navigation-profile'
+export {
+  charadesSettingsNavigationProfile,
+} from './navigation/charades-settings-navigation-profile'
+export {
+  charadesSetupNavigationProfile,
+} from './navigation/charades-setup-navigation-profile'
+export {
+  charadesRuntimeNavigationProfile,
+} from './navigation/charades-runtime-navigation-profile'
+export { useMenuControls } from './menu/useMenuControls'
+export { resolveMenuModeCommand, getNextMenuModeFocus, getNextRailFocusHref } from './menu/menu-controls'
+export { getCurrentGamepadInputLabel, listConnectedGamepads, pickPreferredGamepad } from './menu/charades-controls-bindings'
 export { default as CharadesDeviceListener } from './runtime/setup/DeviceListener'
 export { HostGameScreen } from './runtime/play/HostGameScreen'
 export { PresenterScreen } from './runtime/presenter/PresenterScreen'
@@ -70,6 +103,19 @@ export { usePresenter } from './runtime/hooks/usePresenter'
 export { useWordPool } from './runtime/hooks/useWordPool'
 export { getCharadesMenuActiveHref, resolveCharadesMenuViewFromHref }
 export type { CharadesMenuView } from './menu/menu-view'
+export type { CharadesNavigationCommandId } from './navigation/charades-navigation-actions'
+export type {
+  CharadesMenuNavigationContext,
+} from './navigation/charades-menu-navigation-profile'
+export type {
+  CharadesRuntimeNavigationContext,
+} from './navigation/charades-runtime-navigation-profile'
+export type {
+  CharadesSettingsNavigationContext,
+} from './navigation/charades-settings-navigation-profile'
+export type {
+  CharadesSetupNavigationContext,
+} from './navigation/charades-setup-navigation-profile'
 export { buildPromptPool, buildCategoryPromptPool } from './runtime/hooks/word-pool-helpers'
 export {
   getRemainingPromptCount,

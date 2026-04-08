@@ -23,11 +23,21 @@
                       "id":  "T001",
                       "title":  "Charades code cleanup pass",
                       "status":  "active",
-                      "context":  "Pre-MVP review identified three cleanup areas: stale useGameState dependencies around send/socket reconnects, dead presenter/runtime leftovers after recent refactors, and oversized files in results/playboard that break repo limits.",
-                      "next_action":  "Fix useGameState dependency issues first, then remove dead presenter/runtime code, then split oversized Charades files.",
+                      "context":  "The first cleanup slice is done: `useGameState` runtime helpers were extracted and covered by a lightweight check. Remaining cleanup still includes dead presenter/runtime leftovers after recent refactors and oversized files in results/playboard that are hard to maintain.",
+                      "next_action":  "Remove dead presenter/runtime leftovers next, then split the remaining oversized Charades files only where responsibilities are still mixed.",
                       "blocker":  "",
                       "created":  "2026-03-27",
-                      "updated":  "2026-03-27"
+                      "updated":  "2026-04-07"
+                  },
+                  {
+                      "id":  "T002",
+                      "title":  "Charades host menu and settings navigation polish",
+                      "status":  "active",
+                      "context":  "The shared host navigation framework now exists in `@party/ui` + `@party/game-sdk`, and Charades has been migrated as the reference consumer across menu, settings, setup, and core runtime overlays. Runtime controls were further simplified so gameplay accept actions now use `confirm`, `Akcja glowna` was removed from settings bindings, and persisted legacy bindings are migrated into the new confirm slots.",
+                      "next_action":  "Run a focused manual polish pass on Charades runtime pause/verdict flow and remaining keyboard/controller rough edges, then close the Charades host-navigation polish task.",
+                      "blocker":  "",
+                      "created":  "2026-04-07",
+                      "updated":  "2026-04-08"
                   }
               ]
 }

@@ -10,17 +10,14 @@ import {
   type Player,
 } from './game-state-model'
 import {
-  buildPreparedTurnState,
   buildRoundOrderFinishedState,
   buildRoundStartState,
   buildRoundSummaryFinishedState,
   buildStoppedRoundState,
   buildVerdictState,
-  getPendingTurnDescriptor,
 } from './game-state-transitions'
+import { createPendingTurnStart, resolvePendingWordChange } from './game-state-runtime-helpers'
 import { usePhaseTimers } from './usePhaseTimers'
-import { toPlayerHistoryKey } from './word-history-helpers'
-import { resolveWordChangeRequest } from './word-change-helpers'
 import type { TurnPrompt } from './word-pool-helpers'
 
 export type { GameSettings, Player } from './game-state-model'
@@ -96,60 +93,23 @@ export function useGameState(
         return
       }
 
-      const currentState = stateRef.current
-
-      if (
-        currentState.phase !== 'reveal-buffer' ||
-        msg.turnId !== currentTurnIdRef.current ||
-        !settings.wordChange.enabled ||
-        currentState.currentDifficulty === ''
-      ) {
-        return
-      }
-
-      const currentPrompt: TurnPrompt = {
-        word: currentState.currentWord,
-        category: currentState.currentCategory,
-        difficulty: currentState.currentDifficulty,
-      }
-      const presenterIdx = currentState.order[currentState.currentOrderIdx]
-      const presenter = presenterIdx === undefined ? undefined : currentState.players[presenterIdx]
-      const playerKey = presenter ? toPlayerHistoryKey(presenter) : ''
-      const nextPrompt =
-        settings.wordChange.rerollScope === 'word-only'
-          ? getWordOnlyReroll({
-              playerKey,
-              currentPrompt,
-              rejectedPromptKeysThisTurn: currentState.rejectedPromptKeysThisTurn,
-            })
-          : getWordAndCategoryReroll({
-              playerKey,
-              currentPrompt,
-              rejectedPromptKeysThisTurn: currentState.rejectedPromptKeysThisTurn,
-            })
-      const result = resolveWordChangeRequest({
-        state: currentState,
+      const wordChange = resolvePendingWordChange({
+        state: stateRef.current,
         settings,
         currentTurnId: currentTurnIdRef.current,
         requestedTurnId: msg.turnId,
-        nextPrompt,
+        getWordOnlyReroll,
+        getWordAndCategoryReroll,
       })
 
-      if (!result.sync) {
+      if (!wordChange) {
         return
       }
 
-      recordRejectedPrompt(playerKey, currentPrompt)
-      stateRef.current = result.nextState
-      setState(result.nextState)
-      send({
-        type: 'WORD_CHANGED',
-        turnId: msg.turnId,
-        word: result.sync.word,
-        category: result.sync.category,
-        difficulty: result.sync.difficulty,
-        remainingWordChanges: result.sync.remainingWordChanges,
-      })
+      recordRejectedPrompt(wordChange.playerKey, wordChange.rejectedPrompt)
+      stateRef.current = wordChange.nextState
+      setState(wordChange.nextState)
+      send(wordChange.hostEvent)
     },
     onError() {
       setRoomConnectionState('error')
@@ -215,38 +175,20 @@ export function useGameState(
   }, [settings])
 
   useEffect(() => {
-    if (state.phase !== 'prepare' || state.currentWord !== '' || state.order.length === 0) {
-      return
-    }
-
-    const pendingTurn = getPendingTurnDescriptor(state)
+    const pendingTurn = createPendingTurnStart({
+      state,
+      settings,
+      getNextWord,
+      createTurnId: () => crypto.randomUUID(),
+    })
 
     if (!pendingTurn) {
       return
     }
 
-    const playerKey = toPlayerHistoryKey(pendingTurn.presenter)
-    const { word, category, difficulty } = getNextWord(playerKey)
-    const turnId = crypto.randomUUID()
-    const presenterIdx = state.order[state.currentOrderIdx]
-    currentTurnIdRef.current = turnId
-
-    send({
-      type: 'TURN_START',
-      turnId,
-      word,
-      category,
-      difficulty,
-      canChangeWord: settings.wordChange.enabled,
-      remainingWordChanges: state.remainingWordChangesByPlayer[presenterIdx] ?? 0,
-      presenterName: pendingTurn.presenter.name,
-      timerSeconds: settings.timerSeconds,
-      nextPresenterName: pendingTurn.nextPresenter.name,
-      nextPresenterAvatar: pendingTurn.nextPresenter.avatar,
-      nextStep: pendingTurn.nextStep,
-    })
-
-    setState((current) => buildPreparedTurnState(current, settings, { word, category, difficulty }))
+    currentTurnIdRef.current = pendingTurn.turnId
+    send(pendingTurn.hostEvent)
+    setState(pendingTurn.nextState)
   }, [
     getNextWord,
     send,
@@ -256,8 +198,6 @@ export function useGameState(
     state.order,
     state.phase,
     state.remainingWordChangesByPlayer,
-    commitPrompt,
-    recordRejectedPrompt,
   ])
 
   const stopRoundEarly = useCallback(() => {

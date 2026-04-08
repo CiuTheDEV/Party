@@ -176,6 +176,11 @@
   transition: background 180ms ease, color 180ms ease, box-shadow 180ms ease;
 }
 
+.controlFocused {
+  outline: 2px solid rgba(196, 181, 253, 0.92);
+  outline-offset: 3px;
+}
+
 .deviceSegmentIcon {
   display: inline-flex;
   align-items: center;

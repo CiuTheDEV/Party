@@ -1,6 +1,6 @@
 'use client'
 
-import type { ReactNode } from 'react'
+import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import styles from './GameSidebar.module.css'
@@ -27,11 +27,23 @@ type GameSidebarProps = {
   activeHref?: string
   ariaLabel: string
   footerLink?: SidebarFooterLink
+  focusedHref?: string
+  forceExpanded?: boolean
+  isFocusVisible?: boolean
   links: NavLink[]
   onNavigate?: (href: string) => void
 }
 
-export function GameSidebar({ activeHref, ariaLabel, footerLink, links, onNavigate }: GameSidebarProps) {
+export function GameSidebar({
+  activeHref,
+  ariaLabel,
+  footerLink,
+  focusedHref,
+  forceExpanded = false,
+  isFocusVisible = true,
+  links,
+  onNavigate,
+}: GameSidebarProps) {
   const pathname = usePathname()
   const resolvedActiveHref = activeHref ?? pathname
   const topLinks = links.filter((link) => !link.pinnedBottom)
@@ -50,8 +62,22 @@ export function GameSidebar({ activeHref, ariaLabel, footerLink, links, onNaviga
     })
   }
 
-  const getDesktopClassName = (href: string) =>
-    href === resolvedActiveHref ? `${styles.navLink} ${styles.navLinkActive}` : styles.navLink
+  const suppressNativeKeyboardActivate = (event: ReactKeyboardEvent<HTMLElement>) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault()
+      event.stopPropagation()
+    }
+  }
+
+  const getDesktopClassName = (href: string) => {
+    const classes = [href === resolvedActiveHref ? styles.navLinkActive : styles.navLink]
+
+    if (isFocusVisible && focusedHref === href) {
+      classes.push(styles.navLinkFocused)
+    }
+
+    return classes.join(' ')
+  }
 
   const getMobileClassName = (href: string) =>
     href === resolvedActiveHref ? `${styles.tabItem} ${styles.tabActive}` : styles.tabItem
@@ -72,6 +98,8 @@ export function GameSidebar({ activeHref, ariaLabel, footerLink, links, onNaviga
           key={link.href}
           className={getDesktopClassName(link.href)}
           type="button"
+          tabIndex={-1}
+          onKeyDown={suppressNativeKeyboardActivate}
           onClick={() => handleNavigate(link.href, link.onSelect)}
         >
           {link.icon ? <span className={styles.navIcon}>{link.icon}</span> : null}
@@ -85,6 +113,8 @@ export function GameSidebar({ activeHref, ariaLabel, footerLink, links, onNaviga
         key={link.href}
         href={link.href}
         className={getDesktopClassName(link.href)}
+        tabIndex={-1}
+        onKeyDown={suppressNativeKeyboardActivate}
         onClick={() => handleNavigate(link.href)}
       >
         {link.icon ? <span className={styles.navIcon}>{link.icon}</span> : null}
@@ -109,6 +139,8 @@ export function GameSidebar({ activeHref, ariaLabel, footerLink, links, onNaviga
           key={link.href}
           className={getMobileClassName(link.href)}
           type="button"
+          tabIndex={-1}
+          onKeyDown={suppressNativeKeyboardActivate}
           onClick={() => handleNavigate(link.href, link.onSelect)}
         >
           {link.icon ? <span className={styles.tabIcon}>{link.icon}</span> : null}
@@ -122,6 +154,8 @@ export function GameSidebar({ activeHref, ariaLabel, footerLink, links, onNaviga
         key={link.href}
         href={link.href}
         className={getMobileClassName(link.href)}
+        tabIndex={-1}
+        onKeyDown={suppressNativeKeyboardActivate}
         onClick={() => handleNavigate(link.href)}
       >
         {link.icon ? <span className={styles.tabIcon}>{link.icon}</span> : null}
@@ -132,7 +166,7 @@ export function GameSidebar({ activeHref, ariaLabel, footerLink, links, onNaviga
 
   return (
     <>
-      <aside className={styles.sidebar} aria-label={ariaLabel}>
+      <aside className={forceExpanded ? `${styles.sidebar} ${styles.sidebarExpanded}` : styles.sidebar} aria-label={ariaLabel}>
         <div className={styles.railInner}>
           {topLinks.map(renderDesktopItem)}
 
@@ -145,6 +179,8 @@ export function GameSidebar({ activeHref, ariaLabel, footerLink, links, onNaviga
               href={footerLink.href}
               className={styles.backLink}
               aria-label={footerLink.ariaLabel}
+              tabIndex={-1}
+              onKeyDown={suppressNativeKeyboardActivate}
               onClick={() => handleNavigate(footerLink.href)}
             >
               {footerLink.icon ? <span className={styles.navIcon}>{footerLink.icon}</span> : null}
@@ -163,6 +199,8 @@ export function GameSidebar({ activeHref, ariaLabel, footerLink, links, onNaviga
             href={footerLink.href}
             className={styles.tabItem}
             aria-label={footerLink.ariaLabel}
+            tabIndex={-1}
+            onKeyDown={suppressNativeKeyboardActivate}
             onClick={() => handleNavigate(footerLink.href)}
           >
             {footerLink.mobileIcon ? <span className={styles.tabIcon}>{footerLink.mobileIcon}</span> : null}

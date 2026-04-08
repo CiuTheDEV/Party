@@ -77,3 +77,33 @@
 **Solution:** Put an explicit `status` on `GameConfig` and let the hub treat modules as either `live` or `coming-soon`.
 
 **Why:** This keeps rollout logic out of ad hoc UI checks and lets the repo expose a second game in the catalog without pretending it is already playable.
+
+---
+
+## Host menu controls must be separate from rebindable gameplay controls
+
+**Scenario:** Host-side menu, settings, and setup navigation started inheriting odd behavior from gameplay rebinding, especially on controller bumpers.
+
+**Solution:** Keep menu navigation on a fixed, pre-defined input map and reserve saved user bindings only for actual gameplay runtime actions.
+
+**Why:** Shared semantic bindings seem convenient, but they let gameplay remaps leak into menu affordances and create hard-to-debug conflicts like `LB/RB` acting both as tab shortcuts and as rebound gameplay actions.
+
+---
+
+## Shared host navigation should be engine-plus-profile, not per-screen local state
+
+**Scenario:** A game needs host-side keyboard/controller navigation across menu, settings, setup, and runtime overlays without rebuilding the same focus logic every time.
+
+**Solution:** Keep a shared host navigation engine in `@party/ui` and define per-game navigation profiles in `packages/games/<game>/src/navigation/`.
+
+**Why:** This keeps sleep/wake, modal ownership, focus visibility, and fixed menu input consistent across games, while each game still controls its own targets and commands declaratively instead of scattering focus rules through local `useEffect` state.
+
+---
+
+## Renaming persisted bindings needs an explicit migration map
+
+**Scenario:** A gameplay input semantic is renamed, such as moving from `Akcja glowna` to `Potwierdz`, while old user bindings already exist in `localStorage`.
+
+**Solution:** Keep a small legacy-to-current key map in the bindings loader and copy old saved values into the new keys before merging with defaults.
+
+**Why:** Without an explicit migration step, the UI and runtime may look correct in a fresh session but existing users silently lose custom bindings or appear to revert to defaults after the rename.

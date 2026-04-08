@@ -2,6 +2,7 @@ import { AvatarAsset } from '@party/ui'
 import { ActionHint } from './ActionHint'
 import styles from './HostGameScreen.module.css'
 import type { PlayerSummary } from './playboard-types'
+import { getVerdictGridDensity } from './verdict-grid'
 
 type GuessablePlayer = PlayerSummary & {
   index: number
@@ -10,6 +11,9 @@ type GuessablePlayer = PlayerSummary & {
 type Props = {
   players: GuessablePlayer[]
   selectedPlayerIdx: number | null
+  selectionStage: 'players' | 'actions'
+  actionTarget: 'cancel' | 'confirm'
+  isFocusVisible?: boolean
   onSelectPlayer: (playerIdx: number) => void
   onCancel: () => void
   onConfirm: () => void
@@ -24,19 +28,15 @@ type Props = {
 export function VerdictPickerModal({
   players,
   selectedPlayerIdx,
+  selectionStage,
+  actionTarget,
+  isFocusVisible = false,
   onSelectPlayer,
   onCancel,
   onConfirm,
   actionHints,
 }: Props) {
-  const density =
-    players.length === 12
-      ? 'grid-12'
-      : players.length >= 10
-        ? 'grid-10'
-        : players.length === 9
-          ? 'grid-9'
-          : 'default'
+  const density = getVerdictGridDensity(players.length)
 
   return (
     <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-label="Wybierz gracza">
@@ -46,11 +46,17 @@ export function VerdictPickerModal({
         <div className={styles.modalList} data-density={density}>
           {players.map((player) => {
             const isSelected = selectedPlayerIdx === player.index
+            const isFocusedPlayer = isSelected && isFocusVisible && selectionStage === 'players'
+
             return (
               <button
                 key={`${player.name}-${player.index}`}
                 type="button"
-                className={isSelected ? styles.playerOptionSelected : styles.playerOption}
+                className={[
+                  styles.playerOption,
+                  isSelected ? styles.playerOptionSelected : '',
+                  isFocusedPlayer ? styles.controlFocused : '',
+                ].filter(Boolean).join(' ')}
                 onClick={() => onSelectPlayer(player.index)}
               >
                 <AvatarAsset avatar={player.avatar} className={styles.playerAvatar} />
@@ -62,23 +68,39 @@ export function VerdictPickerModal({
           })}
         </div>
         <div className={styles.modalHintRow}>
-          <span className={styles.modalHintText}>
-            <ActionHint label={actionHints?.previous} muted /> / <ActionHint label={actionHints?.next} muted /> wybór gracza
-          </span>
+          {selectionStage === 'players' ? (
+            <span className={styles.modalHintText}>
+              <ActionHint label={actionHints?.previous} muted /> / <ActionHint label={actionHints?.next} muted /> wybór gracza
+            </span>
+          ) : (
+            <span className={styles.modalHintText}>
+              <ActionHint label={actionHints?.cancel} muted /> wraca do wyboru gracza
+            </span>
+          )}
         </div>
         <div className={styles.modalActions}>
-          <button type="button" className={styles.cancelButton} onClick={onCancel}>
+          <button
+            type="button"
+            className={[
+              styles.cancelButton,
+              isFocusVisible && selectionStage === 'actions' && actionTarget === 'cancel' ? styles.controlFocused : '',
+            ].filter(Boolean).join(' ')}
+            onClick={onCancel}
+          >
             <span>Wróć</span>
-            <ActionHint label={actionHints?.cancel} muted />
+            <ActionHint label={isFocusVisible && selectionStage === 'actions' && actionTarget === 'cancel' ? actionHints?.confirm : null} muted />
           </button>
           <button
             type="button"
-            className={styles.confirmButton}
+            className={[
+              styles.confirmButton,
+              isFocusVisible && selectionStage === 'actions' && actionTarget === 'confirm' ? styles.controlFocused : '',
+            ].filter(Boolean).join(' ')}
             disabled={selectedPlayerIdx === null}
             onClick={onConfirm}
           >
             <span>Przyznaj punkt</span>
-            <ActionHint label={actionHints?.confirm} />
+            <ActionHint label={isFocusVisible && selectionStage === 'actions' && actionTarget === 'confirm' ? actionHints?.confirm : null} />
           </button>
         </div>
       </div>

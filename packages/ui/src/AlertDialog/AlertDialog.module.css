@@ -134,6 +134,11 @@
   width: 100%;
 }
 
+.actionFocused {
+  outline: 2px solid rgba(255, 255, 255, 0.92);
+  outline-offset: 3px;
+}
+
 @media (max-width: 767px) {
   .header {
     flex-direction: column;

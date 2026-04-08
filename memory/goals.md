@@ -1,6 +1,6 @@
 # Goals & Focus
 
-*Last updated: 2026-04-02*
+*Last updated: 2026-04-08*
 
 ---
 
@@ -29,11 +29,15 @@
 - [x] 2-player podium variant
 
 ### Code quality / cleanup
-- [ ] Review `useGameState` callback/effect dependencies around `send` after socket reconnects
+- [x] Review `useGameState` callback/effect dependencies around `send` after socket reconnects
 - [ ] Remove dead presenter/runtime leftovers
   Scope: `PresenterTimerBar`, ignored timer props, stale refs after recent UI refactors
 - [ ] Split oversized Charades files that are still hard to maintain
   Targets: `ResultsGroups.module.css`, `PlayBoard.tsx`, `PlayBoard.module.css`
+
+### Menu and settings polish
+- [ ] Finish Charades host-side menu/settings/runtime controller polish
+  Scope: remaining runtime pause/verdict feel issues, final manual validation after simplifying gameplay bindings to `Potwierdz`, and any last keyboard/controller edge cases
 
 ## Shared UI follow-up
 

@@ -36,6 +36,7 @@ const allLibraryCards: readonly LibraryCard[] = [
     name: '5 Sekund',
     label: 'Szybka akcja',
     imagePath: '/images/game-cards/five-seconds-card-main.png',
+    videoPath: '/videos/game-cards/five-seconds-card-main.mp4',
     tone: 'seconds',
   },
 ] as const

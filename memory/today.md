@@ -200,3 +200,33 @@
 - Verification passing this session: `npm run test:library-card-media --workspace @party/hub`, `npm run build --workspace @party/hub`, `npm run build --workspace @party/charades`, and `npm run test:controls-bindings --workspace @party/charades`.
 - Next: either continue Phase 4 deployment work, or do a browser-only polish/smoke pass over the new alert flows and looped hub cards.
 - Experience recorded: yes
+
+### S27 (22:19~) [Project Party] Charades host navigation and settings input split
+
+- Added host-side keyboard/controller navigation through Charades menu, setup modal, rail, and settings overlay, then iterated heavily on focus handoff between content and sidebar.
+- Split host menu input from gameplay rebinding by introducing fixed predefined menu controls, while leaving saved bindings only for runtime gameplay actions. Also wired top settings tabs to fixed `Q/E` and `LB/RB` shortcuts and continued polishing wake/sleep behavior after mouse input.
+- Next: continue the manual polish pass for Charades settings navigation, especially entry focus for `Sterowanie`, rail handoff edge cases, and any remaining controller-only hover bugs that still show up in real usage.
+- Experience recorded: yes
+
+### S28 (2026-04-08 ~) [Project Party] Shared host navigation framework + Charades reference rollout
+
+- Built the shared host navigation framework across `@party/game-sdk` and `@party/ui`, then migrated Charades onto it as the first reference consumer instead of keeping menu/setup/settings/runtime navigation as separate ad hoc systems.
+- Completed the main rollout slices for Charades menu, settings, setup, and runtime overlays, including fixed host-side input mapping, sleep/wake handling, rail handoff, runtime pause focus, pause exit confirm, and a controlled verdict picker with one active focus path at a time.
+- Documented the adoption path for future games in `packages/game-sdk/README.md` and recorded the reusable framework pattern in `memory/patterns.md`.
+- Next: do a manual runtime polish pass on Charades host controls, especially the pause/settings feel during live play, before declaring the framework product-ready for broader game adoption.
+- Experience recorded: yes
+
+### S29 (2026-04-08 21:02) [Project Party] `/games` catalog polish to match hub
+
+- Rebuilt the full `/games` catalog page so it now matches the hub's cinematic direction instead of looking like a plain utility index: stronger hero, summary stats, layered glass panels, and grouped sections for live vs coming-soon games.
+- Refined the game cards with clearer metadata, stronger hover/focus treatment, better copy hierarchy, and a more intentional empty state. Also wrote `.impeccable.md` to persist the project's design context for future UI work.
+- Verification passing in this session: `npm run build --workspace @party/hub`.
+- Next: run a real browser visual pass on `/games` across desktop and mobile, then continue either deployment work or the remaining Charades runtime polish.
+- Experience recorded: yes
+
+### S30 (23:15~) [Project Party] Charades runtime controls simplification + binding cleanup
+
+- Simplified Charades runtime controls so gameplay-facing accept actions now consistently use `Potwierdz` instead of the older `Akcja glowna`, and removed `Akcja glowna` from the settings bindings list entirely.
+- Added binding migration logic so old persisted `keyboard-primary` / `controller-primary` values are loaded into the new `confirm` slots instead of silently resetting custom controls after the rename.
+- Next: run a focused manual pass on Charades runtime pause/verdict flow and any remaining controller/keyboard rough edges now that `confirm` is the only acceptance semantic in gameplay.
+- Experience recorded: yes

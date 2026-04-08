@@ -44,4 +44,6 @@ export type GameSetupTemplateProps<TState> = {
   onStart: () => void
   onClose: () => void
   startLabel?: string
+  isFocusVisible?: boolean
+  focusedAction?: 'close' | 'start' | null
 }

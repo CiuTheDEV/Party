@@ -66,6 +66,13 @@
   cursor: pointer;
 }
 
+.controlFocused {
+  border-color: color-mix(in srgb, var(--game-color-primary) 70%, white);
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--game-color-primary) 34%, transparent),
+    0 12px 28px rgba(0, 0, 0, 0.26);
+}
+
 .toggleCopy {
   display: grid;
   gap: 4px;

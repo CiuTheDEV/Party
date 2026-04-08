@@ -1,4 +1,5 @@
 export type HostControlDevice = 'keyboard' | 'controller'
+import { getVerdictGridColumnCount } from './verdict-grid'
 
 export type HostControlAction =
   | 'left'
@@ -20,12 +21,22 @@ export type HostControlPhase =
   | 'round-summary'
   | 'verdict'
 
+export type RuntimeSettingsFocusTarget = 'sound' | 'animations' | 'exit' | 'continue'
+export type RuntimeSettingsExitConfirmFocusTarget = 'stay' | 'exit'
+export type RuntimeVerdictFocusTarget = 'correct' | 'incorrect'
+export type RuntimeVerdictPickerStage = 'players' | 'actions'
+export type RuntimeVerdictPickerActionTarget = 'cancel' | 'confirm'
 export type HostControlsContext = {
   phase: HostControlPhase
   isRoundOrderRevealing: boolean
   isSettingsOpen: boolean
   isSettingsExitConfirmOpen: boolean
+  settingsFocusTarget?: RuntimeSettingsFocusTarget
+  settingsExitConfirmFocusTarget?: RuntimeSettingsExitConfirmFocusTarget
+  verdictFocusTarget?: RuntimeVerdictFocusTarget
   isVerdictPickerOpen: boolean
+  verdictPickerStage?: RuntimeVerdictPickerStage
+  verdictPickerActionTarget?: RuntimeVerdictPickerActionTarget
   selectedGuessedPlayerIdx: number | null
   guessedPlayerIndexes: number[]
   isReconnectBlocking: boolean
@@ -36,15 +47,22 @@ export type HostControlsContext = {
 export type HostControlCommand =
   | { type: 'open-settings' }
   | { type: 'close-settings' }
+  | { type: 'set-settings-focus'; target: RuntimeSettingsFocusTarget }
   | { type: 'open-settings-exit-confirm' }
   | { type: 'cancel-settings-exit-confirm' }
+  | { type: 'set-settings-exit-confirm-focus'; target: RuntimeSettingsExitConfirmFocusTarget }
+  | { type: 'toggle-settings-sound' }
+  | { type: 'toggle-settings-animations' }
   | { type: 'exit-to-menu' }
   | { type: 'start-round-order' }
   | { type: 'stop-round' }
   | { type: 'continue-round-summary' }
   | { type: 'open-verdict-picker' }
   | { type: 'close-verdict-picker' }
+  | { type: 'set-verdict-focus'; target: RuntimeVerdictFocusTarget }
   | { type: 'select-verdict-player'; playerIdx: number }
+  | { type: 'set-verdict-picker-stage'; stage: RuntimeVerdictPickerStage }
+  | { type: 'set-verdict-picker-action-target'; target: RuntimeVerdictPickerActionTarget }
   | { type: 'confirm-verdict-player' }
   | { type: 'give-incorrect-verdict' }
   | { type: 'toggle-score-rail' }
@@ -59,8 +77,8 @@ const HOST_CONTROL_BINDING_IDS: Record<HostControlDevice, Record<HostControlActi
     confirm: 'keyboard-confirm',
     back: 'keyboard-back',
     menu: 'keyboard-menu',
-    primary: 'keyboard-primary',
-    secondary: 'keyboard-secondary',
+    primary: '',
+    secondary: '',
     rail: 'keyboard-rail',
   },
   controller: {
@@ -71,14 +89,35 @@ const HOST_CONTROL_BINDING_IDS: Record<HostControlDevice, Record<HostControlActi
     confirm: 'controller-confirm',
     back: 'controller-back',
     menu: 'controller-menu',
-    primary: 'controller-primary',
-    secondary: 'controller-secondary',
+    primary: '',
+    secondary: '',
     rail: 'controller-rail',
   },
 }
 
+const FIXED_RUNTIME_OVERLAY_HINT_LABELS: Record<HostControlDevice, Partial<Record<HostControlAction, string>>> = {
+  keyboard: {
+    left: 'Arrow Left',
+    right: 'Arrow Right',
+    up: 'Arrow Up',
+    down: 'Arrow Down',
+    confirm: 'Enter',
+    back: 'Esc',
+    menu: 'Tab',
+  },
+  controller: {
+    left: 'D-Pad Left',
+    right: 'D-Pad Right',
+    up: 'D-Pad Up',
+    down: 'D-Pad Down',
+    confirm: 'A / Cross',
+    back: 'B / Circle',
+    menu: 'Start',
+  },
+}
+
 export function getHostControlBindingId(device: HostControlDevice, action: HostControlAction) {
-  return HOST_CONTROL_BINDING_IDS[device][action]
+  return HOST_CONTROL_BINDING_IDS[device][action] ?? ''
 }
 
 export function getHostControlActionLabel(
@@ -87,11 +126,21 @@ export function getHostControlActionLabel(
   action: HostControlAction,
 ) {
   const bindingId = getHostControlBindingId(device, action)
+  if (!bindingId) {
+    return null
+  }
   const primary = bindings[`${bindingId}:primary`] ?? ''
   const secondary = bindings[`${bindingId}:secondary`] ?? ''
   const labels = [primary, secondary].filter(Boolean)
 
   return labels.length > 0 ? labels.join(' / ') : null
+}
+
+export function getFixedRuntimeOverlayActionLabel(
+  device: HostControlDevice,
+  action: HostControlAction,
+) {
+  return FIXED_RUNTIME_OVERLAY_HINT_LABELS[device][action] ?? null
 }
 
 export function resolveHostControlAction(
@@ -103,6 +152,9 @@ export function resolveHostControlAction(
   const deviceBindings = HOST_CONTROL_BINDING_IDS[device]
 
   for (const [action, bindingId] of Object.entries(deviceBindings) as Array<[HostControlAction, string]>) {
+    if (!bindingId) {
+      continue
+    }
     const labels = [bindings[`${bindingId}:primary`] ?? '', bindings[`${bindingId}:secondary`] ?? '']
     if (labels.some((label) => label.trim() === normalizedInput)) {
       return action
@@ -133,7 +185,7 @@ export function resolveHostControlCommand(
   }
 
   if (context.phase === 'round-order') {
-    if (!context.isRoundOrderRevealing && (action === 'primary' || action === 'confirm')) {
+    if (!context.isRoundOrderRevealing && action === 'confirm') {
       return { type: 'start-round-order' }
     }
 
@@ -149,7 +201,7 @@ export function resolveHostControlCommand(
   }
 
   if (context.phase === 'timer-running') {
-    if (action === 'primary' || action === 'confirm') {
+    if (action === 'confirm') {
       return { type: 'stop-round' }
     }
 
@@ -157,11 +209,11 @@ export function resolveHostControlCommand(
   }
 
   if (context.phase === 'round-summary') {
-    if (action === 'primary' || action === 'confirm') {
+    if (action === 'confirm') {
       return { type: 'continue-round-summary' }
     }
 
-    if (action === 'secondary' || action === 'back') {
+    if (action === 'back') {
       return { type: 'exit-to-menu' }
     }
 
@@ -169,16 +221,26 @@ export function resolveHostControlCommand(
   }
 
   if (context.phase === 'verdict') {
+    const verdictFocusTarget = context.verdictFocusTarget ?? 'correct'
+
     if (action === 'rail') {
       return { type: 'toggle-verdict-word' }
     }
 
-    if (action === 'secondary' || action === 'back') {
-      return { type: 'give-incorrect-verdict' }
+    if (action === 'left') {
+      return verdictFocusTarget === 'correct' ? null : { type: 'set-verdict-focus', target: 'correct' }
     }
 
-    if ((action === 'primary' || action === 'confirm') && context.guessedPlayerIndexes.length > 0) {
-      return { type: 'open-verdict-picker' }
+    if (action === 'right') {
+      return verdictFocusTarget === 'incorrect' ? null : { type: 'set-verdict-focus', target: 'incorrect' }
+    }
+
+    if (action === 'confirm' && verdictFocusTarget === 'correct') {
+      return context.guessedPlayerIndexes.length > 0 ? { type: 'open-verdict-picker' } : null
+    }
+
+    if (action === 'confirm' && verdictFocusTarget === 'incorrect') {
+      return { type: 'give-incorrect-verdict' }
     }
   }
 
@@ -189,73 +251,181 @@ function resolveSettingsCommand(
   context: HostControlsContext,
   action: HostControlAction,
 ): HostControlCommand | null {
+  const settingsFocusTarget = context.settingsFocusTarget ?? 'continue'
+  const settingsExitConfirmFocusTarget = context.settingsExitConfirmFocusTarget ?? 'stay'
+
   if (context.isSettingsExitConfirmOpen) {
-    if (action === 'primary' || action === 'confirm') {
-      return { type: 'exit-to-menu' }
+    if (action === 'left' || action === 'up') {
+      return settingsExitConfirmFocusTarget === 'stay'
+        ? null
+        : { type: 'set-settings-exit-confirm-focus', target: 'stay' }
     }
 
-    if (action === 'secondary' || action === 'back' || action === 'menu') {
+    if (action === 'right' || action === 'down') {
+      return settingsExitConfirmFocusTarget === 'exit'
+        ? null
+        : { type: 'set-settings-exit-confirm-focus', target: 'exit' }
+    }
+
+    if (action === 'confirm') {
+      return settingsExitConfirmFocusTarget === 'exit'
+        ? { type: 'exit-to-menu' }
+        : { type: 'cancel-settings-exit-confirm' }
+    }
+
+    if (action === 'back' || action === 'menu') {
       return { type: 'cancel-settings-exit-confirm' }
     }
 
     return null
   }
 
-  if (action === 'secondary') {
-    return { type: 'open-settings-exit-confirm' }
+  if (action === 'left' || action === 'right' || action === 'up' || action === 'down') {
+    const nextTarget = getNextSettingsFocusTarget(settingsFocusTarget, action)
+    return nextTarget === settingsFocusTarget ? null : { type: 'set-settings-focus', target: nextTarget }
   }
 
-  if (action === 'primary' || action === 'confirm' || action === 'back' || action === 'menu') {
+    if (action === 'back' || action === 'menu') {
+      return { type: 'close-settings' }
+    }
+
+    if (action === 'confirm') {
+      if (settingsFocusTarget === 'sound') {
+        return { type: 'toggle-settings-sound' }
+      }
+
+    if (settingsFocusTarget === 'animations') {
+      return { type: 'toggle-settings-animations' }
+    }
+
+    if (settingsFocusTarget === 'exit') {
+      return { type: 'open-settings-exit-confirm' }
+    }
+
     return { type: 'close-settings' }
   }
 
   return null
 }
 
+function getNextSettingsFocusTarget(
+  current: RuntimeSettingsFocusTarget,
+  action: 'left' | 'right' | 'up' | 'down',
+) {
+  const targets: RuntimeSettingsFocusTarget[] = ['sound', 'animations', 'exit', 'continue']
+  const currentIndex = targets.indexOf(current)
+
+  if (currentIndex < 0) {
+    return targets[0] ?? current
+  }
+
+  if (action === 'up') {
+    return targets[Math.max(0, currentIndex - 1)] ?? current
+  }
+
+  if (action === 'down') {
+    return targets[Math.min(targets.length - 1, currentIndex + 1)] ?? current
+  }
+
+  if (action === 'left') {
+    return current === 'continue' ? 'exit' : current
+  }
+
+  if (action === 'right') {
+    return current === 'exit' ? 'continue' : current
+  }
+
+  return current
+}
+
 function resolveVerdictPickerCommand(
   context: HostControlsContext,
   action: HostControlAction,
 ): HostControlCommand | null {
-  if (action === 'secondary' || action === 'back' || action === 'menu') {
+  const verdictPickerStage = context.verdictPickerStage ?? 'players'
+  const verdictPickerActionTarget = context.verdictPickerActionTarget ?? 'confirm'
+
+  if (verdictPickerStage === 'actions') {
+    if (action === 'left') {
+      return verdictPickerActionTarget === 'cancel'
+        ? null
+        : { type: 'set-verdict-picker-action-target', target: 'cancel' }
+    }
+
+    if (action === 'right') {
+      return verdictPickerActionTarget === 'confirm'
+        ? null
+        : { type: 'set-verdict-picker-action-target', target: 'confirm' }
+    }
+
+    if (action === 'back' || action === 'menu') {
+      return { type: 'set-verdict-picker-stage', stage: 'players' }
+    }
+
+    if (action === 'confirm') {
+      return verdictPickerActionTarget === 'confirm'
+        ? { type: 'confirm-verdict-player' }
+        : { type: 'close-verdict-picker' }
+    }
+
+    return null
+  }
+
+  if (action === 'back' || action === 'menu') {
     return { type: 'close-verdict-picker' }
   }
 
-  if (action === 'primary' || action === 'confirm') {
-    return context.selectedGuessedPlayerIdx === null ? null : { type: 'confirm-verdict-player' }
+  if (action === 'confirm') {
+    return context.selectedGuessedPlayerIdx === null ? null : { type: 'set-verdict-picker-stage', stage: 'actions' }
   }
 
   if (action !== 'left' && action !== 'right' && action !== 'up' && action !== 'down') {
     return null
   }
 
-  const direction = action === 'left' || action === 'up' ? -1 : 1
-  const nextPlayerIdx = getNextVerdictPlayerIndex(
+  const nextPlayerIdx = getNextVerdictPlayerIndexInGrid(
     context.guessedPlayerIndexes,
     context.selectedGuessedPlayerIdx,
-    direction,
+    action,
   )
 
   return nextPlayerIdx === null ? null : { type: 'select-verdict-player', playerIdx: nextPlayerIdx }
 }
 
-function getNextVerdictPlayerIndex(
+function getNextVerdictPlayerIndexInGrid(
   playerIndexes: number[],
   currentSelection: number | null,
-  direction: -1 | 1,
+  action: 'left' | 'right' | 'up' | 'down',
 ) {
   if (playerIndexes.length === 0) {
     return null
   }
 
   if (currentSelection === null) {
-    return direction === -1 ? playerIndexes[playerIndexes.length - 1] ?? null : playerIndexes[0] ?? null
+    return playerIndexes[0] ?? null
   }
 
   const currentIndex = playerIndexes.indexOf(currentSelection)
   if (currentIndex < 0) {
-    return direction === -1 ? playerIndexes[playerIndexes.length - 1] ?? null : playerIndexes[0] ?? null
+    return playerIndexes[0] ?? null
   }
 
-  const nextIndex = (currentIndex + direction + playerIndexes.length) % playerIndexes.length
-  return playerIndexes[nextIndex] ?? null
+  const columns = getVerdictGridColumnCount(playerIndexes.length)
+  let nextIndex = currentIndex
+
+  if (action === 'left') {
+    nextIndex = currentIndex - 1
+  } else if (action === 'right') {
+    nextIndex = currentIndex + 1
+  } else if (action === 'up') {
+    nextIndex = currentIndex - columns
+  } else if (action === 'down') {
+    nextIndex = currentIndex + columns
+  }
+
+  if (nextIndex < 0 || nextIndex >= playerIndexes.length) {
+    return currentSelection
+  }
+
+  return playerIndexes[nextIndex] ?? currentSelection
 }

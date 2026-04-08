@@ -118,8 +118,8 @@
 }
 
 .details li .iconPlayers { color: #a78bfa; }
-.details li .iconPhone   { color: #34d399; }
-.details li .iconTarget  { color: #fb923c; }
+.details li .iconPhone { color: #34d399; }
+.details li .iconTarget { color: #fb923c; }
 
 .playBtn {
   display: block;
@@ -429,6 +429,15 @@
   box-shadow: 0 16px 32px rgba(124, 58, 237, 0.24);
 }
 
+.focusedAction {
+  transform: translateY(-1px);
+  border-color: rgba(196, 181, 253, 0.72);
+  background: rgba(124, 58, 237, 0.16);
+  box-shadow:
+    0 0 0 2px rgba(196, 181, 253, 0.22),
+    0 18px 34px rgba(91, 33, 182, 0.24);
+}
+
 @media (max-width: 767px) {
   .warningModal {
     gap: 18px;
@@ -591,10 +600,10 @@
 
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
-  20%       { transform: translateX(-6px); }
-  40%       { transform: translateX(6px); }
-  60%       { transform: translateX(-4px); }
-  80%       { transform: translateX(4px); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
 }
 
 /* Mobile */

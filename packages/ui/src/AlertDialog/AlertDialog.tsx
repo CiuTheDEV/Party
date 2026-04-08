@@ -18,6 +18,8 @@ type AlertDialogProps = {
   icon?: ReactNode
   variant?: 'warning' | 'danger'
   actions: AlertDialogAction[]
+  focusedActionIndex?: number | null
+  isFocusVisible?: boolean
   onClose?: () => void
   closeOnBackdrop?: boolean
 }
@@ -30,6 +32,8 @@ export function AlertDialog({
   icon,
   variant = 'warning',
   actions,
+  focusedActionIndex = null,
+  isFocusVisible = true,
   onClose,
   closeOnBackdrop = false,
 }: AlertDialogProps) {
@@ -69,7 +73,7 @@ export function AlertDialog({
         </div>
 
         <div className={styles.actions}>
-          {actions.map((action) => {
+          {actions.map((action, index) => {
             const actionClassName =
               action.variant === 'danger'
                 ? styles.actionDanger
@@ -82,6 +86,7 @@ export function AlertDialog({
                 key={action.label}
                 type="button"
                 className={[styles.actionButton, actionClassName, action.fullWidth ? styles.actionFullWidth : '']
+                  .concat(isFocusVisible && focusedActionIndex === index ? styles.actionFocused : '')
                   .filter(Boolean)
                   .join(' ')}
                 onClick={action.onClick}

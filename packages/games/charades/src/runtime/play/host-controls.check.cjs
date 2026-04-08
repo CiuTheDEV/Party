@@ -23,20 +23,20 @@ run('maps persisted keyboard binding labels to semantic actions', () => {
   assert.equal(
     hostControlsModule.resolveHostControlAction(
       {
-        'keyboard-primary:primary': 'F',
-        'keyboard-primary:secondary': '',
+        'keyboard-confirm:primary': 'F',
+        'keyboard-confirm:secondary': '',
       },
       'keyboard',
       'F',
     ),
-    'primary',
+    'confirm',
   )
 
   assert.equal(
     hostControlsModule.resolveHostControlAction(
       {
-        'keyboard-primary:primary': 'F',
-        'keyboard-primary:secondary': '',
+        'keyboard-confirm:primary': 'F',
+        'keyboard-confirm:secondary': '',
       },
       'keyboard',
       'Space',
@@ -49,13 +49,13 @@ run('returns display labels for action hints on both devices', () => {
   assert.equal(
     hostControlsModule.getHostControlActionLabel(
       {
-        'keyboard-primary:primary': 'F',
-        'keyboard-primary:secondary': 'Space',
-        'controller-primary:primary': 'R1 / RB',
-        'controller-primary:secondary': '',
+        'keyboard-confirm:primary': 'F',
+        'keyboard-confirm:secondary': 'Space',
+        'controller-confirm:primary': 'A / Cross',
+        'controller-confirm:secondary': '',
       },
       'keyboard',
-      'primary',
+      'confirm',
     ),
     'F / Space',
   )
@@ -63,15 +63,25 @@ run('returns display labels for action hints on both devices', () => {
   assert.equal(
     hostControlsModule.getHostControlActionLabel(
       {
-        'keyboard-primary:primary': 'F',
-        'keyboard-primary:secondary': 'Space',
-        'controller-primary:primary': 'R1 / RB',
-        'controller-primary:secondary': 'L2 / LT',
+        'keyboard-confirm:primary': 'F',
+        'keyboard-confirm:secondary': 'Space',
+        'controller-confirm:primary': 'A / Cross',
+        'controller-confirm:secondary': 'X / Square',
       },
       'controller',
-      'primary',
+      'confirm',
     ),
-    'R1 / RB / L2 / LT',
+    'A / Cross / X / Square',
+  )
+
+  assert.equal(
+    hostControlsModule.getFixedRuntimeOverlayActionLabel('keyboard', 'confirm'),
+    'Enter',
+  )
+
+  assert.equal(
+    hostControlsModule.getFixedRuntimeOverlayActionLabel('controller', 'back'),
+    'B / Circle',
   )
 })
 
@@ -83,6 +93,8 @@ run('opens settings from menu action and closes it on repeat', () => {
         isRoundOrderRevealing: false,
         isSettingsOpen: false,
         isSettingsExitConfirmOpen: false,
+        settingsFocusTarget: 'sound',
+        settingsExitConfirmFocusTarget: 'stay',
         isVerdictPickerOpen: false,
         selectedGuessedPlayerIdx: null,
         guessedPlayerIndexes: [],
@@ -102,6 +114,8 @@ run('opens settings from menu action and closes it on repeat', () => {
         isRoundOrderRevealing: false,
         isSettingsOpen: true,
         isSettingsExitConfirmOpen: false,
+        settingsFocusTarget: 'continue',
+        settingsExitConfirmFocusTarget: 'stay',
         isVerdictPickerOpen: false,
         selectedGuessedPlayerIdx: null,
         guessedPlayerIndexes: [],
@@ -112,6 +126,264 @@ run('opens settings from menu action and closes it on repeat', () => {
       'menu',
     ),
     { type: 'close-settings' },
+  )
+})
+
+run('settings menu is intended to enter on the first vertical item', () => {
+  assert.deepEqual(
+    hostControlsModule.resolveHostControlCommand(
+      {
+        phase: 'prepare',
+        isRoundOrderRevealing: false,
+        isSettingsOpen: true,
+        isSettingsExitConfirmOpen: false,
+        settingsFocusTarget: 'sound',
+        settingsExitConfirmFocusTarget: 'stay',
+        isVerdictPickerOpen: false,
+        selectedGuessedPlayerIdx: null,
+        guessedPlayerIndexes: [],
+        isReconnectBlocking: false,
+        canToggleScoreRail: true,
+        isVerdictWordVisible: false,
+      },
+      'down',
+    ),
+    { type: 'set-settings-focus', target: 'animations' },
+  )
+})
+
+run('navigates runtime settings modal targets and resolves primary contextually', () => {
+  assert.deepEqual(
+    hostControlsModule.resolveHostControlCommand(
+      {
+        phase: 'prepare',
+        isRoundOrderRevealing: false,
+        isSettingsOpen: true,
+        isSettingsExitConfirmOpen: false,
+        settingsFocusTarget: 'sound',
+        settingsExitConfirmFocusTarget: 'stay',
+        isVerdictPickerOpen: false,
+        selectedGuessedPlayerIdx: null,
+        guessedPlayerIndexes: [],
+        isReconnectBlocking: false,
+        canToggleScoreRail: true,
+        isVerdictWordVisible: false,
+      },
+      'down',
+    ),
+    { type: 'set-settings-focus', target: 'animations' },
+  )
+
+  assert.deepEqual(
+    hostControlsModule.resolveHostControlCommand(
+      {
+        phase: 'prepare',
+        isRoundOrderRevealing: false,
+        isSettingsOpen: true,
+        isSettingsExitConfirmOpen: false,
+        settingsFocusTarget: 'animations',
+        settingsExitConfirmFocusTarget: 'stay',
+        isVerdictPickerOpen: false,
+        selectedGuessedPlayerIdx: null,
+        guessedPlayerIndexes: [],
+        isReconnectBlocking: false,
+        canToggleScoreRail: true,
+        isVerdictWordVisible: false,
+      },
+      'down',
+    ),
+    { type: 'set-settings-focus', target: 'exit' },
+  )
+
+  assert.deepEqual(
+    hostControlsModule.resolveHostControlCommand(
+      {
+        phase: 'prepare',
+        isRoundOrderRevealing: false,
+        isSettingsOpen: true,
+        isSettingsExitConfirmOpen: false,
+        settingsFocusTarget: 'exit',
+        settingsExitConfirmFocusTarget: 'stay',
+        isVerdictPickerOpen: false,
+        selectedGuessedPlayerIdx: null,
+        guessedPlayerIndexes: [],
+        isReconnectBlocking: false,
+        canToggleScoreRail: true,
+        isVerdictWordVisible: false,
+      },
+      'down',
+    ),
+    { type: 'set-settings-focus', target: 'continue' },
+  )
+
+  assert.equal(
+    hostControlsModule.resolveHostControlCommand(
+      {
+        phase: 'prepare',
+        isRoundOrderRevealing: false,
+        isSettingsOpen: true,
+        isSettingsExitConfirmOpen: false,
+        settingsFocusTarget: 'sound',
+        settingsExitConfirmFocusTarget: 'stay',
+        isVerdictPickerOpen: false,
+        selectedGuessedPlayerIdx: null,
+        guessedPlayerIndexes: [],
+        isReconnectBlocking: false,
+        canToggleScoreRail: true,
+        isVerdictWordVisible: false,
+      },
+      'right',
+    ),
+    null,
+  )
+
+  assert.deepEqual(
+    hostControlsModule.resolveHostControlCommand(
+      {
+        phase: 'prepare',
+        isRoundOrderRevealing: false,
+        isSettingsOpen: true,
+        isSettingsExitConfirmOpen: false,
+        settingsFocusTarget: 'exit',
+        settingsExitConfirmFocusTarget: 'stay',
+        isVerdictPickerOpen: false,
+        selectedGuessedPlayerIdx: null,
+        guessedPlayerIndexes: [],
+        isReconnectBlocking: false,
+        canToggleScoreRail: true,
+        isVerdictWordVisible: false,
+      },
+      'right',
+    ),
+    { type: 'set-settings-focus', target: 'continue' },
+  )
+
+  assert.deepEqual(
+    hostControlsModule.resolveHostControlCommand(
+      {
+        phase: 'prepare',
+        isRoundOrderRevealing: false,
+        isSettingsOpen: true,
+        isSettingsExitConfirmOpen: false,
+        settingsFocusTarget: 'continue',
+        settingsExitConfirmFocusTarget: 'stay',
+        isVerdictPickerOpen: false,
+        selectedGuessedPlayerIdx: null,
+        guessedPlayerIndexes: [],
+        isReconnectBlocking: false,
+        canToggleScoreRail: true,
+        isVerdictWordVisible: false,
+      },
+      'left',
+    ),
+    { type: 'set-settings-focus', target: 'exit' },
+  )
+
+  assert.deepEqual(
+    hostControlsModule.resolveHostControlCommand(
+      {
+        phase: 'prepare',
+        isRoundOrderRevealing: false,
+        isSettingsOpen: true,
+        isSettingsExitConfirmOpen: false,
+        settingsFocusTarget: 'sound',
+        settingsExitConfirmFocusTarget: 'stay',
+        isVerdictPickerOpen: false,
+        selectedGuessedPlayerIdx: null,
+        guessedPlayerIndexes: [],
+        isReconnectBlocking: false,
+        canToggleScoreRail: true,
+        isVerdictWordVisible: false,
+      },
+      'confirm',
+    ),
+    { type: 'toggle-settings-sound' },
+  )
+
+  assert.deepEqual(
+    hostControlsModule.resolveHostControlCommand(
+      {
+        phase: 'prepare',
+        isRoundOrderRevealing: false,
+        isSettingsOpen: true,
+        isSettingsExitConfirmOpen: false,
+        settingsFocusTarget: 'exit',
+        settingsExitConfirmFocusTarget: 'stay',
+        isVerdictPickerOpen: false,
+        selectedGuessedPlayerIdx: null,
+        guessedPlayerIndexes: [],
+        isReconnectBlocking: false,
+        canToggleScoreRail: true,
+        isVerdictWordVisible: false,
+      },
+      'confirm',
+    ),
+    { type: 'open-settings-exit-confirm' },
+  )
+})
+
+run('navigates settings exit confirm and confirms selected action', () => {
+  assert.deepEqual(
+    hostControlsModule.resolveHostControlCommand(
+      {
+        phase: 'prepare',
+        isRoundOrderRevealing: false,
+        isSettingsOpen: true,
+        isSettingsExitConfirmOpen: true,
+        settingsFocusTarget: 'continue',
+        settingsExitConfirmFocusTarget: 'stay',
+        isVerdictPickerOpen: false,
+        selectedGuessedPlayerIdx: null,
+        guessedPlayerIndexes: [],
+        isReconnectBlocking: false,
+        canToggleScoreRail: true,
+        isVerdictWordVisible: false,
+      },
+      'down',
+    ),
+    { type: 'set-settings-exit-confirm-focus', target: 'exit' },
+  )
+
+  assert.deepEqual(
+    hostControlsModule.resolveHostControlCommand(
+      {
+        phase: 'prepare',
+        isRoundOrderRevealing: false,
+        isSettingsOpen: true,
+        isSettingsExitConfirmOpen: true,
+        settingsFocusTarget: 'continue',
+        settingsExitConfirmFocusTarget: 'stay',
+        isVerdictPickerOpen: false,
+        selectedGuessedPlayerIdx: null,
+        guessedPlayerIndexes: [],
+        isReconnectBlocking: false,
+        canToggleScoreRail: true,
+        isVerdictWordVisible: false,
+      },
+      'confirm',
+    ),
+    { type: 'cancel-settings-exit-confirm' },
+  )
+
+  assert.deepEqual(
+    hostControlsModule.resolveHostControlCommand(
+      {
+        phase: 'prepare',
+        isRoundOrderRevealing: false,
+        isSettingsOpen: true,
+        isSettingsExitConfirmOpen: true,
+        settingsFocusTarget: 'continue',
+        settingsExitConfirmFocusTarget: 'exit',
+        isVerdictPickerOpen: false,
+        selectedGuessedPlayerIdx: null,
+        guessedPlayerIndexes: [],
+        isReconnectBlocking: false,
+        canToggleScoreRail: true,
+        isVerdictWordVisible: false,
+      },
+      'confirm',
+    ),
+    { type: 'exit-to-menu' },
   )
 })
 
@@ -130,13 +402,13 @@ run('suppresses host controls while reconnect overlay blocks the screen', () => 
         canToggleScoreRail: false,
         isVerdictWordVisible: false,
       },
-      'primary',
+      'confirm',
     ),
     null,
   )
 })
 
-run('maps primary and secondary actions during verdict', () => {
+run('maps runtime verdict actions through primary and directional choice', () => {
   assert.deepEqual(
     hostControlsModule.resolveHostControlCommand(
       {
@@ -144,16 +416,19 @@ run('maps primary and secondary actions during verdict', () => {
         isRoundOrderRevealing: false,
         isSettingsOpen: false,
         isSettingsExitConfirmOpen: false,
+        verdictFocusTarget: 'correct',
         isVerdictPickerOpen: false,
+        verdictPickerStage: 'players',
+        verdictPickerActionTarget: 'confirm',
         selectedGuessedPlayerIdx: null,
         guessedPlayerIndexes: [1, 3, 4],
         isReconnectBlocking: false,
         canToggleScoreRail: false,
         isVerdictWordVisible: false,
       },
-      'primary',
+      'right',
     ),
-    { type: 'open-verdict-picker' },
+    { type: 'set-verdict-focus', target: 'incorrect' },
   )
 
   assert.deepEqual(
@@ -163,16 +438,41 @@ run('maps primary and secondary actions during verdict', () => {
         isRoundOrderRevealing: false,
         isSettingsOpen: false,
         isSettingsExitConfirmOpen: false,
+        verdictFocusTarget: 'incorrect',
         isVerdictPickerOpen: false,
+        verdictPickerStage: 'players',
+        verdictPickerActionTarget: 'confirm',
         selectedGuessedPlayerIdx: null,
         guessedPlayerIndexes: [1, 3, 4],
         isReconnectBlocking: false,
         canToggleScoreRail: false,
         isVerdictWordVisible: false,
       },
-      'secondary',
+      'confirm',
     ),
     { type: 'give-incorrect-verdict' },
+  )
+
+  assert.deepEqual(
+    hostControlsModule.resolveHostControlCommand(
+      {
+        phase: 'verdict',
+        isRoundOrderRevealing: false,
+        isSettingsOpen: false,
+        isSettingsExitConfirmOpen: false,
+        verdictFocusTarget: 'correct',
+        isVerdictPickerOpen: false,
+        verdictPickerStage: 'players',
+        verdictPickerActionTarget: 'confirm',
+        selectedGuessedPlayerIdx: null,
+        guessedPlayerIndexes: [1, 3, 4],
+        isReconnectBlocking: false,
+        canToggleScoreRail: false,
+        isVerdictWordVisible: false,
+      },
+      'confirm',
+    ),
+    { type: 'open-verdict-picker' },
   )
 })
 
@@ -185,6 +485,8 @@ run('navigates verdict picker and confirms selected player', () => {
         isSettingsOpen: false,
         isSettingsExitConfirmOpen: false,
         isVerdictPickerOpen: true,
+        verdictPickerStage: 'players',
+        verdictPickerActionTarget: 'confirm',
         selectedGuessedPlayerIdx: null,
         guessedPlayerIndexes: [1, 3, 4],
         isReconnectBlocking: false,
@@ -204,6 +506,8 @@ run('navigates verdict picker and confirms selected player', () => {
         isSettingsOpen: false,
         isSettingsExitConfirmOpen: false,
         isVerdictPickerOpen: true,
+        verdictPickerStage: 'players',
+        verdictPickerActionTarget: 'confirm',
         selectedGuessedPlayerIdx: 3,
         guessedPlayerIndexes: [1, 3, 4],
         isReconnectBlocking: false,
@@ -223,6 +527,73 @@ run('navigates verdict picker and confirms selected player', () => {
         isSettingsOpen: false,
         isSettingsExitConfirmOpen: false,
         isVerdictPickerOpen: true,
+        verdictPickerStage: 'players',
+        verdictPickerActionTarget: 'confirm',
+        selectedGuessedPlayerIdx: 3,
+        guessedPlayerIndexes: [1, 3, 4],
+        isReconnectBlocking: false,
+        canToggleScoreRail: false,
+        isVerdictWordVisible: false,
+      },
+      'confirm',
+    ),
+    { type: 'set-verdict-picker-stage', stage: 'actions' },
+  )
+})
+
+run('moves between verdict players without leaving the grid', () => {
+  assert.deepEqual(
+    hostControlsModule.resolveHostControlCommand(
+      {
+        phase: 'verdict',
+        isRoundOrderRevealing: false,
+        isSettingsOpen: false,
+        isSettingsExitConfirmOpen: false,
+        isVerdictPickerOpen: true,
+        verdictPickerStage: 'players',
+        verdictPickerActionTarget: 'confirm',
+        selectedGuessedPlayerIdx: 3,
+        guessedPlayerIndexes: [1, 3, 4],
+        isReconnectBlocking: false,
+        canToggleScoreRail: false,
+        isVerdictWordVisible: false,
+      },
+      'down',
+    ),
+    { type: 'select-verdict-player', playerIdx: 3 },
+  )
+
+  assert.deepEqual(
+    hostControlsModule.resolveHostControlCommand(
+      {
+        phase: 'verdict',
+        isRoundOrderRevealing: false,
+        isSettingsOpen: false,
+        isSettingsExitConfirmOpen: false,
+        isVerdictPickerOpen: true,
+        verdictPickerStage: 'actions',
+        verdictPickerActionTarget: 'cancel',
+        selectedGuessedPlayerIdx: 4,
+        guessedPlayerIndexes: [1, 3, 4],
+        isReconnectBlocking: false,
+        canToggleScoreRail: false,
+        isVerdictWordVisible: false,
+      },
+      'left',
+    ),
+    null,
+  )
+
+  assert.deepEqual(
+    hostControlsModule.resolveHostControlCommand(
+      {
+        phase: 'verdict',
+        isRoundOrderRevealing: false,
+        isSettingsOpen: false,
+        isSettingsExitConfirmOpen: false,
+        isVerdictPickerOpen: true,
+        verdictPickerStage: 'actions',
+        verdictPickerActionTarget: 'confirm',
         selectedGuessedPlayerIdx: 3,
         guessedPlayerIndexes: [1, 3, 4],
         isReconnectBlocking: false,
@@ -232,6 +603,71 @@ run('navigates verdict picker and confirms selected player', () => {
       'confirm',
     ),
     { type: 'confirm-verdict-player' },
+  )
+
+  assert.deepEqual(
+    hostControlsModule.resolveHostControlCommand(
+      {
+        phase: 'verdict',
+        isRoundOrderRevealing: false,
+        isSettingsOpen: false,
+        isSettingsExitConfirmOpen: false,
+        isVerdictPickerOpen: true,
+        verdictPickerStage: 'actions',
+        verdictPickerActionTarget: 'confirm',
+        selectedGuessedPlayerIdx: 3,
+        guessedPlayerIndexes: [1, 3, 4],
+        isReconnectBlocking: false,
+        canToggleScoreRail: false,
+        isVerdictWordVisible: false,
+      },
+      'back',
+    ),
+    { type: 'set-verdict-picker-stage', stage: 'players' },
+  )
+})
+
+run('moves through verdict players vertically in a grid', () => {
+  assert.deepEqual(
+    hostControlsModule.resolveHostControlCommand(
+      {
+        phase: 'verdict',
+        isRoundOrderRevealing: false,
+        isSettingsOpen: false,
+        isSettingsExitConfirmOpen: false,
+        isVerdictPickerOpen: true,
+        verdictPickerStage: 'players',
+        verdictPickerActionTarget: 'confirm',
+        selectedGuessedPlayerIdx: 1,
+        guessedPlayerIndexes: [1, 3, 4, 6, 7, 9],
+        isReconnectBlocking: false,
+        canToggleScoreRail: false,
+        isVerdictWordVisible: false,
+      },
+      'down',
+    ),
+    { type: 'select-verdict-player', playerIdx: 6 },
+  )
+
+  assert.deepEqual(
+    hostControlsModule.resolveHostControlCommand(
+      {
+        phase: 'verdict',
+        isRoundOrderRevealing: false,
+        isSettingsOpen: false,
+        isSettingsExitConfirmOpen: false,
+        isVerdictPickerOpen: true,
+        verdictPickerStage: 'players',
+        verdictPickerActionTarget: 'confirm',
+        selectedGuessedPlayerIdx: 6,
+        guessedPlayerIndexes: [1, 3, 4, 6, 7, 9],
+        isReconnectBlocking: false,
+        canToggleScoreRail: false,
+        isVerdictWordVisible: false,
+      },
+      'up',
+    ),
+    { type: 'select-verdict-player', playerIdx: 1 },
   )
 })
 
@@ -250,7 +686,7 @@ run('maps contextual host actions for round flow and verdict word toggle', () =>
         canToggleScoreRail: false,
         isVerdictWordVisible: false,
       },
-      'primary',
+      'confirm',
     ),
     { type: 'start-round-order' },
   )
@@ -288,7 +724,7 @@ run('maps contextual host actions for round flow and verdict word toggle', () =>
         canToggleScoreRail: false,
         isVerdictWordVisible: false,
       },
-      'primary',
+      'confirm',
     ),
     { type: 'stop-round' },
   )
@@ -307,7 +743,7 @@ run('maps contextual host actions for round flow and verdict word toggle', () =>
         canToggleScoreRail: false,
         isVerdictWordVisible: false,
       },
-      'primary',
+      'confirm',
     ),
     { type: 'continue-round-summary' },
   )

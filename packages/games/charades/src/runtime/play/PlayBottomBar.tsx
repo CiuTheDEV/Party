@@ -22,9 +22,10 @@ type PlayBottomBarProps = {
   onStopRound: () => void
   onCorrectVerdict: () => void
   onIncorrectVerdict: () => void
+  verdictFocusedTarget?: 'correct' | 'incorrect'
+  isFocusVisible?: boolean
   actionHints?: {
-    primary?: string | null
-    secondary?: string | null
+    confirm?: string | null
     menu?: string | null
   }
 }
@@ -42,6 +43,8 @@ export function PlayBottomBar({
   onStopRound,
   onCorrectVerdict,
   onIncorrectVerdict,
+  verdictFocusedTarget = 'correct',
+  isFocusVisible = false,
   actionHints,
 }: PlayBottomBarProps) {
   return (
@@ -59,7 +62,7 @@ export function PlayBottomBar({
       {phase === 'round-order' && !isRoundOrderRevealing && (
         <button className={styles.primaryButton} onClick={onStartRound}>
           <span>Wylosuj kolejność</span>
-          <ActionHint label={actionHints?.primary} />
+          <ActionHint label={actionHints?.confirm} />
         </button>
       )}
 
@@ -87,7 +90,7 @@ export function PlayBottomBar({
         <div className={styles.timerActions}>
           <button className={styles.stopButton} onClick={onStopRound}>
             <span>STOP</span>
-            <ActionHint label={actionHints?.primary} muted />
+            <ActionHint label={actionHints?.confirm} muted />
           </button>
         </div>
       )}
@@ -96,24 +99,36 @@ export function PlayBottomBar({
         <div className={styles.verdictActions}>
           <button className={styles.stopButton} onClick={onExitToMenu}>
             <span>Powrót do menu</span>
-            <ActionHint label={actionHints?.secondary ?? actionHints?.menu} muted />
+            <ActionHint label={actionHints?.menu} muted />
           </button>
           <button className={styles.primaryButton} onClick={onContinueRoundSummary}>
             <span>Następna runda</span>
-            <ActionHint label={actionHints?.primary} />
+            <ActionHint label={actionHints?.confirm} />
           </button>
         </div>
       )}
 
       {phase === 'verdict' && (
         <div className={styles.verdictActions}>
-          <button className={styles.successButton} onClick={onCorrectVerdict}>
+          <button
+            className={[
+              styles.successButton,
+              isFocusVisible && verdictFocusedTarget === 'correct' ? styles.controlFocused : '',
+            ].filter(Boolean).join(' ')}
+            onClick={onCorrectVerdict}
+          >
             <span>Zgadnięto</span>
-            <ActionHint label={actionHints?.primary} />
+            <ActionHint label={isFocusVisible && verdictFocusedTarget === 'correct' ? actionHints?.confirm : null} />
           </button>
-          <button className={styles.dangerButton} onClick={onIncorrectVerdict}>
+          <button
+            className={[
+              styles.dangerButton,
+              isFocusVisible && verdictFocusedTarget === 'incorrect' ? styles.controlFocused : '',
+            ].filter(Boolean).join(' ')}
+            onClick={onIncorrectVerdict}
+          >
             <span>Nie zgadnięto</span>
-            <ActionHint label={actionHints?.secondary} />
+            <ActionHint label={isFocusVisible && verdictFocusedTarget === 'incorrect' ? actionHints?.confirm : null} />
           </button>
         </div>
       )}

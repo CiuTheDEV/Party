@@ -80,6 +80,14 @@
   border-color: rgba(255, 255, 255, 0.08);
 }
 
+.controlFocused {
+  border-color: color-mix(in srgb, var(--game-color-primary) 70%, white);
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--game-color-primary) 30%, transparent),
+    0 14px 28px rgba(0, 0, 0, 0.24);
+  transform: translateY(-2px);
+}
+
 .primaryButton:hover:not(:disabled),
 .stopButton:hover,
 .successButton:hover,

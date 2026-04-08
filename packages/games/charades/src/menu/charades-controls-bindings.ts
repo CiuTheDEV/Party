@@ -1,6 +1,7 @@
 import { charadesSettingsCategories, type CharadesControlsBinding, type CharadesControlsDevice } from './charades-settings-overlay-data'
 
 export const CHARADES_BINDINGS_STORAGE_KEY = 'charades:settings:bindings:v1'
+export const CHARADES_BINDINGS_UPDATED_EVENT = 'charades:settings:bindings-updated'
 export type BindingSlot = 'primary' | 'secondary'
 export type GamepadProfile = 'xbox' | 'playstation' | 'generic'
 
@@ -62,6 +63,12 @@ const controllerProfileLabelMap: Record<string, Record<Exclude<GamepadProfile, '
 
 const controlsBindings = charadesSettingsCategories.find((category) => category.id === 'controls')?.bindings ?? []
 const ignoredGamepadIdParts = ['audio', 'headset', 'headphone', 'hyperx', 'cloud', 'mic', 'speaker']
+const legacyBindingMigrations: Record<string, string> = {
+  'keyboard-primary:primary': 'keyboard-confirm:primary',
+  'keyboard-primary:secondary': 'keyboard-confirm:secondary',
+  'controller-primary:primary': 'controller-confirm:primary',
+  'controller-primary:secondary': 'controller-confirm:secondary',
+}
 
 export function createDefaultBindings() {
   return Object.fromEntries(
@@ -159,10 +166,18 @@ export function loadPersistedBindings() {
 
   try {
     const parsed = JSON.parse(raw) as Record<string, unknown>
+    const migratedParsed = { ...parsed }
+
+    for (const [legacyKey, nextKey] of Object.entries(legacyBindingMigrations)) {
+      if (typeof migratedParsed[nextKey] !== 'string' && typeof migratedParsed[legacyKey] === 'string') {
+        migratedParsed[nextKey] = migratedParsed[legacyKey]
+      }
+    }
+
     const merged = {
       ...defaults,
       ...Object.fromEntries(
-        Object.entries(parsed).filter(([bindingId, value]) => bindingId in defaults && typeof value === 'string'),
+        Object.entries(migratedParsed).filter(([bindingId, value]) => bindingId in defaults && typeof value === 'string'),
       ),
     }
     return merged as Record<string, string>
@@ -177,6 +192,7 @@ export function persistBindings(bindings: Record<string, string>) {
   }
 
   window.localStorage.setItem(CHARADES_BINDINGS_STORAGE_KEY, JSON.stringify(bindings))
+  window.dispatchEvent(new CustomEvent(CHARADES_BINDINGS_UPDATED_EVENT, { detail: bindings }))
 }
 
 export function normalizeKeyboardInput(key: string) {

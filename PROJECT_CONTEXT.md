@@ -1,6 +1,6 @@
 ﻿# Project Party - Project Context
 
-*Last updated: 2026-04-02*
+*Last updated: 2026-04-08*
 
 ---
 
@@ -27,7 +27,8 @@ Secondary focus completed in this session block:
 - ownership cleanup for `charades`,
 - runtime move from `apps/hub` into `packages/games/charades`,
 - hub and shared UI cleanup,
-- `codenames` scaffold + module registration.
+- `codenames` scaffold + module registration,
+- shared host-navigation framework rollout with `charades` as the reference consumer.
 
 ---
 
@@ -78,8 +79,9 @@ project-party/
   - shell layout,
   - setup modal/template chrome,
   - shared platform modal primitives,
-  - shared settings-screen primitives (`AlertDialog`, settings shell/footer/tabs/status/placeholder/header/hero).
-- `@party/game-sdk` owns the module contract.
+  - shared settings-screen primitives (`AlertDialog`, settings shell/footer/tabs/status/placeholder/header/hero),
+  - shared host-navigation engine/provider and controlled focus surfaces.
+- `@party/game-sdk` owns the module contract and host-navigation profile contract.
 - each game module owns:
   - `config`,
   - `config.status` (`live` or `coming-soon`),
@@ -87,7 +89,8 @@ project-party/
   - setup sections,
   - setup validation/state model,
   - results UI,
-  - gameplay entrypoints/runtime.
+  - gameplay entrypoints/runtime,
+  - navigation profiles and delegated host-navigation commands for its own surfaces.
 
 ### Important Nuance
 
@@ -133,22 +136,17 @@ This means:
 - [ ] Start defining the real gameplay/runtime shape for `codenames`
 - [ ] Decide whether Hub library cards should become fully data-driven from module registry
 - [ ] Decide long-term room architecture details before production multiplayer
+- [ ] Finish the live UX polish pass for Charades runtime host controls now that the shared host-navigation framework is in place
 
 ---
 
 <!-- handoff:start -->
 ## Session Handoff
-- Last: 2026-04-06 by Codex (GPT-5.4)
-- Task: Asset-generation prompt packaging for Gemini, hub card loop support, and finishing alert cleanup around Charades.
-- Did: Added two Gemini-ready resource files in `prompts/` for image and short-video generation, derived from the existing Project Party prompt system. Wired the hub library cards to support video loops with poster fallback and connected the current Charades/Codenames cards to `.mp4` assets. Replaced remaining native confirm dialogs in Charades pool management with shared `AlertDialog`, replaced browser-back confirmation during active play with an in-app alert, reviewed the settings code for dead/duplicate logic, and removed two unused helpers from the bindings/settings layer. Verification passing in this session: `npm run test:library-card-media --workspace @party/hub`, `npm run build --workspace @party/hub`, `npm run build --workspace @party/charades`, and `npm run test:controls-bindings --workspace @party/charades`.
-- Next: Return to Phase 4 deployment work or run a manual browser polish pass on the new hub video cards and Charades alert flows.
-- Blocker: No code blocker. Remaining risk is UX-only: the new alert flows and video cards were build-verified but not manually smoke-tested in browser during this session.
-## Previous Handoff
-- Last: 2026-04-06 by Codex (GPT-5.4)
-- Task: Charades settings overlay polish, shared settings UI extraction, and documentation refresh.
-- Did: Finished the main-menu settings overlay flow around manual save/reset and unsaved-changes alerts, then extracted the reusable settings chrome into `@party/ui`: alert dialog, settings shell/footer/tabs/status pill/placeholder/list header/detail hero. Kept Charades-specific binding logic and the controls mapping table local to the game package. Added `packages/ui/README.md` to document the shared UI boundary and updated project docs/memory to reflect the new shared settings primitives. Verification passing in this session: `npm run build --workspace @party/ui` and `npm run build --workspace @party/hub`.
-- Next: Decide whether the controls bindings table should stay game-local until a second game needs it, or whether the next task should return to real settings/runtime work or Phase 4 deployment.
-- Blocker: No code blocker. The main open decision is product/architecture scope: stop the shared extraction here, or generalize more of the settings screen only if reuse is proven.
+- Last: 2026-04-08 23:15 by Codex (GPT-5.4)
+- Task: Continue Charades host/runtime controls cleanup and simplify the gameplay-facing binding model.
+- Did: Simplified Charades runtime controls so gameplay accept actions now use `confirm` instead of the old `primary` semantic, removed `Akcja glowna` from the settings bindings list, rewired runtime hints/bottom-bar flows to `Potwierdz`, and added migration logic so existing persisted `keyboard-primary` / `controller-primary` values load into the new confirm slots. Verification passing in this session: `npm run test:controls-bindings --workspace @party/charades`, `npm run test:host-controls --workspace @party/charades`, `npm run test:navigation-profiles --workspace @party/charades`, `npm run build --workspace @party/charades`, `npm run build --workspace @party/hub`.
+- Next: Run a focused manual polish pass on Charades runtime pause/verdict feel and any remaining keyboard/controller rough edges, then decide whether to close the Charades host-navigation polish task or keep one more cleanup pass open.
+- Blocker: No code blocker. Remaining work is manual UX validation and polish, not framework plumbing.
 <!-- handoff:end -->
 
 

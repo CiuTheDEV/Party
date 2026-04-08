@@ -17,8 +17,12 @@
 }
 
 .sidebar:hover,
-.sidebar:focus-within {
+.sidebar:focus-within,
+.sidebarExpanded {
   width: var(--rail-expanded-width);
+}
+
+.sidebarExpanded {
 }
 
 .railInner {
@@ -79,6 +83,12 @@
   background: rgba(167, 139, 250, 0.1);
 }
 
+.navLinkFocused {
+  outline: 2px solid rgba(196, 181, 253, 0.86);
+  outline-offset: -2px;
+  color: #ffffff;
+}
+
 .navLinkDisabled {
   opacity: 0.35;
   cursor: default;
@@ -114,6 +124,9 @@
 .sidebar:hover .navLink,
 .sidebar:hover .navLinkActive,
 .sidebar:hover .backLink,
+.sidebarExpanded .navLink,
+.sidebarExpanded .navLinkActive,
+.sidebarExpanded .backLink,
 .sidebar:focus-within .navLink,
 .sidebar:focus-within .navLinkActive,
 .sidebar:focus-within .backLink {
@@ -122,6 +135,7 @@
 }
 
 .sidebar:hover .navLabel,
+.sidebarExpanded .navLabel,
 .sidebar:focus-within .navLabel {
   max-width: 160px;
   opacity: 1;
