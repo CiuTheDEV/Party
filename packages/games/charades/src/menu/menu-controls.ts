@@ -15,17 +15,8 @@ export type SettingsTabsCommand =
   | { type: 'select-category'; categoryId: SettingsCategoryId }
   | { type: 'focus-rail' }
 
-const MENU_MODE_ORDER: MenuModeFocusId[] = ['play']
 const SETTINGS_CATEGORY_ORDER: SettingsCategoryId[] = ['general', 'audio', 'controls']
 const CONTROLS_DEVICE_ORDER: ControlsDevice[] = ['keyboard', 'controller']
-
-export function getNextMenuModeFocus(current: MenuModeFocusId, action: HostControlAction) {
-  if (action !== 'left' && action !== 'right' && action !== 'up' && action !== 'down') {
-    return current
-  }
-
-  return getNextInList(MENU_MODE_ORDER, current, action === 'left' || action === 'up' ? -1 : 1) ?? current
-}
 
 export function resolveMenuModeCommand(focusId: MenuModeFocusId, action: HostControlAction): MenuModeCommand | null {
   if (action === 'menu') {

@@ -93,7 +93,7 @@ export {
   charadesRuntimeNavigationProfile,
 } from './navigation/charades-runtime-navigation-profile'
 export { useMenuControls } from './menu/useMenuControls'
-export { resolveMenuModeCommand, getNextMenuModeFocus, getNextRailFocusHref } from './menu/menu-controls'
+export { resolveMenuModeCommand, getNextRailFocusHref } from './menu/menu-controls'
 export { getCurrentGamepadInputLabel, listConnectedGamepads, pickPreferredGamepad } from './menu/charades-controls-bindings'
 export { default as CharadesDeviceListener } from './runtime/setup/DeviceListener'
 export { HostGameScreen } from './runtime/play/HostGameScreen'

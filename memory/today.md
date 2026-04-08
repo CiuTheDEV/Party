@@ -224,6 +224,19 @@
 - Next: run a real browser visual pass on `/games` across desktop and mobile, then continue either deployment work or the remaining Charades runtime polish.
 - Experience recorded: yes
 
+### S31 (2026-04-08 ~) [Project Party] Charades navigation code review + dead code cleanup
+
+- Reviewed the full host navigation system (shared framework + Charades profiles) for consistency, logic, and dead code.
+- Removed `predefined-menu-controls.ts` (entire file was dead — no callers since `useMenuControls` migrated to `resolveFixedHostNavigationAction`).
+- Removed dead `getNextMenuModeFocus` function and its public export from `@party/charades` index.
+- Simplified `CharadesMenuContent`: removed always-`'play'` `focusedModeAction` state, simplified `onAction` handler, simplified button onClick.
+- Extracted shared `isTypingTarget` into `charades-controls-bindings.ts` — removes the duplicate that existed in `useMenuControls` and `useHostControls`.
+- Fixed indentation bug in `resolveSettingsCommand` inside `host-controls.ts`.
+- Added comment explaining intentional separation of `HostControlAction` vs `HostNavigationAction`.
+- Build passing: `@party/charades` + `@party/hub`. Controls bindings tests passing.
+- Next: run a manual UX polish pass on Charades runtime pause/verdict flow before closing T002.
+- Experience recorded: no (mechanical cleanup, no new reusable patterns)
+
 ### S30 (23:15~) [Project Party] Charades runtime controls simplification + binding cleanup
 
 - Simplified Charades runtime controls so gameplay-facing accept actions now consistently use `Potwierdz` instead of the older `Akcja glowna`, and removed `Akcja glowna` from the settings bindings list entirely.

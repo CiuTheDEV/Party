@@ -1,3 +1,7 @@
+// HostControlAction and HostNavigationAction are intentionally separate:
+// runtime bindings are user-configurable (loaded from localStorage) and include
+// game-specific actions like 'rail', while menu navigation uses fixed input maps
+// from @party/ui. Merging them would couple the rebinding system to the shared framework.
 export type HostControlDevice = 'keyboard' | 'controller'
 import { getVerdictGridColumnCount } from './verdict-grid'
 
@@ -285,14 +289,14 @@ function resolveSettingsCommand(
     return nextTarget === settingsFocusTarget ? null : { type: 'set-settings-focus', target: nextTarget }
   }
 
-    if (action === 'back' || action === 'menu') {
-      return { type: 'close-settings' }
-    }
+  if (action === 'back' || action === 'menu') {
+    return { type: 'close-settings' }
+  }
 
-    if (action === 'confirm') {
-      if (settingsFocusTarget === 'sound') {
-        return { type: 'toggle-settings-sound' }
-      }
+  if (action === 'confirm') {
+    if (settingsFocusTarget === 'sound') {
+      return { type: 'toggle-settings-sound' }
+    }
 
     if (settingsFocusTarget === 'animations') {
       return { type: 'toggle-settings-animations' }

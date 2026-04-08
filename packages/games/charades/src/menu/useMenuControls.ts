@@ -6,6 +6,7 @@ import {
   createGamepadSnapshot,
   detectGamepadProfile,
   getGamepadInputLabel,
+  isTypingTarget,
   listConnectedGamepads,
   normalizeKeyboardInput,
   pickPreferredGamepad,
@@ -135,15 +136,6 @@ function reportDevice(
 
   lastDeviceRef.current = nextDevice
   onDeviceChangeRef.current?.(nextDevice)
-}
-
-function isTypingTarget(target: EventTarget | null) {
-  if (!(target instanceof HTMLElement)) {
-    return false
-  }
-
-  const tagName = target.tagName.toLowerCase()
-  return target.isContentEditable || tagName === 'input' || tagName === 'textarea' || tagName === 'select'
 }
 
 function isHostControlAction(action: string): action is HostControlAction {

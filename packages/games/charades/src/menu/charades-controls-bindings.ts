@@ -329,3 +329,12 @@ export function applyBindingAssignment(
 export function getBindingDevice(bindingId: string): CharadesControlsDevice | null {
   return getControlsBindings().find((binding) => binding.id === bindingId)?.device ?? null
 }
+
+export function isTypingTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) {
+    return false
+  }
+
+  const tagName = target.tagName.toLowerCase()
+  return target.isContentEditable || tagName === 'input' || tagName === 'textarea' || tagName === 'select'
+}

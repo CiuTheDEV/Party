@@ -23,11 +23,11 @@
                       "id":  "T001",
                       "title":  "Charades code cleanup pass",
                       "status":  "active",
-                      "context":  "The first cleanup slice is done: `useGameState` runtime helpers were extracted and covered by a lightweight check. Remaining cleanup still includes dead presenter/runtime leftovers after recent refactors and oversized files in results/playboard that are hard to maintain.",
+                      "context":  "Navigation dead code cleared in S31: removed `predefined-menu-controls.ts`, `getNextMenuModeFocus`, dead state in `CharadesMenuContent`, duplicate `isTypingTarget`. Remaining cleanup: dead presenter/runtime leftovers after recent refactors, and oversized files in results/playboard.",
                       "next_action":  "Remove dead presenter/runtime leftovers next, then split the remaining oversized Charades files only where responsibilities are still mixed.",
                       "blocker":  "",
                       "created":  "2026-03-27",
-                      "updated":  "2026-04-07"
+                      "updated":  "2026-04-08"
                   },
                   {
                       "id":  "T002",

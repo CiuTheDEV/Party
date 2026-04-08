@@ -142,11 +142,16 @@ This means:
 
 <!-- handoff:start -->
 ## Session Handoff
+- Last: 2026-04-08 by Claude (Sonnet)
+- Task: Code review and dead code cleanup of the host navigation + controls system.
+- Did: Removed `predefined-menu-controls.ts` (entire file dead), removed `getNextMenuModeFocus` function and its public export, simplified `CharadesMenuContent` (dead state + onClick), extracted shared `isTypingTarget` from two hooks into `charades-controls-bindings.ts`, fixed indentation bug in `resolveSettingsCommand`, added comment explaining intentional type separation. Build + tests passing.
+- Next: Run manual UX polish pass on Charades runtime pause/verdict flow (keyboard + controller rough edges), then close T002.
+- Blocker: None — remaining work is manual UX validation.
+
+## Previous Handoff
 - Last: 2026-04-08 23:15 by Codex (GPT-5.4)
 - Task: Continue Charades host/runtime controls cleanup and simplify the gameplay-facing binding model.
-- Did: Simplified Charades runtime controls so gameplay accept actions now use `confirm` instead of the old `primary` semantic, removed `Akcja glowna` from the settings bindings list, rewired runtime hints/bottom-bar flows to `Potwierdz`, and added migration logic so existing persisted `keyboard-primary` / `controller-primary` values load into the new confirm slots. Verification passing in this session: `npm run test:controls-bindings --workspace @party/charades`, `npm run test:host-controls --workspace @party/charades`, `npm run test:navigation-profiles --workspace @party/charades`, `npm run build --workspace @party/charades`, `npm run build --workspace @party/hub`.
-- Next: Run a focused manual polish pass on Charades runtime pause/verdict feel and any remaining keyboard/controller rough edges, then decide whether to close the Charades host-navigation polish task or keep one more cleanup pass open.
-- Blocker: No code blocker. Remaining work is manual UX validation and polish, not framework plumbing.
+- Did: Simplified runtime controls to use `confirm` instead of `primary`, removed `Akcja glowna` from bindings, added migration for legacy persisted bindings.
 <!-- handoff:end -->
 
 

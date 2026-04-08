@@ -1,9 +1,8 @@
 import { GameIcon } from '@party/ui'
 import { Info, Smartphone, Target, Users } from 'lucide-react'
-import { useState } from 'react'
 import { CharadesSettingsOverlay } from './CharadesSettingsOverlay'
 import type { CharadesMenuView } from './menu-view'
-import { resolveMenuModeCommand, type MenuModeFocusId } from './menu-controls'
+import { resolveMenuModeCommand } from './menu-controls'
 import { useMenuControls } from './useMenuControls'
 import styles from './CharadesMenuContent.module.css'
 
@@ -39,13 +38,11 @@ export function CharadesMenuContent({
   onSettingsDirtyChange,
 }: CharadesMenuContentProps) {
   const isSettingsView = activeView === 'settings'
-  const [focusedModeAction, setFocusedModeAction] = useState<MenuModeFocusId>('play')
 
   useMenuControls({
     enabled: controlsEnabled && !isSettingsView,
     onAction: (action) => {
-      setFocusedModeAction('play')
-      const command = resolveMenuModeCommand(focusedModeAction, action)
+      const command = resolveMenuModeCommand('play', action)
 
       if (!command) {
         return
@@ -128,11 +125,8 @@ export function CharadesMenuContent({
             </ul>
           </div>
           <button
-            className={focusedModeAction === 'play' && isContentFocused ? `${styles.playBtn} ${styles.controlFocused}` : styles.playBtn}
-            onClick={() => {
-              setFocusedModeAction('play')
-              onOpenSetup()
-            }}
+            className={isContentFocused ? `${styles.playBtn} ${styles.controlFocused}` : styles.playBtn}
+            onClick={onOpenSetup}
           >
             Zagraj teraz
           </button>
