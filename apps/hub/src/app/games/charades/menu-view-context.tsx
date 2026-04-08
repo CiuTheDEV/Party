@@ -5,13 +5,23 @@ import type { CharadesMenuView } from '@party/charades'
 
 type CharadesMenuViewContextValue = {
   activeMenuView: CharadesMenuView
-  setActiveMenuView: (view: CharadesMenuView) => void
   requestMenuViewChange: (view: CharadesMenuView) => void
+  commitMenuViewChange: (view: CharadesMenuView) => void
+  menuFocusArea: 'content' | 'rail' | null
+  setMenuFocusArea: (area: 'content' | 'rail' | null) => void
+  railFocusedHref: string
+  setRailFocusedHref: (href: string) => void
+  isRailForcedExpanded: boolean
+  setIsRailForcedExpanded: (value: boolean) => void
+  isMenuInputSuspended: boolean
+  setIsMenuInputSuspended: (value: boolean) => void
+  isControllerWakeGuardActive: boolean
+  isHostInputAwake: boolean
+  wakeHostInput: (device?: 'keyboard' | 'controller') => void
+  sleepHostInput: () => void
   hasUnsavedSettingsChanges: boolean
   setHasUnsavedSettingsChanges: (value: boolean) => void
-  isSettingsExitConfirmOpen: boolean
-  cancelSettingsExitConfirm: () => void
-  commitPendingMenuViewChange: () => void
+  registerSettingsExitGuard: (guard: ((view: CharadesMenuView) => boolean) | null) => void
 }
 
 const CharadesMenuViewContext = createContext<CharadesMenuViewContextValue | null>(null)
@@ -22,26 +32,46 @@ type ProviderProps = CharadesMenuViewContextValue & {
 
 export function CharadesMenuViewProvider({
   activeMenuView,
-  setActiveMenuView,
   requestMenuViewChange,
+  commitMenuViewChange,
+  menuFocusArea,
+  setMenuFocusArea,
+  railFocusedHref,
+  setRailFocusedHref,
+  isRailForcedExpanded,
+  setIsRailForcedExpanded,
+  isMenuInputSuspended,
+  setIsMenuInputSuspended,
+  isControllerWakeGuardActive,
+  isHostInputAwake,
+  wakeHostInput,
+  sleepHostInput,
   hasUnsavedSettingsChanges,
   setHasUnsavedSettingsChanges,
-  isSettingsExitConfirmOpen,
-  cancelSettingsExitConfirm,
-  commitPendingMenuViewChange,
+  registerSettingsExitGuard,
   children,
-}: ProviderProps & Omit<CharadesMenuViewContextValue, 'activeMenuView' | 'setActiveMenuView'>) {
+}: ProviderProps) {
   return (
     <CharadesMenuViewContext.Provider
       value={{
         activeMenuView,
-        setActiveMenuView,
         requestMenuViewChange,
+        commitMenuViewChange,
+        menuFocusArea,
+        setMenuFocusArea,
+        railFocusedHref,
+        setRailFocusedHref,
+        isRailForcedExpanded,
+        setIsRailForcedExpanded,
+        isMenuInputSuspended,
+        setIsMenuInputSuspended,
+        isControllerWakeGuardActive,
+        isHostInputAwake,
+        wakeHostInput,
+        sleepHostInput,
         hasUnsavedSettingsChanges,
         setHasUnsavedSettingsChanges,
-        isSettingsExitConfirmOpen,
-        cancelSettingsExitConfirm,
-        commitPendingMenuViewChange,
+        registerSettingsExitGuard,
       }}
     >
       {children}

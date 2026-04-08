@@ -6,8 +6,8 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   buildPromptPool,
   charadesModule,
-  CharadesMenuContent,
   CharadesDeviceListener,
+  CharadesMenuContent,
   clearPresenterSession,
   createCharadesRoomId,
   ensureCharadesWordHistorySession,
@@ -20,6 +20,7 @@ import {
   readCharadesWordHistory,
   readPresenterSession,
   startNewCharadesWordHistorySession,
+  useMenuControls,
   writeCharadesSetup,
   type CharadesSetupHelpers,
   type CharadesSetupState,
@@ -37,20 +38,35 @@ type StartWarningState = {
   demand: number
 }
 
+type SetupFocusTarget = 'close' | 'start'
+type StartWarningFocusTarget = 'back' | 'manage' | 'start'
+
 export default function CharadesMenuPage() {
   const router = useRouter()
   const {
     activeMenuView,
     requestMenuViewChange,
-    isSettingsExitConfirmOpen,
-    cancelSettingsExitConfirm,
-    commitPendingMenuViewChange,
+    menuFocusArea,
+    setMenuFocusArea,
+    railFocusedHref,
+    setRailFocusedHref,
+    setIsRailForcedExpanded,
+    setIsMenuInputSuspended,
+    isControllerWakeGuardActive,
+    isHostInputAwake,
+    wakeHostInput,
+    sleepHostInput,
+    registerSettingsExitGuard,
+    commitMenuViewChange,
     setHasUnsavedSettingsChanges,
   } = useCharadesMenuView()
   const [showSetup, setShowSetup] = useState(false)
   const [isSetupReady, setIsSetupReady] = useState(false)
   const [setupState, setSetupState] = useState<CharadesSetupState>(() => charadesModule.createInitialSetupState())
   const [startWarning, setStartWarning] = useState<StartWarningState | null>(null)
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
+  const [setupFocus, setSetupFocus] = useState<SetupFocusTarget>('start')
+  const [warningFocus, setWarningFocus] = useState<StartWarningFocusTarget>('start')
 
   useEffect(() => {
     const storedSetup = readCharadesSetup()
@@ -84,6 +100,11 @@ export default function CharadesMenuPage() {
       requestMenuViewChange('mode')
     }
   }, [requestMenuViewChange])
+
+  useEffect(() => {
+    setIsMenuInputSuspended(showSetup || startWarning !== null || isSettingsModalOpen)
+    return () => setIsMenuInputSuspended(false)
+  }, [isSettingsModalOpen, setIsMenuInputSuspended, showSetup, startWarning])
 
   useEffect(() => {
     if (!isSetupReady || !setupState.roomId) {
@@ -169,6 +190,7 @@ export default function CharadesMenuPage() {
     const poolStats = getActivePoolStats()
 
     if (poolStats.remaining < demand || poolStats.total < demand) {
+      setWarningFocus('start')
       setStartWarning({
         remaining: poolStats.remaining,
         total: poolStats.total,
@@ -180,17 +202,96 @@ export default function CharadesMenuPage() {
     startGame()
   }
 
+  useMenuControls({
+    enabled: showSetup && startWarning === null,
+    onAction: (action) => {
+      if (action === 'left' || action === 'right' || action === 'up' || action === 'down') {
+        setSetupFocus((current) => (current === 'start' ? 'close' : 'start'))
+        return
+      }
+
+      if (action === 'back' || action === 'secondary' || action === 'menu') {
+        setShowSetup(false)
+        return
+      }
+
+      if (action === 'confirm' || action === 'primary') {
+        if (setupFocus === 'close') {
+          setShowSetup(false)
+          return
+        }
+
+        handleStart()
+      }
+    },
+  })
+
+  useMenuControls({
+    enabled: startWarning !== null,
+    onAction: (action) => {
+      if (action === 'left') {
+        setWarningFocus((current) => (current === 'start' ? 'manage' : current === 'manage' ? 'back' : 'start'))
+        return
+      }
+
+      if (action === 'right') {
+        setWarningFocus((current) => (current === 'back' ? 'manage' : current === 'manage' ? 'start' : 'back'))
+        return
+      }
+
+      if (action === 'back' || action === 'secondary' || action === 'menu') {
+        setStartWarning(null)
+        return
+      }
+
+      if (action === 'confirm' || action === 'primary') {
+        if (warningFocus === 'back') {
+          setStartWarning(null)
+          return
+        }
+
+        if (warningFocus === 'manage') {
+          setStartWarning(null)
+          openCharadesPoolManager()
+          return
+        }
+
+        setStartWarning(null)
+        startGame()
+      }
+    },
+  })
+
   return (
     <>
       <CharadesMenuContent
         activeView={activeMenuView}
+        controlsEnabled={!showSetup && startWarning === null && menuFocusArea === 'content' && isHostInputAwake && !isControllerWakeGuardActive}
+        isContentFocused={menuFocusArea === 'content' && isHostInputAwake}
         onChangeView={requestMenuViewChange}
-        isSettingsExitConfirmOpen={isSettingsExitConfirmOpen}
-        onCancelSettingsExitConfirm={cancelSettingsExitConfirm}
-        onCommitSettingsExit={commitPendingMenuViewChange}
+        registerSettingsExitGuard={registerSettingsExitGuard}
+        onCommitViewChange={commitMenuViewChange}
+        onSettingsModalOpenChange={setIsSettingsModalOpen}
         onSettingsDirtyChange={setHasUnsavedSettingsChanges}
+        onFocusRail={() => {
+          setRailFocusedHref(activeMenuView === 'settings' ? '/games/charades/settings' : railFocusedHref)
+          setMenuFocusArea('rail')
+          setIsRailForcedExpanded(true)
+        }}
+        onWakeHostFocus={(device) => {
+          wakeHostInput(device ?? 'keyboard')
+          setIsRailForcedExpanded(false)
+        }}
+        onSleepHostFocus={() => {
+          sleepHostInput()
+        }}
+        isHostInputAwake={isHostInputAwake}
         onOpenSetup={() => {
           requestMenuViewChange('mode')
+          wakeHostInput('keyboard')
+          setMenuFocusArea('content')
+          setIsRailForcedExpanded(false)
+          setSetupFocus('start')
           setShowSetup(true)
         }}
       />
@@ -203,7 +304,9 @@ export default function CharadesMenuPage() {
           validation={validation}
           onStart={handleStart}
           onClose={() => setShowSetup(false)}
+          isFocusVisible={isHostInputAwake}
           startLabel="Rozpocznij grę"
+          focusedAction={setupFocus}
         />
       ) : null}
 
@@ -241,12 +344,16 @@ export default function CharadesMenuPage() {
             </div>
 
             <div className={styles.warningActions}>
-              <button type="button" className={styles.warningButton} onClick={() => setStartWarning(null)}>
+              <button
+                type="button"
+                className={warningFocus === 'back' ? `${styles.warningButton} ${styles.focusedAction}` : styles.warningButton}
+                onClick={() => setStartWarning(null)}
+              >
                 Wróć
               </button>
               <button
                 type="button"
-                className={styles.warningButton}
+                className={warningFocus === 'manage' ? `${styles.warningButton} ${styles.focusedAction}` : styles.warningButton}
                 onClick={() => {
                   setStartWarning(null)
                   openCharadesPoolManager()
@@ -256,7 +363,7 @@ export default function CharadesMenuPage() {
               </button>
               <button
                 type="button"
-                className={styles.warningPrimaryButton}
+                className={warningFocus === 'start' ? `${styles.warningPrimaryButton} ${styles.focusedAction}` : styles.warningPrimaryButton}
                 onClick={() => {
                   setStartWarning(null)
                   startGame()

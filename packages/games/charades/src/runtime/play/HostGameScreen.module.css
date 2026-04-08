@@ -72,6 +72,10 @@
   gap: 12px;
 }
 
+.modalList[data-density='grid-4'] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .modalList[data-density='grid-9'] {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -94,6 +98,8 @@
   transition: transform 0.15s ease, opacity 0.15s ease, border-color 0.15s ease;
 }
 
+.modalList[data-density='grid-4'] .playerOption,
+.modalList[data-density='grid-4'] .playerOptionSelected,
 .modalList[data-density='grid-9'] .playerOption,
 .modalList[data-density='grid-9'] .playerOptionSelected,
 .modalList[data-density='grid-10'] .playerOption,
@@ -119,6 +125,15 @@
     color-mix(in srgb, var(--game-color-primary) 10%, rgba(7, 8, 13, 0.68));
 }
 
+.controlFocused {
+  border-color: color-mix(in srgb, var(--game-color-primary) 48%, white);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 0 0 2px color-mix(in srgb, var(--game-color-primary) 26%, transparent),
+    0 20px 34px rgba(0, 0, 0, 0.24);
+  transform: translateY(-2px);
+}
+
 .playerOption:hover {
   transform: translateY(-2px);
   opacity: 0.98;
@@ -131,6 +146,7 @@
   height: 84px;
 }
 
+.modalList[data-density='grid-4'] .playerAvatar,
 .modalList[data-density='grid-9'] .playerAvatar,
 .modalList[data-density='grid-10'] .playerAvatar,
 .modalList[data-density='grid-12'] .playerAvatar {
@@ -156,6 +172,7 @@
   white-space: nowrap;
 }
 
+.modalList[data-density='grid-4'] .playerName,
 .modalList[data-density='grid-9'] .playerName,
 .modalList[data-density='grid-10'] .playerName,
 .modalList[data-density='grid-12'] .playerName {
@@ -241,6 +258,7 @@
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   }
 
+  .modalList[data-density='grid-4'],
   .modalList[data-density='grid-9'] {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -266,6 +284,7 @@
     flex-direction: column;
   }
 
+  .modalList[data-density='grid-4'],
   .modalList[data-density='grid-9'],
   .modalList[data-density='grid-10'],
   .modalList[data-density='grid-12'] {

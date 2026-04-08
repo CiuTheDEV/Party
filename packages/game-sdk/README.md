@@ -95,3 +95,65 @@ Today it already owns:
 `codenames` is scaffolded as the second module and registered as `coming-soon`.
 
 So the module system is now credible end-to-end for one live game and ready to host additional games before their gameplay is implemented.
+
+## Host Navigation Adoption
+
+Shared host-side navigation now has a reusable framework split across:
+- `@party/game-sdk`
+  - host navigation contract and profile types,
+- `@party/ui`
+  - shared engine, provider, fixed input mapping, and controlled focus surfaces,
+- `packages/games/<game>/src/navigation/`
+  - game-specific profiles and command mapping.
+
+### What a game should provide
+
+For a new game module, add:
+- `navigation/<game>-navigation-targets.ts`
+  - shared target, zone, and screen IDs for that game,
+- `navigation/<game>-navigation-actions.ts`
+  - semantic commands delegated back into the game,
+- one profile per host surface, for example:
+  - menu,
+  - settings,
+  - setup,
+  - runtime overlays.
+
+### Required profile rules
+
+Every host navigation profile must define:
+- an explicit `screenId`,
+- an explicit `getEntryTarget(context)`,
+- a `resolveAction(...)` function for semantic host actions.
+
+Every screen or modal must have a meaningful entry target. Do not rely on DOM focus guessing.
+
+### Fixed vs rebindable controls
+
+Always keep these separate:
+- fixed host navigation:
+  - menu,
+  - rail/sidebar,
+  - setup,
+  - settings,
+  - runtime overlays such as pause or confirm dialogs,
+- rebindable gameplay controls:
+  - only actions that affect live gameplay.
+
+Do not let saved gameplay bindings drive menu or overlay navigation.
+
+### Recommended coverage
+
+Minimum checks for a new game:
+- profile tests for entry targets and zone transitions,
+- input tests for fixed host navigation behavior,
+- runtime overlay tests for modal ownership and focus restore,
+- workspace builds for:
+  - `@party/game-sdk`,
+  - `@party/ui`,
+  - the game package,
+  - `@party/hub`.
+
+### Reference implementation
+
+`charades` is the current reference consumer of the shared host navigation framework.

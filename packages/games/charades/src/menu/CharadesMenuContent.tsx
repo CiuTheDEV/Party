@@ -1,29 +1,69 @@
 import { GameIcon } from '@party/ui'
 import { Info, Smartphone, Target, Users } from 'lucide-react'
+import { useState } from 'react'
 import { CharadesSettingsOverlay } from './CharadesSettingsOverlay'
 import type { CharadesMenuView } from './menu-view'
+import { resolveMenuModeCommand, type MenuModeFocusId } from './menu-controls'
+import { useMenuControls } from './useMenuControls'
 import styles from './CharadesMenuContent.module.css'
 
 export type CharadesMenuContentProps = {
   onOpenSetup: () => void
+  onFocusRail?: () => void
+  onWakeHostFocus?: (device?: 'keyboard' | 'controller') => void
+  onSleepHostFocus?: () => void
+  isHostInputAwake?: boolean
   activeView?: CharadesMenuView
+  controlsEnabled?: boolean
+  isContentFocused?: boolean
   onChangeView?: (view: CharadesMenuView) => void
-  isSettingsExitConfirmOpen?: boolean
-  onCancelSettingsExitConfirm?: () => void
-  onCommitSettingsExit?: () => void
+  registerSettingsExitGuard?: (guard: ((view: CharadesMenuView) => boolean) | null) => void
+  onCommitViewChange?: (view: CharadesMenuView) => void
+  onSettingsModalOpenChange?: (value: boolean) => void
   onSettingsDirtyChange?: (value: boolean) => void
 }
 
 export function CharadesMenuContent({
   onOpenSetup,
+  onFocusRail,
+  onWakeHostFocus,
+  onSleepHostFocus,
+  isHostInputAwake = false,
   activeView,
+  controlsEnabled = true,
+  isContentFocused = true,
   onChangeView,
-  isSettingsExitConfirmOpen,
-  onCancelSettingsExitConfirm,
-  onCommitSettingsExit,
+  registerSettingsExitGuard,
+  onCommitViewChange,
+  onSettingsModalOpenChange,
   onSettingsDirtyChange,
 }: CharadesMenuContentProps) {
   const isSettingsView = activeView === 'settings'
+  const [focusedModeAction, setFocusedModeAction] = useState<MenuModeFocusId>('play')
+
+  useMenuControls({
+    enabled: controlsEnabled && !isSettingsView,
+    onAction: (action) => {
+      setFocusedModeAction('play')
+      const command = resolveMenuModeCommand(focusedModeAction, action)
+
+      if (!command) {
+        return
+      }
+
+      if (command.type === 'focus-rail') {
+        onFocusRail?.()
+        return
+      }
+
+      if (command.type === 'open-setup') {
+        onOpenSetup()
+        return
+      }
+
+      onChangeView?.('settings')
+    },
+  })
 
   return (
     <main className={isSettingsView ? `${styles.page} ${styles.pageSettings}` : styles.page}>
@@ -45,15 +85,20 @@ export function CharadesMenuContent({
       {isSettingsView ? (
         <CharadesSettingsOverlay
           onBack={() => onChangeView?.('mode')}
-          onExitToMenu={onCommitSettingsExit ?? (() => onChangeView?.('mode'))}
-          isExitConfirmOpenExternal={isSettingsExitConfirmOpen}
-          onCloseExternalExitConfirm={onCancelSettingsExitConfirm}
+          onFocusRail={onFocusRail}
+          onWakeHostFocus={onWakeHostFocus}
+          onSleepHostFocus={onSleepHostFocus}
+          registerSettingsExitGuard={registerSettingsExitGuard}
+          onCommitViewChange={onCommitViewChange ?? ((view) => onChangeView?.(view))}
+          onModalOpenChange={onSettingsModalOpenChange}
           onUnsavedChangesChange={onSettingsDirtyChange}
+          isHostFocused={isContentFocused}
+          isHostInputAwake={isHostInputAwake}
         />
       ) : (
         <section className={styles.modeCard}>
           <div className={styles.modeHeader}>
-            <h2 className={styles.modeName}>Tryb Klasyczny</h2>
+            <h2 className={styles.modeName}>Tryb klasyczny</h2>
             <span className={styles.badge}>Zalecany</span>
           </div>
           <div className={styles.modeBody}>
@@ -82,7 +127,13 @@ export function CharadesMenuContent({
               </li>
             </ul>
           </div>
-          <button className={styles.playBtn} onClick={onOpenSetup}>
+          <button
+            className={focusedModeAction === 'play' && isContentFocused ? `${styles.playBtn} ${styles.controlFocused}` : styles.playBtn}
+            onClick={() => {
+              setFocusedModeAction('play')
+              onOpenSetup()
+            }}
+          >
             Zagraj teraz
           </button>
         </section>
@@ -91,12 +142,6 @@ export function CharadesMenuContent({
       {isSettingsView ? null : (
         <footer className={styles.footer}>
           <div className={styles.footerLinks}>
-            <button type="button" className={styles.footerLink} onClick={() => onChangeView?.('mode')}>
-              Menu gry
-            </button>
-            <button type="button" className={styles.footerLink} onClick={() => onChangeView?.('settings')}>
-              Ustawienia
-            </button>
             <span className={styles.footerLink}>Zasady</span>
             <span className={styles.footerLink}>Wsparcie</span>
           </div>

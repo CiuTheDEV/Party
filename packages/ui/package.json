@@ -10,9 +10,12 @@
   },
   "scripts": {
     "build": "tsc --noEmit",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "test:controlled-focus-surfaces": "node ./src/host-navigation/controlled-focus-surfaces.check.cjs",
+    "test:host-navigation-engine": "npx tsc --target es2022 --module commonjs --moduleResolution node --types node --skipLibCheck --outDir ../../output/ui-host-navigation ./src/host-navigation/host-navigation-engine.ts ./src/host-navigation/host-navigation-types.ts ./src/host-navigation/useHostNavigationInput.ts && node ./src/host-navigation/host-navigation-engine.check.cjs ../../output/ui-host-navigation/host-navigation-engine.js ../../output/ui-host-navigation/useHostNavigationInput.js"
   },
   "dependencies": {
+    "@party/game-sdk": "*",
     "lucide-react": "^0.577.0"
   }
 }

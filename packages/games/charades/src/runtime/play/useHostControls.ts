@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import {
   CHARADES_BINDINGS_STORAGE_KEY,
+  CHARADES_BINDINGS_UPDATED_EVENT,
   createDefaultBindings,
   createGamepadSnapshot,
   detectGamepadProfile,
@@ -14,11 +15,11 @@ import {
   type GamepadSnapshot,
 } from '../../menu/charades-controls-bindings'
 import {
-  resolveHostControlAction,
   resolveHostControlCommand,
   type HostControlCommand,
   type HostControlsContext,
 } from './host-controls'
+import { resolveRuntimeHostAction, shouldReportControllerDevice } from './runtime-input-helpers'
 
 type UseHostControlsOptions = {
   context: HostControlsContext
@@ -61,8 +62,16 @@ export function useHostControls({ context, onCommand, onDeviceChange, onControll
       }
     }
 
+    function handleBindingsUpdated() {
+      bindingsRef.current = loadPersistedBindings()
+    }
+
     window.addEventListener('storage', handleStorage)
-    return () => window.removeEventListener('storage', handleStorage)
+    window.addEventListener(CHARADES_BINDINGS_UPDATED_EVENT, handleBindingsUpdated)
+    return () => {
+      window.removeEventListener('storage', handleStorage)
+      window.removeEventListener(CHARADES_BINDINGS_UPDATED_EVENT, handleBindingsUpdated)
+    }
   }, [])
 
   useEffect(() => {
@@ -76,7 +85,7 @@ export function useHostControls({ context, onCommand, onDeviceChange, onControll
         return
       }
 
-      const action = resolveHostControlAction(bindingsRef.current, 'keyboard', inputLabel)
+      const action = resolveRuntimeHostAction(contextRef.current, bindingsRef.current, 'keyboard', inputLabel)
       if (!action) {
         return
       }
@@ -121,7 +130,6 @@ export function useHostControls({ context, onCommand, onDeviceChange, onControll
       const nextSnapshot = createGamepadSnapshot(activeGamepad)
       if (!previousSnapshot) {
         previousSnapshot = nextSnapshot
-        reportDevice('controller', lastDeviceRef, onDeviceChangeRef)
         frameId = window.requestAnimationFrame(tick)
         return
       }
@@ -134,7 +142,7 @@ export function useHostControls({ context, onCommand, onDeviceChange, onControll
         return
       }
 
-      const action = resolveHostControlAction(bindingsRef.current, 'controller', inputLabel)
+      const action = resolveRuntimeHostAction(contextRef.current, bindingsRef.current, 'controller', inputLabel)
       if (!action) {
         frameId = window.requestAnimationFrame(tick)
         return
@@ -142,7 +150,9 @@ export function useHostControls({ context, onCommand, onDeviceChange, onControll
 
       const command = resolveHostControlCommand(contextRef.current, action)
       if (command) {
-        reportDevice('controller', lastDeviceRef, onDeviceChangeRef)
+        if (shouldReportControllerDevice(previousSnapshot, inputLabel)) {
+          reportDevice('controller', lastDeviceRef, onDeviceChangeRef)
+        }
         onCommandRef.current(command)
       }
 

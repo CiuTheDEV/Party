@@ -1,10 +1,16 @@
 import { ActionHint } from './ActionHint'
 import styles from './PlaySettingsModal.module.css'
 
+type SettingsFocusTarget = 'sound' | 'animations' | 'exit' | 'continue'
+type SettingsExitConfirmFocusTarget = 'stay' | 'exit'
+
 type Props = {
   soundEnabled: boolean
   animationsEnabled: boolean
   isExitConfirmOpen: boolean
+  focusedTarget: SettingsFocusTarget
+  exitConfirmFocusedTarget: SettingsExitConfirmFocusTarget
+  isFocusVisible?: boolean
   onToggleSound: () => void
   onToggleAnimations: () => void
   onOpenExitConfirm: () => void
@@ -12,8 +18,7 @@ type Props = {
   onContinue: () => void
   onExitToMenu: () => void
   actionHints?: {
-    primary?: string | null
-    secondary?: string | null
+    confirm?: string | null
   }
 }
 
@@ -21,12 +26,18 @@ type ToggleCardProps = {
   label: string
   description: string
   enabled: boolean
+  focused?: boolean
   onToggle: () => void
 }
 
-function ToggleCard({ label, description, enabled, onToggle }: ToggleCardProps) {
+function ToggleCard({ label, description, enabled, focused = false, onToggle }: ToggleCardProps) {
   return (
-    <button type="button" className={styles.toggleCard} onClick={onToggle} aria-pressed={enabled}>
+    <button
+      type="button"
+      className={focused ? `${styles.toggleCard} ${styles.controlFocused}` : styles.toggleCard}
+      onClick={onToggle}
+      aria-pressed={enabled}
+    >
       <span className={styles.toggleCopy}>
         <span className={styles.toggleLabel}>{label}</span>
         <span className={styles.toggleDescription}>{description}</span>
@@ -42,6 +53,9 @@ export function PlaySettingsModal({
   soundEnabled,
   animationsEnabled,
   isExitConfirmOpen,
+  focusedTarget,
+  exitConfirmFocusedTarget,
+  isFocusVisible = false,
   onToggleSound,
   onToggleAnimations,
   onOpenExitConfirm,
@@ -61,13 +75,32 @@ export function PlaySettingsModal({
               Bieżąca rozgrywka zostanie przerwana. Użyj tej opcji tylko wtedy, gdy naprawdę chcesz opuścić mecz.
             </p>
             <div className={styles.actions}>
-              <button type="button" className={styles.secondaryButton} onClick={onCancelExitConfirm}>
+              <button
+                type="button"
+                className={
+                  isFocusVisible && exitConfirmFocusedTarget === 'stay'
+                    ? `${styles.secondaryButton} ${styles.controlFocused}`
+                    : styles.secondaryButton
+                }
+                onClick={onCancelExitConfirm}
+              >
                 <span>Zostań w grze</span>
-                <ActionHint label={actionHints?.secondary} muted />
+                <ActionHint
+                  label={isFocusVisible && exitConfirmFocusedTarget === 'stay' ? actionHints?.confirm : null}
+                  muted
+                />
               </button>
-              <button type="button" className={styles.dangerButton} onClick={onExitToMenu}>
+              <button
+                type="button"
+                className={
+                  isFocusVisible && exitConfirmFocusedTarget === 'exit'
+                    ? `${styles.dangerButton} ${styles.controlFocused}`
+                    : styles.dangerButton
+                }
+                onClick={onExitToMenu}
+              >
                 <span>Tak, wróć do menu</span>
-                <ActionHint label={actionHints?.primary} />
+                <ActionHint label={isFocusVisible && exitConfirmFocusedTarget === 'exit' ? actionHints?.confirm : null} />
               </button>
             </div>
           </>
@@ -81,24 +114,42 @@ export function PlaySettingsModal({
                 label="Dźwięk"
                 description="Przygotowane pod efekty audio w trakcie rozgrywki."
                 enabled={soundEnabled}
+                focused={isFocusVisible && focusedTarget === 'sound'}
                 onToggle={onToggleSound}
               />
               <ToggleCard
                 label="Animacje"
                 description="Wyłącza ruch i skraca przyszłe animacje w interfejsie."
                 enabled={animationsEnabled}
+                focused={isFocusVisible && focusedTarget === 'animations'}
                 onToggle={onToggleAnimations}
               />
             </div>
 
             <div className={styles.actions}>
-              <button type="button" className={styles.secondaryButton} onClick={onOpenExitConfirm}>
+              <button
+                type="button"
+                className={
+                  isFocusVisible && focusedTarget === 'exit'
+                    ? `${styles.secondaryButton} ${styles.controlFocused}`
+                    : styles.secondaryButton
+                }
+                onClick={onOpenExitConfirm}
+              >
                 <span>Powrót do menu</span>
-                <ActionHint label={actionHints?.secondary} muted />
+                <ActionHint label={isFocusVisible && focusedTarget === 'exit' ? actionHints?.confirm : null} muted />
               </button>
-              <button type="button" className={styles.primaryButton} onClick={onContinue}>
+              <button
+                type="button"
+                className={
+                  isFocusVisible && focusedTarget === 'continue'
+                    ? `${styles.primaryButton} ${styles.controlFocused}`
+                    : styles.primaryButton
+                }
+                onClick={onContinue}
+              >
                 <span>Kontynuuj</span>
-                <ActionHint label={actionHints?.primary} />
+                <ActionHint label={isFocusVisible && focusedTarget === 'continue' ? actionHints?.confirm : null} />
               </button>
             </div>
           </>

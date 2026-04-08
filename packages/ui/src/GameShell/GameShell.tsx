@@ -8,6 +8,9 @@ type GameShellProps = {
   brandHref?: string
   brandLabel: string
   footerLink?: SidebarFooterLink
+  focusedHref?: string
+  forceSidebarExpanded?: boolean
+  isSidebarFocusVisible?: boolean
   links: NavLink[]
   mainClassName?: string
   mainId?: string
@@ -22,6 +25,9 @@ export function GameShell({
   brandHref,
   brandLabel,
   footerLink,
+  focusedHref,
+  forceSidebarExpanded = false,
+  isSidebarFocusVisible = true,
   links,
   mainClassName,
   mainId,
@@ -38,6 +44,9 @@ export function GameShell({
           activeHref={activeHref}
           ariaLabel={navAriaLabel}
           footerLink={footerLink}
+          focusedHref={focusedHref}
+          forceExpanded={forceSidebarExpanded}
+          isFocusVisible={isSidebarFocusVisible}
           links={links}
           onNavigate={onNavigate}
         />

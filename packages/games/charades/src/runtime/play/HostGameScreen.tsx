@@ -19,6 +19,7 @@ import {
 } from '../shared/charades-play-preferences'
 import {
   CHARADES_BINDINGS_STORAGE_KEY,
+  CHARADES_BINDINGS_UPDATED_EVENT,
   formatControllerLabelForProfile,
   loadPersistedBindings,
   type GamepadProfile,
@@ -55,8 +56,13 @@ type HostGameScreenProps = {
 
 export function HostGameScreen(props: HostGameScreenProps) {
   const [isVerdictPickerOpen, setIsVerdictPickerOpen] = useState(false)
+  const [verdictFocusTarget, setVerdictFocusTarget] = useState<'correct' | 'incorrect'>('correct')
+  const [verdictPickerStage, setVerdictPickerStage] = useState<'players' | 'actions'>('players')
+  const [verdictPickerActionTarget, setVerdictPickerActionTarget] = useState<'cancel' | 'confirm'>('confirm')
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isSettingsExitConfirmOpen, setIsSettingsExitConfirmOpen] = useState(false)
+  const [settingsFocusTarget, setSettingsFocusTarget] = useState<'sound' | 'animations' | 'exit' | 'continue'>('sound')
+  const [settingsExitConfirmFocusTarget, setSettingsExitConfirmFocusTarget] = useState<'stay' | 'exit'>('stay')
   const [soundEnabled, setSoundEnabled] = useState(true)
   const [animationsEnabled, setAnimationsEnabled] = useState(true)
   const [selectedGuessedPlayerIdx, setSelectedGuessedPlayerIdx] = useState<number | null>(null)
@@ -104,20 +110,33 @@ export function HostGameScreen(props: HostGameScreenProps) {
       }
     }
 
+    function handleBindingsUpdated() {
+      setControlBindings(loadPersistedBindings())
+    }
+
     window.addEventListener('storage', handleStorage)
-    return () => window.removeEventListener('storage', handleStorage)
+    window.addEventListener(CHARADES_BINDINGS_UPDATED_EVENT, handleBindingsUpdated)
+    return () => {
+      window.removeEventListener('storage', handleStorage)
+      window.removeEventListener(CHARADES_BINDINGS_UPDATED_EVENT, handleBindingsUpdated)
+    }
   }, [])
 
   useEffect(() => {
     if (props.phase !== 'verdict') {
       setIsVerdictPickerOpen(false)
       setSelectedGuessedPlayerIdx(null)
+      setVerdictFocusTarget('correct')
+      setVerdictPickerStage('players')
+      setVerdictPickerActionTarget('confirm')
     }
   }, [props.phase])
 
   useEffect(() => {
     if (!isSettingsOpen) {
       setIsSettingsExitConfirmOpen(false)
+      setSettingsFocusTarget('sound')
+      setSettingsExitConfirmFocusTarget('stay')
     }
   }, [isSettingsOpen])
 
@@ -168,21 +187,44 @@ export function HostGameScreen(props: HostGameScreenProps) {
   const guessedPlayerIndexes = guessedPlayers.map((player) => player.index)
   const canToggleScoreRail = props.phase === 'prepare' && props.players.some((player) => (player.score ?? 0) > 0)
 
+  useEffect(() => {
+    if (!isVerdictPickerOpen || selectedGuessedPlayerIdx !== null) {
+      return
+    }
+
+    setSelectedGuessedPlayerIdx(guessedPlayerIndexes[0] ?? null)
+  }, [guessedPlayerIndexes, isVerdictPickerOpen, selectedGuessedPlayerIdx])
+
   const handleHostControlCommand = useCallback(
     (command: HostControlCommand) => {
       switch (command.type) {
         case 'open-settings':
+          setSettingsFocusTarget('sound')
+          setSettingsExitConfirmFocusTarget('stay')
           setIsSettingsOpen(true)
           return
         case 'close-settings':
           setIsSettingsExitConfirmOpen(false)
           setIsSettingsOpen(false)
           return
+        case 'set-settings-focus':
+          setSettingsFocusTarget(command.target)
+          return
         case 'open-settings-exit-confirm':
+          setSettingsExitConfirmFocusTarget('stay')
           setIsSettingsExitConfirmOpen(true)
           return
         case 'cancel-settings-exit-confirm':
           setIsSettingsExitConfirmOpen(false)
+          return
+        case 'set-settings-exit-confirm-focus':
+          setSettingsExitConfirmFocusTarget(command.target)
+          return
+        case 'toggle-settings-sound':
+          toggleSound()
+          return
+        case 'toggle-settings-animations':
+          toggleAnimations()
           return
         case 'exit-to-menu':
           props.onExitToMenu()
@@ -198,13 +240,30 @@ export function HostGameScreen(props: HostGameScreenProps) {
           return
         case 'open-verdict-picker':
           setSelectedGuessedPlayerIdx((current) => current ?? guessedPlayerIndexes[0] ?? null)
+          setVerdictPickerStage('players')
+          setVerdictPickerActionTarget('confirm')
           setIsVerdictPickerOpen(true)
           return
         case 'close-verdict-picker':
+          setVerdictPickerStage('players')
+          setVerdictPickerActionTarget('confirm')
           setIsVerdictPickerOpen(false)
+          return
+        case 'set-verdict-focus':
+          setVerdictFocusTarget(command.target)
           return
         case 'select-verdict-player':
           setSelectedGuessedPlayerIdx(command.playerIdx)
+          setVerdictPickerStage('players')
+          return
+        case 'set-verdict-picker-stage':
+          setVerdictPickerStage(command.stage)
+          if (command.stage === 'actions') {
+            setVerdictPickerActionTarget('confirm')
+          }
+          return
+        case 'set-verdict-picker-action-target':
+          setVerdictPickerActionTarget(command.target)
           return
         case 'confirm-verdict-player':
           if (selectedGuessedPlayerIdx !== null) {
@@ -231,7 +290,12 @@ export function HostGameScreen(props: HostGameScreenProps) {
       isRoundOrderRevealing: props.isRoundOrderRevealing,
       isSettingsOpen,
       isSettingsExitConfirmOpen,
+      settingsFocusTarget,
+      settingsExitConfirmFocusTarget,
+      verdictFocusTarget,
       isVerdictPickerOpen,
+      verdictPickerStage,
+      verdictPickerActionTarget,
       selectedGuessedPlayerIdx,
       guessedPlayerIndexes,
       isReconnectBlocking: isPresenterReconnectRequired || isRoomReconnectRequired,
@@ -244,7 +308,7 @@ export function HostGameScreen(props: HostGameScreenProps) {
   })
 
   const getActionHint = useCallback(
-    (action: 'left' | 'right' | 'confirm' | 'back' | 'menu' | 'primary' | 'secondary' | 'rail') => {
+    (action: 'left' | 'right' | 'confirm' | 'back' | 'menu' | 'rail') => {
       const label = getHostControlActionLabel(controlBindings, activeInputDevice, action)
       return activeInputDevice === 'controller' ? formatControllerLabelForProfile(label ?? '', controllerProfile) : label
     },
@@ -253,7 +317,15 @@ export function HostGameScreen(props: HostGameScreenProps) {
 
   return (
     <div className={styles.screen}>
-      <RuntimeTopBar gameName="Kalambury" onOpenSettings={() => setIsSettingsOpen(true)} />
+      <RuntimeTopBar
+        gameName="Kalambury"
+        onOpenSettings={() => {
+          setSettingsFocusTarget('sound')
+          setSettingsExitConfirmFocusTarget('stay')
+          setIsSettingsExitConfirmOpen(false)
+          setIsSettingsOpen(true)
+        }}
+      />
 
       <PlayBoard
         animationsEnabled={animationsEnabled}
@@ -287,16 +359,19 @@ export function HostGameScreen(props: HostGameScreenProps) {
         roundOrderCountdown={roundOrderCountdown}
         onContinueRoundSummary={props.onFinishRoundSummary}
         onCorrectVerdict={() => {
-          setSelectedGuessedPlayerIdx(null)
+          setSelectedGuessedPlayerIdx(guessedPlayerIndexes[0] ?? null)
+          setVerdictPickerStage('players')
+          setVerdictPickerActionTarget('confirm')
           setIsVerdictPickerOpen(true)
         }}
         onExitToMenu={props.onExitToMenu}
         onIncorrectVerdict={() => props.onGiveVerdict(false)}
+        verdictFocusedTarget={verdictFocusTarget}
+        isFocusVisible
         onStartRound={props.onStartRound}
         onStopRound={props.onStopRound}
         actionHints={{
-          primary: getActionHint('primary'),
-          secondary: getActionHint('secondary'),
+          confirm: getActionHint('confirm'),
           menu: getActionHint('menu'),
         }}
       />
@@ -305,8 +380,18 @@ export function HostGameScreen(props: HostGameScreenProps) {
         <VerdictPickerModal
           players={guessedPlayers}
           selectedPlayerIdx={selectedGuessedPlayerIdx}
-          onSelectPlayer={setSelectedGuessedPlayerIdx}
-          onCancel={() => setIsVerdictPickerOpen(false)}
+          selectionStage={verdictPickerStage}
+          actionTarget={verdictPickerActionTarget}
+          isFocusVisible
+          onSelectPlayer={(playerIdx) => {
+            setSelectedGuessedPlayerIdx(playerIdx)
+            setVerdictPickerStage('players')
+          }}
+          onCancel={() => {
+            setVerdictPickerStage('players')
+            setVerdictPickerActionTarget('confirm')
+            setIsVerdictPickerOpen(false)
+          }}
           onConfirm={() => {
             if (selectedGuessedPlayerIdx === null) {
               return
@@ -327,18 +412,26 @@ export function HostGameScreen(props: HostGameScreenProps) {
           soundEnabled={soundEnabled}
           animationsEnabled={animationsEnabled}
           isExitConfirmOpen={isSettingsExitConfirmOpen}
+          focusedTarget={settingsFocusTarget}
+          exitConfirmFocusedTarget={settingsExitConfirmFocusTarget}
+          isFocusVisible
           onToggleSound={toggleSound}
           onToggleAnimations={toggleAnimations}
-          onOpenExitConfirm={() => setIsSettingsExitConfirmOpen(true)}
-          onCancelExitConfirm={() => setIsSettingsExitConfirmOpen(false)}
+          onOpenExitConfirm={() => {
+            setSettingsExitConfirmFocusTarget('stay')
+            setIsSettingsExitConfirmOpen(true)
+          }}
+          onCancelExitConfirm={() => {
+            setSettingsExitConfirmFocusTarget('stay')
+            setIsSettingsExitConfirmOpen(false)
+          }}
           onExitToMenu={props.onExitToMenu}
           onContinue={() => {
             setIsSettingsExitConfirmOpen(false)
             setIsSettingsOpen(false)
           }}
           actionHints={{
-            primary: getActionHint('primary'),
-            secondary: getActionHint('secondary'),
+            confirm: getActionHint('confirm'),
           }}
         />
       ) : null}
