@@ -33,11 +33,11 @@
                       "id":  "T002",
                       "title":  "Charades host menu and settings navigation polish",
                       "status":  "active",
-                      "context":  "The shared host navigation framework now exists in `@party/ui` + `@party/game-sdk`, and Charades has been migrated as the reference consumer across menu, settings, setup, and core runtime overlays. Runtime controls were simplified so gameplay accept actions now use `confirm`, and Batch 1 runtime/presenter motion is now implemented across round-order polish, timer pressure, verdict reveal, presenter flow, and verdict picker transitions. A broader setup-modal animation batch was attempted and then fully reverted after it regressed modal UI, so setup motion is not part of the current stable scope.",
-                      "next_action":  "Run a focused manual polish pass on Charades runtime pause/verdict flow, presenter feel, and remaining keyboard/controller rough edges, then close the Charades host-navigation polish task.",
+                      "context":  "The shared host navigation framework now exists in `@party/ui` + `@party/game-sdk`, and Charades has been migrated as the reference consumer across menu, settings, setup, and core runtime overlays. Runtime controls were simplified so gameplay accept actions now use `confirm`, and Batch 1 runtime/presenter motion is now implemented across round-order polish, timer pressure, verdict reveal, presenter flow, and verdict picker transitions. Setup/category animation re-entry was explored again on 2026-04-11 but intentionally not kept after it failed user validation, so setup motion remains paused outside the stable scope.",
+                      "next_action":  "Run a focused manual browser pass on Charades runtime pause/verdict flow and presenter feel from `main`, then continue only with narrow, user-validated UI polish slices.",
                       "blocker":  "",
                       "created":  "2026-04-07",
-                      "updated":  "2026-04-10"
+                      "updated":  "2026-04-11"
                   }
               ]
 }

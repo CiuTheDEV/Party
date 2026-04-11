@@ -201,6 +201,13 @@ Details live in `packages/game-sdk/README.md`.
 - No commented-out code in the repo
 - No `TODO` without an active task in `memory/active-tasks.json`
 - Every function should do one thing
+- Treat every file with Polish UI copy as **UTF-8-sensitive**
+- If a file shows any mojibake or broken Polish diacritics, stop partial editing immediately
+- In UTF-8-sensitive files, prefer either:
+  - the smallest possible non-text patch, or
+  - a deliberate full-file rewrite in clean UTF-8
+- Do not mix logic/layout edits with copy rewrites in the same risky patch
+- After editing a UTF-8-sensitive file, verify the resulting text in the file before continuing
 
 ### Commits
 

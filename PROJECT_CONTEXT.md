@@ -142,14 +142,16 @@ This means:
 
 <!-- handoff:start -->
 ## Session Handoff
+- Last: 2026-04-11 by Codex (GPT-5.4)
+- Task: Merge the current Charades motion/navigation branch into `main`, then tighten agent workflow after failed setup/category animation attempts.
+- Did: Committed and merged the current runtime/presenter motion + navigation branch into `main`, pushed `main`, removed the merged feature branch, and left the workspace on `main`. Re-tried category/setup animation in a narrower slice, but it still did not produce an acceptable user-visible result and was not kept as stable output. Added a new repo rule in `AGENTS.md` to treat files with Polish UI copy as UTF-8-sensitive and require safer edit discipline.
+- Next: Continue from `main` with a browser-first validation pass on the stable Charades runtime motion. Keep setup animation paused unless it is resumed one element at a time with immediate user validation.
+- Blocker: None — main blocker is UX validation rather than code integration.
+
+## Previous Handoff
 - Last: 2026-04-10 by Codex (GPT-5.4)
 - Task: Continue Charades motion polish, presenter flow, and setup-modal animation exploration.
 - Did: Finished a stronger Batch 1 motion pass after early subtle versions were not perceptible: improved host timer pressure, verdict word reveal, rhythm between `buffer -> timer -> verdict`, presenter stage/your-turn/timer flow, and verdict picker transitions. Attempted setup-modal animation polish next, but it regressed the setup/settings modal UI, so the full setup-modal batch was reverted to the last stable state. Verified with `npm run build` in `@party/ui`, `@party/charades`, and `@party/hub`.
 - Next: Do a real browser feel pass on the current stable Charades motion set. If setup-modal motion work resumes later, restart with a much smaller, local-only scope instead of touching shared modal shells and controls.
 - Blocker: None — remaining work is manual UX validation.
-
-## Previous Handoff
-- Last: 2026-04-10 by Codex (GPT-5.4)
-- Task: Implement Batch 1 Charades runtime/presenter animations.
-- Did: Added shared local motion profile + reduced-motion guard, animated runtime phase entries in `PlayBoardPhases`, added timer/countdown pulse behavior, added presenter stage/your-turn/timer motion, and animated the host verdict picker entry/focus feedback. Verified with `npm run build` in `@party/charades`, helper motion check, and `npm run build` in `@party/hub`.
 <!-- handoff:end -->

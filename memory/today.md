@@ -269,3 +269,11 @@
 - Attempted a broader animation batch for setup modals, but it regressed modal UI/layout; reverted the whole setup-modal batch back to the last stable state instead of patching over a broken shell.
 - Next: do a browser-only validation pass on the current Charades motion set, and if setup-modal motion returns later, re-enter with a much smaller scope limited to one local surface at a time.
 - Experience recorded: yes
+
+### S35 (2026-04-11 ~) [Project Party] Runtime motion merge + UTF-8 workflow hardening
+
+- Finalized the current Charades runtime/presenter motion work on `main`, including the existing Batch 1 runtime polish, helper checks, and current repo state from the motion/navigation branch, then pushed and cleaned up the merged worktree branch so the workspace now stays on `main`.
+- Tried to re-enter setup/category animation work one element at a time, but the category expand/collapse change did not land in a user-acceptable state and was intentionally not kept as session output.
+- Added an explicit agent rule in `AGENTS.md` to treat files with Polish UI copy as UTF-8-sensitive: stop partial edits on mojibake, prefer minimal non-text patches or deliberate full-file rewrites, and verify text after editing.
+- Next: resume from `main`, keep setup animation paused for now, and continue only with narrow, user-validated UI changes or a browser-first manual pass on the stable Charades runtime motion.
+- Experience recorded: yes
