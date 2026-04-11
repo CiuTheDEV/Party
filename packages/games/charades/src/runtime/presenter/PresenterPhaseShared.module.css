@@ -27,6 +27,21 @@
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.22);
 }
 
+.phaseCard[data-motion-tier='warning'] {
+  border-color: rgba(251, 191, 36, 0.24);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(251, 191, 36, 0.08);
+}
+
+.phaseCard[data-motion-tier='critical'] {
+  border-color: rgba(248, 113, 113, 0.28);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(248, 113, 113, 0.12),
+    0 0 34px rgba(248, 113, 113, 0.12);
+}
+
 .phaseCardAlert {
   border-color: rgba(251, 113, 133, 0.34);
   background:
@@ -74,10 +89,23 @@
   text-align: center;
 }
 
+.timerHero[data-motion-tier='warning'] .phaseTitle,
+.timerHero[data-motion-tier='warning'] .timerCount {
+  color: #fde68a;
+}
+
+.timerHero[data-motion-tier='critical'] .phaseTitle,
+.timerHero[data-motion-tier='critical'] .timerCount {
+  color: #fecaca;
+}
+
 .timerCount {
   font-size: clamp(4rem, 16vw, 7rem);
   font-weight: 900;
   line-height: 0.9;
+  color: #f8fafc;
+  text-shadow: 0 0 0 rgba(0, 0, 0, 0);
+  will-change: transform, filter;
 }
 
 .phaseLead,

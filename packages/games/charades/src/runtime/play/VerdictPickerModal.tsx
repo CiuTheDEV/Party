@@ -1,4 +1,7 @@
+import { useEffect, useLayoutEffect, useRef } from 'react'
+import { gsap } from 'gsap'
 import { AvatarAsset } from '@party/ui'
+import { charadesMotionProfile, useCharadesReducedMotion } from '../shared/charades-motion'
 import { ActionHint } from './ActionHint'
 import styles from './HostGameScreen.module.css'
 import type { PlayerSummary } from './playboard-types'
@@ -37,13 +40,215 @@ export function VerdictPickerModal({
   actionHints,
 }: Props) {
   const density = getVerdictGridDensity(players.length)
+  const reducedMotion = useCharadesReducedMotion()
+  const overlayRef = useRef<HTMLDivElement | null>(null)
+  const cardRef = useRef<HTMLDivElement | null>(null)
+  const listRef = useRef<HTMLDivElement | null>(null)
+  const hintRowRef = useRef<HTMLDivElement | null>(null)
+  const actionsRef = useRef<HTMLDivElement | null>(null)
+  const cancelButtonRef = useRef<HTMLButtonElement | null>(null)
+  const confirmButtonRef = useRef<HTMLButtonElement | null>(null)
+  const playerOptionRefs = useRef<Record<number, HTMLButtonElement | null>>({})
+
+  useLayoutEffect(() => {
+    if (reducedMotion) {
+      return
+    }
+
+    const ctx = gsap.context(() => {
+      const orderedPlayerNodes = players
+        .map((player) => playerOptionRefs.current[player.index])
+        .filter(Boolean) as HTMLButtonElement[]
+      const timeline = gsap.timeline()
+
+      timeline.fromTo(
+        overlayRef.current,
+        {
+          autoAlpha: 0,
+        },
+        {
+          autoAlpha: 1,
+          duration: 0.18,
+          ease: 'power1.out',
+        },
+      )
+
+      timeline.fromTo(
+        cardRef.current,
+        {
+          autoAlpha: 0,
+          y: charadesMotionProfile.verdict.y,
+          scale: charadesMotionProfile.verdict.scale,
+        },
+        {
+          autoAlpha: 1,
+          y: 0,
+          scale: 1,
+          duration: charadesMotionProfile.verdict.duration,
+          ease: charadesMotionProfile.verdict.ease,
+        },
+        0,
+      )
+
+      if (orderedPlayerNodes.length > 0) {
+        timeline.fromTo(
+          orderedPlayerNodes,
+          {
+            autoAlpha: 0,
+            y: 10,
+            scale: 0.985,
+          },
+          {
+            autoAlpha: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.2,
+            ease: 'power2.out',
+            stagger: charadesMotionProfile.verdict.stagger,
+          },
+          '<+0.05',
+        )
+      }
+
+      timeline.fromTo(
+        [hintRowRef.current, actionsRef.current].filter(Boolean),
+        {
+          autoAlpha: 0,
+          y: 8,
+        },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.2,
+          ease: 'power2.out',
+          stagger: 0.04,
+        },
+        '<+0.03',
+      )
+    }, overlayRef)
+
+    return () => {
+      ctx.revert()
+    }
+  }, [players, reducedMotion])
+
+  useEffect(() => {
+    if (reducedMotion || !listRef.current || !actionsRef.current || !hintRowRef.current) {
+      return
+    }
+
+    const playerNodes = players
+      .map((player) => playerOptionRefs.current[player.index])
+      .filter(Boolean) as HTMLButtonElement[]
+    const actionNodes = [cancelButtonRef.current, confirmButtonRef.current].filter(Boolean) as HTMLButtonElement[]
+
+    gsap.killTweensOf([...playerNodes, ...actionNodes, listRef.current, hintRowRef.current, actionsRef.current])
+
+    if (selectionStage === 'actions') {
+      gsap.to(playerNodes, {
+        scale: 0.985,
+        autoAlpha: 0.78,
+        duration: 0.18,
+        ease: 'power2.out',
+        stagger: 0.01,
+      })
+      gsap.fromTo(
+        actionsRef.current,
+        {
+          y: 12,
+          autoAlpha: 0.72,
+          scale: 0.985,
+        },
+        {
+          y: 0,
+          autoAlpha: 1,
+          scale: 1,
+          duration: 0.2,
+          ease: 'power2.out',
+          clearProps: 'transform,opacity',
+        },
+      )
+      gsap.fromTo(
+        hintRowRef.current,
+        {
+          y: 8,
+          autoAlpha: 0.72,
+        },
+        {
+          y: 0,
+          autoAlpha: 1,
+          duration: 0.18,
+          ease: 'power2.out',
+          clearProps: 'transform,opacity',
+        },
+      )
+    } else {
+      gsap.to(playerNodes, {
+        scale: 1,
+        autoAlpha: 1,
+        duration: 0.18,
+        ease: 'power2.out',
+        stagger: 0.008,
+        clearProps: 'transform,opacity',
+      })
+      gsap.fromTo(
+        listRef.current,
+        {
+          y: 8,
+          autoAlpha: 0.84,
+        },
+        {
+          y: 0,
+          autoAlpha: 1,
+          duration: 0.18,
+          ease: 'power2.out',
+          clearProps: 'transform,opacity',
+        },
+      )
+    }
+  }, [players, reducedMotion, selectionStage])
+
+  useEffect(() => {
+    if (reducedMotion || !isFocusVisible) {
+      return
+    }
+
+    const activeElement =
+      selectionStage === 'players'
+        ? (selectedPlayerIdx !== null ? playerOptionRefs.current[selectedPlayerIdx] : null)
+        : actionTarget === 'confirm'
+          ? confirmButtonRef.current
+          : cancelButtonRef.current
+
+    if (!activeElement) {
+      return
+    }
+
+    gsap.killTweensOf(activeElement)
+    gsap.fromTo(
+      activeElement,
+      {
+        scale: charadesMotionProfile.verdict.focusScale + 0.02,
+        y: -3,
+        filter: 'brightness(1.08)',
+      },
+      {
+        scale: 1,
+        y: 0,
+        filter: 'none',
+        duration: 0.18,
+        ease: 'back.out(1.6)',
+        clearProps: 'transform,filter',
+      },
+    )
+  }, [actionTarget, isFocusVisible, reducedMotion, selectedPlayerIdx, selectionStage])
 
   return (
-    <div className={styles.modalOverlay} role="dialog" aria-modal="true" aria-label="Wybierz gracza">
-      <div className={styles.modalCard}>
-        <span className={styles.modalEyebrow}>Zgadnięto</span>
-        <h2 className={styles.modalTitle}>Który gracz odgadł hasło?</h2>
-        <div className={styles.modalList} data-density={density}>
+    <div ref={overlayRef} className={styles.modalOverlay} role="dialog" aria-modal="true" aria-label="Wybierz gracza">
+      <div ref={cardRef} className={styles.modalCard} data-stage={selectionStage}>
+        <span className={styles.modalEyebrow}>Zgadnieto</span>
+        <h2 className={styles.modalTitle}>Ktory gracz odgadl haslo?</h2>
+        <div ref={listRef} className={styles.modalList} data-density={density} data-stage={selectionStage}>
           {players.map((player) => {
             const isSelected = selectedPlayerIdx === player.index
             const isFocusedPlayer = isSelected && isFocusVisible && selectionStage === 'players'
@@ -51,12 +256,16 @@ export function VerdictPickerModal({
             return (
               <button
                 key={`${player.name}-${player.index}`}
+                ref={(node) => {
+                  playerOptionRefs.current[player.index] = node
+                }}
                 type="button"
                 className={[
                   styles.playerOption,
                   isSelected ? styles.playerOptionSelected : '',
                   isFocusedPlayer ? styles.controlFocused : '',
                 ].filter(Boolean).join(' ')}
+                data-stage={selectionStage}
                 onClick={() => onSelectPlayer(player.index)}
               >
                 <AvatarAsset avatar={player.avatar} className={styles.playerAvatar} />
@@ -67,10 +276,10 @@ export function VerdictPickerModal({
             )
           })}
         </div>
-        <div className={styles.modalHintRow}>
+        <div ref={hintRowRef} className={styles.modalHintRow} data-stage={selectionStage}>
           {selectionStage === 'players' ? (
             <span className={styles.modalHintText}>
-              <ActionHint label={actionHints?.previous} muted /> / <ActionHint label={actionHints?.next} muted /> wybór gracza
+              <ActionHint label={actionHints?.previous} muted /> / <ActionHint label={actionHints?.next} muted /> wybor gracza
             </span>
           ) : (
             <span className={styles.modalHintText}>
@@ -78,8 +287,9 @@ export function VerdictPickerModal({
             </span>
           )}
         </div>
-        <div className={styles.modalActions}>
+        <div ref={actionsRef} className={styles.modalActions} data-stage={selectionStage}>
           <button
+            ref={cancelButtonRef}
             type="button"
             className={[
               styles.cancelButton,
@@ -87,10 +297,14 @@ export function VerdictPickerModal({
             ].filter(Boolean).join(' ')}
             onClick={onCancel}
           >
-            <span>Wróć</span>
-            <ActionHint label={isFocusVisible && selectionStage === 'actions' && actionTarget === 'cancel' ? actionHints?.confirm : null} muted />
+            <span>Wroc</span>
+            <ActionHint
+              label={isFocusVisible && selectionStage === 'actions' && actionTarget === 'cancel' ? actionHints?.confirm : null}
+              muted
+            />
           </button>
           <button
+            ref={confirmButtonRef}
             type="button"
             className={[
               styles.confirmButton,
@@ -100,7 +314,9 @@ export function VerdictPickerModal({
             onClick={onConfirm}
           >
             <span>Przyznaj punkt</span>
-            <ActionHint label={isFocusVisible && selectionStage === 'actions' && actionTarget === 'confirm' ? actionHints?.confirm : null} />
+            <ActionHint
+              label={isFocusVisible && selectionStage === 'actions' && actionTarget === 'confirm' ? actionHints?.confirm : null}
+            />
           </button>
         </div>
       </div>

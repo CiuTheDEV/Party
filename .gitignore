@@ -2,6 +2,14 @@
 .codex/auth.json
 .codex/sessions/
 .codex/logs/
+.codex/skills/gsap-core/
+.codex/skills/gsap-frameworks/
+.codex/skills/gsap-performance/
+.codex/skills/gsap-plugins/
+.codex/skills/gsap-react/
+.codex/skills/gsap-scrolltrigger/
+.codex/skills/gsap-timeline/
+.codex/skills/gsap-utils/
 
 # Claude Code — never commit local settings with potential secrets
 .claude/settings.local.json

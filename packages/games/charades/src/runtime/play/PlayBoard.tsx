@@ -17,13 +17,11 @@ import {
   getScoreKey,
   toLocalPoint,
 } from './playboard-helpers'
+import { getCornerDeckCountDuringDeal } from './playboard-state-helpers'
 import type { CardPoint, Phase, PlayBoardProps, PlayerSummary, RankedPlayer } from './playboard-types'
+import { getRoundOrderAnimationProfile } from './round-order-animation'
 import { usePrepareScoreRail } from './usePrepareScoreRail'
 
-const COLLECT_DURATION = 0.22
-const DEAL_DURATION = 0.62
-const BETWEEN_COLLECT_MS = 30
-const BETWEEN_DEAL_MS = 110
 export function PlayBoard({
   phase,
   players,
@@ -243,6 +241,7 @@ export function PlayBoard({
       return null
     }
 
+    const profile = getRoundOrderAnimationProfile()
     const timeline = gsap.timeline()
 
     gsap.set(flyCard, {
@@ -269,8 +268,8 @@ export function PlayBoard({
         gsap.set(flyCard, {
           x: center.x,
           y: center.y,
-          rotation: -2,
-          scale: 1,
+          rotation: profile.collect.startRotation,
+          scale: profile.collect.startScale,
           opacity: 1,
         })
         gsap.set(flyCardInner, { rotateY: 0 })
@@ -281,9 +280,10 @@ export function PlayBoard({
         {
           x: corner.x,
           y: corner.y,
-          rotation: -10,
-          duration: COLLECT_DURATION,
-          ease: 'power2.inOut',
+          rotation: profile.collect.endRotation,
+          scale: profile.collect.endScale,
+          duration: profile.collect.duration,
+          ease: profile.collect.ease,
         },
         '>'
       )
@@ -295,7 +295,7 @@ export function PlayBoard({
         setCornerCount(index + 1)
       })
 
-      timeline.to({}, { duration: BETWEEN_COLLECT_MS / 1000 })
+      timeline.to({}, { duration: profile.collect.pauseAfterMs / 1000 })
     }
 
     for (let index = 0; index < order.length; index += 1) {
@@ -307,12 +307,12 @@ export function PlayBoard({
         setFlyCardFace('back')
         setFlyCardPlayer(player)
         setFlyCardOrderIndex(index + 1)
-        setCornerCount(totalCards - index)
+        setCornerCount(getCornerDeckCountDuringDeal(totalCards, index))
         gsap.set(flyCard, {
           x: corner.x,
           y: corner.y,
-          rotation: -10,
-          scale: 1,
+          rotation: profile.deal.startRotation,
+          scale: profile.deal.startScale,
           opacity: 1,
         })
         gsap.set(flyCardInner, { rotateY: 0 })
@@ -322,10 +322,23 @@ export function PlayBoard({
         flyCard,
         {
           x: slot.x,
+          y: slot.y + profile.deal.glideYOffset,
+          rotation: profile.deal.glideRotation,
+          scale: profile.deal.glideScale,
+          duration: profile.deal.glideDuration,
+          ease: profile.deal.glideEase,
+        },
+        '>'
+      )
+
+      timeline.to(
+        flyCard,
+        {
           y: slot.y,
           rotation: 0,
-          duration: DEAL_DURATION,
-          ease: 'power3.out',
+          scale: 1,
+          duration: profile.deal.settleDuration,
+          ease: profile.deal.settleEase,
         },
         '>'
       )
@@ -334,20 +347,24 @@ export function PlayBoard({
         flyCardInner,
         {
           rotateY: 180,
-          duration: DEAL_DURATION * 0.7,
-          ease: 'power2.out',
-          onStart: () => {
-            setFlyCardFace('front')
-          },
+          duration: profile.deal.flipDuration,
+          ease: profile.deal.flipEase,
         },
-        '<+0.1'
+        `<+${profile.deal.flipStartDelay}`
+      )
+
+      timeline.add(
+        () => {
+          setFlyCardFace('front')
+        },
+        `<+${profile.deal.faceSwapDelay}`
       )
 
       timeline.to(
         flyCard,
         {
           opacity: 0,
-          duration: 0.04,
+          duration: profile.deal.fadeDuration,
           ease: 'none',
         },
         '>'
@@ -358,7 +375,7 @@ export function PlayBoard({
         setFlyCardFace('back')
         setFlyCardPlayer(null)
         setFlyCardOrderIndex(null)
-        setCornerCount(totalCards - index - 1)
+        setCornerCount(getCornerDeckCountDuringDeal(totalCards, index))
         gsap.set(flyCard, { opacity: 1 })
         window.requestAnimationFrame(() => {
           setLandedSlotIndex(index)
@@ -366,13 +383,13 @@ export function PlayBoard({
         })
       })
 
-      timeline.to({}, { duration: 0.12 })
+      timeline.to({}, { duration: profile.deal.landedHoldDuration })
 
       timeline.add(() => {
         setLandedSlotIndex((current) => (current === index ? null : current))
       })
 
-      timeline.to({}, { duration: BETWEEN_DEAL_MS / 1000 })
+      timeline.to({}, { duration: profile.deal.pauseAfterMs / 1000 })
     }
 
     return timeline

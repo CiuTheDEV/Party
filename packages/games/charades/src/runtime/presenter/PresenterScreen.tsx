@@ -1,20 +1,64 @@
 'use client'
 
 import { AvatarAsset } from '@party/ui'
+import { useLayoutEffect, useRef } from 'react'
+import { gsap } from 'gsap'
 import { PresenterPhaseReveal } from './PresenterPhaseReveal'
 import { PresenterPhaseTimer } from './PresenterPhaseTimer'
 import { PresenterPhaseBetween } from './PresenterPhaseBetween'
 import { PresenterPhaseEnded } from './PresenterPhaseEnded'
 import { PresenterPhaseYourTurn } from './PresenterPhaseYourTurn'
+import { charadesMotionProfile, useCharadesReducedMotion } from '../shared/charades-motion'
 import styles from './PresenterScreen.module.css'
 import type { PresenterConnectionState, PresenterScreenProps, PresenterViewState } from './types'
 
 export function PresenterScreen({ state, connectionState, onRevealWord, onChangeWord }: PresenterScreenProps) {
   const chrome = getPresenterChrome(state)
+  const reducedMotion = useCharadesReducedMotion()
+  const stageRef = useRef<HTMLElement | null>(null)
+  const stagePhase = getStagePhase(state.phase)
+
+  useLayoutEffect(() => {
+    if (reducedMotion || !stageRef.current) {
+      return
+    }
+
+    const stageContent = stageRef.current.firstElementChild as HTMLElement | null
+
+    if (!stageContent) {
+      return
+    }
+
+    gsap.killTweensOf(stageContent)
+
+    const tween = gsap.fromTo(
+      stageContent,
+      {
+        autoAlpha: 0,
+        y: charadesMotionProfile.phaseTransition.y,
+        scale: charadesMotionProfile.phaseTransition.scale,
+        filter: 'blur(10px)',
+      },
+      {
+        autoAlpha: 1,
+        y: 0,
+        scale: 1,
+        filter: 'blur(0px)',
+        duration: charadesMotionProfile.phaseTransition.duration,
+        ease: charadesMotionProfile.phaseTransition.ease,
+        clearProps: 'transform,opacity,visibility,filter',
+      },
+    )
+
+    return () => {
+      tween.kill()
+      gsap.set(stageContent, { clearProps: 'transform,opacity,visibility,filter' })
+    }
+  }, [reducedMotion, state.phase])
 
   return (
     <div className={styles.screen}>
-      <main className={styles.frame} data-phase={state.phase}>
+      <main className={styles.frame} data-phase={stagePhase}>
         <header className={styles.topBar}>
           <div className={styles.presenterBlock}>
             <span className={styles.infoLabel}>{chrome.presenterLabel}</span>
@@ -27,7 +71,7 @@ export function PresenterScreen({ state, connectionState, onRevealWord, onChange
           </div>
         </header>
 
-        <section className={styles.stage}>
+        <section ref={stageRef} className={styles.stage} data-phase={stagePhase}>
           {state.phase === 'waiting' && (
             <MessagePanel
               accent="Gotowe"
@@ -88,6 +132,26 @@ export function PresenterScreen({ state, connectionState, onRevealWord, onChange
       </main>
     </div>
   )
+}
+
+function getStagePhase(phase: PresenterViewState['phase']) {
+  if (phase === 'your-turn' || phase === 'reveal-buffer') {
+    return 'prepare'
+  }
+
+  if (phase === 'timer-running') {
+    return 'active'
+  }
+
+  if (phase === 'awaiting-verdict' || phase === 'between') {
+    return 'decision'
+  }
+
+  if (phase === 'ended') {
+    return 'ended'
+  }
+
+  return 'idle'
 }
 
 function MessagePanel({

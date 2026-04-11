@@ -17,6 +17,24 @@
   position: relative;
 }
 
+.frame[data-phase='prepare'] .topBar {
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(251, 191, 36, 0.08);
+}
+
+.frame[data-phase='active'] .topBar {
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.22),
+    0 0 28px rgba(248, 250, 252, 0.06);
+}
+
+.frame[data-phase='decision'] .topBar {
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(56, 189, 248, 0.08);
+}
+
 .topBar,
 .messageCard {
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -99,6 +117,38 @@
 .stage {
   min-height: 0;
   display: grid;
+  position: relative;
+}
+
+.stage::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 24px;
+  opacity: 0;
+  pointer-events: none;
+  filter: blur(22px);
+  transition: opacity 0.24s ease;
+}
+
+.stage[data-phase='prepare']::before {
+  opacity: 0.58;
+  background: radial-gradient(circle at 50% 16%, rgba(251, 191, 36, 0.1), transparent 54%);
+}
+
+.stage[data-phase='active']::before {
+  opacity: 0.62;
+  background: radial-gradient(circle at 50% 14%, rgba(248, 250, 252, 0.08), transparent 52%);
+}
+
+.stage[data-phase='decision']::before {
+  opacity: 0.56;
+  background: radial-gradient(circle at 50% 14%, rgba(56, 189, 248, 0.09), transparent 52%);
+}
+
+.stage[data-phase='ended']::before {
+  opacity: 0.54;
+  background: radial-gradient(circle at 50% 14%, rgba(167, 139, 250, 0.1), transparent 52%);
 }
 
 .messageCard {

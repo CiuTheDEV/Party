@@ -142,16 +142,14 @@ This means:
 
 <!-- handoff:start -->
 ## Session Handoff
-- Last: 2026-04-08 by Claude (Sonnet)
-- Task: Code review and dead code cleanup of the host navigation + controls system.
-- Did: Removed `predefined-menu-controls.ts` (entire file dead), removed `getNextMenuModeFocus` function and its public export, simplified `CharadesMenuContent` (dead state + onClick), extracted shared `isTypingTarget` from two hooks into `charades-controls-bindings.ts`, fixed indentation bug in `resolveSettingsCommand`, added comment explaining intentional type separation. Build + tests passing.
-- Next: Run manual UX polish pass on Charades runtime pause/verdict flow (keyboard + controller rough edges), then close T002.
+- Last: 2026-04-10 by Codex (GPT-5.4)
+- Task: Continue Charades motion polish, presenter flow, and setup-modal animation exploration.
+- Did: Finished a stronger Batch 1 motion pass after early subtle versions were not perceptible: improved host timer pressure, verdict word reveal, rhythm between `buffer -> timer -> verdict`, presenter stage/your-turn/timer flow, and verdict picker transitions. Attempted setup-modal animation polish next, but it regressed the setup/settings modal UI, so the full setup-modal batch was reverted to the last stable state. Verified with `npm run build` in `@party/ui`, `@party/charades`, and `@party/hub`.
+- Next: Do a real browser feel pass on the current stable Charades motion set. If setup-modal motion work resumes later, restart with a much smaller, local-only scope instead of touching shared modal shells and controls.
 - Blocker: None — remaining work is manual UX validation.
 
 ## Previous Handoff
-- Last: 2026-04-08 23:15 by Codex (GPT-5.4)
-- Task: Continue Charades host/runtime controls cleanup and simplify the gameplay-facing binding model.
-- Did: Simplified runtime controls to use `confirm` instead of `primary`, removed `Akcja glowna` from bindings, added migration for legacy persisted bindings.
+- Last: 2026-04-10 by Codex (GPT-5.4)
+- Task: Implement Batch 1 Charades runtime/presenter animations.
+- Did: Added shared local motion profile + reduced-motion guard, animated runtime phase entries in `PlayBoardPhases`, added timer/countdown pulse behavior, added presenter stage/your-turn/timer motion, and animated the host verdict picker entry/focus feedback. Verified with `npm run build` in `@party/charades`, helper motion check, and `npm run build` in `@party/hub`.
 <!-- handoff:end -->
-
-

@@ -33,11 +33,11 @@
                       "id":  "T002",
                       "title":  "Charades host menu and settings navigation polish",
                       "status":  "active",
-                      "context":  "The shared host navigation framework now exists in `@party/ui` + `@party/game-sdk`, and Charades has been migrated as the reference consumer across menu, settings, setup, and core runtime overlays. Runtime controls were further simplified so gameplay accept actions now use `confirm`, `Akcja glowna` was removed from settings bindings, and persisted legacy bindings are migrated into the new confirm slots.",
-                      "next_action":  "Run a focused manual polish pass on Charades runtime pause/verdict flow and remaining keyboard/controller rough edges, then close the Charades host-navigation polish task.",
+                      "context":  "The shared host navigation framework now exists in `@party/ui` + `@party/game-sdk`, and Charades has been migrated as the reference consumer across menu, settings, setup, and core runtime overlays. Runtime controls were simplified so gameplay accept actions now use `confirm`, and Batch 1 runtime/presenter motion is now implemented across round-order polish, timer pressure, verdict reveal, presenter flow, and verdict picker transitions. A broader setup-modal animation batch was attempted and then fully reverted after it regressed modal UI, so setup motion is not part of the current stable scope.",
+                      "next_action":  "Run a focused manual polish pass on Charades runtime pause/verdict flow, presenter feel, and remaining keyboard/controller rough edges, then close the Charades host-navigation polish task.",
                       "blocker":  "",
                       "created":  "2026-04-07",
-                      "updated":  "2026-04-08"
+                      "updated":  "2026-04-10"
                   }
               ]
 }

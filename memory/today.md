@@ -243,3 +243,29 @@
 - Added binding migration logic so old persisted `keyboard-primary` / `controller-primary` values are loaded into the new `confirm` slots instead of silently resetting custom controls after the rename.
 - Next: run a focused manual pass on Charades runtime pause/verdict flow and any remaining controller/keyboard rough edges now that `confirm` is the only acceptance semantic in gameplay.
 - Experience recorded: yes
+
+### S32 (2026-04-10 ~) [Project Party] Repo cleanup and local artifact filtering
+
+- Reduced repo noise by restoring `apps/hub/next-env.d.ts` to the stable tracked import path after a local Next.js dev-only rewrite changed it to `./.next/dev/types/routes.d.ts`.
+- Added targeted `.gitignore` entries for local-only `.codex/skills/gsap-*` directories instead of ignoring the whole `.codex/skills/` tree, because part of that tree is intentionally versioned in this repo.
+- Verification: `git status --short` now shows only the intentional `.gitignore` change from this cleanup.
+- Next: resume product work from T002/T001 without local skill installs polluting the worktree.
+- Experience recorded: no (repo hygiene only)
+
+### S33 (2026-04-10 ~) [Project Party] Charades Batch 1 runtime/presenter motion
+
+- Implemented a local shared motion layer for Charades runtime (`charades-motion.ts`) with game-show timing tokens, timer-pressure tiers, and a reduced-motion guard.
+- Animated Batch 1 runtime phase entries in `PlayBoardPhases`: `prepare`, `buffer`, `timer-running`, and `verdict`, including staged intros plus per-second countdown/timer pulse behavior.
+- Animated presenter flow for Batch 1: light stage phase transition in `PresenterScreen`, a stronger intro in `PresenterPhaseYourTurn`, and timer-driven motion pressure in `PresenterPhaseTimer`.
+- Added host-side verdict picker animation polish: overlay/card entry, staggered player option reveal, and quick focus snap feedback on selected/focused controls.
+- Verification passing in this session: `npm run build` in `packages/games/charades`, `charades-motion.check.cjs`, and `npm run build` in `apps/hub`.
+- Next: run a real browser feel pass and trim any over-animated moments before extending motion beyond Batch 1.
+- Experience recorded: yes
+
+### S34 (2026-04-10 ~) [Project Party] Charades motion polish, presenter pass, and reverted setup-modal batch
+
+- Continued Batch 1 polish after user feedback that early motion was effectively invisible: strengthened timer pressure, improved verdict word reveal, aligned `buffer -> timer -> verdict` rhythm, and upgraded presenter-side stage/your-turn/timer motion.
+- Added a stronger host verdict picker handoff between player selection and action confirmation, then verified all Charades and hub builds after each motion slice.
+- Attempted a broader animation batch for setup modals, but it regressed modal UI/layout; reverted the whole setup-modal batch back to the last stable state instead of patching over a broken shell.
+- Next: do a browser-only validation pass on the current Charades motion set, and if setup-modal motion returns later, re-enter with a much smaller scope limited to one local surface at a time.
+- Experience recorded: yes
