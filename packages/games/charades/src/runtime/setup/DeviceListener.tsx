@@ -53,7 +53,7 @@ export default function DeviceListener({
         isConnectedRef.current = true
         onConnect()
       }
-      if (msg.type === 'ROOM_STATE' && msg.state?.presenterConnected === true) {
+      if (msg.type === 'ROOM_STATE' && msg.state?.presenterConnected === true && !isConnectedRef.current) {
         isConnectedRef.current = true
         onConnect()
       }
