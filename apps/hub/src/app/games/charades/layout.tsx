@@ -19,6 +19,7 @@ import {
 } from '@party/charades'
 import { GameShell, HostNavigationProvider, useHostNavigation } from '@party/ui'
 import type { NavLink, SidebarFooterLink } from '@party/ui'
+import type { GameShellLink } from '@party/game-sdk'
 import { ArrowLeft, BarChart2, Home, Play, Settings } from 'lucide-react'
 import { useSelectedLayoutSegment } from 'next/navigation'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -59,7 +60,7 @@ function CharadesLayoutShell({ children }: { children: React.ReactNode }) {
 
   const links: NavLink[] = useMemo(
     () =>
-      charadesModule.shell.links.map((link) => {
+      charadesModule.shell.links.map((link: GameShellLink) => {
         const mappedView = resolveCharadesMenuViewFromHref(link.href)
 
         return {
