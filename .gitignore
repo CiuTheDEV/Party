@@ -33,6 +33,10 @@ node_modules/
 .next/
 dist/
 output/
+out/
+
+# Local tools
+.obsidian/
 
 # Local tool/runtime artifacts
 .partykit/
