@@ -1,4 +1,5 @@
 const DEFAULT_PARTYKIT_PORT = '1999'
+const PRODUCTION_PARTYKIT_HOST = 'project-party.ciuthedev.partykit.dev'
 
 function isLoopbackHost(hostname: string) {
   return hostname === 'localhost' || hostname === '127.0.0.1'
@@ -22,9 +23,8 @@ export function resolvePartykitHost({ envHost, windowHostname }: PartykitHostRes
     return `localhost:${DEFAULT_PARTYKIT_PORT}`
   }
 
-  throw new Error(
-    `Missing NEXT_PUBLIC_PARTYKIT_HOST for hostname "${windowHostname}". Set an explicit PartyKit host before using the production app.`,
-  )
+  // Non-localhost without env var — use the production PartyKit host
+  return PRODUCTION_PARTYKIT_HOST
 }
 
 export function getPartykitHost() {
