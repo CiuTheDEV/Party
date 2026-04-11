@@ -138,7 +138,7 @@ export default function CharadesMenuPage() {
     [],
   )
 
-  const sections = charadesModule.setupSections.map((section) => {
+  const sections = charadesModule.setupSections.map((section: (typeof charadesModule.setupSections)[number]) => {
     const SectionComponent = section.render
 
     return {
