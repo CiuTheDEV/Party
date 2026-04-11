@@ -18,11 +18,21 @@ export default function DeviceListener({
   onDisconnect: () => void
 }) {
   const isConnectedRef = useRef(false)
+  const onConnectRef = useRef(onConnect)
+  const onDisconnectRef = useRef(onDisconnect)
+
+  useEffect(() => {
+    onConnectRef.current = onConnect
+  }, [onConnect])
+
+  useEffect(() => {
+    onDisconnectRef.current = onDisconnect
+  }, [onDisconnect])
 
   useEffect(() => {
     if (!roomId) {
       isConnectedRef.current = false
-      onDisconnect()
+      onDisconnectRef.current()
       return
     }
 
@@ -36,11 +46,11 @@ export default function DeviceListener({
       isConnectedRef.current = nextConnected
 
       if (nextConnected) {
-        onConnect()
+        onConnectRef.current()
         return
       }
 
-      onDisconnect()
+      onDisconnectRef.current()
     }
 
     syncConnectionState()
@@ -51,11 +61,11 @@ export default function DeviceListener({
       const msg = JSON.parse(event.data)
       if (msg.type === 'DEVICE_CONNECTED') {
         isConnectedRef.current = true
-        onConnect()
+        onConnectRef.current()
       }
       if (msg.type === 'ROOM_STATE' && msg.state?.presenterConnected === true && !isConnectedRef.current) {
         isConnectedRef.current = true
-        onConnect()
+        onConnectRef.current()
       }
     }
 
@@ -76,6 +86,6 @@ export default function DeviceListener({
       ws.removeEventListener('message', handleMessage)
       ws.close()
     }
-  }, [roomId, onConnect, onDisconnect])
+  }, [roomId])
   return null
 }
