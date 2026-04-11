@@ -150,7 +150,7 @@ export default function CharadesMenuPage() {
       content: (
         <SectionComponent
           state={setupState}
-          updateState={(recipe) => setSetupState((current) => recipe(current))}
+          updateState={(recipe: (current: CharadesSetupState) => CharadesSetupState) => setSetupState((current) => recipe(current))}
           validation={validation}
           helpers={helpers}
         />
