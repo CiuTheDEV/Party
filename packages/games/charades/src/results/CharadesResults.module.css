@@ -58,10 +58,18 @@
 
 .againBtn,
 .menuBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   padding: 14px 30px;
   font-size: 16px;
   border-radius: 10px;
   cursor: pointer;
+  transition:
+    transform 140ms ease,
+    box-shadow 140ms ease,
+    border-color 140ms ease;
 }
 
 .againBtn {
@@ -75,6 +83,12 @@
   background: transparent;
   color: var(--color-text-muted);
   border: 1px solid var(--color-outline-variant);
+}
+
+.controlFocused {
+  transform: translateY(-1px);
+  box-shadow: 0 0 0 3px rgba(248, 250, 252, 0.18);
+  border-color: rgba(248, 250, 252, 0.75);
 }
 
 @media (max-width: 767px) {

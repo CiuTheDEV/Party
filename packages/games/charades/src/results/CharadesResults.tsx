@@ -1,15 +1,218 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import type { GameResultsProps } from '@party/game-sdk'
 import styles from './CharadesResults.module.css'
 import { Podium } from './Podium'
 import type { CharadesResultPlayer } from './types'
+import {
+  CHARADES_BINDINGS_STORAGE_KEY,
+  CHARADES_BINDINGS_UPDATED_EVENT,
+  createGamepadSnapshot,
+  detectGamepadProfile,
+  formatControllerLabelForProfile,
+  getGamepadInputLabel,
+  isTypingTarget,
+  listConnectedGamepads,
+  loadPersistedBindings,
+  normalizeKeyboardInput,
+  pickPreferredGamepad,
+  type GamepadProfile,
+  type GamepadSnapshot,
+} from '../menu/charades-controls-bindings'
+import { ActionHint } from '../runtime/play/ActionHint'
+import { getHostControlActionLabel } from '../runtime/play/host-controls'
+import {
+  createRuntimeInputState,
+  sleepRuntimeInput,
+  shouldBlockRuntimeAction,
+  updateRuntimeControllerWakeGuard,
+  wakeRuntimeInput,
+} from '../runtime/play/runtime-input-state'
+import {
+  getNextResultsActionTarget,
+  resolveResultsAction,
+  type ResultsActionTarget,
+} from './results-controls'
 
 type Props = GameResultsProps & {
   players: CharadesResultPlayer[]
 }
 
 export function CharadesResults({ players, onPlayAgain, onBackToMenu }: Props) {
+  const [selectedAction, setSelectedAction] = useState<ResultsActionTarget>('again')
+  const [inputState, setInputState] = useState(() => createRuntimeInputState())
+  const [controlBindings, setControlBindings] = useState<Record<string, string>>({})
+  const [activeInputDevice, setActiveInputDevice] = useState<'keyboard' | 'controller'>('keyboard')
+  const [controllerProfile, setControllerProfile] = useState<GamepadProfile>('generic')
+
+  useEffect(() => {
+    setControlBindings(loadPersistedBindings())
+
+    function handleStorage(event: StorageEvent) {
+      if (event.key === CHARADES_BINDINGS_STORAGE_KEY) {
+        setControlBindings(loadPersistedBindings())
+      }
+    }
+
+    function handleBindingsUpdated() {
+      setControlBindings(loadPersistedBindings())
+    }
+
+    window.addEventListener('storage', handleStorage)
+    window.addEventListener(CHARADES_BINDINGS_UPDATED_EVENT, handleBindingsUpdated)
+    return () => {
+      window.removeEventListener('storage', handleStorage)
+      window.removeEventListener(CHARADES_BINDINGS_UPDATED_EVENT, handleBindingsUpdated)
+    }
+  }, [])
+
+  useEffect(() => {
+    function handlePointerDown(event: PointerEvent) {
+      if (event.pointerType !== 'mouse') {
+        return
+      }
+
+      setInputState((current) => sleepRuntimeInput(current, 'mouse'))
+    }
+
+    window.addEventListener('pointerdown', handlePointerDown)
+    return () => window.removeEventListener('pointerdown', handlePointerDown)
+  }, [])
+
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.repeat || isTypingTarget(event.target)) {
+        return
+      }
+
+      const inputLabel = normalizeKeyboardInput(event.key)
+      if (!inputLabel) {
+        return
+      }
+
+      const action = resolveResultsAction(controlBindings, 'keyboard', inputLabel)
+      if (!action) {
+        return
+      }
+
+      event.preventDefault()
+      setActiveInputDevice('keyboard')
+
+      if (shouldBlockRuntimeAction(inputState, 'keyboard')) {
+        setInputState(wakeRuntimeInput(inputState, 'keyboard'))
+        return
+      }
+
+      if (action === 'confirm') {
+        if (selectedAction === 'again') {
+          onPlayAgain()
+          return
+        }
+
+        onBackToMenu()
+        return
+      }
+
+      if (action === 'back' || action === 'menu') {
+        onBackToMenu()
+        return
+      }
+
+      setSelectedAction((current) => getNextResultsActionTarget(current, action))
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [controlBindings, inputState, onBackToMenu, onPlayAgain, selectedAction])
+
+  useEffect(() => {
+    let frameId = 0
+    let previousSnapshot: GamepadSnapshot | null = null
+
+    const tick = () => {
+      const activeGamepad = pickPreferredGamepad(listConnectedGamepads())
+
+      if (!activeGamepad) {
+        previousSnapshot = null
+        if (controllerProfile !== 'generic') {
+          setControllerProfile('generic')
+        }
+        frameId = window.requestAnimationFrame(tick)
+        return
+      }
+
+      const profile = detectGamepadProfile(activeGamepad.id || '')
+      if (controllerProfile !== profile) {
+        setControllerProfile(profile)
+      }
+
+      const nextSnapshot = createGamepadSnapshot(activeGamepad)
+      if (!previousSnapshot) {
+        previousSnapshot = nextSnapshot
+        frameId = window.requestAnimationFrame(tick)
+        return
+      }
+
+      const inputLabel = getGamepadInputLabel(activeGamepad, previousSnapshot)
+      previousSnapshot = nextSnapshot
+
+      if (!inputLabel) {
+        setInputState((current) => updateRuntimeControllerWakeGuard(current, true))
+        frameId = window.requestAnimationFrame(tick)
+        return
+      }
+
+      const action = resolveResultsAction(controlBindings, 'controller', inputLabel)
+      if (!action) {
+        frameId = window.requestAnimationFrame(tick)
+        return
+      }
+
+      setActiveInputDevice('controller')
+
+      if (shouldBlockRuntimeAction(inputState, 'controller')) {
+        setInputState(wakeRuntimeInput(inputState, 'controller'))
+        frameId = window.requestAnimationFrame(tick)
+        return
+      }
+
+      if (action === 'confirm') {
+        if (selectedAction === 'again') {
+          onPlayAgain()
+        } else {
+          onBackToMenu()
+        }
+        frameId = window.requestAnimationFrame(tick)
+        return
+      }
+
+      if (action === 'back' || action === 'menu') {
+        onBackToMenu()
+        frameId = window.requestAnimationFrame(tick)
+        return
+      }
+
+      setSelectedAction((current) => getNextResultsActionTarget(current, action))
+      frameId = window.requestAnimationFrame(tick)
+    }
+
+    frameId = window.requestAnimationFrame(tick)
+    return () => window.cancelAnimationFrame(frameId)
+  }, [controlBindings, controllerProfile, inputState, onBackToMenu, onPlayAgain, selectedAction])
+
+  const isFocusVisible = inputState.isAwake
+  const confirmHintLabel = (() => {
+    const label = getHostControlActionLabel(controlBindings, activeInputDevice, 'confirm')
+    if (!label) {
+      return null
+    }
+
+    return activeInputDevice === 'controller'
+      ? formatControllerLabelForProfile(label, controllerProfile)
+      : label
+  })()
+
   return (
     <main className={styles.page}>
       <div className={styles.header}>
@@ -22,11 +225,27 @@ export function CharadesResults({ players, onPlayAgain, onBackToMenu }: Props) {
       </section>
 
       <div className={styles.actions}>
-        <button type="button" className={styles.againBtn} onClick={onPlayAgain}>
-          Zagraj jeszcze raz
+        <button
+          type="button"
+          className={[
+            styles.againBtn,
+            isFocusVisible && selectedAction === 'again' ? styles.controlFocused : '',
+          ].filter(Boolean).join(' ')}
+          onClick={onPlayAgain}
+        >
+          <span>Zagraj jeszcze raz</span>
+          <ActionHint label={isFocusVisible && selectedAction === 'again' ? confirmHintLabel : null} />
         </button>
-        <button type="button" className={styles.menuBtn} onClick={onBackToMenu}>
-          Wróć do menu
+        <button
+          type="button"
+          className={[
+            styles.menuBtn,
+            isFocusVisible && selectedAction === 'menu' ? styles.controlFocused : '',
+          ].filter(Boolean).join(' ')}
+          onClick={onBackToMenu}
+        >
+          <span>Wróć do menu</span>
+          <ActionHint label={isFocusVisible && selectedAction === 'menu' ? confirmHintLabel : null} muted />
         </button>
       </div>
     </main>
