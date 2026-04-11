@@ -135,6 +135,66 @@
 
 ---
 
+### 2026-04-11 - Cloudflare Pages Workers (new UI) does not expose env vars to build
+
+**Symptom:** `NEXT_PUBLIC_PARTYKIT_HOST` set in CF Pages dashboard had no effect — `process.env.NEXT_PUBLIC_PARTYKIT_HOST` was undefined at build time.
+
+**Root cause:** The new "Workers & Pages" UI in Cloudflare does not have a "Expose during build" toggle. Variables set there are runtime variables for Workers, not build-time variables for static Next.js exports. `NEXT_PUBLIC_*` vars must be baked in during `next build`.
+
+**Fix:** Hardcode the production PartyKit host as a fallback constant in `charades-runtime.ts` for non-localhost environments.
+
+**How to prevent it:** For CF Pages static exports, do not rely on dashboard env vars for `NEXT_PUBLIC_*` values. Either hardcode production values in code or use a `.env.production` file committed to the repo (without secrets).
+
+---
+
+### 2026-04-11 - CF Pages project created via Workers UI gets unpredictable subdomain
+
+**Symptom:** Created project named `party` but got URL `party-9pe.pages.dev` instead of `party.pages.dev`.
+
+**Root cause:** Name `party` was taken at the CF Pages DNS level. CF assigns a unique suffix automatically.
+
+**Fix:** Accept the assigned URL. Check actual URL with `npx wrangler pages project list`.
+
+**How to prevent it:** Check URL immediately after project creation before configuring env vars or sharing links.
+
+---
+
+### 2026-04-11 - DeviceListener WebSocket reconnect loop caused by unstable callback refs
+
+**Symptom:** Pairing panel in Charades setup modal flickered continuously. Host could not detect presenter connection.
+
+**Root cause:** `useEffect` in `DeviceListener` listed `onConnect`/`onDisconnect` as dependencies. These callbacks were inline arrow functions recreated on every render, causing effect to re-run → new WebSocket → `ROOM_STATE` received → `onConnect` called → state update → re-render → new callbacks → loop.
+
+**Fix:** Store callbacks in refs and remove them from `useEffect` dependencies. Effect only restarts on `roomId` change.
+
+**How to prevent it:** Any `useEffect` that creates a WebSocket or long-lived subscription must not list callbacks as dependencies. Use refs to hold the latest callback values.
+
+---
+
+### 2026-04-11 - DeviceListener localStorage check does not work cross-device
+
+**Symptom:** `isPresenterSessionFresh()` always returned false on host — presenter connection never detected via polling.
+
+**Root cause:** `localStorage` is per-browser. The presenter writes their session to their own phone's localStorage. The host's browser cannot read it.
+
+**Fix:** Use WebSocket messages exclusively (`ROOM_STATE` on connect, `DEVICE_CONNECTED` on new join, `PRESENTER_DISCONNECTED` on leave) instead of polling localStorage.
+
+**How to prevent it:** Never use localStorage for cross-device state. It is local to one browser.
+
+---
+
+### 2026-04-11 - Turbo build required for CF Pages to resolve workspace package types
+
+**Symptom:** `@party/ui` TypeScript build failed on CF with "Cannot find module '@party/game-sdk'". Locally `tsc --noEmit` passed clean.
+
+**Root cause:** Locally `@party/ui` resolved `@party/game-sdk` through root `node_modules` symlinks. On CF, packages are built in isolation without cross-package path resolution. `@party/ui/tsconfig.json` had no `paths` entry for `@party/game-sdk`.
+
+**Fix:** Added `paths: { "@party/game-sdk": ["../game-sdk/src"] }` to `packages/ui/tsconfig.json`. Also changed CF Pages build command from `npm run build --workspace @party/hub` to `npm run build` (turbo) so packages are built in dependency order.
+
+**How to prevent it:** Each package's `tsconfig.json` must be self-contained with explicit `paths` for all workspace dependencies it imports. Never rely on root-level module resolution in isolated CI environments.
+
+---
+
 ### 2026-04-01 - Autoscale is a fallback, not the default display mode
 
 **Symptom:** Short words became visually tiny after adding a shared autoscale component meant to protect only very long phrases.

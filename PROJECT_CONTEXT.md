@@ -142,16 +142,16 @@ This means:
 
 <!-- handoff:start -->
 ## Session Handoff
-- Last: 2026-04-11 by Codex (GPT-5.4)
-- Task: Merge the current Charades motion/navigation branch into `main`, then tighten agent workflow after failed setup/category animation attempts.
-- Did: Committed and merged the current runtime/presenter motion + navigation branch into `main`, pushed `main`, removed the merged feature branch, and left the workspace on `main`. Re-tried category/setup animation in a narrower slice, but it still did not produce an acceptable user-visible result and was not kept as stable output. Added a new repo rule in `AGENTS.md` to treat files with Polish UI copy as UTF-8-sensitive and require safer edit discipline.
-- Next: Continue from `main` with a browser-first validation pass on the stable Charades runtime motion. Keep setup animation paused unless it is resumed one element at a time with immediate user validation.
-- Blocker: None — main blocker is UX validation rather than code integration.
+- Last: 2026-04-11 by Claude (Sonnet 4.6)
+- Task: Phase 4 deploy — hub na Cloudflare Pages + PartyKit server.
+- Did: Wdrożono hub na CF Pages jako static export. Naprawiono TypeScript strict-mode błędy. Zmieniono build command na `npm run build` (turbo). Wdrożono PartyKit server (`project-party.ciuthedev.partykit.dev`). Przepisano `DeviceListener` żeby używał wyłącznie WebSocket do wykrywania prezentera (fix cross-device localStorage + reconnect loop). Ostatni fix (`DeviceListener` WebSocket-only) wypchnięty ale nie smoke-testowany — czeka na deploy CF.
+- Next: Smoke test parowania prezenter/host po deployu ostatniego fixa. Jeśli pairing działa — pełny end-to-end test gry. Potem T002 (Charades runtime polish) lub kolejne Phase 4 zadania.
+- Blocker: Brak — czeka na CF deploy ostatniego commita (`89a545d`).
 
 ## Previous Handoff
-- Last: 2026-04-10 by Codex (GPT-5.4)
-- Task: Continue Charades motion polish, presenter flow, and setup-modal animation exploration.
-- Did: Finished a stronger Batch 1 motion pass after early subtle versions were not perceptible: improved host timer pressure, verdict word reveal, rhythm between `buffer -> timer -> verdict`, presenter stage/your-turn/timer flow, and verdict picker transitions. Attempted setup-modal animation polish next, but it regressed the setup/settings modal UI, so the full setup-modal batch was reverted to the last stable state. Verified with `npm run build` in `@party/ui`, `@party/charades`, and `@party/hub`.
-- Next: Do a real browser feel pass on the current stable Charades motion set. If setup-modal motion work resumes later, restart with a much smaller, local-only scope instead of touching shared modal shells and controls.
-- Blocker: None — remaining work is manual UX validation.
+- Last: 2026-04-11 by Codex (GPT-5.4)
+- Task: Merge the current Charades motion/navigation branch into `main`, then tighten agent workflow after failed setup/category animation attempts.
+- Did: Committed and merged the current runtime/presenter motion + navigation branch into `main`, pushed `main`, removed the merged feature branch. Re-tried category/setup animation — not kept. Added UTF-8-sensitive edit rule in `AGENTS.md`.
+- Next: Browser-first validation pass on stable Charades runtime motion.
+- Blocker: None.
 <!-- handoff:end -->

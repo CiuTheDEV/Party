@@ -270,6 +270,19 @@
 - Next: do a browser-only validation pass on the current Charades motion set, and if setup-modal motion returns later, re-enter with a much smaller scope limited to one local surface at a time.
 - Experience recorded: yes
 
+### S36 (2026-04-11 ~) [Project Party] Phase 4 deploy — hub on CF Pages + PartyKit server
+
+- Deployed hub to Cloudflare Pages as Next.js static export (`output: 'export'`, `trailingSlash: true`, `_redirects` SPA fallback).
+- Fixed multiple TypeScript strict-mode errors that only surfaced on CF (implicit any in `.map()` callbacks, missing workspace `paths` in `@party/ui/tsconfig.json`).
+- Changed CF Pages build command to `npm run build` (turbo) so workspace packages are built in dependency order before hub.
+- Deployed PartyKit server (`project-party.ciuthedev.partykit.dev`) via `npx partykit deploy` using existing Cloudflare auth.
+- Hardcoded production PartyKit host as fallback in `charades-runtime.ts` because CF Pages Workers UI does not expose build-time env vars.
+- Fixed DeviceListener reconnect loop: moved callbacks to refs, removed them from `useEffect` dependencies.
+- Fixed cross-device presenter detection: rewrote DeviceListener to use WebSocket-only detection (`ROOM_STATE` + `DEVICE_CONNECTED` + `PRESENTER_DISCONNECTED`) instead of localStorage polling which doesn't work cross-device.
+- Hub is live on `party-9pe.pages.dev`. PartyKit server is live. Pairing detection fix deployed but not yet smoke-tested end-to-end.
+- Next: smoke test presenter pairing after last DeviceListener fix deploys, then do full end-to-end game test.
+- Experience recorded: yes
+
 ### S35 (2026-04-11 ~) [Project Party] Runtime motion merge + UTF-8 workflow hardening
 
 - Finalized the current Charades runtime/presenter motion work on `main`, including the existing Batch 1 runtime polish, helper checks, and current repo state from the motion/navigation branch, then pushed and cleaned up the merged worktree branch so the workspace now stays on `main`.
