@@ -179,7 +179,7 @@ export default function GamesCatalogPage() {
                               <Users size={14} aria-hidden="true" />
                               {game.minPlayers}-{game.maxPlayers} graczy
                             </span>
-                            {modes.map((mode) => (
+                            {modes.map((mode: string) => (
                               <span key={mode} className={styles.metaPill}>
                                 {mode}
                               </span>
@@ -250,7 +250,7 @@ export default function GamesCatalogPage() {
                               <Clock3 size={14} aria-hidden="true" />
                               Premiera w przygotowaniu
                             </span>
-                            {modes.map((mode) => (
+                            {modes.map((mode: string) => (
                               <span key={mode} className={styles.metaPill}>
                                 {mode}
                               </span>
