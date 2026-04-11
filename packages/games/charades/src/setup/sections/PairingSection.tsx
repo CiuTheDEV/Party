@@ -1,5 +1,6 @@
 'use client'
 
+import { useCallback } from 'react'
 import type { GameSetupSectionComponentProps } from '@party/game-sdk'
 import type { CharadesSetupHelpers } from '../helpers'
 import type { CharadesSetupState } from '../state'
@@ -12,13 +13,21 @@ export function PairingSection({
 }: GameSetupSectionComponentProps<CharadesSetupState, CharadesSetupHelpers>) {
   const DeviceListener = helpers.DeviceListener
 
+  const handleConnect = useCallback(() => {
+    updateState((current) => ({ ...current, isDeviceConnected: true }))
+  }, [updateState])
+
+  const handleDisconnect = useCallback(() => {
+    updateState((current) => ({ ...current, isDeviceConnected: false }))
+  }, [updateState])
+
   return (
     <>
       {state.roomId ? (
         <DeviceListener
           roomId={state.roomId}
-          onConnect={() => updateState((current) => ({ ...current, isDeviceConnected: true }))}
-          onDisconnect={() => updateState((current) => ({ ...current, isDeviceConnected: false }))}
+          onConnect={handleConnect}
+          onDisconnect={handleDisconnect}
         />
       ) : null}
       <PairingPanel
