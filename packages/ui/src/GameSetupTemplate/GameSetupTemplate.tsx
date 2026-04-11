@@ -31,7 +31,7 @@ export function GameSetupTemplate<TState>({
         </div>
 
         <div className={styles.body}>
-          {sections.map((section) => (
+          {sections.map((section: (typeof sections)[number]) => (
             section.unstyled ? (
               <div key={section.id} className={section.className}>
                 {section.content}
@@ -49,7 +49,7 @@ export function GameSetupTemplate<TState>({
         <div className={styles.footer}>
           {validation.errors && validation.errors.length > 0 ? (
             <ul className={styles.errorList}>
-              {validation.errors.map((error) => (
+              {validation.errors.map((error: string) => (
                 <li key={error} className={styles.errorItem}>
                   {error}
                 </li>
