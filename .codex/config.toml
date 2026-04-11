@@ -15,7 +15,7 @@ max_threads = 4
 max_depth = 1
 
 [sandbox_workspace_write]
-network_access = true
+network_access = false
 
 [windows]
 sandbox = "elevated"
@@ -25,7 +25,7 @@ view_image = true
 
 [features]
 multi_agent = true
-apps = true
+apps = false
 rmcp_client = true
 
 [tui]
@@ -41,6 +41,10 @@ animations = false
 
 [permissions.network]
 allow_upstream_proxy = false
+
+[mcp_servers.playwright]
+command = "npx"
+args = ["@playwright/mcp@latest"]
 
 [mcp_servers.context7]
 url = "https://mcp.context7.com/mcp"
