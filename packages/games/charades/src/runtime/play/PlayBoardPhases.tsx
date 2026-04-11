@@ -577,7 +577,7 @@ export function PrepareView({
             <span className={styles.scoreRailToggleIcon} aria-hidden="true">
               <ChevronLeft size={22} />
             </span>
-            <ActionHint label={railHintLabel} muted />
+            {railHintLabel ? <span className={styles.scoreRailToggleHint}>{railHintLabel}</span> : null}
           </button>
 
           <div className={styles.scoreRailHeader}>

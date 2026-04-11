@@ -20,19 +20,36 @@ import {
   type HostControlCommand,
   type HostControlsContext,
 } from './host-controls'
+import {
+  shouldBlockRuntimeAction,
+  updateRuntimeControllerWakeGuard,
+  wakeRuntimeInput,
+  type RuntimeInputState,
+} from './runtime-input-state'
 import { resolveRuntimeHostAction, shouldReportControllerDevice } from './runtime-input-helpers'
 
 type UseHostControlsOptions = {
   context: HostControlsContext
+  inputState: RuntimeInputState
   onCommand: (command: HostControlCommand) => void
+  onInputStateChange: (nextState: RuntimeInputState) => void
   onDeviceChange?: (device: 'keyboard' | 'controller') => void
   onControllerProfileChange?: (profile: 'xbox' | 'playstation' | 'generic') => void
 }
 
-export function useHostControls({ context, onCommand, onDeviceChange, onControllerProfileChange }: UseHostControlsOptions) {
+export function useHostControls({
+  context,
+  inputState,
+  onCommand,
+  onInputStateChange,
+  onDeviceChange,
+  onControllerProfileChange,
+}: UseHostControlsOptions) {
   const bindingsRef = useRef<Record<string, string>>(createDefaultBindings())
   const contextRef = useRef(context)
+  const inputStateRef = useRef(inputState)
   const onCommandRef = useRef(onCommand)
+  const onInputStateChangeRef = useRef(onInputStateChange)
   const onDeviceChangeRef = useRef(onDeviceChange)
   const onControllerProfileChangeRef = useRef(onControllerProfileChange)
   const lastDeviceRef = useRef<'keyboard' | 'controller'>('keyboard')
@@ -43,8 +60,16 @@ export function useHostControls({ context, onCommand, onDeviceChange, onControll
   }, [context])
 
   useEffect(() => {
+    inputStateRef.current = inputState
+  }, [inputState])
+
+  useEffect(() => {
     onCommandRef.current = onCommand
   }, [onCommand])
+
+  useEffect(() => {
+    onInputStateChangeRef.current = onInputStateChange
+  }, [onInputStateChange])
 
   useEffect(() => {
     onDeviceChangeRef.current = onDeviceChange
@@ -98,6 +123,10 @@ export function useHostControls({ context, onCommand, onDeviceChange, onControll
 
       event.preventDefault()
       reportDevice('keyboard', lastDeviceRef, onDeviceChangeRef)
+      if (shouldBlockRuntimeAction(inputStateRef.current, 'keyboard')) {
+        onInputStateChangeRef.current(wakeRuntimeInput(inputStateRef.current, 'keyboard'))
+        return
+      }
       onCommandRef.current(command)
     }
 
@@ -139,6 +168,10 @@ export function useHostControls({ context, onCommand, onDeviceChange, onControll
       previousSnapshot = nextSnapshot
 
       if (!inputLabel) {
+        const nextInputState = updateRuntimeControllerWakeGuard(inputStateRef.current, true)
+        if (nextInputState !== inputStateRef.current) {
+          onInputStateChangeRef.current(nextInputState)
+        }
         frameId = window.requestAnimationFrame(tick)
         return
       }
@@ -153,6 +186,11 @@ export function useHostControls({ context, onCommand, onDeviceChange, onControll
       if (command) {
         if (shouldReportControllerDevice(previousSnapshot, inputLabel)) {
           reportDevice('controller', lastDeviceRef, onDeviceChangeRef)
+        }
+        if (shouldBlockRuntimeAction(inputStateRef.current, 'controller')) {
+          onInputStateChangeRef.current(wakeRuntimeInput(inputStateRef.current, 'controller'))
+          frameId = window.requestAnimationFrame(tick)
+          return
         }
         onCommandRef.current(command)
       }

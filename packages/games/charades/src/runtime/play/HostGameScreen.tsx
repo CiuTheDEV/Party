@@ -9,7 +9,9 @@ import { ReconnectPresenterModal } from './ReconnectPresenterModal'
 import { RoomConnectionModal } from './RoomConnectionModal'
 import { PlaySettingsModal } from './PlaySettingsModal'
 import { VerdictPickerModal } from './VerdictPickerModal'
+import { getVisibleActionHintLabel } from './action-hint-visibility'
 import { getHostControlActionLabel, type HostControlCommand, type HostControlDevice } from './host-controls'
+import { createRuntimeInputState, sleepRuntimeInput } from './runtime-input-state'
 import { useHostControls } from './useHostControls'
 import type { Phase, PlayerSummary } from './playboard-types'
 import { useRoundOrderCountdown } from './useRoundOrderCountdown'
@@ -71,6 +73,7 @@ export function HostGameScreen(props: HostGameScreenProps) {
   const [activeInputDevice, setActiveInputDevice] = useState<HostControlDevice>('keyboard')
   const [controllerProfile, setControllerProfile] = useState<GamepadProfile>('generic')
   const [controlBindings, setControlBindings] = useState<Record<string, string>>({})
+  const [runtimeInputState, setRuntimeInputState] = useState(() => createRuntimeInputState())
   const wasSettingsOpenRef = useRef(false)
   const isPresenterReconnectRequired =
     !props.isDeviceConnected &&
@@ -120,6 +123,19 @@ export function HostGameScreen(props: HostGameScreenProps) {
       window.removeEventListener('storage', handleStorage)
       window.removeEventListener(CHARADES_BINDINGS_UPDATED_EVENT, handleBindingsUpdated)
     }
+  }, [])
+
+  useEffect(() => {
+    function handlePointerDown(event: PointerEvent) {
+      if (event.pointerType !== 'mouse') {
+        return
+      }
+
+      setRuntimeInputState((current) => sleepRuntimeInput(current, 'mouse'))
+    }
+
+    window.addEventListener('pointerdown', handlePointerDown)
+    return () => window.removeEventListener('pointerdown', handlePointerDown)
   }, [])
 
   useEffect(() => {
@@ -302,7 +318,9 @@ export function HostGameScreen(props: HostGameScreenProps) {
       canToggleScoreRail,
       isVerdictWordVisible: false,
     },
+    inputState: runtimeInputState,
     onCommand: handleHostControlCommand,
+    onInputStateChange: setRuntimeInputState,
     onDeviceChange: setActiveInputDevice,
     onControllerProfileChange: setControllerProfile,
   })
@@ -310,9 +328,12 @@ export function HostGameScreen(props: HostGameScreenProps) {
   const getActionHint = useCallback(
     (action: 'left' | 'right' | 'confirm' | 'back' | 'menu' | 'rail') => {
       const label = getHostControlActionLabel(controlBindings, activeInputDevice, action)
-      return activeInputDevice === 'controller' ? formatControllerLabelForProfile(label ?? '', controllerProfile) : label
+      const deviceLabel =
+        activeInputDevice === 'controller' ? formatControllerLabelForProfile(label ?? '', controllerProfile) : label
+
+      return getVisibleActionHintLabel(deviceLabel, runtimeInputState.isAwake)
     },
-    [activeInputDevice, controlBindings, controllerProfile],
+    [activeInputDevice, controlBindings, controllerProfile, runtimeInputState.isAwake],
   )
 
   return (
@@ -367,7 +388,7 @@ export function HostGameScreen(props: HostGameScreenProps) {
         onExitToMenu={props.onExitToMenu}
         onIncorrectVerdict={() => props.onGiveVerdict(false)}
         verdictFocusedTarget={verdictFocusTarget}
-        isFocusVisible
+        isFocusVisible={runtimeInputState.isAwake}
         onStartRound={props.onStartRound}
         onStopRound={props.onStopRound}
         actionHints={{
@@ -382,7 +403,7 @@ export function HostGameScreen(props: HostGameScreenProps) {
           selectedPlayerIdx={selectedGuessedPlayerIdx}
           selectionStage={verdictPickerStage}
           actionTarget={verdictPickerActionTarget}
-          isFocusVisible
+          isFocusVisible={runtimeInputState.isAwake}
           onSelectPlayer={(playerIdx) => {
             setSelectedGuessedPlayerIdx(playerIdx)
             setVerdictPickerStage('players')
@@ -414,7 +435,7 @@ export function HostGameScreen(props: HostGameScreenProps) {
           isExitConfirmOpen={isSettingsExitConfirmOpen}
           focusedTarget={settingsFocusTarget}
           exitConfirmFocusedTarget={settingsExitConfirmFocusTarget}
-          isFocusVisible
+          isFocusVisible={runtimeInputState.isAwake}
           onToggleSound={toggleSound}
           onToggleAnimations={toggleAnimations}
           onOpenExitConfirm={() => {

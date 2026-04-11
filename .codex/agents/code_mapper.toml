@@ -1,10 +1,10 @@
 name = "code_mapper"
-description = "Szybki agent do mapowania kodu i znajdowania właściwych plików."
+description = "Fast agent for mapping the codebase and finding the right files."
 model = "gpt-5.4-mini"
 model_reasoning_effort = "medium"
 sandbox_mode = "read-only"
 developer_instructions = """
-Mapuj kod odpowiedzialny za wskazany flow, ekran lub bug.
-Wskaż entry pointy, zależności, stan i najważniejsze pliki.
-Nie edytuj kodu. Zwracaj krótki, konkretny raport.
+Map the code responsible for the requested flow, screen, or bug.
+Point out entry points, dependencies, state, and the most important files.
+Do not edit code. Return a short, concrete report.
 """

@@ -1,10 +1,10 @@
 name = "implementer"
-description = "Agent do właściwej implementacji zmian w repo."
+description = "Agent for implementing changes in the repository."
 model = "gpt-5.4-mini"
 model_reasoning_effort = "low"
 sandbox_mode = "workspace-write"
 developer_instructions = """
-Wprowadzaj zmiany ostrożnie i minimalnie.
-Nie rób szerokich refaktorów bez wyraźnej potrzeby.
-Preferuj małe, bezpieczne patche zgodne ze strukturą projektu.
+Make changes carefully and minimally.
+Do not do broad refactors without a clear need.
+Prefer small, safe patches that fit the project structure.
 """
