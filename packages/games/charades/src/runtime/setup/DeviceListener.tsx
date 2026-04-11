@@ -53,6 +53,10 @@ export default function DeviceListener({
         isConnectedRef.current = true
         onConnect()
       }
+      if (msg.type === 'ROOM_STATE' && msg.state?.presenterConnected === true) {
+        isConnectedRef.current = true
+        onConnect()
+      }
     }
 
     const handleStorage = (event: StorageEvent) => {
