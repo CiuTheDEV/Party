@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useRef, useState } from 'react'
 
 export type AuthUser = {
   id: string
@@ -10,6 +10,7 @@ export type AuthUser = {
   updatedAt: string
   lastLoginAt: string | null
   entitlements: string[]
+  unlockExpiresAt: string | null
   isAdmin: boolean
 }
 
@@ -19,7 +20,11 @@ type AuthContextValue = {
   refresh: () => Promise<AuthUser | null>
   logout: () => Promise<void>
   redeemActivationCode: (code: string) => Promise<AuthUser | null>
-  createActivationCode: (code: string) => Promise<string>
+  createActivationCode: (
+    code: string,
+    codeValidityMinutes: number,
+    unlockDurationMinutes: number,
+  ) => Promise<string>
 }
 
 const AuthContext = createContext<AuthContextValue>({
@@ -53,6 +58,7 @@ async function readCurrentUser() {
     updatedAt: payload.user.updatedAt ?? new Date().toISOString(),
     lastLoginAt: payload.user.lastLoginAt ?? null,
     entitlements: payload.user.entitlements ?? [],
+    unlockExpiresAt: payload.user.unlockExpiresAt ?? null,
     isAdmin: payload.user.isAdmin ?? false,
   }
 }
@@ -64,6 +70,11 @@ export function useAuth() {
 export function Providers({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const refreshRef = useRef<() => Promise<AuthUser | null>>(async () => null)
+
+  useEffect(() => {
+    refreshRef.current = refresh
+  }, [refresh])
 
   async function refresh() {
     setIsLoading(true)
@@ -118,6 +129,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
       updatedAt: payload.user.updatedAt ?? new Date().toISOString(),
       lastLoginAt: payload.user.lastLoginAt ?? null,
       entitlements: payload.user.entitlements ?? [],
+      unlockExpiresAt: payload.user.unlockExpiresAt ?? null,
       isAdmin: payload.user.isAdmin ?? false,
     }
 
@@ -125,14 +137,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
     return nextUser
   }
 
-  async function createActivationCode(code: string) {
+  async function createActivationCode(code: string, codeValidityMinutes: number, unlockDurationMinutes: number) {
     const response = await fetch('/api/auth/admin/create-code', {
       method: 'POST',
       credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ code }),
+      body: JSON.stringify({ code, codeValidityMinutes, unlockDurationMinutes }),
     })
 
     if (!response.ok) {
@@ -154,6 +166,20 @@ export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     void refresh()
   }, [])
+
+  useEffect(() => {
+    if (!user?.unlockExpiresAt) {
+      return undefined
+    }
+
+    const unlockAt = new Date(user.unlockExpiresAt).getTime()
+    const delay = Math.max(0, unlockAt - Date.now() + 250)
+    const timeoutId = window.setTimeout(() => {
+      void refreshRef.current()
+    }, delay)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [user?.unlockExpiresAt])
 
   return (
     <AuthContext.Provider value={{ user, isLoading, refresh, logout, redeemActivationCode, createActivationCode }}>

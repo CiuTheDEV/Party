@@ -32,8 +32,11 @@ export type ActivationCodeRecord = {
   code: string
   entitlementKey: string
   createdAt: string
+  codeExpiresAt: string | null
+  unlockDurationMinutes: number
   redeemedByUserId: string | null
   redeemedAt: string | null
+  expiresAt: string | null
 }
 
 export type PublicAuthUser = {
@@ -44,6 +47,7 @@ export type PublicAuthUser = {
   updatedAt: string
   lastLoginAt: string | null
   entitlements: string[]
+  unlockExpiresAt: string | null
   isAdmin: boolean
 }
 
@@ -67,10 +71,16 @@ export type AuthRepository = {
   createSession(session: AuthSessionRecord): Promise<AuthSessionRecord>
   findSessionByTokenHash(tokenHash: string): Promise<AuthSessionRecord | null>
   revokeSessionByTokenHash(tokenHash: string, revokedAt: string): Promise<void>
-  listUserEntitlementKeys(userId: string): Promise<string[]>
+  listUserEntitlements(userId: string, nowIso: string): Promise<Array<{ key: string; expiresAt: string }>>
   findActivationCodeByCode(code: string): Promise<ActivationCodeRecord | null>
-  redeemActivationCode(code: string, userId: string, redeemedAt: string): Promise<boolean>
+  redeemActivationCode(code: string, userId: string, redeemedAt: string, unlockExpiresAt: string): Promise<boolean>
   createActivationCode(activationCode: ActivationCodeRecord): Promise<ActivationCodeRecord>
+}
+
+export type CreateActivationCodeInput = {
+  code: string
+  codeValidityMinutes: number
+  unlockDurationMinutes: number
 }
 
 export type AuthDeps = {
@@ -90,6 +100,11 @@ export type LoginInput = {
   email: string
   password: string
 }
+
+type PublicUserSource = Pick<
+  AuthUserRecord,
+  'id' | 'email' | 'displayName' | 'createdAt' | 'updatedAt' | 'lastLoginAt'
+>
 
 const invalidInputError: AuthFailure = {
   code: 'invalid_input',
@@ -127,7 +142,11 @@ const activationCodeTakenError: AuthFailure = {
   status: 409,
 }
 
-function publicUser(user: AuthUserRecord, entitlements: string[] = []): PublicAuthUser {
+function publicUser(
+  user: PublicUserSource,
+  entitlements: string[] = [],
+  unlockExpiresAt: string | null = null,
+): PublicAuthUser {
   return {
     id: user.id,
     email: user.email,
@@ -136,6 +155,7 @@ function publicUser(user: AuthUserRecord, entitlements: string[] = []): PublicAu
     updatedAt: user.updatedAt,
     lastLoginAt: user.lastLoginAt,
     entitlements,
+    unlockExpiresAt,
     isAdmin: isAdminEmail(user.email),
   }
 }
@@ -156,9 +176,9 @@ function resolveVerifyPassword(deps: AuthDeps) {
   return deps.verifyPassword ?? verifyPassword
 }
 
-async function resolveUserEntitlementKeys(repo: AuthRepository, userId: string) {
+async function resolveUserEntitlements(repo: AuthRepository, userId: string, nowIso: string) {
   try {
-    return await repo.listUserEntitlementKeys(userId)
+    return await repo.listUserEntitlements(userId, nowIso)
   } catch {
     return []
   }
@@ -168,12 +188,14 @@ function buildInvalidInput(message: string): AuthFailure {
   return { ...invalidInputError, message }
 }
 
-function normalizePublicUser(user: AuthUserRecord, entitlements: string[]): PublicAuthUser {
-  return publicUser(user, entitlements)
-}
+async function loadPublicUser(repo: AuthRepository, user: PublicUserSource, nowIso: string) {
+  const entitlements = await resolveUserEntitlements(repo, user.id, nowIso)
+  const unlockExpiresAt = entitlements.length > 0 ? entitlements.reduce((latest, current) => {
+    if (!latest) return current.expiresAt
+    return new Date(current.expiresAt).getTime() > new Date(latest).getTime() ? current.expiresAt : latest
+  }, null as string | null) : null
 
-async function loadPublicUser(repo: AuthRepository, user: AuthUserRecord) {
-  return normalizePublicUser(user, await resolveUserEntitlementKeys(repo, user.id))
+  return publicUser(user, entitlements.map((entry) => entry.key), unlockExpiresAt)
 }
 
 export async function registerAccount(
@@ -237,7 +259,7 @@ export async function registerAccount(
     user: await loadPublicUser(repo, {
       ...createdUser,
       lastLoginAt: nowIso,
-    }),
+    }, nowIso),
     sessionToken,
     sessionExpiresAt: sessionExpiresAt.toISOString(),
   }
@@ -295,7 +317,7 @@ export async function loginAccount(
       ...user,
       lastLoginAt: nowIso,
       updatedAt: nowIso,
-    }),
+    }, nowIso),
     sessionToken,
     sessionExpiresAt: sessionExpiresAt.toISOString(),
   }
@@ -347,7 +369,7 @@ export async function getCurrentUser(
 
   return {
     ok: true,
-    user: await loadPublicUser(repo, user),
+    user: await loadPublicUser(repo, user, now.toISOString()),
   }
 }
 
@@ -377,28 +399,31 @@ export async function redeemActivationCode(
 
   const activationCode = await repo.findActivationCodeByCode(normalizedCode)
   if (!activationCode || activationCode.entitlementKey !== 'charades_category_pack') {
-    return { ok: false, error: buildInvalidInput('Nieprawidłowy kod aktywacyjny.') }
+    return { ok: false, error: buildInvalidInput('Nieprawid�owy kod aktywacyjny.') }
   }
 
   const redeemedAt = resolveNow(deps).toISOString()
-  const redeemed = await repo.redeemActivationCode(normalizedCode, currentUser.user.id, redeemedAt)
+  if (activationCode.codeExpiresAt && new Date(activationCode.codeExpiresAt).getTime() <= new Date(redeemedAt).getTime()) {
+    return { ok: false, error: buildInvalidInput('Ten kod wygas�.') }
+  }
+
+  const unlockDurationMinutes = Math.max(1, Math.floor(activationCode.unlockDurationMinutes || 60))
+  const unlockExpiresAt = new Date(new Date(redeemedAt).getTime() + unlockDurationMinutes * 60 * 1000).toISOString()
+  const redeemed = await repo.redeemActivationCode(normalizedCode, currentUser.user.id, redeemedAt, unlockExpiresAt)
   if (!redeemed) {
-    return { ok: false, error: buildInvalidInput('Nieprawidłowy kod aktywacyjny.') }
+    return { ok: false, error: buildInvalidInput('Nieprawid�owy kod aktywacyjny.') }
   }
 
   return {
     ok: true,
-    user: {
-      ...currentUser.user,
-      entitlements: [...currentUser.user.entitlements, activationCode.entitlementKey],
-    },
+    user: await loadPublicUser(repo, currentUser.user, redeemedAt),
   }
 }
 
 export async function createActivationCode(
   repo: AuthRepository,
   sessionToken: string | null | undefined,
-  code: string,
+  input: CreateActivationCodeInput,
   deps: AuthDeps = {},
 ): Promise<
   | { ok: true; user: PublicAuthUser; activationCode: ActivationCodeRecord }
@@ -413,24 +438,30 @@ export async function createActivationCode(
     return { ok: false, error: forbiddenError }
   }
 
-  const normalizedCode = normalizeActivationCode(code)
+  const normalizedCode = normalizeActivationCode(input.code)
   if (!normalizedCode) {
     return { ok: false, error: buildInvalidInput('Podaj kod aktywacyjny.') }
   }
 
+  const codeValidityMinutes = Math.max(1, Math.floor(input.codeValidityMinutes))
+  const unlockDurationMinutes = Math.max(1, Math.floor(input.unlockDurationMinutes))
   const existingActivationCode = await repo.findActivationCodeByCode(normalizedCode)
   if (existingActivationCode) {
     return { ok: false, error: activationCodeTakenError }
   }
 
   const nowIso = resolveNow(deps).toISOString()
+  const codeExpiresAt = new Date(new Date(nowIso).getTime() + codeValidityMinutes * 60 * 1000).toISOString()
   const activationCode: ActivationCodeRecord = {
     id: crypto.randomUUID(),
     code: normalizedCode,
     entitlementKey: 'charades_category_pack',
     createdAt: nowIso,
+    codeExpiresAt,
+    unlockDurationMinutes,
     redeemedByUserId: null,
     redeemedAt: null,
+    expiresAt: null,
   }
 
   await repo.createActivationCode(activationCode)

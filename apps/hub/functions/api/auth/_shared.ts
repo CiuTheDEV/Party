@@ -55,8 +55,11 @@ type D1ActivationCodeRow = {
   code: string
   entitlement_key: string
   created_at: string
+  code_expires_at: string | null
+  unlock_duration_minutes: number | null
   redeemed_by_user_id: string | null
   redeemed_at: string | null
+  expires_at: string | null
 }
 
 function mapUser(row: D1UserRow): AuthUserRecord {
@@ -88,8 +91,11 @@ function mapActivationCode(row: D1ActivationCodeRow): ActivationCodeRecord {
     code: row.code,
     entitlementKey: row.entitlement_key,
     createdAt: row.created_at,
+    codeExpiresAt: row.code_expires_at,
+    unlockDurationMinutes: row.unlock_duration_minutes ?? 60,
     redeemedByUserId: row.redeemed_by_user_id,
     redeemedAt: row.redeemed_at,
+    expiresAt: row.expires_at,
   }
 }
 
@@ -165,32 +171,34 @@ export function createD1AuthRepository(db: AuthEnv['DB']): AuthRepository {
         .bind(revokedAt, tokenHash)
         .run()
     },
-    async listUserEntitlementKeys(userId) {
+    async listUserEntitlements(userId, nowIso) {
       const rows = await db
         .prepare(
-          'SELECT entitlement_key, id, code, created_at, redeemed_by_user_id, redeemed_at FROM activation_codes WHERE redeemed_by_user_id = ?1 AND redeemed_at IS NOT NULL',
+          'SELECT entitlement_key, expires_at, id, code, created_at, code_expires_at, unlock_duration_minutes, redeemed_by_user_id, redeemed_at FROM activation_codes WHERE redeemed_by_user_id = ?1 AND redeemed_at IS NOT NULL AND (expires_at IS NULL OR expires_at > ?2)',
         )
-        .bind(userId)
+        .bind(userId, nowIso)
         .all<D1ActivationCodeRow>()
 
-      return rows.results.map((row) => row.entitlement_key)
+      return rows.results
+        .filter((row) => row.expires_at !== null)
+        .map((row) => ({ key: row.entitlement_key, expiresAt: row.expires_at as string }))
     },
     async findActivationCodeByCode(code) {
       const row = await db
         .prepare(
-          'SELECT id, code, entitlement_key, created_at, redeemed_by_user_id, redeemed_at FROM activation_codes WHERE code = ?1 LIMIT 1',
+          'SELECT id, code, entitlement_key, created_at, code_expires_at, unlock_duration_minutes, redeemed_by_user_id, redeemed_at, expires_at FROM activation_codes WHERE code = ?1 LIMIT 1',
         )
         .bind(code)
         .first<D1ActivationCodeRow>()
 
       return row ? mapActivationCode(row) : null
     },
-    async redeemActivationCode(code, userId, redeemedAt) {
+    async redeemActivationCode(code, userId, redeemedAt, unlockExpiresAt) {
       const result = (await db
         .prepare(
-          'UPDATE activation_codes SET redeemed_by_user_id = ?2, redeemed_at = ?3 WHERE code = ?1 AND redeemed_at IS NULL',
+          'UPDATE activation_codes SET redeemed_by_user_id = ?2, redeemed_at = ?3, expires_at = ?4 WHERE code = ?1 AND redeemed_at IS NULL',
         )
-        .bind(code, userId, redeemedAt)
+        .bind(code, userId, redeemedAt, unlockExpiresAt)
         .run()) as { meta?: { changes?: number } }
 
       return result.meta?.changes === 1
@@ -198,15 +206,18 @@ export function createD1AuthRepository(db: AuthEnv['DB']): AuthRepository {
     async createActivationCode(activationCode) {
       await db
         .prepare(
-          'INSERT INTO activation_codes (id, code, entitlement_key, created_at, redeemed_by_user_id, redeemed_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6)',
+          'INSERT INTO activation_codes (id, code, entitlement_key, created_at, code_expires_at, unlock_duration_minutes, redeemed_by_user_id, redeemed_at, expires_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9)',
         )
         .bind(
           activationCode.id,
           activationCode.code,
           activationCode.entitlementKey,
           activationCode.createdAt,
+          activationCode.codeExpiresAt,
+          activationCode.unlockDurationMinutes,
           activationCode.redeemedByUserId,
           activationCode.redeemedAt,
+          activationCode.expiresAt,
         )
         .run()
 
@@ -249,6 +260,29 @@ function toStringField(value: unknown) {
 
 function normalizeCodeField(value: unknown) {
   return typeof value === 'string' ? value.trim() : ''
+}
+
+function normalizeMinutesField(value: unknown, fallback: number) {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return Math.max(1, Math.floor(value))
+  }
+
+  if (typeof value === 'string') {
+    const parsed = Number(value)
+    if (Number.isFinite(parsed)) {
+      return Math.max(1, Math.floor(parsed))
+    }
+  }
+
+  return Math.max(1, Math.floor(fallback))
+}
+
+function normalizeCodeValidityMinutesField(value: unknown) {
+  return normalizeMinutesField(value, 60)
+}
+
+function normalizeUnlockDurationMinutesField(value: unknown) {
+  return normalizeMinutesField(value, 60)
 }
 
 export async function registerFromRequest(request: Request, env: AuthEnv) {
@@ -364,14 +398,27 @@ export async function redeemCodeFromRequest(request: Request, env: AuthEnv) {
 }
 
 export async function createActivationCodeFromRequest(request: Request, env: AuthEnv) {
-  const body = await readJsonBody<{ code?: unknown }>(request)
+  const body = await readJsonBody<{
+    code?: unknown
+    codeValidityMinutes?: unknown
+    unlockDurationMinutes?: unknown
+    durationMinutes?: unknown
+  }>(request)
   if (!body) {
     return errorResponse({ code: 'invalid_input', message: 'Invalid JSON.', status: 400 })
   }
 
   const repo = createD1AuthRepository(env.DB)
   const sessionToken = readCookieValue(request.headers.get('cookie'))
-  const result = await createActivationCode(repo, sessionToken, normalizeCodeField(body.code))
+  const result = await createActivationCode(
+    repo,
+    sessionToken,
+    {
+      code: normalizeCodeField(body.code),
+      codeValidityMinutes: normalizeCodeValidityMinutesField(body.codeValidityMinutes ?? body.durationMinutes),
+      unlockDurationMinutes: normalizeUnlockDurationMinutesField(body.unlockDurationMinutes ?? body.durationMinutes),
+    },
+  )
 
   if (result.ok === false) {
     return errorResponse(result.error)

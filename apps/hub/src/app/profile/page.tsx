@@ -24,6 +24,8 @@ export default function ProfilePage() {
   const [activationSuccess, setActivationSuccess] = useState<string | null>(null)
   const [isRedeeming, setIsRedeeming] = useState(false)
   const [adminCode, setAdminCode] = useState('')
+  const [adminCodeValidityMinutes, setAdminCodeValidityMinutes] = useState('60')
+  const [adminUnlockDurationMinutes, setAdminUnlockDurationMinutes] = useState('60')
   const [adminError, setAdminError] = useState<string | null>(null)
   const [adminSuccess, setAdminSuccess] = useState<string | null>(null)
   const [isCreatingCode, setIsCreatingCode] = useState(false)
@@ -58,9 +60,13 @@ export default function ProfilePage() {
     setIsCreatingCode(true)
 
     try {
-      const createdCode = await createActivationCode(adminCode)
+      const codeValidityMinutes = Math.max(1, Math.floor(Number(adminCodeValidityMinutes) || 60))
+      const unlockDurationMinutes = Math.max(1, Math.floor(Number(adminUnlockDurationMinutes) || 60))
+      const createdCode = await createActivationCode(adminCode, codeValidityMinutes, unlockDurationMinutes)
       setAdminCode(createdCode)
-      setAdminSuccess(`Utworzono kod: ${createdCode}`)
+      setAdminCodeValidityMinutes('60')
+      setAdminUnlockDurationMinutes('60')
+      setAdminSuccess(`Utworzono kod: ${createdCode} | wa�ny ${codeValidityMinutes} min | odblokowuje ${unlockDurationMinutes} min`)
     } catch (error) {
       setAdminError(error instanceof Error ? error.message : 'Nie udało się utworzyć kodu.')
     } finally {
@@ -119,7 +125,11 @@ export default function ProfilePage() {
             {hasPremiumUnlock ? (
               <div className={styles.activationStatus}>
                 <span className={styles.statusDot} />
-                <span>Pakiet kategorii aktywny</span>
+                <span>
+                  {user.unlockExpiresAt
+                    ? `Pakiet aktywny do ${new Date(user.unlockExpiresAt).toLocaleString('pl-PL')}`
+                    : 'Pakiet kategorii aktywny'}
+                </span>
               </div>
             ) : (
               <form className={styles.activationForm} onSubmit={handleActivationSubmit}>
@@ -151,7 +161,8 @@ export default function ProfilePage() {
                 <span className={styles.activationEyebrow}>Admin panel</span>
                 <h2 className={styles.activationTitle}>Tworzenie kodów aktywacyjnych</h2>
                 <p className={styles.activationLead}>
-                  Ten panel widzi wyłącznie konto Bullet. Dostęp do niego jest sprawdzany po stronie serwera.
+                  Ten panel widzi wyłącznie konto Bullet. Pierwsze pole ustawia ważność kodu, drugie czas
+                  odblokowania kategorii po aktywacji.
                 </p>
               </div>
 
@@ -167,6 +178,36 @@ export default function ProfilePage() {
                     required
                   />
                 </label>
+
+                <div className={styles.adminDualGrid}>
+                  <label className={styles.activationField}>
+                    <span className={styles.label}>Kod wa�ny przez (min)</span>
+                    <input
+                      className={styles.input}
+                      type="number"
+                      min={1}
+                      step={1}
+                      value={adminCodeValidityMinutes}
+                      onChange={(event) => setAdminCodeValidityMinutes(event.target.value)}
+                      autoComplete="off"
+                      required
+                    />
+                  </label>
+
+                  <label className={styles.activationField}>
+                    <span className={styles.label}>Kategorie odblokowane na (min)</span>
+                    <input
+                      className={styles.input}
+                      type="number"
+                      min={1}
+                      step={1}
+                      value={adminUnlockDurationMinutes}
+                      onChange={(event) => setAdminUnlockDurationMinutes(event.target.value)}
+                      autoComplete="off"
+                      required
+                    />
+                  </label>
+                </div>
 
                 {adminError ? <p className={styles.error}>{adminError}</p> : null}
                 {adminSuccess ? <p className={styles.success}>{adminSuccess}</p> : null}
@@ -199,3 +240,4 @@ export default function ProfilePage() {
     </main>
   )
 }
+

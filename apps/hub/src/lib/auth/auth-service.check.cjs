@@ -24,6 +24,7 @@ function createMemoryRepo() {
     users: [],
     sessions: [],
     activationCodes: [],
+    currentNow: '2026-04-12T12:00:00.000Z',
   }
 
   return {
@@ -60,28 +61,33 @@ function createMemoryRepo() {
     async findActivationCodeByCode(code) {
       return state.activationCodes.find((activationCode) => activationCode.code === code) ?? null
     },
-    async redeemActivationCode(code, userId, redeemedAt) {
+    async redeemActivationCode(code, userId, redeemedAt, unlockExpiresAt) {
       const activationCode = state.activationCodes.find((entry) => entry.code === code)
       if (!activationCode || activationCode.redeemedAt) return false
       activationCode.redeemedByUserId = userId
       activationCode.redeemedAt = redeemedAt
+      activationCode.expiresAt = unlockExpiresAt
       return true
     },
     async createActivationCode(activationCode) {
       state.activationCodes.push({ ...activationCode })
       return activationCode
     },
-    async listUserEntitlementKeys(userId) {
+    async listUserEntitlements(userId, nowIso) {
       return state.activationCodes
-        .filter((activationCode) => activationCode.redeemedByUserId === userId && activationCode.redeemedAt)
-        .map((activationCode) => activationCode.entitlementKey)
+        .filter((activationCode) => {
+          if (activationCode.redeemedByUserId !== userId || !activationCode.redeemedAt) return false
+          if (!activationCode.expiresAt) return false
+          return new Date(activationCode.expiresAt).getTime() > new Date(nowIso).getTime()
+        })
+        .map((activationCode) => ({ key: activationCode.entitlementKey, expiresAt: activationCode.expiresAt }))
     },
   }
 }
 
 function createMemoryRepoWithoutActivationTable() {
   const repo = createMemoryRepo()
-  repo.listUserEntitlementKeys = async () => {
+  repo.listUserEntitlements = async () => {
     throw new Error('no such table: activation_codes')
   }
   return repo
@@ -255,19 +261,24 @@ run('redeeming an activation code unlocks the account entitlement', async () => 
   repo.state.activationCodes.push({
     code: 'KALAMBURY-START',
     entitlementKey: 'charades_category_pack',
+    codeExpiresAt: null,
+    unlockDurationMinutes: 60,
     redeemedByUserId: null,
     redeemedAt: null,
+    expiresAt: null,
   })
 
   const redeem = await authService.redeemActivationCode(repo, registration.sessionToken, '  kalambury-start  ', deps)
   assert.equal(redeem.ok, true)
   if (!redeem.ok) throw new Error('Expected activation code redemption to succeed.')
   assert.deepEqual(redeem.user.entitlements, ['charades_category_pack'])
+  assert.equal(redeem.user.unlockExpiresAt, '2026-04-12T13:00:00.000Z')
 
   const me = await authService.getCurrentUser(repo, registration.sessionToken, deps)
   assert.equal(me.ok, true)
   if (!me.ok) throw new Error('Expected user lookup to succeed.')
   assert.deepEqual(me.user.entitlements, ['charades_category_pack'])
+  assert.equal(me.user.unlockExpiresAt, '2026-04-12T13:00:00.000Z')
 })
 
 run('admin can create activation codes', async () => {
@@ -286,9 +297,84 @@ run('admin can create activation codes', async () => {
 
   if (!registration.ok) throw new Error('Expected successful registration result.')
 
-  const created = await authService.createActivationCode(repo, registration.sessionToken, '  spring-2026  ', deps)
+  const created = await authService.createActivationCode(
+    repo,
+    registration.sessionToken,
+    { code: '  spring-2026  ', codeValidityMinutes: 30, unlockDurationMinutes: 45 },
+    deps,
+  )
   assert.equal(created.ok, true)
   if (!created.ok) throw new Error('Expected activation code creation to succeed.')
   assert.equal(created.activationCode.code, 'SPRING-2026')
   assert.equal(created.activationCode.entitlementKey, 'charades_category_pack')
+  assert.equal(created.activationCode.codeExpiresAt, '2026-04-12T12:30:00.000Z')
+  assert.equal(created.activationCode.unlockDurationMinutes, 45)
+})
+
+run('expired activation codes cannot be redeemed', async () => {
+  const repo = createMemoryRepo()
+  const deps = createDeps()
+  deps.now = () => new Date(repo.state.currentNow)
+
+  const registration = await authService.registerAccount(
+    repo,
+    {
+      email: 'test@example.com',
+      displayName: 'Mati',
+      password: 'super-secret',
+    },
+    deps,
+  )
+
+  if (!registration.ok) throw new Error('Expected successful registration result.')
+
+  repo.state.activationCodes.push({
+    code: 'SHORT-CODE',
+    entitlementKey: 'charades_category_pack',
+    codeExpiresAt: '2026-04-12T12:05:00.000Z',
+    unlockDurationMinutes: 15,
+    redeemedByUserId: null,
+    redeemedAt: null,
+    expiresAt: null,
+  })
+  repo.state.currentNow = '2026-04-12T12:06:00.000Z'
+
+  const redeem = await authService.redeemActivationCode(repo, registration.sessionToken, 'SHORT-CODE', deps)
+  assert.equal(redeem.ok, false)
+  if (redeem.ok) throw new Error('Expected activation code redemption to fail.')
+  assert.equal(redeem.error.code, 'invalid_input')
+})
+
+run('expired activation codes do not grant entitlements', async () => {
+  const repo = createMemoryRepo()
+  const deps = createDeps()
+  deps.now = () => new Date(repo.state.currentNow)
+
+  const registration = await authService.registerAccount(
+    repo,
+    {
+      email: 'test@example.com',
+      displayName: 'Mati',
+      password: 'super-secret',
+    },
+    deps,
+  )
+
+  if (!registration.ok) throw new Error('Expected successful registration result.')
+
+  repo.state.activationCodes.push({
+    code: 'MINUTE-CODE',
+    entitlementKey: 'charades_category_pack',
+    codeExpiresAt: null,
+    unlockDurationMinutes: 5,
+    redeemedByUserId: registration.user.id,
+    redeemedAt: '2026-04-12T12:00:00.000Z',
+    expiresAt: '2026-04-12T12:05:00.000Z',
+  })
+  repo.state.currentNow = '2026-04-12T12:06:00.000Z'
+
+  const me = await authService.getCurrentUser(repo, registration.sessionToken, deps)
+  assert.equal(me.ok, true)
+  if (!me.ok) throw new Error('Expected user lookup to succeed.')
+  assert.deepEqual(me.user.entitlements, [])
 })
