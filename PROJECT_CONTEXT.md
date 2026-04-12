@@ -144,8 +144,8 @@ This means:
 ## Session Handoff
 - Last: 2026-04-12 by Codex (GPT-5.4)
 - Task: Phase 5 auth — custom login system.
-- Did: Built the email+password auth flow, added `/api/auth/*` and the `/auth` page, created the remote D1 database `party-hub-auth`, applied the schema migration, bound `DB` in `apps/hub/wrangler.toml`, fixed edge-safe hashing, and verified `npm run build --workspace @party/hub`.
-- Next: Smoke test register/login/logout/me against the live Pages runtime, then close T002 if the cookie session flow holds.
+- Did: Built the email+password auth flow, added `/api/auth/*` and the `/auth` page, created the remote D1 database `party-hub-auth`, applied the schema migration, bound `DB` in `apps/hub/wrangler.toml`, fixed edge-safe hashing, verified `npm run build --workspace @party/hub`, and smoke-tested register/login/logout/me on the live Pages deployment.
+- Next: None for auth; T002 is complete.
 - Blocker: None.
 
 ## Previous Handoff
