@@ -39,6 +39,8 @@ output/
 .playwright-cli/
 .playwright-mcp/
 .superpowers/
+.obsidian/
+apps/hub/out/
 docs/superpowers/
 *.tsbuildinfo
 *.log
