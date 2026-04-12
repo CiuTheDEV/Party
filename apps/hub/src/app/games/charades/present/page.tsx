@@ -6,41 +6,58 @@ import { PresenterScreen, usePresenter } from '@party/charades'
 import styles from './page.module.css'
 
 export default function PresentPage() {
-  const [viewportHeight, setViewportHeight] = useState('100dvh')
+  const [viewportStyle, setViewportStyle] = useState({
+    '--presenter-viewport-height': '100dvh',
+    '--presenter-viewport-width': '100vw',
+    '--presenter-viewport-top': '0px',
+    '--presenter-viewport-left': '0px',
+  } as React.CSSProperties)
 
   useEffect(() => {
     let frameId = 0
 
-    const applyViewportHeight = () => {
-      const nextHeight = window.visualViewport?.height ?? window.innerHeight
-      setViewportHeight(`${Math.round(nextHeight)}px`)
+    const applyViewportFrame = () => {
+      const visualViewport = window.visualViewport
+      const nextHeight = visualViewport?.height ?? window.innerHeight
+      const nextWidth = visualViewport?.width ?? window.innerWidth
+      const nextTop = visualViewport?.offsetTop ?? 0
+      const nextLeft = visualViewport?.offsetLeft ?? 0
+
+      window.scrollTo(0, 0)
+
+      setViewportStyle({
+        '--presenter-viewport-height': `${Math.round(nextHeight)}px`,
+        '--presenter-viewport-width': `${Math.round(nextWidth)}px`,
+        '--presenter-viewport-top': `${Math.round(nextTop)}px`,
+        '--presenter-viewport-left': `${Math.round(nextLeft)}px`,
+      } as React.CSSProperties)
     }
 
-    const scheduleViewportHeight = () => {
+    const scheduleViewportFrame = () => {
       cancelAnimationFrame(frameId)
       frameId = window.requestAnimationFrame(() => {
-        applyViewportHeight()
+        applyViewportFrame()
       })
     }
 
-    scheduleViewportHeight()
+    scheduleViewportFrame()
 
-    window.addEventListener('resize', scheduleViewportHeight)
-    window.addEventListener('orientationchange', scheduleViewportHeight)
-    window.visualViewport?.addEventListener('resize', scheduleViewportHeight)
-    window.visualViewport?.addEventListener('scroll', scheduleViewportHeight)
+    window.addEventListener('resize', scheduleViewportFrame)
+    window.addEventListener('orientationchange', scheduleViewportFrame)
+    window.visualViewport?.addEventListener('resize', scheduleViewportFrame)
+    window.visualViewport?.addEventListener('scroll', scheduleViewportFrame)
 
     return () => {
       cancelAnimationFrame(frameId)
-      window.removeEventListener('resize', scheduleViewportHeight)
-      window.removeEventListener('orientationchange', scheduleViewportHeight)
-      window.visualViewport?.removeEventListener('resize', scheduleViewportHeight)
-      window.visualViewport?.removeEventListener('scroll', scheduleViewportHeight)
+      window.removeEventListener('resize', scheduleViewportFrame)
+      window.removeEventListener('orientationchange', scheduleViewportFrame)
+      window.visualViewport?.removeEventListener('resize', scheduleViewportFrame)
+      window.visualViewport?.removeEventListener('scroll', scheduleViewportFrame)
     }
   }, [])
 
   return (
-    <div className={styles.routeShell} style={{ '--presenter-viewport-height': viewportHeight } as React.CSSProperties}>
+    <div className={styles.routeShell} style={viewportStyle}>
       <Suspense fallback={<RouteStatus eyebrow="Prezenter" message="Łączenie..." />}>
         <PresentRoute />
       </Suspense>
