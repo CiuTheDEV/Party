@@ -4,6 +4,14 @@
   Daily working memory. Each session appends a section.
 -->
 
+### S40 (16:38~) [Project Party] Phase 5 auth deploy fix
+
+- Fixed the Cloudflare Pages project config so Git-based builds run from the repo root but still export the Hub from `apps/hub/out`.
+- Added root-level Pages Functions shims for `/api/auth/*` and corrected their imports so the auth bundle resolves cleanly in the Pages build.
+- Verified `npm run build` locally after the fix and pushed the result to `origin/main`.
+- Next: wait for the next production deploy and confirm the Cloudflare Pages build succeeds with the new root config.
+- Experience recorded: yes
+
 ### S1 (~daytime) [Project Party] Phases 0-2 foundation
 
 - Initialized the Turborepo monorepo, built the hub shell, and defined the initial `@party/game-sdk` contract.

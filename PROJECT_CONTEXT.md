@@ -19,7 +19,7 @@ Core product model:
 
 ## Current Focus
 
-> Phase 5 - custom auth (email/password, guest + account)
+> Phase 5 - custom auth (email/password, guest + account) - done
 
 Secondary focus completed in this session block:
 - architecture cleanup for game modules,
@@ -43,7 +43,7 @@ Secondary focus completed in this session block:
 | 3.5 | Module architecture cleanup: shared setup + module ownership | Done |
 | 3.6 | Second module scaffold + module registry hardening | Done |
 | 4 | Real-time multiplayer / deploy (Partykit, rooms, Cloudflare) | Done |
-| 5 | Custom auth (email/password, guest + account) | In progress |
+| 5 | Custom auth (email/password, guest + account) | Done |
 | 6 | Leaderboards and game history | TODO |
 | 7 | Monetization stubs (Stripe-ready, not connected) | TODO |
 | 8 | Launch | TODO |
@@ -143,15 +143,15 @@ This means:
 <!-- handoff:start -->
 ## Session Handoff
 - Last: 2026-04-12 by Codex (GPT-5.4)
-- Task: Phase 5 auth — custom login system.
-- Did: Built the email+password auth flow, added `/api/auth/*` and the `/auth` page, created the remote D1 database `party-hub-auth`, applied the schema migration, bound `DB` in `apps/hub/wrangler.toml`, fixed edge-safe hashing, verified `npm run build --workspace @party/hub`, and smoke-tested register/login/logout/me on the live Pages deployment.
-- Next: None for auth; T002 is complete.
+- Task: Cloudflare Pages config fix for auth deploy.
+- Did: Added a root `wrangler.toml` so Pages builds from `apps/hub/out`, added root-level auth function shims under `functions/api/auth/*`, fixed the shim import paths, verified `npm run build`, and pushed the fix to `origin/main`.
+- Next: Wait for the next Cloudflare Pages deploy and confirm the production build succeeds end-to-end.
 - Blocker: None.
 
 ## Previous Handoff
 - Last: 2026-04-12 by Codex (GPT-5.4)
-- Task: Charades presenter autoscaling + mobile device viewport polish.
-- Did: Nowy autoscaling oparty o układ całych słów, mobile viewport hardening dla `/present`, UTF-8 fixes w content/charades. Commity `dac3b68`–`12b8575`.
-- Next: Smoke test na telefonie po `12b8575`.
-- Blocker: Brak.
+- Task: Phase 5 auth — custom login system.
+- Did: Built the email+password auth flow, added `/api/auth/*` and the `/auth` page, created the remote D1 database `party-hub-auth`, applied the schema migration, bound `DB` in `apps/hub/wrangler.toml`, fixed edge-safe hashing, verified `npm run build --workspace @party/hub`, and smoke-tested register/login/logout/me on the live Pages deployment.
+- Next: None for auth; T002 is complete.
+- Blocker: None.
 <!-- handoff:end -->

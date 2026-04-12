@@ -15,6 +15,16 @@
 
 ## Entries
 
+### 2026-04-12 - Cloudflare Pages Git deploys need root-level build config and root-level Functions shims
+
+**Symptom:** A Pages deployment built from the repo root could not find the Hub export output, and root Functions bundling failed to resolve imports that pointed into `apps/hub`.
+
+**Root cause:** Cloudflare Pages was using the repository root as the build root, while the app-specific `wrangler.toml` and Functions lived under `apps/hub`. Git deploys only see the repo-root Pages config and root-level `functions/` directory.
+
+**Fix:** Added a root `wrangler.toml` with `pages_build_output_dir = "apps/hub/out"` and moved the Pages Functions entrypoints to repo-root `functions/api/auth/*`, pointing them back to the shared auth code.
+
+**How to prevent it:** For Pages Git deployments in a monorepo, keep the deployment-visible config at the repo root or make sure the project root in Cloudflare matches the app directory exactly. Do not rely on a nested app `wrangler.toml` alone.
+
 ### 2026-04-12 - PBKDF2 iteration cost must fit Pages Functions CPU budget
 
 **Symptom:** Email/password registration and login returned Cloudflare 1101 errors on Pages, while validation-only auth paths still worked.
