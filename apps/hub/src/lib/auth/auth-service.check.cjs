@@ -79,6 +79,14 @@ function createMemoryRepo() {
   }
 }
 
+function createMemoryRepoWithoutActivationTable() {
+  const repo = createMemoryRepo()
+  repo.listUserEntitlementKeys = async () => {
+    throw new Error('no such table: activation_codes')
+  }
+  return repo
+}
+
 function createDeps() {
   let tokenCounter = 0
 
@@ -202,6 +210,30 @@ run('bullet account is marked as admin', async () => {
   if (!registration.ok) throw new Error('Expected successful registration result.')
 
   assert.equal(registration.user.isAdmin, true)
+})
+
+run('auth still works when entitlement storage is unavailable', async () => {
+  const repo = createMemoryRepoWithoutActivationTable()
+  const deps = createDeps()
+
+  const registration = await authService.registerAccount(
+    repo,
+    {
+      email: 'test@example.com',
+      displayName: 'Mati',
+      password: 'super-secret',
+    },
+    deps,
+  )
+
+  assert.equal(registration.ok, true)
+  if (!registration.ok) throw new Error('Expected successful registration result.')
+  assert.deepEqual(registration.user.entitlements, [])
+
+  const me = await authService.getCurrentUser(repo, registration.sessionToken, deps)
+  assert.equal(me.ok, true)
+  if (!me.ok) throw new Error('Expected user lookup to succeed.')
+  assert.deepEqual(me.user.entitlements, [])
 })
 
 run('redeeming an activation code unlocks the account entitlement', async () => {

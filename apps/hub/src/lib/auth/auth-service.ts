@@ -157,7 +157,11 @@ function resolveVerifyPassword(deps: AuthDeps) {
 }
 
 async function resolveUserEntitlementKeys(repo: AuthRepository, userId: string) {
-  return repo.listUserEntitlementKeys(userId)
+  try {
+    return await repo.listUserEntitlementKeys(userId)
+  } catch {
+    return []
+  }
 }
 
 function buildInvalidInput(message: string): AuthFailure {
