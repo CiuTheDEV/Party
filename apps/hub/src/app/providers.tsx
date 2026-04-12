@@ -182,6 +182,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }
 
   async function updateAvatar(avatarId: string) {
+    // Optimistic update — show new avatar instantly before server confirms
+    setUser((prev) => (prev ? { ...prev, avatarId } : prev))
+
     const response = await fetch('/api/auth/update-avatar', {
       method: 'POST',
       credentials: 'include',
