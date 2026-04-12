@@ -1,0 +1,11 @@
+name = "party-hub"
+pages_build_output_dir = "apps/hub/out"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat_v2"]
+
+# Pages builds from the repo root, so this file points Cloudflare at the Hub export.
+
+[[d1_databases]]
+binding = "DB"
+database_name = "party-hub-auth"
+database_id = "803fb3cf-04b6-481a-96d4-c6337064d12b"
