@@ -202,3 +202,33 @@
     gap: 10px;
   }
 }
+
+@media (orientation: landscape) and (max-height: 540px) and (min-width: 640px) {
+  .revealLayout {
+    gap: 8px;
+    grid-template-columns: minmax(0, 1fr) minmax(180px, 0.42fr);
+  }
+
+  .wordHeroCard,
+  .revealMetaCard {
+    border-radius: 16px;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .wordHero {
+    min-height: clamp(120px, 24svh, 180px);
+    padding: 2px 6px;
+  }
+
+  .categoryPill,
+  .difficultyPill {
+    padding: 5px 8px;
+    font-size: 0.66rem;
+  }
+
+  .changeButtonLabel {
+    padding: 10px 12px;
+    font-size: 1rem;
+  }
+}

@@ -164,3 +164,41 @@
     gap: 10px;
   }
 }
+
+@media (orientation: landscape) and (max-height: 540px) and (min-width: 640px) {
+  .yourTurnLayout {
+    grid-template-columns: minmax(0, 1fr) minmax(170px, 0.4fr);
+    gap: 6px;
+  }
+
+  .readyCard {
+    border-radius: 16px;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  .readyHero {
+    gap: 8px;
+  }
+
+  .readyTitle {
+    font-size: clamp(1.3rem, 4vw, 2rem);
+    max-width: 12ch;
+  }
+
+  .hiddenWordIcon {
+    width: clamp(58px, 12vw, 78px);
+  }
+
+  .hiddenWordIcon :global(svg) {
+    width: clamp(28px, 6vw, 40px);
+    height: clamp(28px, 6vw, 40px);
+  }
+
+  .readyButton {
+    min-height: 46px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    font-size: 0.94rem;
+  }
+}

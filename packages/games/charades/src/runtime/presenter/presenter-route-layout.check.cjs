@@ -13,8 +13,8 @@ if (!routeShellMatch) {
   throw new Error('Missing .routeShell rule in present/page.module.css')
 }
 
-if (!/height:\s*100dvh/.test(routeShellMatch[1])) {
-  throw new Error('Presenter route shell must lock to height: 100dvh')
+if (!/height:\s*var\(--presenter-viewport-height,\s*100dvh\)/.test(routeShellMatch[1])) {
+  throw new Error('Presenter route shell must use the presenter viewport height CSS variable fallback')
 }
 
 if (!/position:\s*fixed/.test(routeShellMatch[1])) {

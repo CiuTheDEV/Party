@@ -1,13 +1,46 @@
 'use client'
 
 import { useSearchParams } from 'next/navigation'
-import { Suspense, useEffect } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { PresenterScreen, usePresenter } from '@party/charades'
 import styles from './page.module.css'
 
 export default function PresentPage() {
+  const [viewportHeight, setViewportHeight] = useState('100dvh')
+
+  useEffect(() => {
+    let frameId = 0
+
+    const applyViewportHeight = () => {
+      const nextHeight = window.visualViewport?.height ?? window.innerHeight
+      setViewportHeight(`${Math.round(nextHeight)}px`)
+    }
+
+    const scheduleViewportHeight = () => {
+      cancelAnimationFrame(frameId)
+      frameId = window.requestAnimationFrame(() => {
+        applyViewportHeight()
+      })
+    }
+
+    scheduleViewportHeight()
+
+    window.addEventListener('resize', scheduleViewportHeight)
+    window.addEventListener('orientationchange', scheduleViewportHeight)
+    window.visualViewport?.addEventListener('resize', scheduleViewportHeight)
+    window.visualViewport?.addEventListener('scroll', scheduleViewportHeight)
+
+    return () => {
+      cancelAnimationFrame(frameId)
+      window.removeEventListener('resize', scheduleViewportHeight)
+      window.removeEventListener('orientationchange', scheduleViewportHeight)
+      window.visualViewport?.removeEventListener('resize', scheduleViewportHeight)
+      window.visualViewport?.removeEventListener('scroll', scheduleViewportHeight)
+    }
+  }, [])
+
   return (
-    <div className={styles.routeShell}>
+    <div className={styles.routeShell} style={{ '--presenter-viewport-height': viewportHeight } as React.CSSProperties}>
       <Suspense fallback={<RouteStatus eyebrow="Prezenter" message="Łączenie..." />}>
         <PresentRoute />
       </Suspense>
