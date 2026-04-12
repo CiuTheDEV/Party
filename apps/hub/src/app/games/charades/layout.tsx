@@ -17,6 +17,7 @@ import {
   useMenuControls,
   type CharadesMenuView,
 } from '@party/charades'
+import { UserButton } from '@clerk/nextjs'
 import { GameShell, HostNavigationProvider, useHostNavigation } from '@party/ui'
 import type { NavLink, SidebarFooterLink } from '@party/ui'
 import { ArrowLeft, BarChart2, Home, Play, Settings } from 'lucide-react'
@@ -265,6 +266,7 @@ function CharadesLayoutShell({ children }: { children: React.ReactNode }) {
         isSidebarFocusVisible={hostNavigation.state.isAwake && menuFocusArea === 'rail'}
         links={links}
         navAriaLabel={`Nawigacja gry ${charadesModule.shell.gameName}`}
+        userSlot={<UserButton />}
       >
         {children}
       </GameShell>

@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import { Epilogue, Manrope } from 'next/font/google'
 import styles from './Topbar.module.css'
@@ -5,12 +7,13 @@ import styles from './Topbar.module.css'
 type TopbarProps = {
   brandHref?: string
   brandLabel: string
+  userSlot?: React.ReactNode
 }
 
 const headingFont = Epilogue({ subsets: ['latin'], weight: ['700', '800', '900'] })
 const bodyFont = Manrope({ subsets: ['latin'], weight: ['400', '500', '600', '700', '800'] })
 
-export function Topbar({ brandHref = '/', brandLabel }: TopbarProps) {
+export function Topbar({ brandHref = '/', brandLabel, userSlot }: TopbarProps) {
   return (
     <header className={styles.topbar}>
       <div className={styles.topbarInner}>
@@ -18,9 +21,11 @@ export function Topbar({ brandHref = '/', brandLabel }: TopbarProps) {
           {brandLabel}
         </Link>
 
-        <button className={`${styles.loginButton} ${bodyFont.className}`} type="button" aria-label="Zaloguj">
-          Zaloguj
-        </button>
+        <div className={`${styles.loginButton} ${bodyFont.className}`}>
+          {userSlot ?? (
+            <a href="/sign-in" aria-label="Zaloguj">Zaloguj</a>
+          )}
+        </div>
       </div>
     </header>
   )

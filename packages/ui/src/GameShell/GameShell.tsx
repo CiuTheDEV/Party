@@ -17,6 +17,7 @@ type GameShellProps = {
   navAriaLabel: string
   onNavigate?: (href: string) => void
   rootClassName?: string
+  userSlot?: React.ReactNode
   children: React.ReactNode
 }
 
@@ -34,11 +35,12 @@ export function GameShell({
   navAriaLabel,
   onNavigate,
   rootClassName,
+  userSlot,
   children,
 }: GameShellProps) {
   return (
     <div className={rootClassName ? `${styles.root} ${rootClassName}` : styles.root}>
-      <Topbar brandLabel={brandLabel} brandHref={brandHref} />
+      <Topbar brandLabel={brandLabel} brandHref={brandHref} userSlot={userSlot} />
       <div className={styles.body}>
         <GameSidebar
           activeHref={activeHref}
