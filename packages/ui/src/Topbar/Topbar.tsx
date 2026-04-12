@@ -21,7 +21,7 @@ export function Topbar({ brandHref = '/', brandLabel, userSlot }: TopbarProps) {
           {brandLabel}
         </Link>
 
-        <div className={`${styles.loginButton} ${bodyFont.className}`}>
+        <div className={bodyFont.className}>
           {userSlot}
         </div>
       </div>

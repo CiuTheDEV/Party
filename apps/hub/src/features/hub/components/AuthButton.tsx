@@ -1,6 +1,7 @@
 'use client'
 
 import { SignInButton, UserButton, useUser } from '@clerk/react'
+import styles from './AuthButton.module.css'
 
 export function AuthButton() {
   const { isLoaded, isSignedIn } = useUser()
@@ -13,7 +14,9 @@ export function AuthButton() {
 
   return (
     <SignInButton mode="modal">
-      <button type="button">Zaloguj</button>
+      <button type="button" className={styles.loginButton}>
+        Zaloguj
+      </button>
     </SignInButton>
   )
 }
