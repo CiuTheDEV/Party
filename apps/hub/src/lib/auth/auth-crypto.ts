@@ -1,6 +1,6 @@
 const textEncoder = new TextEncoder()
 
-const PASSWORD_HASH_ITERATIONS = 150_000
+const PASSWORD_HASH_ITERATIONS = 20_000
 const PASSWORD_HASH_BYTES = 32
 const PASSWORD_SALT_BYTES = 16
 

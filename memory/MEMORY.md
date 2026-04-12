@@ -15,6 +15,16 @@
 
 ## Entries
 
+### 2026-04-12 - PBKDF2 iteration cost must fit Pages Functions CPU budget
+
+**Symptom:** Email/password registration and login returned Cloudflare 1101 errors on Pages, while validation-only auth paths still worked.
+
+**Root cause:** The initial PBKDF2 cost of 150k iterations was too heavy for the Pages runtime used by the hub.
+
+**Fix:** Lowered the PBKDF2 cost to 20k iterations and verified register/login on the live Pages deployment.
+
+**How to prevent it:** When auth runs on edge functions, benchmark the password hash cost against the actual runtime instead of copying a desktop-server default.
+
 ### 2026-03-22 - `emitDeclarationOnly` breaks runtime imports in Next.js
 
 **Symptom:** `Module not found: Can't resolve '@party/charades'` after importing runtime config from the workspace package into the hub.
