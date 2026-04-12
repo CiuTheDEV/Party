@@ -247,7 +247,7 @@
   color: rgba(248, 247, 255, 0.92);
 }
 
-@media (orientation: landscape) and (min-width: 820px) {
+@media (orientation: landscape) and (min-width: 640px) {
   .phaseStack {
     grid-template-columns: minmax(0, 1fr) minmax(220px, 0.48fr);
     grid-template-rows: minmax(0, 1fr);
@@ -292,7 +292,7 @@
   }
 }
 
-@media (max-height: 760px) and (orientation: landscape) and (min-width: 820px) {
+@media (max-height: 760px) and (orientation: landscape) and (min-width: 640px) {
   .phaseStack {
     gap: 10px;
   }

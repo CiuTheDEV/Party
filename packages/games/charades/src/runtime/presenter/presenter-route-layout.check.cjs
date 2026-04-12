@@ -17,6 +17,10 @@ if (!/height:\s*100dvh/.test(routeShellMatch[1])) {
   throw new Error('Presenter route shell must lock to height: 100dvh')
 }
 
+if (!/position:\s*fixed/.test(routeShellMatch[1])) {
+  throw new Error('Presenter route shell must be fixed to the viewport')
+}
+
 if (!/overflow:\s*hidden/.test(routeShellMatch[1])) {
   throw new Error('Presenter route shell must hide overflow')
 }

@@ -168,7 +168,7 @@
   }
 }
 
-@media (orientation: landscape) and (min-width: 820px) {
+@media (orientation: landscape) and (min-width: 640px) {
   .revealLayout {
     grid-template-columns: minmax(0, 1fr) minmax(220px, 0.48fr);
     grid-template-rows: minmax(0, 1fr);
@@ -192,7 +192,7 @@
   }
 }
 
-@media (max-height: 760px) and (orientation: landscape) and (min-width: 820px) {
+@media (max-height: 760px) and (orientation: landscape) and (min-width: 640px) {
   .wordHeroCard,
   .revealMetaCard {
     gap: 10px;

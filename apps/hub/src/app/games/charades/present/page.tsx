@@ -1,7 +1,7 @@
 'use client'
 
 import { useSearchParams } from 'next/navigation'
-import { Suspense } from 'react'
+import { Suspense, useEffect } from 'react'
 import { PresenterScreen, usePresenter } from '@party/charades'
 import styles from './page.module.css'
 
@@ -16,6 +16,33 @@ export default function PresentPage() {
 }
 
 function PresentRoute() {
+  useEffect(() => {
+    const html = document.documentElement
+    const body = document.body
+    const previousHtmlOverflow = html.style.overflow
+    const previousBodyOverflow = body.style.overflow
+    const previousHtmlOverscroll = html.style.overscrollBehavior
+    const previousBodyOverscroll = body.style.overscrollBehavior
+    const previousHtmlHeight = html.style.height
+    const previousBodyHeight = body.style.height
+
+    html.style.overflow = 'hidden'
+    body.style.overflow = 'hidden'
+    html.style.overscrollBehavior = 'none'
+    body.style.overscrollBehavior = 'none'
+    html.style.height = '100%'
+    body.style.height = '100%'
+
+    return () => {
+      html.style.overflow = previousHtmlOverflow
+      body.style.overflow = previousBodyOverflow
+      html.style.overscrollBehavior = previousHtmlOverscroll
+      body.style.overscrollBehavior = previousBodyOverscroll
+      html.style.height = previousHtmlHeight
+      body.style.height = previousBodyHeight
+    }
+  }, [])
+
   const params = useSearchParams()
   const roomId = params.get('room') ?? ''
 
