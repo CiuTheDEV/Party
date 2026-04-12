@@ -31,7 +31,7 @@
 | Game logic | Room management, scoring, state |
 | API routes | Cloudflare Workers, D1 queries |
 | Contained refactors | Small to medium changes |
-| Auth flow (Clerk) | Integration work |
+| Auth flow (custom email/password) | Integration work |
 | Partykit setup | Multiplayer architecture |
 
 ### Hand Off to Codex / Antigravity
@@ -85,7 +85,7 @@ All services must have a free tier. Before adding anything new:
 | Cloudflare Pages | Yes | Ask the product owner if limits matter |
 | Cloudflare D1 | Yes | Ask the product owner |
 | Cloudflare Workers | Yes | Ask the product owner |
-| Clerk | Yes | Ask the product owner |
+| Custom auth | Yes | Ask the product owner if it adds cost |
 | Partykit | Yes | Verify limits before heavy use |
 | Stripe | Transaction-based | Not connected yet |
 

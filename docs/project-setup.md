@@ -132,9 +132,9 @@ Initial schema should stay minimal:
 
 ---
 
-## Auth - Clerk
+## Auth - Custom
 
-Clerk is planned, but should only be wired into runtime once real test keys exist.
+Auth now uses same-origin Pages Functions and D1. The current flow is email/password with session cookies, and no auth env vars are needed.
 
 ---
 
@@ -162,9 +162,9 @@ Expected result:
 
 | Variable | Where | Purpose |
 |----------|-------|---------|
-| `CLERK_SECRET_KEY` | local env only | Clerk server auth |
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | local env only | Clerk client auth |
 | `NODE_VERSION` | Cloudflare Pages | Build environment |
+
+> Auth now uses same-origin Pages Functions and D1. No auth env vars are needed.
 
 > Never commit real secrets.
 

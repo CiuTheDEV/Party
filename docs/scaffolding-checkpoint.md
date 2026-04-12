@@ -40,11 +40,11 @@ Before evaluating any service:
 
 ## 4. Auth Layer
 
-**Default: Clerk later**
+**Default: custom auth**
 
-- [ ] Clerk is the default auth direction
+- [ ] Use the in-house email/password auth flow
 - [ ] Guest play must stay supported
-- [ ] Do not self-implement auth
+- [ ] Keep auth on the same origin as the hub
 
 ## 5. Payments Layer
 

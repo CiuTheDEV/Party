@@ -11,6 +11,13 @@
 - Next: build the first Charades module.
 - Experience recorded: yes
 
+### S39 (2026-04-12 ~) [Project Party] Phase 5 auth spec rewrite
+
+- Zawęziłem zakres do MVP bez Clerka: rejestracja, logowanie, wylogowanie, sesja w `httpOnly` cookie, `/api/auth/me`, prosty profil i miejsce pod przyszłe activation codes.
+- Przepisałem spec Phase 5 na własny auth i zapisałem go w `docs/superpowers/specs/2026-04-12-phase5-auth-design.md`.
+- Next: rozpisać implementation plan i zacząć podmianę Clerka na własny provider auth.
+- Experience recorded: yes
+
 ### S18 (11:51~) [Project Party] Charades warning modal and long-word UI hardening
 
 - Reworked the low-pool warning modal into a clearer hero-plus-stats layout and cleaned the menu page file back to proper UTF-8 text.

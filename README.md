@@ -35,7 +35,7 @@ project-party/
 | Monorepo | Turborepo |
 | Real-time | Partykit |
 | Database | Cloudflare D1 |
-| Auth | Clerk later |
+| Auth | Custom email/password auth |
 | Hosting | Cloudflare Pages |
 | Payments | Stripe stub |
 

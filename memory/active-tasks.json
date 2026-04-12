@@ -28,6 +28,16 @@
                       "blocker":  "",
                       "created":  "2026-03-27",
                       "updated":  "2026-04-08"
+                  },
+                  {
+                      "id":  "T002",
+                      "title":  "Custom auth implementation",
+                      "status":  "active",
+                      "context":  "Phase 5 auth moved off Clerk. The in-house email+password flow is implemented, the remote D1 database party-hub-auth exists, the schema migration is applied, and the hub build passes with the custom auth provider.",
+                      "next_action":  "Run an end-to-end smoke test against the live Pages runtime for register/login/logout/me, then close the task if the session flow holds up.",
+                      "blocker":  "",
+                      "created":  "2026-04-12",
+                      "updated":  "2026-04-12"
                   }
               ]
 }

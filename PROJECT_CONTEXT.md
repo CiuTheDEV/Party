@@ -19,7 +19,7 @@ Core product model:
 
 ## Current Focus
 
-> Phase 5 - optional auth (Clerk, guest + account)
+> Phase 5 - custom auth (email/password, guest + account)
 
 Secondary focus completed in this session block:
 - architecture cleanup for game modules,
@@ -43,7 +43,7 @@ Secondary focus completed in this session block:
 | 3.5 | Module architecture cleanup: shared setup + module ownership | Done |
 | 3.6 | Second module scaffold + module registry hardening | Done |
 | 4 | Real-time multiplayer / deploy (Partykit, rooms, Cloudflare) | Done |
-| 5 | Optional auth (Clerk, guest + account) | TODO |
+| 5 | Custom auth (email/password, guest + account) | In progress |
 | 6 | Leaderboards and game history | TODO |
 | 7 | Monetization stubs (Stripe-ready, not connected) | TODO |
 | 8 | Launch | TODO |
@@ -123,7 +123,7 @@ This means:
 | Hosting | Cloudflare Pages + Workers | Free tier + aligned with owner account |
 | Real-time | Partykit | Fastest path to multiplayer on CF stack |
 | Database | Cloudflare D1 | Native CF, zero ops |
-| Auth | Clerk later | Good guest/account split, deferred to later phase |
+| Auth | Custom email/password auth | Same-origin Pages Functions + D1 keep the stack free-tier and future-proof |
 | Payments | Stripe stub only | Monetization-ready, no live payments now |
 | Shared setup | One shell, custom game sections | Common UX without losing game flexibility |
 | Module rollout | Explicit `config.status` | Register future games before gameplay is ready |
@@ -142,11 +142,11 @@ This means:
 
 <!-- handoff:start -->
 ## Session Handoff
-- Last: 2026-04-12 by Claude (Sonnet 4.6)
-- Task: Phase 5 auth — próba integracji Clerk z static export na CF Pages.
-- Did: Próbowano wdrożyć Clerk w 3 podejściach: (1) OpenNext + CF Workers — bloker: Next.js 16 middleware niezgodne z OpenNext; (2) @clerk/nextjs z static export — bloker: Server Actions niekompatybilne z `output: 'export'`; (3) clerk-js z CDN — bloker: clerk.browser.js v6 ładuje się w trybie headless bez UI components. Ostatecznie zdecydowano porzucić Clerk i napisać własny system auth. Hub wrócił do static export na CF Pages z działającym buildem. Plik `providers.tsx` i `AuthButton.tsx` są w stanie przejściowym (niekompletnym).
-- Next: Zbudować własny system auth: email+hasło+Google OAuth, D1 jako baza, CF Workers jako API, httpOnly cookie sesja. Zacząć od schematu D1 i Worker API.
-- Blocker: Brak — decyzja architektoniczna podjęta, gotowe do implementacji.
+- Last: 2026-04-12 by Codex (GPT-5.4)
+- Task: Phase 5 auth — custom login system.
+- Did: Built the email+password auth flow, added `/api/auth/*` and the `/auth` page, created the remote D1 database `party-hub-auth`, applied the schema migration, bound `DB` in `apps/hub/wrangler.toml`, and verified `npm run build --workspace @party/hub`.
+- Next: Smoke test register/login/logout/me against the live Pages runtime, then close T002 if the cookie session flow holds.
+- Blocker: None.
 
 ## Previous Handoff
 - Last: 2026-04-12 by Codex (GPT-5.4)

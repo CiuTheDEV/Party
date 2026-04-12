@@ -1,42 +1,39 @@
 'use client'
 
-import { useClerk } from '@/app/providers'
-import { useEffect, useRef, useState } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/app/providers'
 import styles from './AuthButton.module.css'
 
 export function AuthButton() {
-  const { clerk, isLoaded, isSignedIn } = useClerk()
-  const [showModal, setShowModal] = useState(false)
-  const mountRef = useRef<HTMLDivElement>(null)
+  const { user, isLoading, logout } = useAuth()
+  const router = useRouter()
 
-  useEffect(() => {
-    if (!showModal || !clerk || !mountRef.current) return
-    clerk.mountSignIn?.(mountRef.current)
-    return () => {
-      clerk.unmountSignIn?.(mountRef.current!)
-    }
-  }, [showModal, clerk])
-
-  if (!isLoaded) {
-    return <button type="button" className={styles.loginButton} disabled>Zaloguj</button>
-  }
-
-  if (isSignedIn) {
+  if (isLoading) {
     return (
-      <button
-        type="button"
-        className={styles.loginButton}
-        onClick={() => clerk?.signOut(() => window.location.reload())}
-      >
-        Wyloguj
+      <button type="button" className={styles.loginButton} disabled>
+        Zaloguj się
       </button>
     )
   }
 
-  if (showModal) {
+  if (user) {
     return (
-      <div style={{ position: 'fixed', inset: 0, zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.7)' }} onClick={() => setShowModal(false)}>
-        <div onClick={e => e.stopPropagation()} ref={mountRef} />
+      <div className={styles.authGroup}>
+        <Link href="/profile" className={styles.accountButton} title={user.email}>
+          {user.displayName}
+        </Link>
+        <button
+          type="button"
+          className={styles.logoutButton}
+          onClick={async () => {
+            await logout()
+            router.replace('/')
+            router.refresh()
+          }}
+        >
+          Wyloguj
+        </button>
       </div>
     )
   }
@@ -45,9 +42,11 @@ export function AuthButton() {
     <button
       type="button"
       className={styles.loginButton}
-      onClick={() => setShowModal(true)}
+      onClick={() => {
+        router.push('/auth')
+      }}
     >
-      Zaloguj
+      Zaloguj się
     </button>
   )
 }

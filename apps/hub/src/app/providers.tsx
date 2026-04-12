@@ -2,66 +2,87 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 
-type ClerkInstance = {
-  load: (opts?: object) => Promise<void>
-  openSignIn: (opts: object) => void
-  redirectToSignIn: () => void
-  mountSignIn?: (node: HTMLElement) => void
-  unmountSignIn?: (node: HTMLElement) => void
-  signOut: (cb: () => void) => void
-  user: {
-    username: string | null
-    firstName: string | null
-    createdAt: Date | null
-    emailAddresses: { emailAddress: string }[]
-  } | null | undefined
+export type AuthUser = {
+  id: string
+  email: string
+  displayName: string
+  createdAt: string
+  updatedAt: string
+  lastLoginAt: string | null
 }
 
-type ClerkCtx = {
-  clerk: ClerkInstance | null
-  isLoaded: boolean
-  isSignedIn: boolean
+type AuthContextValue = {
+  user: AuthUser | null
+  isLoading: boolean
+  refresh: () => Promise<AuthUser | null>
+  logout: () => Promise<void>
 }
 
-const ClerkContext = createContext<ClerkCtx>({ clerk: null, isLoaded: false, isSignedIn: false })
+const AuthContext = createContext<AuthContextValue>({
+  user: null,
+  isLoading: true,
+  refresh: async () => null,
+  logout: async () => {},
+})
 
-export function useClerk() {
-  return useContext(ClerkContext)
+async function readCurrentUser() {
+  const response = await fetch('/api/auth/me', {
+    credentials: 'include',
+  })
+
+  if (response.status === 401) {
+    return null
+  }
+
+  if (!response.ok) {
+    throw new Error('Nie udało się pobrać sesji.')
+  }
+
+  const payload = (await response.json()) as { user: AuthUser }
+  return payload.user
+}
+
+export function useAuth() {
+  return useContext(AuthContext)
 }
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  const [clerk, setClerk] = useState<ClerkInstance | null>(null)
-  const [isLoaded, setIsLoaded] = useState(false)
-  const [isSignedIn, setIsSignedIn] = useState(false)
+  const [user, setUser] = useState<AuthUser | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  async function refresh() {
+    setIsLoading(true)
+
+    try {
+      const nextUser = await readCurrentUser()
+      setUser(nextUser)
+      return nextUser
+    } catch {
+      setUser(null)
+      return null
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  async function logout() {
+    try {
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      })
+    } finally {
+      setUser(null)
+    }
+  }
 
   useEffect(() => {
-    // clerk.browser.js is loaded via <Script> in layout.tsx before this runs
-    // It auto-initializes window.Clerk when data-clerk-publishable-key is present
-    function init() {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const instance = (window as any).Clerk as ClerkInstance | undefined
-      if (!instance) {
-        setTimeout(init, 50)
-        return
-      }
-      // Clerk auto-loads itself — just wait for it to be ready
-      instance.load({ standardBrowser: true } as object).then(() => {
-        setClerk(instance)
-        setIsLoaded(true)
-        setIsSignedIn(!!instance.user)
-      }).catch(() => {
-        // Already loaded — still set state
-        setClerk(instance)
-        setIsLoaded(true)
-        setIsSignedIn(!!instance.user)
-      })
-    }
-    init()
+    void refresh()
   }, [])
 
   return (
-    <ClerkContext.Provider value={{ clerk, isLoaded, isSignedIn }}>
+    <AuthContext.Provider value={{ user, isLoading, refresh, logout }}>
       {children}
-    </ClerkContext.Provider>
+    </AuthContext.Provider>
   )
 }
