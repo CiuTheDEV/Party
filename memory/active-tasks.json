@@ -1,21 +1,21 @@
-﻿{
+{
     "_schema":  {
                     "description":  "Cross-session in-flight task registry.",
                     "fields":  {
                                    "id":  "Incrementing task ID (T001, T002, ...)",
                                    "title":  "Brief task title",
                                    "status":  "active | blocked | waiting",
-                                   "context":  "Current state and what\u0027s been done",
+                                   "context":  "Current state and what's been done",
                                    "next_action":  "Specific next step to take",
-                                   "blocker":  "What\u0027s blocking (if status=blocked)",
+                                   "blocker":  "What's blocking (if status=blocked)",
                                    "created":  "YYYY-MM-DD",
                                    "updated":  "YYYY-MM-DD"
                                },
                     "rules":  [
-                                  "Don\u0027t add single-session tasks (those go in today.md)",
-                                  "Don\u0027t add high-level goals (those go in goals.md)",
+                                  "Don't add single-session tasks (those go in today.md)",
+                                  "Don't add high-level goals (those go in goals.md)",
                                   "Remove completed tasks (today.md records completion)",
-                                  "Remind user about tasks stale \u003e14 days"
+                                  "Remind user about tasks stale >14 days"
                               ]
                 },
     "tasks":  [
@@ -28,16 +28,6 @@
                       "blocker":  "",
                       "created":  "2026-03-27",
                       "updated":  "2026-04-08"
-                  },
-                  {
-                      "id":  "T002",
-                      "title":  "Charades host menu and settings navigation polish",
-                      "status":  "active",
-                      "context":  "The shared host navigation framework now exists in `@party/ui` + `@party/game-sdk`, and Charades has been migrated as the reference consumer across menu, settings, setup, and core runtime overlays. Runtime controls were simplified so gameplay accept actions now use `confirm`, and Batch 1 runtime/presenter motion is now implemented across round-order polish, timer pressure, verdict reveal, presenter flow, and verdict picker transitions. Setup/category animation re-entry was explored again on 2026-04-11 but intentionally not kept after it failed user validation, so setup motion remains paused outside the stable scope.",
-                      "next_action":  "Run a focused manual browser pass on Charades runtime pause/verdict flow and presenter feel from `main`, then continue only with narrow, user-validated UI polish slices.",
-                      "blocker":  "",
-                      "created":  "2026-04-07",
-                      "updated":  "2026-04-11"
                   }
               ]
 }

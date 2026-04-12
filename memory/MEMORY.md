@@ -204,3 +204,15 @@
 **Fix:** Split rendering into two modes: a large static display for normal short words and autoscale only for genuinely long words.
 
 **How to prevent it:** For adaptive typography, design the common case first and treat autoscaling as an exception path. Never let a safety mechanism lower the baseline quality of ordinary content.
+
+---
+
+### 2026-04-12 - DevTools mobile emulation can hide real-phone presenter viewport bugs
+
+**Symptom:** The Charades presenter looked correct in Chrome DevTools mobile mode, but on a real phone the route still allowed residual scroll and stale post-rotation offsets that only corrected after manual interaction.
+
+**Root cause:** Presenter layout quality depended on browser viewport behavior that DevTools emulation smooths over: dynamic mobile browser chrome, `visualViewport` updates, orientation transitions, and leftover document scroll offset. A CSS-only `vh/svh/dvh` setup was not enough.
+
+**Fix:** Move the presenter route toward a viewport-locked shell, sync height from `window.visualViewport` / `window.innerHeight`, and validate on an actual phone before treating the layout as done.
+
+**How to prevent it:** For mobile fullscreen surfaces, treat DevTools emulation as a first-pass filter only. Final validation must happen on a real device before closing viewport or orientation bugs.

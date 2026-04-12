@@ -290,3 +290,20 @@
 - Added an explicit agent rule in `AGENTS.md` to treat files with Polish UI copy as UTF-8-sensitive: stop partial edits on mojibake, prefer minimal non-text patches or deliberate full-file rewrites, and verify text after editing.
 - Next: resume from `main`, keep setup animation paused for now, and continue only with narrow, user-validated UI changes or a browser-first manual pass on the stable Charades runtime motion.
 - Experience recorded: yes
+
+### S38 (2026-04-12 ~) [Project Party] Phase 5 auth — Clerk dead end, własny system auth
+- Próbowano 3 podejścia z Clerk: OpenNext+Workers (niezgodność Next.js 16), @clerk/nextjs+static export (Server Actions), clerk-js CDN (headless mode bez UI). Żadne nie działało.
+- Hub wrócił do static export na CF Pages z `output: 'export'`. Build działa, deploy na CF Pages działa.
+- Zdecydowano porzucić Clerk i napisać własny auth: email+hasło+Google, D1, CF Workers API, httpOnly cookie.
+- Kluczowa lekcja: @clerk/nextjs v7 jest niekompatybilny ze static export (Server Actions). clerk-js v6 z CDN ładuje się headless bez UI components gdy używany poza @clerk/nextjs.
+- Next: Własny auth — schemat D1 + Worker API endpoint.
+- Experience recorded: yes
+
+### S37 (2026-04-12 ~) [Project Party] Charades presenter autoscaling + mobile viewport hardening
+
+- Reworked presenter autoscaling around whole-word layout candidates instead of raw shrink-until-fit logic: added `1/2/3` line candidate selection, better card space usage, and an extra penalty against `short / short / long` line splits.
+- Fixed UTF-8-sensitive Charades content safely, added trailing periods to proverb prompts, and introduced a new `DEV` category with 5 short and 5 long prompts.
+- Hardened the `/games/charades/present` route for real phones with a viewport-locked shell, tighter low-height landscape rules, `visualViewport`-driven height syncing, and follow-up scroll reset attempts after rotation/zoom related viewport changes.
+- Verification passing in this session: `npm run test:autoscaled-word-layout`, `npm run test:presenter-layout`, `node ./src/runtime/presenter/presenter-route-layout.check.cjs`, `npm run build` in `packages/games/charades`, and `npm run build --workspace @party/hub`.
+- Next: retest the latest presenter deploy on a real phone after commit `12b8575`; if rotation/zoom still leaves a stale offset that only clears after manual scroll, inspect on-device viewport offset behavior rather than continuing CSS-only tweaks.
+- Experience recorded: yes

@@ -1,6 +1,6 @@
 ﻿# Project Party - Project Context
 
-*Last updated: 2026-04-08*
+*Last updated: 2026-04-12*
 
 ---
 
@@ -19,7 +19,7 @@ Core product model:
 
 ## Current Focus
 
-> Phase 4 - deploy and multiplayer foundation (Cloudflare Pages + Partykit)
+> Phase 5 - optional auth (Clerk, guest + account)
 
 Secondary focus completed in this session block:
 - architecture cleanup for game modules,
@@ -42,7 +42,7 @@ Secondary focus completed in this session block:
 | 3 | First game: Charades / Kalambury MVP | Done |
 | 3.5 | Module architecture cleanup: shared setup + module ownership | Done |
 | 3.6 | Second module scaffold + module registry hardening | Done |
-| 4 | Real-time multiplayer / deploy (Partykit, rooms, Cloudflare) | In progress |
+| 4 | Real-time multiplayer / deploy (Partykit, rooms, Cloudflare) | Done |
 | 5 | Optional auth (Clerk, guest + account) | TODO |
 | 6 | Leaderboards and game history | TODO |
 | 7 | Monetization stubs (Stripe-ready, not connected) | TODO |
@@ -142,16 +142,16 @@ This means:
 
 <!-- handoff:start -->
 ## Session Handoff
-- Last: 2026-04-11 by Claude (Sonnet 4.6)
-- Task: Phase 4 deploy — hub na Cloudflare Pages + PartyKit server.
-- Did: Wdrożono hub na CF Pages jako static export. Naprawiono TypeScript strict-mode błędy. Zmieniono build command na `npm run build` (turbo). Wdrożono PartyKit server (`project-party.ciuthedev.partykit.dev`). Przepisano `DeviceListener` żeby używał wyłącznie WebSocket do wykrywania prezentera (fix cross-device localStorage + reconnect loop). Ostatni fix (`DeviceListener` WebSocket-only) wypchnięty ale nie smoke-testowany — czeka na deploy CF.
-- Next: Smoke test parowania prezenter/host po deployu ostatniego fixa. Jeśli pairing działa — pełny end-to-end test gry. Potem T002 (Charades runtime polish) lub kolejne Phase 4 zadania.
-- Blocker: Brak — czeka na CF deploy ostatniego commita (`89a545d`).
+- Last: 2026-04-12 by Claude (Sonnet 4.6)
+- Task: Phase 5 auth — próba integracji Clerk z static export na CF Pages.
+- Did: Próbowano wdrożyć Clerk w 3 podejściach: (1) OpenNext + CF Workers — bloker: Next.js 16 middleware niezgodne z OpenNext; (2) @clerk/nextjs z static export — bloker: Server Actions niekompatybilne z `output: 'export'`; (3) clerk-js z CDN — bloker: clerk.browser.js v6 ładuje się w trybie headless bez UI components. Ostatecznie zdecydowano porzucić Clerk i napisać własny system auth. Hub wrócił do static export na CF Pages z działającym buildem. Plik `providers.tsx` i `AuthButton.tsx` są w stanie przejściowym (niekompletnym).
+- Next: Zbudować własny system auth: email+hasło+Google OAuth, D1 jako baza, CF Workers jako API, httpOnly cookie sesja. Zacząć od schematu D1 i Worker API.
+- Blocker: Brak — decyzja architektoniczna podjęta, gotowe do implementacji.
 
 ## Previous Handoff
-- Last: 2026-04-11 by Codex (GPT-5.4)
-- Task: Merge the current Charades motion/navigation branch into `main`, then tighten agent workflow after failed setup/category animation attempts.
-- Did: Committed and merged the current runtime/presenter motion + navigation branch into `main`, pushed `main`, removed the merged feature branch. Re-tried category/setup animation — not kept. Added UTF-8-sensitive edit rule in `AGENTS.md`.
-- Next: Browser-first validation pass on stable Charades runtime motion.
-- Blocker: None.
+- Last: 2026-04-12 by Codex (GPT-5.4)
+- Task: Charades presenter autoscaling + mobile device viewport polish.
+- Did: Nowy autoscaling oparty o układ całych słów, mobile viewport hardening dla `/present`, UTF-8 fixes w content/charades. Commity `dac3b68`–`12b8575`.
+- Next: Smoke test na telefonie po `12b8575`.
+- Blocker: Brak.
 <!-- handoff:end -->

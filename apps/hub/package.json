@@ -10,6 +10,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@clerk/clerk-js": "^6.6.0",
     "@clerk/nextjs": "^7.0.12",
     "@party/charades": "*",
     "@party/codenames": "*",

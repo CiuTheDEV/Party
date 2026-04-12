@@ -1,27 +1,24 @@
 'use client'
 
-import { useUser } from '@clerk/react'
+import { useClerk } from '@/app/providers'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
 export default function ProfilePage() {
-  const { user, isLoaded } = useUser()
+  const { clerk, isLoaded, isSignedIn } = useClerk()
   const router = useRouter()
 
   useEffect(() => {
-    if (isLoaded && !user) {
-      router.replace('/sign-in?redirect_url=/profile')
+    if (isLoaded && !isSignedIn) {
+      router.replace('/')
     }
-  }, [isLoaded, user, router])
+  }, [isLoaded, isSignedIn, router])
 
-  if (!isLoaded) {
+  if (!isLoaded || !isSignedIn || !clerk?.user) {
     return null
   }
 
-  if (!user) {
-    return null
-  }
-
+  const user = clerk.user
   const displayName =
     user.username ??
     user.firstName ??

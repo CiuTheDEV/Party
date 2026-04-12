@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import { Providers } from './providers'
 import '@party/ui/tokens.css'
 import './globals.css'
@@ -15,6 +16,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pl">
+      <head>
+        <Script
+          src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@6/dist/clerk.browser.js"
+          data-clerk-publishable-key={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY}
+          strategy="beforeInteractive"
+          crossOrigin="anonymous"
+        />
+      </head>
       <body>
         <Providers>{children}</Providers>
       </body>
