@@ -23,6 +23,7 @@ function createMemoryRepo() {
   const state = {
     users: [],
     sessions: [],
+    activationCodes: [],
   }
 
   return {
@@ -56,6 +57,25 @@ function createMemoryRepo() {
       if (!session) return
       session.revokedAt = revokedAt
     },
+    async findActivationCodeByCode(code) {
+      return state.activationCodes.find((activationCode) => activationCode.code === code) ?? null
+    },
+    async redeemActivationCode(code, userId, redeemedAt) {
+      const activationCode = state.activationCodes.find((entry) => entry.code === code)
+      if (!activationCode || activationCode.redeemedAt) return false
+      activationCode.redeemedByUserId = userId
+      activationCode.redeemedAt = redeemedAt
+      return true
+    },
+    async createActivationCode(activationCode) {
+      state.activationCodes.push({ ...activationCode })
+      return activationCode
+    },
+    async listUserEntitlementKeys(userId) {
+      return state.activationCodes
+        .filter((activationCode) => activationCode.redeemedByUserId === userId && activationCode.redeemedAt)
+        .map((activationCode) => activationCode.entitlementKey)
+    },
   }
 }
 
@@ -86,6 +106,7 @@ run('registering a fresh email creates a user and a session', async () => {
   if (!result.ok) throw new Error('Expected successful registration result.')
   assert.equal(result.user.email, 'test@example.com')
   assert.equal(result.user.displayName, 'Mati')
+  assert.equal(result.user.isAdmin, false)
   assert.equal(result.sessionToken, 'session-token-1')
   assert.equal(repo.state.users.length, 1)
   assert.equal(repo.state.sessions.length, 1)
@@ -161,4 +182,81 @@ run('me returns the current user when the session token is valid', async () => {
   if (!me.ok) throw new Error('Expected user lookup to succeed.')
   assert.equal(me.user.email, 'test@example.com')
   assert.equal(me.user.displayName, 'Mati')
+  assert.equal(me.user.isAdmin, false)
+})
+
+run('bullet account is marked as admin', async () => {
+  const repo = createMemoryRepo()
+  const deps = createDeps()
+
+  const registration = await authService.registerAccount(
+    repo,
+    {
+      email: 'ciu.ciubiczys@gmail.com',
+      displayName: 'Bullet',
+      password: 'super-secret',
+    },
+    deps,
+  )
+
+  if (!registration.ok) throw new Error('Expected successful registration result.')
+
+  assert.equal(registration.user.isAdmin, true)
+})
+
+run('redeeming an activation code unlocks the account entitlement', async () => {
+  const repo = createMemoryRepo()
+  const deps = createDeps()
+
+  const registration = await authService.registerAccount(
+    repo,
+    {
+      email: 'test@example.com',
+      displayName: 'Mati',
+      password: 'super-secret',
+    },
+    deps,
+  )
+
+  if (!registration.ok) throw new Error('Expected successful registration result.')
+
+  repo.state.activationCodes.push({
+    code: 'KALAMBURY-START',
+    entitlementKey: 'charades_category_pack',
+    redeemedByUserId: null,
+    redeemedAt: null,
+  })
+
+  const redeem = await authService.redeemActivationCode(repo, registration.sessionToken, '  kalambury-start  ', deps)
+  assert.equal(redeem.ok, true)
+  if (!redeem.ok) throw new Error('Expected activation code redemption to succeed.')
+  assert.deepEqual(redeem.user.entitlements, ['charades_category_pack'])
+
+  const me = await authService.getCurrentUser(repo, registration.sessionToken, deps)
+  assert.equal(me.ok, true)
+  if (!me.ok) throw new Error('Expected user lookup to succeed.')
+  assert.deepEqual(me.user.entitlements, ['charades_category_pack'])
+})
+
+run('admin can create activation codes', async () => {
+  const repo = createMemoryRepo()
+  const deps = createDeps()
+
+  const registration = await authService.registerAccount(
+    repo,
+    {
+      email: 'ciu.ciubiczys@gmail.com',
+      displayName: 'Bullet',
+      password: 'super-secret',
+    },
+    deps,
+  )
+
+  if (!registration.ok) throw new Error('Expected successful registration result.')
+
+  const created = await authService.createActivationCode(repo, registration.sessionToken, '  spring-2026  ', deps)
+  assert.equal(created.ok, true)
+  if (!created.ok) throw new Error('Expected activation code creation to succeed.')
+  assert.equal(created.activationCode.code, 'SPRING-2026')
+  assert.equal(created.activationCode.entitlementKey, 'charades_category_pack')
 })

@@ -2,6 +2,7 @@ export const SESSION_COOKIE_NAME = 'party_session'
 export const PASSWORD_MIN_LENGTH = 8
 export const SESSION_TTL_DAYS = 30
 export const SESSION_TTL_MS = SESSION_TTL_DAYS * 24 * 60 * 60 * 1000
+export const ADMIN_EMAIL = 'ciu.ciubiczys@gmail.com'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -30,6 +31,14 @@ export function validateEmail(value: string): ValidationResult {
 export function normalizeDisplayName(value: string) {
   const normalized = value.trim().replace(/\s+/g, ' ')
   return normalized.length > 0 ? normalized : null
+}
+
+export function normalizeActivationCode(value: string) {
+  return value.trim().toUpperCase()
+}
+
+export function isAdminEmail(value: string) {
+  return normalizeEmail(value) === ADMIN_EMAIL
 }
 
 export function validatePassword(value: string): ValidationResult {

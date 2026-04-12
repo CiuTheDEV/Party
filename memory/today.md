@@ -4,6 +4,22 @@
   Daily working memory. Each session appends a section.
 -->
 
+### S41 (late) [Project Party] Auth activation codes + locked Charades categories
+
+- Added a D1-backed activation-code flow that redeems a code for the `charades_category_pack` entitlement and exposes entitlements through auth/session responses.
+- Added a profile-page activation form so signed-in users can enter a code and immediately unlock the premium Charades categories.
+- Locked the extra Charades categories behind the entitlement and added visible kłódki plus helper text so the blocked state is obvious in setup.
+- Verification passing in this session: `npm run build`, `npm run build --workspace @party/hub`, `node apps/hub/src/lib/auth/auth-service.check.cjs output/auth-check/auth-service.js`, and `node packages/games/charades/src/setup/category-access.check.cjs output/charades-setup/state.js`.
+- Experience recorded: yes
+
+### S42 (late) [Project Party] Activation-code UX refinement + admin panel
+
+- Kept the profile code input for all signed-in users, added a Bullet-only admin panel for creating new activation codes, and made the admin gate depend on the server-verified `ciu.ciubiczys@gmail.com` account.
+- Moved the Charades unlock flow into a lock-button popup on each locked category card so the user can read why it is blocked and paste a code right there.
+- Hardened the auth payload and API routes with an `isAdmin` flag plus a server-side admin-only create-code endpoint, so the admin UI is not the only line of defense.
+- Verification passing in this session: `npm run build`, `npx tsc --target es2022 --module commonjs --moduleResolution node --types node --skipLibCheck --outDir output/auth-check apps/hub/src/lib/auth/auth-crypto.ts apps/hub/src/lib/auth/auth-domain.ts apps/hub/src/lib/auth/auth-service.ts`, `node apps/hub/src/lib/auth/auth-service.check.cjs output/auth-check/auth-service.js`, and `node packages/games/charades/src/setup/category-access.check.cjs output/charades-setup/state.js`.
+- Experience recorded: yes
+
 ### S40 (16:38~) [Project Party] Phase 5 auth deploy fix
 
 - Fixed the Cloudflare Pages project config so Git-based builds run from the repo root but still export the Hub from `apps/hub/out`.

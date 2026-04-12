@@ -1,4 +1,11 @@
-import { createSessionExpiresAt, normalizeDisplayName, validateEmail, validatePassword } from './auth-domain'
+import {
+  createSessionExpiresAt,
+  isAdminEmail,
+  normalizeActivationCode,
+  normalizeDisplayName,
+  validateEmail,
+  validatePassword,
+} from './auth-domain'
 import { createSessionToken, hashPassword, hashSessionToken, verifyPassword } from './auth-crypto'
 
 export type AuthUserRecord = {
@@ -20,6 +27,15 @@ export type AuthSessionRecord = {
   revokedAt: string | null
 }
 
+export type ActivationCodeRecord = {
+  id: string
+  code: string
+  entitlementKey: string
+  createdAt: string
+  redeemedByUserId: string | null
+  redeemedAt: string | null
+}
+
 export type PublicAuthUser = {
   id: string
   email: string
@@ -27,6 +43,8 @@ export type PublicAuthUser = {
   createdAt: string
   updatedAt: string
   lastLoginAt: string | null
+  entitlements: string[]
+  isAdmin: boolean
 }
 
 export type AuthFailure = {
@@ -49,6 +67,10 @@ export type AuthRepository = {
   createSession(session: AuthSessionRecord): Promise<AuthSessionRecord>
   findSessionByTokenHash(tokenHash: string): Promise<AuthSessionRecord | null>
   revokeSessionByTokenHash(tokenHash: string, revokedAt: string): Promise<void>
+  listUserEntitlementKeys(userId: string): Promise<string[]>
+  findActivationCodeByCode(code: string): Promise<ActivationCodeRecord | null>
+  redeemActivationCode(code: string, userId: string, redeemedAt: string): Promise<boolean>
+  createActivationCode(activationCode: ActivationCodeRecord): Promise<ActivationCodeRecord>
 }
 
 export type AuthDeps = {
@@ -93,7 +115,19 @@ const sessionNotFoundError: AuthFailure = {
   status: 401,
 }
 
-function publicUser(user: AuthUserRecord): PublicAuthUser {
+const forbiddenError: AuthFailure = {
+  code: 'forbidden',
+  message: 'Brak uprawnieĹ„ administratora.',
+  status: 403,
+}
+
+const activationCodeTakenError: AuthFailure = {
+  code: 'activation_code_taken',
+  message: 'Taki kod juĹĽ istnieje.',
+  status: 409,
+}
+
+function publicUser(user: AuthUserRecord, entitlements: string[] = []): PublicAuthUser {
   return {
     id: user.id,
     email: user.email,
@@ -101,6 +135,8 @@ function publicUser(user: AuthUserRecord): PublicAuthUser {
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
     lastLoginAt: user.lastLoginAt,
+    entitlements,
+    isAdmin: isAdminEmail(user.email),
   }
 }
 
@@ -120,8 +156,20 @@ function resolveVerifyPassword(deps: AuthDeps) {
   return deps.verifyPassword ?? verifyPassword
 }
 
+async function resolveUserEntitlementKeys(repo: AuthRepository, userId: string) {
+  return repo.listUserEntitlementKeys(userId)
+}
+
 function buildInvalidInput(message: string): AuthFailure {
   return { ...invalidInputError, message }
+}
+
+function normalizePublicUser(user: AuthUserRecord, entitlements: string[]): PublicAuthUser {
+  return publicUser(user, entitlements)
+}
+
+async function loadPublicUser(repo: AuthRepository, user: AuthUserRecord) {
+  return normalizePublicUser(user, await resolveUserEntitlementKeys(repo, user.id))
 }
 
 export async function registerAccount(
@@ -182,7 +230,7 @@ export async function registerAccount(
 
   return {
     ok: true,
-    user: publicUser({
+    user: await loadPublicUser(repo, {
       ...createdUser,
       lastLoginAt: nowIso,
     }),
@@ -239,7 +287,7 @@ export async function loginAccount(
 
   return {
     ok: true,
-    user: publicUser({
+    user: await loadPublicUser(repo, {
       ...user,
       lastLoginAt: nowIso,
       updatedAt: nowIso,
@@ -295,6 +343,97 @@ export async function getCurrentUser(
 
   return {
     ok: true,
-    user: publicUser(user),
+    user: await loadPublicUser(repo, user),
+  }
+}
+
+export async function redeemActivationCode(
+  repo: AuthRepository,
+  sessionToken: string | null | undefined,
+  code: string,
+  deps: AuthDeps = {},
+): Promise<
+  | { ok: true; user: PublicAuthUser }
+  | { ok: false; error: AuthFailure }
+> {
+  const currentUser = await getCurrentUser(repo, sessionToken, deps)
+  if (currentUser.ok === false) {
+    return { ok: false, error: currentUser.error }
+  }
+
+  const normalizedCode = normalizeActivationCode(code)
+  if (!normalizedCode) {
+    return { ok: false, error: buildInvalidInput('Podaj kod aktywacyjny.') }
+  }
+
+  const existingEntitlements = currentUser.user.entitlements
+  if (existingEntitlements.includes('charades_category_pack')) {
+    return { ok: true, user: currentUser.user }
+  }
+
+  const activationCode = await repo.findActivationCodeByCode(normalizedCode)
+  if (!activationCode || activationCode.entitlementKey !== 'charades_category_pack') {
+    return { ok: false, error: buildInvalidInput('Nieprawidłowy kod aktywacyjny.') }
+  }
+
+  const redeemedAt = resolveNow(deps).toISOString()
+  const redeemed = await repo.redeemActivationCode(normalizedCode, currentUser.user.id, redeemedAt)
+  if (!redeemed) {
+    return { ok: false, error: buildInvalidInput('Nieprawidłowy kod aktywacyjny.') }
+  }
+
+  return {
+    ok: true,
+    user: {
+      ...currentUser.user,
+      entitlements: [...currentUser.user.entitlements, activationCode.entitlementKey],
+    },
+  }
+}
+
+export async function createActivationCode(
+  repo: AuthRepository,
+  sessionToken: string | null | undefined,
+  code: string,
+  deps: AuthDeps = {},
+): Promise<
+  | { ok: true; user: PublicAuthUser; activationCode: ActivationCodeRecord }
+  | { ok: false; error: AuthFailure }
+> {
+  const currentUser = await getCurrentUser(repo, sessionToken, deps)
+  if (currentUser.ok === false) {
+    return { ok: false, error: currentUser.error }
+  }
+
+  if (!currentUser.user.isAdmin) {
+    return { ok: false, error: forbiddenError }
+  }
+
+  const normalizedCode = normalizeActivationCode(code)
+  if (!normalizedCode) {
+    return { ok: false, error: buildInvalidInput('Podaj kod aktywacyjny.') }
+  }
+
+  const existingActivationCode = await repo.findActivationCodeByCode(normalizedCode)
+  if (existingActivationCode) {
+    return { ok: false, error: activationCodeTakenError }
+  }
+
+  const nowIso = resolveNow(deps).toISOString()
+  const activationCode: ActivationCodeRecord = {
+    id: crypto.randomUUID(),
+    code: normalizedCode,
+    entitlementKey: 'charades_category_pack',
+    createdAt: nowIso,
+    redeemedByUserId: null,
+    redeemedAt: null,
+  }
+
+  await repo.createActivationCode(activationCode)
+
+  return {
+    ok: true,
+    user: currentUser.user,
+    activationCode,
   }
 }

@@ -4,12 +4,15 @@ import {
   readCookieValue,
 } from '../../../src/lib/auth/auth-domain'
 import {
+  createActivationCode,
   getCurrentUser,
   loginAccount,
   logoutAccount,
+  redeemActivationCode,
   registerAccount,
   type AuthFailure,
   type AuthRepository,
+  type ActivationCodeRecord,
   type AuthSessionRecord,
   type AuthUserRecord,
 } from '../../../src/lib/auth/auth-service'
@@ -17,6 +20,7 @@ import {
 type D1Prepared = {
   bind: (...values: unknown[]) => {
     first: <T = Record<string, unknown>>() => Promise<T | null>
+    all: <T = Record<string, unknown>>() => Promise<{ results: T[] }>
     run: () => Promise<unknown>
   }
 }
@@ -46,6 +50,15 @@ type D1SessionRow = {
   revoked_at: string | null
 }
 
+type D1ActivationCodeRow = {
+  id: string
+  code: string
+  entitlement_key: string
+  created_at: string
+  redeemed_by_user_id: string | null
+  redeemed_at: string | null
+}
+
 function mapUser(row: D1UserRow): AuthUserRecord {
   return {
     id: row.id,
@@ -66,6 +79,17 @@ function mapSession(row: D1SessionRow): AuthSessionRecord {
     createdAt: row.created_at,
     expiresAt: row.expires_at,
     revokedAt: row.revoked_at,
+  }
+}
+
+function mapActivationCode(row: D1ActivationCodeRow): ActivationCodeRecord {
+  return {
+    id: row.id,
+    code: row.code,
+    entitlementKey: row.entitlement_key,
+    createdAt: row.created_at,
+    redeemedByUserId: row.redeemed_by_user_id,
+    redeemedAt: row.redeemed_at,
   }
 }
 
@@ -141,6 +165,53 @@ export function createD1AuthRepository(db: AuthEnv['DB']): AuthRepository {
         .bind(revokedAt, tokenHash)
         .run()
     },
+    async listUserEntitlementKeys(userId) {
+      const rows = await db
+        .prepare(
+          'SELECT entitlement_key, id, code, created_at, redeemed_by_user_id, redeemed_at FROM activation_codes WHERE redeemed_by_user_id = ?1 AND redeemed_at IS NOT NULL',
+        )
+        .bind(userId)
+        .all<D1ActivationCodeRow>()
+
+      return rows.results.map((row) => row.entitlement_key)
+    },
+    async findActivationCodeByCode(code) {
+      const row = await db
+        .prepare(
+          'SELECT id, code, entitlement_key, created_at, redeemed_by_user_id, redeemed_at FROM activation_codes WHERE code = ?1 LIMIT 1',
+        )
+        .bind(code)
+        .first<D1ActivationCodeRow>()
+
+      return row ? mapActivationCode(row) : null
+    },
+    async redeemActivationCode(code, userId, redeemedAt) {
+      const result = (await db
+        .prepare(
+          'UPDATE activation_codes SET redeemed_by_user_id = ?2, redeemed_at = ?3 WHERE code = ?1 AND redeemed_at IS NULL',
+        )
+        .bind(code, userId, redeemedAt)
+        .run()) as { meta?: { changes?: number } }
+
+      return result.meta?.changes === 1
+    },
+    async createActivationCode(activationCode) {
+      await db
+        .prepare(
+          'INSERT INTO activation_codes (id, code, entitlement_key, created_at, redeemed_by_user_id, redeemed_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6)',
+        )
+        .bind(
+          activationCode.id,
+          activationCode.code,
+          activationCode.entitlementKey,
+          activationCode.createdAt,
+          activationCode.redeemedByUserId,
+          activationCode.redeemedAt,
+        )
+        .run()
+
+      return activationCode
+    },
   }
 }
 
@@ -174,6 +245,10 @@ function errorResponse(error: AuthFailure) {
 
 function toStringField(value: unknown) {
   return typeof value === 'string' ? value : ''
+}
+
+function normalizeCodeField(value: unknown) {
+  return typeof value === 'string' ? value.trim() : ''
 }
 
 export async function registerFromRequest(request: Request, env: AuthEnv) {
@@ -269,4 +344,38 @@ export async function meFromRequest(request: Request, env: AuthEnv) {
   }
 
   return jsonResponse({ user: result.user })
+}
+
+export async function redeemCodeFromRequest(request: Request, env: AuthEnv) {
+  const body = await readJsonBody<{ code?: unknown }>(request)
+  if (!body) {
+    return errorResponse({ code: 'invalid_input', message: 'Invalid JSON.', status: 400 })
+  }
+
+  const repo = createD1AuthRepository(env.DB)
+  const sessionToken = readCookieValue(request.headers.get('cookie'))
+  const result = await redeemActivationCode(repo, sessionToken, normalizeCodeField(body.code))
+
+  if (result.ok === false) {
+    return errorResponse(result.error)
+  }
+
+  return jsonResponse({ user: result.user })
+}
+
+export async function createActivationCodeFromRequest(request: Request, env: AuthEnv) {
+  const body = await readJsonBody<{ code?: unknown }>(request)
+  if (!body) {
+    return errorResponse({ code: 'invalid_input', message: 'Invalid JSON.', status: 400 })
+  }
+
+  const repo = createD1AuthRepository(env.DB)
+  const sessionToken = readCookieValue(request.headers.get('cookie'))
+  const result = await createActivationCode(repo, sessionToken, normalizeCodeField(body.code))
+
+  if (result.ok === false) {
+    return errorResponse(result.error)
+  }
+
+  return jsonResponse({ user: result.user, activationCode: result.activationCode }, { status: 201 })
 }

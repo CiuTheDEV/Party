@@ -143,9 +143,9 @@ This means:
 <!-- handoff:start -->
 ## Session Handoff
 - Last: 2026-04-12 by Codex (GPT-5.4)
-- Task: Cloudflare Pages config fix for auth deploy.
-- Did: Added a root `wrangler.toml` so Pages builds from `apps/hub/out`, added root-level auth function shims under `functions/api/auth/*`, fixed the shim import paths, verified `npm run build`, and pushed the fix to `origin/main`.
-- Next: Wait for the next Cloudflare Pages deploy and confirm the production build succeeds end-to-end.
+- Task: Activation-code UX refinement + admin-only panel.
+- Did: Kept the code input in the profile for all users, added an admin-only code-generation panel that is gated by the server-verified Bullet email, and moved the unlock flow into a lock-button popup on locked Charades categories. The auth payload now carries `isAdmin`, and the admin code endpoint is enforced server-side.
+- Next: Optional visual polish or a follow-up smoke test in the browser if you want to validate the popup flow interactively.
 - Blocker: None.
 
 ## Previous Handoff

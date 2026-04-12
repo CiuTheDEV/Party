@@ -14,12 +14,14 @@ import {
   getRemainingUniqueWordCount,
   getTotalUniqueWordCount,
   isPresenterSessionFresh,
+  isCharadesCategoryUnlocked,
   normalizeCharadesSettings,
   openCharadesPoolManager,
   readCharadesSetup,
   readCharadesWordHistory,
   readPresenterSession,
   startNewCharadesWordHistorySession,
+  sanitizeCharadesSelectedCategories,
   useMenuControls,
   writeCharadesSetup,
   type CharadesSetupHelpers,
@@ -27,10 +29,12 @@ import {
 } from '@party/charades'
 import { allCategories } from '@content/charades/index'
 import { GameSetupTemplate } from '@party/ui'
+import { useAuth } from '../../providers'
 import { useCharadesMenuView } from './menu-view-context'
 import styles from './page.module.css'
 
 const DeviceListener = dynamic(async () => CharadesDeviceListener, { ssr: false })
+const EMPTY_ENTITLEMENTS: string[] = []
 
 type StartWarningState = {
   remaining: number
@@ -43,6 +47,7 @@ type StartWarningFocusTarget = 'back' | 'manage' | 'start'
 
 export default function CharadesMenuPage() {
   const router = useRouter()
+  const { user, isLoading, redeemActivationCode } = useAuth()
   const {
     activeMenuView,
     requestMenuViewChange,
@@ -67,6 +72,12 @@ export default function CharadesMenuPage() {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const [setupFocus, setSetupFocus] = useState<SetupFocusTarget>('start')
   const [warningFocus, setWarningFocus] = useState<StartWarningFocusTarget>('start')
+  const entitlements = user?.entitlements ?? EMPTY_ENTITLEMENTS
+
+  const hasCategoryAccess = useMemo(
+    () => (categoryId: string) => isCharadesCategoryUnlocked(categoryId, entitlements),
+    [entitlements],
+  )
 
   useEffect(() => {
     const storedSetup = readCharadesSetup()
@@ -88,6 +99,25 @@ export default function CharadesMenuPage() {
     }))
     setIsSetupReady(true)
   }, [])
+
+  useEffect(() => {
+    if (isLoading || !isSetupReady) {
+      return
+    }
+
+    setSetupState((current) => {
+      const nextSelectedCategories = sanitizeCharadesSelectedCategories(current.selectedCategories, allCategories, entitlements)
+
+      if (nextSelectedCategories === current.selectedCategories) {
+        return current
+      }
+
+      return {
+        ...current,
+        selectedCategories: nextSelectedCategories,
+      }
+    })
+  }, [entitlements, isLoading, isSetupReady])
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -134,8 +164,12 @@ export default function CharadesMenuPage() {
           isDeviceConnected: false,
         }))
       },
+      hasCategoryAccess,
+      redeemActivationCode: async (code: string) => {
+        await redeemActivationCode(code)
+      },
     }),
-    [],
+    [hasCategoryAccess, redeemActivationCode],
   )
 
   const sections = charadesModule.setupSections.map((section: (typeof charadesModule.setupSections)[number]) => {
@@ -159,7 +193,8 @@ export default function CharadesMenuPage() {
   })
 
   function getActivePoolStats() {
-    const prompts = buildPromptPool(allCategories, setupState.selectedCategories)
+    const accessibleCategories = allCategories.filter((category) => hasCategoryAccess(category.id))
+    const prompts = buildPromptPool(accessibleCategories, setupState.selectedCategories)
     const usedPromptKeys = new Set(readCharadesWordHistory()?.usedPrompts ?? [])
 
     return {

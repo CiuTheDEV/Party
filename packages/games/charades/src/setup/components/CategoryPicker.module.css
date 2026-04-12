@@ -146,6 +146,31 @@
   cursor: default;
 }
 
+.cardLocked {
+  position: relative;
+  overflow: hidden;
+  min-height: 92px;
+  gap: 8px;
+  border-style: dashed;
+  border-color: rgba(255, 255, 255, 0.18);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.02)),
+    rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.86);
+  cursor: not-allowed;
+}
+
+.cardLocked::after {
+  content: '';
+  position: absolute;
+  inset: auto -20% -36% auto;
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.14), transparent 72%);
+  pointer-events: none;
+}
+
 .cardEasy {
   border-color: rgba(244, 114, 182, 0.56);
   background: rgba(244, 114, 182, 0.12);
@@ -193,6 +218,47 @@
 
 .unselectedBadge {
   border: 2px solid rgba(255, 255, 255, 0.22);
+}
+
+.lockBadge {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.84);
+  flex-shrink: 0;
+}
+
+.lockBadgeButton {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.lockBadgeButton:focus-visible {
+  outline: 2px solid rgba(196, 181, 253, 0.8);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
+.lockedTag {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 24px;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #c4b5fd;
 }
 
 .segmentedControl {
@@ -453,6 +519,94 @@
   line-height: 1.4;
 }
 
+.unlockForm {
+  display: grid;
+  gap: 14px;
+}
+
+.unlockField {
+  display: grid;
+  gap: 8px;
+}
+
+.unlockLabel {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #c4b5fd;
+}
+
+.unlockInput {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f5f3ff;
+  font: inherit;
+}
+
+.unlockInput:focus {
+  outline: none;
+  border-color: rgba(196, 181, 253, 0.45);
+}
+
+.unlockNote {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.64);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.unlockError,
+.unlockSuccess {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.unlockError {
+  color: #fca5a5;
+}
+
+.unlockSuccess {
+  color: #9cf6c5;
+}
+
+.unlockActions {
+  display: flex;
+  gap: 10px;
+}
+
+.unlockSecondaryButton,
+.unlockPrimaryButton {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 14px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.unlockSecondaryButton {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.unlockPrimaryButton {
+  border: 0;
+  background: linear-gradient(180deg, #f5f7fb, #dfe6f5);
+  color: #06070b;
+}
+
+.unlockPrimaryButton:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
 @media (max-width: 767px) {
   .header {
     padding: 16px;
@@ -494,6 +648,10 @@
     min-height: 108px;
   }
 
+  .cardLocked {
+    min-height: 88px;
+  }
+
   .name {
     font-size: 15px;
   }
@@ -523,6 +681,10 @@
   .categoryResetRow {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .unlockActions {
+    flex-direction: column;
   }
 
   .modalClose,

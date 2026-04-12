@@ -139,6 +139,13 @@ export {
   writeCharadesSetup,
   writePresenterSession,
 } from './runtime/shared/charades-storage'
+export {
+  CHARADES_BASE_CATEGORY_ID,
+  CHARADES_CATEGORY_UNLOCK_ENTITLEMENT,
+  getCharadesAccessibleCategories,
+  isCharadesCategoryUnlocked,
+  sanitizeCharadesSelectedCategories,
+} from './setup/state'
 export { getPartykitHost, getPresenterOrigin, isLocalPresenterOrigin } from './runtime/shared/charades-runtime'
 export type {
   CharadesAvatarId,

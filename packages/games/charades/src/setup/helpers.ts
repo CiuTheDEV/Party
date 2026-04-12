@@ -17,4 +17,6 @@ export type CharadesSetupHelpers = {
   categories: CharadesWordCategory[]
   DeviceListener: ComponentType<CharadesDeviceListenerProps>
   onDisconnectDevice: () => void
+  hasCategoryAccess: (categoryId: string) => boolean
+  redeemActivationCode: (code: string) => Promise<void>
 }

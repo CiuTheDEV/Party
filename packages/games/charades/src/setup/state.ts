@@ -1,4 +1,11 @@
 import type { GameSetupValidation } from '@party/game-sdk'
+export {
+  CHARADES_BASE_CATEGORY_ID,
+  CHARADES_CATEGORY_UNLOCK_ENTITLEMENT,
+  getCharadesAccessibleCategories,
+  isCharadesCategoryUnlocked,
+  sanitizeCharadesSelectedCategories,
+} from './category-access'
 
 export type CharadesPlayerDraft = {
   name: string
