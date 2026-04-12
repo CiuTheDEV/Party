@@ -22,9 +22,7 @@ export function Topbar({ brandHref = '/', brandLabel, userSlot }: TopbarProps) {
         </Link>
 
         <div className={`${styles.loginButton} ${bodyFont.className}`}>
-          {userSlot ?? (
-            <a href="/sign-in" aria-label="Zaloguj">Zaloguj</a>
-          )}
+          {userSlot}
         </div>
       </div>
     </header>

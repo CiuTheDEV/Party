@@ -1,11 +1,25 @@
-import { currentUser } from '@clerk/nextjs/server'
-import { redirect } from 'next/navigation'
+'use client'
 
-export default async function ProfilePage() {
-  const user = await currentUser()
+import { useUser } from '@clerk/react'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
+
+export default function ProfilePage() {
+  const { user, isLoaded } = useUser()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (isLoaded && !user) {
+      router.replace('/sign-in?redirect_url=/profile')
+    }
+  }, [isLoaded, user, router])
+
+  if (!isLoaded) {
+    return null
+  }
 
   if (!user) {
-    redirect('/sign-in?redirect_url=/profile')
+    return null
   }
 
   const displayName =
@@ -14,10 +28,9 @@ export default async function ProfilePage() {
     user.emailAddresses[0]?.emailAddress.split('@')[0] ??
     'Gracz'
 
-  const memberSince = new Date(user.createdAt).toLocaleDateString('pl-PL', {
-    year: 'numeric',
-    month: 'long',
-  })
+  const memberSince = user.createdAt
+    ? new Date(user.createdAt).toLocaleDateString('pl-PL', { year: 'numeric', month: 'long' })
+    : '—'
 
   return (
     <main style={{ maxWidth: 480, margin: '4rem auto', padding: '0 1rem' }}>

@@ -5,8 +5,8 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Epilogue, Manrope } from 'next/font/google'
 import { Globe, Mail, Share2 } from 'lucide-react'
-import { UserButton } from '@clerk/nextjs'
 import { GameShell, PremiumModal } from '@party/ui'
+import { AuthButton } from '@/features/hub/components/AuthButton'
 import type { NavLink } from '@party/ui'
 import { games, liveGames } from '@/data/games'
 import { HeroCarousel } from '@/features/hub/components/HeroCarousel'
@@ -57,7 +57,7 @@ export default function HomePage() {
         navAriaLabel="Nawigacja Hubu"
         onNavigate={setActiveRailHref}
         rootClassName={bodyFont.className}
-        userSlot={<UserButton />}
+        userSlot={<AuthButton />}
       >
         <HeroCarousel
           featuredHref={featuredGame?.href}
