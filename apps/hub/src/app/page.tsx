@@ -3,7 +3,6 @@
 import type { CSSProperties } from 'react'
 import { useState } from 'react'
 import Link from 'next/link'
-import { Epilogue, Manrope } from 'next/font/google'
 import { Globe, Mail, Share2 } from 'lucide-react'
 import { GameShell, PremiumModal } from '@party/ui'
 import { AuthButton } from '@/features/hub/components/AuthButton'
@@ -18,8 +17,8 @@ import { scrollToSection } from '@/features/hub/lib/scrolling'
 import layoutStyles from '@/features/hub/styles/layout.module.css'
 import sectionStyles from '@/features/hub/styles/sections.module.css'
 
-const headingFont = Epilogue({ subsets: ['latin'], weight: ['700', '800', '900'] })
-const bodyFont = Manrope({ subsets: ['latin'], weight: ['400', '500', '600', '700', '800'] })
+const headingFont = { className: '' }
+const bodyFont = { className: '' }
 
 const libraryCardToneClassNames = {
   mystery: sectionStyles.cardMystery,

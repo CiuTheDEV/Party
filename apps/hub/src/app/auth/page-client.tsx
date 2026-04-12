@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { getAuthApiUrl } from '../../lib/auth/auth-api'
 import { useAuth } from '../providers'
 import styles from './page.module.css'
 
@@ -38,7 +39,7 @@ export default function AuthPageClient({ nextPath }: { nextPath: string }) {
     setIsSubmitting(true)
 
     try {
-      const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/register'
+      const endpoint = mode === 'login' ? getAuthApiUrl('/login') : getAuthApiUrl('/register')
       const response = await fetch(endpoint, {
         method: 'POST',
         credentials: 'include',

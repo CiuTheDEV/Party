@@ -1,6 +1,7 @@
 'use client'
 
 import { createContext, useContext, useEffect, useRef, useState, lazy, Suspense } from 'react'
+import { getAuthApiUrl } from '../lib/auth/auth-api'
 
 const ProfileModal = lazy(() =>
   import('../features/profile/ProfileModal').then((m) => ({ default: m.ProfileModal })),
@@ -71,7 +72,7 @@ function mapAuthUser(payload: Partial<AuthUser>): AuthUser {
 }
 
 async function readCurrentUser() {
-  const response = await fetch('/api/auth/me', {
+  const response = await fetch(getAuthApiUrl('/me'), {
     credentials: 'include',
   })
 
@@ -122,7 +123,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   async function logout() {
     try {
-      await fetch('/api/auth/logout', {
+      await fetch(getAuthApiUrl('/logout'), {
         method: 'POST',
         credentials: 'include',
       })
@@ -132,7 +133,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }
 
   async function redeemActivationCode(code: string) {
-    const response = await fetch('/api/auth/redeem-code', {
+    const response = await fetch(getAuthApiUrl('/redeem-code'), {
       method: 'POST',
       credentials: 'include',
       headers: {
@@ -156,7 +157,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }
 
   async function createActivationCode(code: string, codeValidityMinutes: number, unlockDurationMinutes: number) {
-    const response = await fetch('/api/auth/admin/create-code', {
+    const response = await fetch(getAuthApiUrl('/admin/create-code'), {
       method: 'POST',
       credentials: 'include',
       headers: {
@@ -185,7 +186,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     // Optimistic update — show new avatar instantly before server confirms
     setUser((prev) => (prev ? { ...prev, avatarId } : prev))
 
-    const response = await fetch('/api/auth/update-avatar', {
+    const response = await fetch(getAuthApiUrl('/update-avatar'), {
       method: 'POST',
       credentials: 'include',
       headers: {

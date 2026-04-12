@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import { Epilogue, Manrope } from 'next/font/google'
 import styles from './Topbar.module.css'
 
 type TopbarProps = {
@@ -10,8 +9,8 @@ type TopbarProps = {
   userSlot?: React.ReactNode
 }
 
-const headingFont = Epilogue({ subsets: ['latin'], weight: ['700', '800', '900'] })
-const bodyFont = Manrope({ subsets: ['latin'], weight: ['400', '500', '600', '700', '800'] })
+const headingFont = { className: '' }
+const bodyFont = { className: '' }
 
 export function Topbar({ brandHref = '/', brandLabel, userSlot }: TopbarProps) {
   return (

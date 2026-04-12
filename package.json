@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build": "turbo build",
-    "dev": "turbo dev",
+    "dev": "dev.bat",
     "lint": "turbo lint",
     "verify:encoding": "npm run encoding:check && npm run docs:check-encoding",
     "encoding:check": "powershell -ExecutionPolicy Bypass -File ./scripts/check-text-encoding.ps1",

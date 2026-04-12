@@ -3,14 +3,13 @@
 import type { CSSProperties } from 'react'
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
-import { Epilogue, Manrope } from 'next/font/google'
 import { ArrowRight, Clock3, LayoutGrid, Search, Users } from 'lucide-react'
 import { PremiumModal } from '@party/ui'
 import { games } from '@/data/games'
 import styles from './page.module.css'
 
-const headingFont = Epilogue({ subsets: ['latin'], weight: ['700', '800', '900'] })
-const bodyFont = Manrope({ subsets: ['latin'], weight: ['400', '500', '600', '700', '800'] })
+const headingFont = { className: '' }
+const bodyFont = { className: '' }
 
 function formatMode(mode: string) {
   switch (mode) {

@@ -142,10 +142,10 @@ This means:
 
 <!-- handoff:start -->
 ## Session Handoff
-- Last: 2026-04-12 by Claude Sonnet 4.6
-- Task: Player profile modal with avatar picker.
-- Did: Replaced /profile page with a glass-dark modal (ProfileModal) opened from AuthButton. Two tabs (Konto/Dostęp) at fixed 380px height. Avatar picker slides in from right with Anuluj/Akceptuj. Admin button (cyan) for isAdmin users. New /api/auth/update-avatar endpoint + D1 migration for avatar_id column. AuthButton shows current avatar thumbnail. ProfileModalContext in Providers for open state. Optimistic avatar update so header refreshes instantly on accept. Also fixed pre-existing UTF-8 mojibake in auth-service.ts and CategoryPicker.tsx. Commits: 884b736, 8edd131.
-- Next: Browser smoke test on the deployed hub — test avatar change, tab switch, activation code flow, admin button visibility. Then decide on /admin panel content (separate task).
+- Last: 2026-04-12 by Codex (GPT-5.4)
+- Task: Fix local dev startup and keep auth working on localhost.
+- Did: Removed Google font fetches that were blocking offline builds, kept the local auth API path selection for `localhost`/`127.0.0.1`, and made the Windows dev launcher start the local auth server plus static hub without the failing build step. Verified `npm run build --workspace @party/hub` passes and `npm run dev` reaches both `127.0.0.1:8788` and `127.0.0.1:3000`.
+- Next: If the hub UI changes, rebuild `apps/hub/out` before restarting dev so the static launcher serves the latest bundle.
 - Blocker: None.
 
 ## Previous Handoff
