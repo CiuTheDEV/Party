@@ -20,7 +20,8 @@
 .wordHeroCard {
   min-height: 0;
   grid-template-rows: auto minmax(0, 1fr);
-  padding-block: clamp(18px, 4vw, 28px);
+  gap: clamp(8px, 1.4vw, 12px);
+  padding-block: clamp(16px, 3.2vw, 24px);
   background:
     radial-gradient(circle at top, rgba(56, 189, 248, 0.18), transparent 54%),
     linear-gradient(180deg, rgba(15, 21, 27, 0.98), rgba(10, 15, 19, 0.92));
@@ -113,27 +114,35 @@
 }
 
 .wordHero {
+  width: 100%;
   min-height: 0;
+  min-height: clamp(220px, 34svh, 380px);
   display: grid;
+  grid-template-rows: minmax(0, 1fr);
   align-content: center;
   justify-items: center;
-  gap: clamp(10px, 1.8vw, 14px);
-  padding-inline: clamp(12px, 2.2vw, 24px);
+  gap: clamp(6px, 1.2vw, 10px);
+  padding: clamp(4px, 0.8vw, 8px) clamp(8px, 1.6vw, 18px);
   text-align: center;
   overflow: hidden;
 }
 
 .word {
+  display: block;
   width: 100%;
   max-width: 100%;
+  box-sizing: border-box;
+  padding-block: 0.12em;
   font-weight: 900;
-  line-height: 0.92;
+  line-height: 1.04;
   color: #f8fafc;
 }
 
 .wordScaleRoot {
   height: 100%;
   width: 100%;
+  display: grid;
+  align-items: center;
 }
 
 .changeButtonLabel {

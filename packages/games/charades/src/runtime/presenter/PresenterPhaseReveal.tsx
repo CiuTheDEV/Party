@@ -83,9 +83,14 @@ export function PresenterPhaseReveal({
             text={word}
             className={styles.wordScaleRoot}
             textClassName={styles.word}
-            wrapMode={revealSizing.wrapMode}
             minFontSize={revealSizing.minFontSize}
             maxFontSize={revealSizing.maxFontSize}
+            layoutStrategy="whole-word"
+            lineHeight={1.04}
+            horizontalPadding={12}
+            verticalPadding={12}
+            averageGlyphWidth={0.54}
+            wrapMode={revealSizing.wrapMode}
           />
         </div>
       </section>

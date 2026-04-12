@@ -7,9 +7,11 @@ import styles from './page.module.css'
 
 export default function PresentPage() {
   return (
-    <Suspense fallback={<RouteStatus eyebrow="Prezenter" message="Łączenie..." />}>
-      <PresentRoute />
-    </Suspense>
+    <div className={styles.routeShell}>
+      <Suspense fallback={<RouteStatus eyebrow="Prezenter" message="Łączenie..." />}>
+        <PresentRoute />
+      </Suspense>
+    </div>
   )
 }
 

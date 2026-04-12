@@ -1,10 +1,13 @@
 .screen {
-  min-height: 100svh;
+  height: 100%;
+  min-height: 100%;
   padding: clamp(10px, 2.2vw, 16px);
   background:
     radial-gradient(circle at top, rgba(251, 191, 36, 0.18), transparent 30%),
     linear-gradient(180deg, #0b1016 0%, #070b11 48%, #040608 100%);
   color: #f9fafb;
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 .frame {

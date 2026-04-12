@@ -17,6 +17,11 @@
   text-align: center;
 }
 
+.line {
+  display: block;
+  width: 100%;
+}
+
 .text[data-wrap-mode='balance'] {
   white-space: normal;
   text-wrap: balance;
@@ -27,4 +32,13 @@
   white-space: nowrap;
   text-wrap: nowrap;
   overflow-wrap: normal;
+}
+
+.text[data-layout-strategy='whole-word'] {
+  display: grid;
+  justify-items: center;
+  white-space: normal;
+  text-wrap: unset;
+  overflow-wrap: normal;
+  word-break: normal;
 }

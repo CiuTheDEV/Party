@@ -1,12 +1,21 @@
-.statusScreen {
-  min-height: 100svh;
-  display: grid;
-  place-items: center;
-  padding: clamp(16px, 3vw, 24px);
+.routeShell {
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
   background:
     radial-gradient(circle at top, rgba(124, 58, 237, 0.28), transparent 34%),
     linear-gradient(180deg, #120b24 0%, #09090f 52%, #050507 100%);
+}
+
+.statusScreen {
+  height: 100%;
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: clamp(16px, 3vw, 24px);
   color: #f8f7ff;
+  overflow: hidden;
 }
 
 .statusCard {

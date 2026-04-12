@@ -1,6 +1,7 @@
 'use client'
 
 import { useLayoutEffect, useRef, useState } from 'react'
+import { resolveAutoscaledWordLayout } from './autoscaled-word-layout'
 import styles from './AutoscaledWord.module.css'
 
 type AutoscaledWordProps = {
@@ -12,6 +13,11 @@ type AutoscaledWordProps = {
   minFontSize?: number
   maxFontSize: number
   step?: number
+  layoutStrategy?: 'css-wrap' | 'whole-word'
+  averageGlyphWidth?: number
+  horizontalPadding?: number
+  verticalPadding?: number
+  lineHeight?: number
 }
 
 export function AutoscaledWord({
@@ -23,10 +29,18 @@ export function AutoscaledWord({
   minFontSize = 14,
   maxFontSize,
   step = 2,
+  layoutStrategy = 'css-wrap',
+  averageGlyphWidth = 0.56,
+  horizontalPadding = 0,
+  verticalPadding = 0,
+  lineHeight = 1.04,
 }: AutoscaledWordProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const textRef = useRef<HTMLDivElement | null>(null)
-  const [fontSize, setFontSize] = useState(maxFontSize)
+  const [layoutState, setLayoutState] = useState(() => ({
+    fontSize: maxFontSize,
+    lines: [text],
+  }))
 
   useLayoutEffect(() => {
     const container = containerRef.current
@@ -37,8 +51,25 @@ export function AutoscaledWord({
     }
 
     const measure = () => {
-      let nextFontSize = maxFontSize
+      if (layoutStrategy === 'whole-word') {
+        const resolved = resolveAutoscaledWordLayout({
+          text,
+          strategy: 'whole-word',
+          width: container.clientWidth,
+          height: container.clientHeight,
+          maxFontSize,
+          minFontSize,
+          lineHeight,
+          horizontalPadding,
+          verticalPadding,
+          averageGlyphWidth,
+        })
 
+        setLayoutState(resolved)
+        return
+      }
+
+      let nextFontSize = maxFontSize
       textNode.style.fontSize = `${nextFontSize}px`
 
       while (
@@ -50,7 +81,10 @@ export function AutoscaledWord({
         textNode.style.fontSize = `${nextFontSize}px`
       }
 
-      setFontSize(nextFontSize)
+      setLayoutState({
+        fontSize: nextFontSize,
+        lines: [text],
+      })
     }
 
     measure()
@@ -64,7 +98,17 @@ export function AutoscaledWord({
     return () => {
       resizeObserver.disconnect()
     }
-  }, [maxFontSize, minFontSize, step, text])
+  }, [
+    averageGlyphWidth,
+    horizontalPadding,
+    layoutStrategy,
+    lineHeight,
+    maxFontSize,
+    minFontSize,
+    step,
+    text,
+    verticalPadding,
+  ])
 
   return (
     <div
@@ -77,10 +121,17 @@ export function AutoscaledWord({
       className={`${styles.text}${textClassName ? ` ${textClassName}` : ''}`}
       data-visible={typeof isVisible === 'boolean' ? String(isVisible) : undefined}
       data-wrap-mode={wrapMode}
-      style={{ fontSize }}
+      data-layout-strategy={layoutStrategy}
+      style={{ fontSize: layoutState.fontSize }}
     >
-      {text}
-    </div>
+      {layoutStrategy === 'whole-word'
+        ? layoutState.lines.map((line, index) => (
+            <span key={`${line}-${index}`} className={styles.line}>
+              {line}
+            </span>
+          ))
+        : text}
+      </div>
     </div>
   )
 }
