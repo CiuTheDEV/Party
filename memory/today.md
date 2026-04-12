@@ -4,6 +4,13 @@
   Daily working memory. Each session appends a section.
 -->
 
+### S43 (late) [Project Party] Session wrap-up after timed unlock codes
+
+- Finished the activation-code timing model so Bullet can create codes with separate `codeValidityMinutes` and `unlockDurationMinutes`, and locked Charades categories now re-lock automatically when the unlock window expires.
+- Kept the profile code input for regular users, refined the Bullet-only admin panel to show both timing fields, and surfaced the unlock-expiry timestamp in the profile UI.
+- Applied the new D1 migration for activation-code windows to the remote `party-hub-auth` database and verified the Hub build plus auth regression tests after the change.
+- Experience recorded: yes
+
 ### S41 (late) [Project Party] Auth activation codes + locked Charades categories
 
 - Added a D1-backed activation-code flow that redeems a code for the `charades_category_pack` entitlement and exposes entitlements through auth/session responses.

@@ -143,6 +143,13 @@ This means:
 <!-- handoff:start -->
 ## Session Handoff
 - Last: 2026-04-12 by Codex (GPT-5.4)
+- Task: Time-limited activation codes and auto re-locking categories.
+- Did: Split activation codes into two windows (`codeValidityMinutes` and `unlockDurationMinutes`), updated the Bullet admin panel to generate both values, surfaced unlock expiry in the profile, and made locked Charades categories re-lock automatically when the unlock window ends.
+- Next: Optional browser smoke test for the admin panel or the Charades re-lock timing if you want to validate the expiry UX interactively.
+- Blocker: None.
+
+## Previous Handoff
+- Last: 2026-04-12 by Codex (GPT-5.4)
 - Task: Activation-code UX refinement + admin-only panel.
 - Did: Kept the code input in the profile for all users, added an admin-only code-generation panel that is gated by the server-verified Bullet email, and moved the unlock flow into a lock-button popup on locked Charades categories. The auth payload now carries `isAdmin`, and the admin code endpoint is enforced server-side.
 - Next: Optional visual polish or a follow-up smoke test in the browser if you want to validate the popup flow interactively.
