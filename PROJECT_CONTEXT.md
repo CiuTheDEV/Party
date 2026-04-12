@@ -142,23 +142,16 @@ This means:
 
 <!-- handoff:start -->
 ## Session Handoff
+- Last: 2026-04-12 by Claude Sonnet 4.6
+- Task: Player profile modal with avatar picker.
+- Did: Replaced /profile page with a glass-dark modal (ProfileModal) opened from AuthButton. Two tabs (Konto/Dostęp) at fixed 380px height. Avatar picker slides in from right with Anuluj/Akceptuj. Admin button (cyan) for isAdmin users. New /api/auth/update-avatar endpoint + D1 migration for avatar_id column. AuthButton shows current avatar thumbnail. ProfileModalContext in Providers for open state. Optimistic avatar update so header refreshes instantly on accept. Also fixed pre-existing UTF-8 mojibake in auth-service.ts and CategoryPicker.tsx. Commits: 884b736, 8edd131.
+- Next: Browser smoke test on the deployed hub — test avatar change, tab switch, activation code flow, admin button visibility. Then decide on /admin panel content (separate task).
+- Blocker: None.
+
+## Previous Handoff
 - Last: 2026-04-12 by Codex (GPT-5.4)
 - Task: Time-limited activation codes and auto re-locking categories.
 - Did: Split activation codes into two windows (`codeValidityMinutes` and `unlockDurationMinutes`), updated the Bullet admin panel to generate both values, surfaced unlock expiry in the profile, and made locked Charades categories re-lock automatically when the unlock window ends.
-- Next: Optional browser smoke test for the admin panel or the Charades re-lock timing if you want to validate the expiry UX interactively.
-- Blocker: None.
-
-## Previous Handoff
-- Last: 2026-04-12 by Codex (GPT-5.4)
-- Task: Activation-code UX refinement + admin-only panel.
-- Did: Kept the code input in the profile for all users, added an admin-only code-generation panel that is gated by the server-verified Bullet email, and moved the unlock flow into a lock-button popup on locked Charades categories. The auth payload now carries `isAdmin`, and the admin code endpoint is enforced server-side.
-- Next: Optional visual polish or a follow-up smoke test in the browser if you want to validate the popup flow interactively.
-- Blocker: None.
-
-## Previous Handoff
-- Last: 2026-04-12 by Codex (GPT-5.4)
-- Task: Phase 5 auth — custom login system.
-- Did: Built the email+password auth flow, added `/api/auth/*` and the `/auth` page, created the remote D1 database `party-hub-auth`, applied the schema migration, bound `DB` in `apps/hub/wrangler.toml`, fixed edge-safe hashing, verified `npm run build --workspace @party/hub`, and smoke-tested register/login/logout/me on the live Pages deployment.
-- Next: None for auth; T002 is complete.
+- Next: Profile modal feature completed in next session.
 - Blocker: None.
 <!-- handoff:end -->

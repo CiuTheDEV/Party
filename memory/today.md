@@ -1,3 +1,18 @@
+# Today - 2026-04-12
+
+### S44 (2026-04-12 ~) [Project Party] Profile modal z avatar pickerem
+
+- Zastąpiono /profile osobną stroną modalem szklanym otwieranym z AuthButton.
+- Dwa taby (Konto / Dostęp) o stałej wysokości 380px — brak skoku layoutu przy przełączaniu.
+- Avatar picker wsuwa się z prawej (CSS transform), Anuluj/Akceptuj, zapis przez POST /api/auth/update-avatar.
+- Dodano kolumnę avatar_id do tabeli users w D1 (migration zastosowana przez MCP).
+- Admin button (cyan) widoczny tylko dla isAdmin users, przenosi na /admin.
+- ProfileModalContext w Providers (Client Component) — brak prop drillingu przez Server Component layout.
+- AuthButton pokazuje teraz miniaturkę avatara obok displayName.
+- Przy okazji naprawiono stare błędy kodowania UTF-8 w auth-service.ts i CategoryPicker.tsx.
+- Commit i push: 884b736.
+- Experience recorded: yes
+
 # Today - 2026-03-26
 
 <!--
