@@ -2,13 +2,19 @@ import type { WordCategory } from './index'
 
 export const developer: WordCategory = {
   id: 'developer',
-  name: 'Developer',
+  name: 'DEV',
   wordsEasy: [
-    'TEST 1',
-    'TEST 2',
-    'TEST 3',
-    'TEST 4',
-    'Konstantynopolitańczykowianeczka uczyła się polskiego, aby zaimponować swoim przyjaciołom z Krakowa.',
+    'Pull request.',
+    'Code review.',
+    'Dark mode.',
+    'Hotfix na produkcji.',
+    'Merge conflict.',
   ],
-  wordsHard: [],
+  wordsHard: [
+    'Aplikacja działa lokalnie, ale nie przechodzi na produkcji.',
+    'Junior odpalił deploy w piątek pięć minut przed końcem pracy.',
+    'Backend czeka na frontend, a frontend czeka na backend.',
+    'Wszyscy potwierdzają, że przeczytali dokumentację, ale nikt jej nie czytał.',
+    'Staging wygląda dobrze, dopóki klient nie kliknie dokładnie tego jednego przycisku.',
+  ],
 }

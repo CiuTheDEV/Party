@@ -41,4 +41,5 @@ export const allCategories: WordCategory[] = [
   places,
   animals,
   random,
+  developer,
 ]
