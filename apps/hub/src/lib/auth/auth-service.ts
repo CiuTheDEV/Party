@@ -16,6 +16,7 @@ export type AuthUserRecord = {
   createdAt: string
   updatedAt: string
   lastLoginAt: string | null
+  avatarId: string
 }
 
 export type AuthSessionRecord = {
@@ -49,6 +50,7 @@ export type PublicAuthUser = {
   entitlements: string[]
   unlockExpiresAt: string | null
   isAdmin: boolean
+  avatarId: string
 }
 
 export type AuthFailure = {
@@ -75,6 +77,7 @@ export type AuthRepository = {
   findActivationCodeByCode(code: string): Promise<ActivationCodeRecord | null>
   redeemActivationCode(code: string, userId: string, redeemedAt: string, unlockExpiresAt: string): Promise<boolean>
   createActivationCode(activationCode: ActivationCodeRecord): Promise<ActivationCodeRecord>
+  updateUserAvatar(userId: string, avatarId: string): Promise<void>
 }
 
 export type CreateActivationCodeInput = {
@@ -103,7 +106,7 @@ export type LoginInput = {
 
 type PublicUserSource = Pick<
   AuthUserRecord,
-  'id' | 'email' | 'displayName' | 'createdAt' | 'updatedAt' | 'lastLoginAt'
+  'id' | 'email' | 'displayName' | 'createdAt' | 'updatedAt' | 'lastLoginAt' | 'avatarId'
 >
 
 const invalidInputError: AuthFailure = {
@@ -132,13 +135,13 @@ const sessionNotFoundError: AuthFailure = {
 
 const forbiddenError: AuthFailure = {
   code: 'forbidden',
-  message: 'Brak uprawnieĹ„ administratora.',
+  message: 'Brak uprawnień administratora.',
   status: 403,
 }
 
 const activationCodeTakenError: AuthFailure = {
   code: 'activation_code_taken',
-  message: 'Taki kod juĹĽ istnieje.',
+  message: 'Taki kod już istnieje.',
   status: 409,
 }
 
@@ -157,6 +160,7 @@ function publicUser(
     entitlements,
     unlockExpiresAt,
     isAdmin: isAdminEmail(user.email),
+    avatarId: user.avatarId,
   }
 }
 
@@ -241,6 +245,7 @@ export async function registerAccount(
     createdAt: nowIso,
     updatedAt: nowIso,
     lastLoginAt: nowIso,
+    avatarId: 'smile',
   })
 
   await repo.createSession({
@@ -399,19 +404,19 @@ export async function redeemActivationCode(
 
   const activationCode = await repo.findActivationCodeByCode(normalizedCode)
   if (!activationCode || activationCode.entitlementKey !== 'charades_category_pack') {
-    return { ok: false, error: buildInvalidInput('Nieprawid�owy kod aktywacyjny.') }
+    return { ok: false, error: buildInvalidInput('Nieprawid\u0142owy kod aktywacyjny.') }
   }
 
   const redeemedAt = resolveNow(deps).toISOString()
   if (activationCode.codeExpiresAt && new Date(activationCode.codeExpiresAt).getTime() <= new Date(redeemedAt).getTime()) {
-    return { ok: false, error: buildInvalidInput('Ten kod wygas�.') }
+    return { ok: false, error: buildInvalidInput('Ten kod wygas\u0142.') }
   }
 
   const unlockDurationMinutes = Math.max(1, Math.floor(activationCode.unlockDurationMinutes || 60))
   const unlockExpiresAt = new Date(new Date(redeemedAt).getTime() + unlockDurationMinutes * 60 * 1000).toISOString()
   const redeemed = await repo.redeemActivationCode(normalizedCode, currentUser.user.id, redeemedAt, unlockExpiresAt)
   if (!redeemed) {
-    return { ok: false, error: buildInvalidInput('Nieprawid�owy kod aktywacyjny.') }
+    return { ok: false, error: buildInvalidInput('Nieprawid\u0142owy kod aktywacyjny.') }
   }
 
   return {
@@ -470,5 +475,33 @@ export async function createActivationCode(
     ok: true,
     user: currentUser.user,
     activationCode,
+  }
+}
+
+export async function updateAvatar(
+  repo: AuthRepository,
+  sessionToken: string | null | undefined,
+  avatarId: string,
+  deps: AuthDeps = {},
+): Promise<
+  | { ok: true; user: PublicAuthUser }
+  | { ok: false; error: AuthFailure }
+> {
+  const currentUser = await getCurrentUser(repo, sessionToken, deps)
+  if (currentUser.ok === false) {
+    return { ok: false, error: currentUser.error }
+  }
+
+  await repo.updateUserAvatar(currentUser.user.id, avatarId)
+
+  const now = resolveNow(deps).toISOString()
+  const user = await repo.findUserById(currentUser.user.id)
+  if (!user) {
+    return { ok: false, error: sessionNotFoundError }
+  }
+
+  return {
+    ok: true,
+    user: await loadPublicUser(repo, user, now),
   }
 }

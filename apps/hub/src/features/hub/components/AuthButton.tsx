@@ -1,12 +1,13 @@
 'use client'
 
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useAuth } from '@/app/providers'
+import { useAuth, useProfileModal } from '@/app/providers'
+import { getPartyAvatarAssetSrc } from '@party/ui'
 import styles from './AuthButton.module.css'
 
 export function AuthButton() {
-  const { user, isLoading, logout } = useAuth()
+  const { user, isLoading } = useAuth()
+  const { openProfile } = useProfileModal()
   const router = useRouter()
 
   if (isLoading) {
@@ -19,22 +20,16 @@ export function AuthButton() {
 
   if (user) {
     return (
-      <div className={styles.authGroup}>
-        <Link href="/profile" className={styles.accountButton} title={user.email}>
-          {user.displayName}
-        </Link>
-        <button
-          type="button"
-          className={styles.logoutButton}
-          onClick={async () => {
-            await logout()
-            router.replace('/')
-            router.refresh()
-          }}
-        >
-          Wyloguj
-        </button>
-      </div>
+      <button type="button" className={styles.accountButton} onClick={openProfile} title={user.email}>
+        <img
+          src={getPartyAvatarAssetSrc(user.avatarId, 'static').src}
+          alt="Twój awatar"
+          width={28}
+          height={28}
+          className={styles.accountAvatar}
+        />
+        {user.displayName}
+      </button>
     )
   }
 

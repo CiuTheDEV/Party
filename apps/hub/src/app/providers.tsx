@@ -1,6 +1,10 @@
 'use client'
 
-import { createContext, useContext, useEffect, useRef, useState } from 'react'
+import { createContext, useContext, useEffect, useRef, useState, lazy, Suspense } from 'react'
+
+const ProfileModal = lazy(() =>
+  import('../features/profile/ProfileModal').then((m) => ({ default: m.ProfileModal })),
+)
 
 export type AuthUser = {
   id: string
@@ -12,6 +16,7 @@ export type AuthUser = {
   entitlements: string[]
   unlockExpiresAt: string | null
   isAdmin: boolean
+  avatarId: string
 }
 
 type AuthContextValue = {
@@ -25,6 +30,7 @@ type AuthContextValue = {
     codeValidityMinutes: number,
     unlockDurationMinutes: number,
   ) => Promise<string>
+  updateAvatar: (avatarId: string) => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextValue>({
@@ -34,7 +40,35 @@ const AuthContext = createContext<AuthContextValue>({
   logout: async () => {},
   redeemActivationCode: async () => null,
   createActivationCode: async () => '',
+  updateAvatar: async () => {},
 })
+
+export type ProfileModalContextValue = {
+  isOpen: boolean
+  openProfile: () => void
+  closeProfile: () => void
+}
+
+export const ProfileModalContext = createContext<ProfileModalContextValue>({
+  isOpen: false,
+  openProfile: () => {},
+  closeProfile: () => {},
+})
+
+function mapAuthUser(payload: Partial<AuthUser>): AuthUser {
+  return {
+    id: payload.id ?? '',
+    email: payload.email ?? '',
+    displayName: payload.displayName ?? '',
+    createdAt: payload.createdAt ?? new Date().toISOString(),
+    updatedAt: payload.updatedAt ?? new Date().toISOString(),
+    lastLoginAt: payload.lastLoginAt ?? null,
+    entitlements: payload.entitlements ?? [],
+    unlockExpiresAt: payload.unlockExpiresAt ?? null,
+    isAdmin: payload.isAdmin ?? false,
+    avatarId: payload.avatarId ?? 'smile',
+  }
+}
 
 async function readCurrentUser() {
   const response = await fetch('/api/auth/me', {
@@ -50,26 +84,21 @@ async function readCurrentUser() {
   }
 
   const payload = (await response.json()) as { user: Partial<AuthUser> }
-  return {
-    id: payload.user.id ?? '',
-    email: payload.user.email ?? '',
-    displayName: payload.user.displayName ?? '',
-    createdAt: payload.user.createdAt ?? new Date().toISOString(),
-    updatedAt: payload.user.updatedAt ?? new Date().toISOString(),
-    lastLoginAt: payload.user.lastLoginAt ?? null,
-    entitlements: payload.user.entitlements ?? [],
-    unlockExpiresAt: payload.user.unlockExpiresAt ?? null,
-    isAdmin: payload.user.isAdmin ?? false,
-  }
+  return mapAuthUser(payload.user)
 }
 
 export function useAuth() {
   return useContext(AuthContext)
 }
 
+export function useProfileModal() {
+  return useContext(ProfileModalContext)
+}
+
 export function Providers({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
   const refreshRef = useRef<() => Promise<AuthUser | null>>(async () => null)
 
   useEffect(() => {
@@ -121,18 +150,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     }
 
     const payload = (await response.json()) as { user: Partial<AuthUser> }
-    const nextUser: AuthUser = {
-      id: payload.user.id ?? '',
-      email: payload.user.email ?? '',
-      displayName: payload.user.displayName ?? '',
-      createdAt: payload.user.createdAt ?? new Date().toISOString(),
-      updatedAt: payload.user.updatedAt ?? new Date().toISOString(),
-      lastLoginAt: payload.user.lastLoginAt ?? null,
-      entitlements: payload.user.entitlements ?? [],
-      unlockExpiresAt: payload.user.unlockExpiresAt ?? null,
-      isAdmin: payload.user.isAdmin ?? false,
-    }
-
+    const nextUser = mapAuthUser(payload.user)
     setUser(nextUser)
     return nextUser
   }
@@ -163,6 +181,24 @@ export function Providers({ children }: { children: React.ReactNode }) {
     return payload.activationCode.code ?? ''
   }
 
+  async function updateAvatar(avatarId: string) {
+    const response = await fetch('/api/auth/update-avatar', {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ avatarId }),
+    })
+
+    if (!response.ok) {
+      throw new Error('Nie udało się zaktualizować awatara.')
+    }
+
+    const payload = (await response.json()) as { user: Partial<AuthUser> }
+    setUser(mapAuthUser(payload.user))
+  }
+
   useEffect(() => {
     void refresh()
   }, [])
@@ -181,9 +217,22 @@ export function Providers({ children }: { children: React.ReactNode }) {
     return () => window.clearTimeout(timeoutId)
   }, [user?.unlockExpiresAt])
 
+  const profileModalValue: ProfileModalContextValue = {
+    isOpen: isProfileOpen,
+    openProfile: () => setIsProfileOpen(true),
+    closeProfile: () => setIsProfileOpen(false),
+  }
+
   return (
-    <AuthContext.Provider value={{ user, isLoading, refresh, logout, redeemActivationCode, createActivationCode }}>
-      {children}
-    </AuthContext.Provider>
+    <ProfileModalContext.Provider value={profileModalValue}>
+      <AuthContext.Provider value={{ user, isLoading, refresh, logout, redeemActivationCode, createActivationCode, updateAvatar }}>
+        {children}
+        {isProfileOpen && (
+          <Suspense fallback={null}>
+            <ProfileModal />
+          </Suspense>
+        )}
+      </AuthContext.Provider>
+    </ProfileModalContext.Provider>
   )
 }

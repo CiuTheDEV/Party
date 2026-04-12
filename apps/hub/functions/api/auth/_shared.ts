@@ -10,12 +10,29 @@ import {
   logoutAccount,
   redeemActivationCode,
   registerAccount,
+  updateAvatar,
   type AuthFailure,
   type AuthRepository,
   type ActivationCodeRecord,
   type AuthSessionRecord,
   type AuthUserRecord,
 } from '../../../src/lib/auth/auth-service'
+
+// Mirrors PARTY_AVATARS IDs from @party/ui — kept here to avoid bundling UI into Pages Functions
+const VALID_AVATAR_IDS = new Set([
+  'smile', 'sunglasses', 'star-struck', 'partying-face', 'smile-cat', 'nerd-face',
+  'tongue-face', 'monocle-face', 'angel-face', 'cowboy-face', 'ghost', 'beaming-face',
+  'laughing-face', 'wink-face', 'cool-face', 'mind-blown', 'alien', 'joy-face',
+  'heart-eyes', 'kissing-face', 'thinking-face', 'shushing-face', 'sleepy-face',
+  'drooling-face', 'robot-face', 'clown-face', 'poop',
+  'dog', 'cat', 'bear', 'fox', 'tiger', 'lion', 'frog', 'pig', 'koala', 'unicorn',
+  'wolf', 'owl', 'rabbit', 'mouse', 'panda', 'monkey', 'penguin', 'dragon', 'chicken',
+  'duck', 'eagle', 'shark', 'octopus', 'butterfly', 'snail', 'lady-beetle', 'whale', 'dolphin',
+  'theater', 'circus', 'palette', 'clapper', 'microphone', 'guitar', 'dart', 'trophy',
+  'star', 'fire', 'gem', 'rocket', 'lightning', 'soccer-ball', 'dice', 'crown',
+  'headphones', 'basketball', 'volleyball', 'gamepad', 'joystick', 'camera', 'movie-camera',
+  'books', 'magic-wand', 'saturn', 'crystal-ball',
+])
 
 type D1Prepared = {
   bind: (...values: unknown[]) => {
@@ -39,6 +56,7 @@ type D1UserRow = {
   created_at: string
   updated_at: string
   last_login_at: string | null
+  avatar_id: string | null
 }
 
 type D1SessionRow = {
@@ -71,6 +89,7 @@ function mapUser(row: D1UserRow): AuthUserRecord {
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     lastLoginAt: row.last_login_at,
+    avatarId: row.avatar_id ?? 'smile',
   }
 }
 
@@ -104,7 +123,7 @@ export function createD1AuthRepository(db: AuthEnv['DB']): AuthRepository {
     async findUserByEmail(email) {
       const row = await db
         .prepare(
-          'SELECT id, email, display_name, password_hash, created_at, updated_at, last_login_at FROM users WHERE email = ?1 LIMIT 1',
+          'SELECT id, email, display_name, password_hash, created_at, updated_at, last_login_at, avatar_id FROM users WHERE email = ?1 LIMIT 1',
         )
         .bind(email)
         .first<D1UserRow>()
@@ -114,7 +133,7 @@ export function createD1AuthRepository(db: AuthEnv['DB']): AuthRepository {
     async findUserById(id) {
       const row = await db
         .prepare(
-          'SELECT id, email, display_name, password_hash, created_at, updated_at, last_login_at FROM users WHERE id = ?1 LIMIT 1',
+          'SELECT id, email, display_name, password_hash, created_at, updated_at, last_login_at, avatar_id FROM users WHERE id = ?1 LIMIT 1',
         )
         .bind(id)
         .first<D1UserRow>()
@@ -124,7 +143,7 @@ export function createD1AuthRepository(db: AuthEnv['DB']): AuthRepository {
     async createUser(user) {
       await db
         .prepare(
-          'INSERT INTO users (id, email, display_name, password_hash, created_at, updated_at, last_login_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)',
+          'INSERT INTO users (id, email, display_name, password_hash, created_at, updated_at, last_login_at, avatar_id) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)',
         )
         .bind(
           user.id,
@@ -134,6 +153,7 @@ export function createD1AuthRepository(db: AuthEnv['DB']): AuthRepository {
           user.createdAt,
           user.updatedAt,
           user.lastLoginAt,
+          user.avatarId,
         )
         .run()
 
@@ -202,6 +222,12 @@ export function createD1AuthRepository(db: AuthEnv['DB']): AuthRepository {
         .run()) as { meta?: { changes?: number } }
 
       return result.meta?.changes === 1
+    },
+    async updateUserAvatar(userId, avatarId) {
+      await db
+        .prepare('UPDATE users SET avatar_id = ?1, updated_at = ?2 WHERE id = ?3')
+        .bind(avatarId, new Date().toISOString(), userId)
+        .run()
     },
     async createActivationCode(activationCode) {
       await db
@@ -389,6 +415,28 @@ export async function redeemCodeFromRequest(request: Request, env: AuthEnv) {
   const repo = createD1AuthRepository(env.DB)
   const sessionToken = readCookieValue(request.headers.get('cookie'))
   const result = await redeemActivationCode(repo, sessionToken, normalizeCodeField(body.code))
+
+  if (result.ok === false) {
+    return errorResponse(result.error)
+  }
+
+  return jsonResponse({ user: result.user })
+}
+
+export async function updateAvatarFromRequest(request: Request, env: AuthEnv) {
+  const body = await readJsonBody<{ avatarId?: unknown }>(request)
+  if (!body) {
+    return errorResponse({ code: 'invalid_input', message: 'Invalid JSON.', status: 400 })
+  }
+
+  const avatarId = toStringField(body.avatarId)
+  if (!avatarId || !VALID_AVATAR_IDS.has(avatarId)) {
+    return errorResponse({ code: 'invalid_input', message: 'Nieprawidłowy identyfikator awatara.', status: 400 })
+  }
+
+  const repo = createD1AuthRepository(env.DB)
+  const sessionToken = readCookieValue(request.headers.get('cookie'))
+  const result = await updateAvatar(repo, sessionToken, avatarId)
 
   if (result.ok === false) {
     return errorResponse(result.error)

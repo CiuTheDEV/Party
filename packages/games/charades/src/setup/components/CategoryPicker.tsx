@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { AlertDialog } from '@party/ui'
 import { Check, CheckCheck, ChevronDown, Dices, Eraser, LibraryBig, LockKeyhole } from 'lucide-react'
@@ -175,13 +175,13 @@ export function CategoryPicker({
 
     try {
       await redeemActivationCode(activationCode)
-      setActivationSuccess('Kod zaakceptowany. Kategoria zostaĹ‚a odblokowana.')
+      setActivationSuccess('Kod zaakceptowany. Kategoria została odblokowana.')
       setActivationCode('')
       setTimeout(() => {
         setLockedCategory(null)
       }, 350)
     } catch (error) {
-      setActivationError(error instanceof Error ? error.message : 'Nie udaĹ‚o siÄ™ aktywowaÄ‡ kodu.')
+      setActivationError(error instanceof Error ? error.message : 'Nie udało się aktywować kodu.')
     } finally {
       setIsRedeeming(false)
     }
@@ -265,7 +265,7 @@ export function CategoryPicker({
             <button
               type="button"
               className={styles.iconActionButton}
-              aria-label="WyczyĹ›Ä‡ wybĂłr kategorii"
+              aria-label="Wyczyść wybór kategorii"
               onClick={clearAll}
             >
               <Eraser size={16} />
@@ -316,7 +316,7 @@ export function CategoryPicker({
                       <button
                         type="button"
                         className={styles.lockBadgeButton}
-                        aria-label={`OtwĂłrz kod aktywacyjny dla kategorii ${category.name}`}
+                        aria-label={`Otwórz kod aktywacyjny dla kategorii ${category.name}`}
                         onClick={(event) => {
                           event.stopPropagation()
                           openActivationDialog(category)
@@ -347,7 +347,7 @@ export function CategoryPicker({
                         setCategoryMode(category.id, 'easy')
                       }}
                     >
-                      Ĺatwe
+                      Łatwe
                     </button>
                     <button
                       type="button"
@@ -377,7 +377,7 @@ export function CategoryPicker({
           </div>
 
           <button type="button" className={styles.managementStrip} onClick={() => setIsPoolManagerOpen(true)}>
-            ZarzÄ…dzaj pulÄ… unikalnych haseĹ‚
+            Zarządzaj pulą unikalnych haseł
           </button>
         </div>
       ) : null}
@@ -394,16 +394,16 @@ export function CategoryPicker({
             <div className={styles.modalHeader}>
               <div className={styles.modalHeading}>
                 <h3 id="charades-pool-manager-title" className={styles.modalTitle}>
-                  ZarzÄ…dzaj pulÄ… unikalnych haseĹ‚
+                  Zarządzaj pulą unikalnych haseł
                 </h3>
                 <p className={styles.modalDescription}>
-                  Tutaj sprawdzisz stan aktywnej puli i rÄ™cznie wyczyĹ›cisz historiÄ™ zuĹĽytych oraz odrzuconych haseĹ‚.
+                  Tutaj sprawdzisz stan aktywnej puli i ręcznie wyczyścisz historię zużytych oraz odrzuconych haseł.
                 </p>
               </div>
               <button
                 type="button"
                 className={styles.modalClose}
-                aria-label="Zamknij zarzÄ…dzanie pulÄ…"
+                aria-label="Zamknij zarządzanie pulą"
                 onClick={() => setIsPoolManagerOpen(false)}
               >
                 Zamknij
@@ -412,9 +412,9 @@ export function CategoryPicker({
 
             <section className={styles.modalSection}>
               <div className={styles.modalSectionCopy}>
-                <h4 className={styles.modalSectionTitle}>CaĹ‚a pula</h4>
+                <h4 className={styles.modalSectionTitle}>Cała pula</h4>
                 <p className={styles.modalSectionDescription}>
-                  Aktywna pula dla bieĹĽÄ…cego wyboru kategorii ma teraz tyle Ĺ›wieĹĽych haseĹ‚:
+                  Aktywna pula dla bieżącego wyboru kategorii ma teraz tyle świeżych haseł:
                 </p>
                 <div className={styles.poolSummaryValue}>{`${activePoolStats.remaining}/${activePoolStats.total}`}</div>
               </div>
@@ -427,7 +427,7 @@ export function CategoryPicker({
               <div className={styles.modalSectionCopy}>
                 <h4 className={styles.modalSectionTitle}>Kategorie</h4>
                 <p className={styles.modalSectionDescription}>
-                  Reset kategorii czyĹ›ci jej historiÄ™ dla wszystkich graczy w tej sesji.
+                  Reset kategorii czyści jej historię dla wszystkich graczy w tej sesji.
                 </p>
               </div>
 
@@ -441,7 +441,7 @@ export function CategoryPicker({
                       <div className={styles.categoryResetMeta}>
                         <span className={styles.categoryResetName}>{category.name}</span>
                         <div className={styles.categoryStatsRow}>
-                          <span className={styles.categoryStatPill}>{`Ĺatwe ${easyStats.remaining}/${easyStats.total}`}</span>
+                          <span className={styles.categoryStatPill}>{`Łatwe ${easyStats.remaining}/${easyStats.total}`}</span>
                           <span className={styles.categoryStatPill}>{`Trudne ${hardStats.remaining}/${hardStats.total}`}</span>
                         </div>
                       </div>
@@ -476,7 +476,7 @@ export function CategoryPicker({
                   {lockedCategory.name}
                 </h3>
                 <p className={styles.modalDescription}>
-                  Ta kategoria jest zablokowana. Wpisz kod aktywacyjny, aby jÄ… odblokowaÄ‡.
+                  Ta kategoria jest zablokowana. Wpisz kod aktywacyjny, aby ją odblokować.
                 </p>
               </div>
               <button
@@ -503,7 +503,7 @@ export function CategoryPicker({
               </label>
 
               <p className={styles.unlockNote}>
-                Po odblokowaniu kategoria zniknie z listy zamkniÄ™tych i stanie siÄ™ dostÄ™pna od razu.
+                Po odblokowaniu kategoria zniknie z listy zamkniętych i stanie się dostępna od razu.
               </p>
 
               {activationError ? <p className={styles.unlockError}>{activationError}</p> : null}
@@ -518,7 +518,7 @@ export function CategoryPicker({
                   Anuluj
                 </button>
                 <button type="submit" className={styles.unlockPrimaryButton} disabled={isRedeeming}>
-                  {isRedeeming ? 'AktywujÄ™...' : 'Odblokuj'}
+                  {isRedeeming ? 'Aktywuję...' : 'Odblokuj'}
                 </button>
               </div>
             </form>
@@ -532,13 +532,13 @@ export function CategoryPicker({
         eyebrow="Reset puli"
         title={
           poolResetTarget?.type === 'all'
-            ? 'PrzywrĂłciÄ‡ caĹ‚Ä… historiÄ™ puli?'
-            : `PrzywrĂłciÄ‡ kategoriÄ™ "${poolResetTarget?.categoryName}"?`
+            ? 'Przywrócić całą historię puli?'
+            : `Przywrócić kategorię "${poolResetTarget?.categoryName}"?`
         }
         description={
           poolResetTarget?.type === 'all'
-            ? 'Wszystkie zuĹĽyte i odrzucone hasĹ‚a wrĂłcÄ… do uĹĽycia w tej sesji.'
-            : 'ZuĹĽyte i odrzucone hasĹ‚a z tej kategorii wrĂłcÄ… do uĹĽycia dla caĹ‚ej sesji.'
+            ? 'Wszystkie zużyte i odrzucone hasła wrócą do użycia w tej sesji.'
+            : 'Zużyte i odrzucone hasła z tej kategorii wrócą do użycia dla całej sesji.'
         }
         actions={[
           {
@@ -565,4 +565,3 @@ export function openCharadesPoolManager() {
 
   window.dispatchEvent(new CustomEvent(OPEN_POOL_MANAGER_EVENT))
 }
-
