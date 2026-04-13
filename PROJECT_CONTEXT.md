@@ -61,7 +61,7 @@ project-party/
 |  |- game-sdk/             # Module contract (config, status, setup, menu, results)
 |  `- games/
 |     |- charades/          # First live game module
-|     `- codenames/         # Coming-soon game scaffold
+|     `- codenames/         # Live game module (menu + setup, no runtime yet)
 `- content/
    `- charades/             # Word lists and categories
 ```
@@ -98,7 +98,7 @@ Current repo now matches the intended split much more closely:
 - `apps/hub` is platform routing + registry + hub feature code,
 - `@party/ui` owns shared shell/setup primitives,
 - `charades` owns menu, setup, results, and runtime,
-- `codenames` is scaffolded and registered as `coming-soon`.
+- `codenames` is live with full menu + settings overlay + setup modal (no gameplay runtime yet).
 
 ### Shared Setup Model
 
@@ -133,7 +133,7 @@ This means:
 ## Open Questions / Remaining Tech Debt
 
 - [ ] Finalize Phase 4 deploy path for hub + Partykit
-- [ ] Start defining the real gameplay/runtime shape for `codenames`
+- [ ] Implement Codenames gameplay/runtime (menu + setup are done)
 - [ ] Decide whether Hub library cards should become fully data-driven from module registry
 - [ ] Decide long-term room architecture details before production multiplayer
 - [ ] Finish the live UX polish pass for Charades runtime host controls now that the shared host-navigation framework is in place
@@ -142,16 +142,16 @@ This means:
 
 <!-- handoff:start -->
 ## Session Handoff
-- Last: 2026-04-12 by Codex (GPT-5.4)
-- Task: Fix local dev startup and keep auth working on localhost.
-- Did: Removed Google font fetches that were blocking offline builds, kept the local auth API path selection for `localhost`/`127.0.0.1`, and made the Windows dev launcher start the local auth server plus static hub without the failing build step. Verified `npm run build --workspace @party/hub` passes and `npm run dev` reaches both `127.0.0.1:8788` and `127.0.0.1:3000`.
-- Next: If the hub UI changes, rebuild `apps/hub/out` before restarting dev so the static launcher serves the latest bundle.
+- Last: 2026-04-13 by Claude Code (Sonnet)
+- Task: Dodano Tajniacy — pełny moduł menu + setup (bez runtime).
+- Did: Zaimplementowano cały pakiet `@party/codenames`: menu główne, overlay ustawień (z rebindingiem kontrolera/klawiatury), setup modal z sekcjami drużyn/rund/kategorii. Dodano hub route `apps/hub/src/app/games/codenames/`. Build `@party/codenames` + `@party/hub` przechodzi czysto, `/games/codenames` widoczne w output.
+- Next: Gameplay/runtime Tajniaków — logika kart, tury, tryb Mistrza Szpiegów.
 - Blocker: None.
 
 ## Previous Handoff
 - Last: 2026-04-12 by Codex (GPT-5.4)
-- Task: Time-limited activation codes and auto re-locking categories.
-- Did: Split activation codes into two windows (`codeValidityMinutes` and `unlockDurationMinutes`), updated the Bullet admin panel to generate both values, surfaced unlock expiry in the profile, and made locked Charades categories re-lock automatically when the unlock window ends.
-- Next: Profile modal feature completed in next session.
+- Task: Fix local dev startup and keep auth working on localhost.
+- Did: Removed Google font fetches that were blocking offline builds, kept the local auth API path selection for `localhost`/`127.0.0.1`, and made the Windows dev launcher start the local auth server plus static hub without the failing build step.
+- Next: Codenames module — completed in S45.
 - Blocker: None.
 <!-- handoff:end -->

@@ -1,3 +1,18 @@
+# Today - 2026-04-13
+
+### S45 (2026-04-13) [Project Party] Tajniacy — menu, settings overlay, setup modal + hub route
+
+- Dodano grę Tajniacy (Codenames) jako pełny moduł menu+setup bez runtime.
+- Zakres: menu główne, overlay ustawień (skopiowany z Kalamburów), setup modal z 3 sekcjami.
+- Model drużyn: dwie stałe drużyny (Czerwoni/Niebiescy) z avatarem i edytowalną nazwą — brak listy graczy.
+- Setup: `TeamsSection` (2 karty drużyn z avatar pickerem), `SettingsSection` (stepper rund 1-10), `CategoriesSection` (standardowe/+18).
+- Skopiowano i przemianowano wszystkie lokalne helpery z Kalamburów: `codenames-controls-bindings.ts`, `codenames-settings-overlay-helpers.ts`, `useSettingsBindingsDraft.ts`, `useSettingsGamepadDebug.ts`.
+- Dodano brakujące pliki: `css-modules.d.ts`, `minPlayers`/`maxPlayers` w `config.ts`.
+- Naprawiono props `AvatarAsset`: `id` → `avatar`, usunięto prop `size`.
+- Dodano hub route: `apps/hub/src/app/games/codenames/` — layout, page, menu-view-context, theme.css.
+- Build: `@party/codenames` ✅, `@party/hub` ✅ (route `/games/codenames` w output).
+- Experience recorded: yes
+
 # Today - 2026-04-12
 
 ### S44 (2026-04-12 ~) [Project Party] Profile modal z avatar pickerem
