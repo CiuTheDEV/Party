@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { getPartyAvatarsByCategory, AvatarAsset } from '@party/ui'
+import { useEffect, useRef, useState } from 'react'
+import { AvatarAsset, getPartyAvatarCategories, getPartyAvatarsByCategory } from '@party/ui'
 import type { GameSetupSectionComponentProps } from '@party/game-sdk'
+import { X } from 'lucide-react'
 import type { CodenamesSetupHelpers } from '../helpers'
 import type { CodenamesSetupState, CodenamesTeam } from '../state'
 import styles from './TeamsSection.module.css'
@@ -14,7 +15,11 @@ const ALL_AVATARS = [
   ...getPartyAvatarsByCategory('people'),
   ...getPartyAvatarsByCategory('animals'),
   ...getPartyAvatarsByCategory('other'),
-].map((a) => a.id)
+].map((avatar) => avatar.id)
+
+const AVATAR_CATEGORIES = getPartyAvatarCategories()
+
+type AvatarCategoryId = (typeof AVATAR_CATEGORIES)[number]['id']
 
 type TeamCardProps = {
   team: CodenamesTeam
@@ -25,62 +30,120 @@ type TeamCardProps = {
 
 function TeamCard({ team, label, color, onChange }: TeamCardProps) {
   const [pickingAvatar, setPickingAvatar] = useState(false)
+  const [activeCategory, setActiveCategory] = useState<AvatarCategoryId>(AVATAR_CATEGORIES[0]?.id ?? 'people')
   const popupRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (!pickingAvatar) return
-    function handleClickOutside(e: MouseEvent) {
-      if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
+    if (!pickingAvatar) {
+      return
+    }
+
+    function handleClickOutside(event: MouseEvent) {
+      if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
         setPickingAvatar(false)
       }
     }
+
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [pickingAvatar])
+
+  useEffect(() => {
+    if (!pickingAvatar) {
+      return
+    }
+
+    const match = AVATAR_CATEGORIES.find((category) =>
+      getPartyAvatarsByCategory(category.id).some((avatar) => avatar.id === team.avatar),
+    )
+
+    if (match) {
+      setActiveCategory(match.id)
+    }
+  }, [pickingAvatar, team.avatar])
+
+  const activeAvatars = getPartyAvatarsByCategory(activeCategory)
 
   return (
     <div className={styles.card} style={{ '--team-color': color } as React.CSSProperties}>
       <div className={styles.cardHeader}>
         <span className={styles.cardLabel}>{label}</span>
       </div>
-      <div className={styles.avatarPopupAnchor} ref={popupRef}>
-        <button
-          type="button"
-          className={styles.avatarBtn}
-          onClick={() => setPickingAvatar((prev) => !prev)}
-          title="Zmień avatar drużyny"
-        >
-          <AvatarAsset avatar={team.avatar} />
-          <span className={styles.avatarHint}>Zmień</span>
-        </button>
-        {pickingAvatar ? (
-          <div className={styles.avatarPopup}>
-            <div className={styles.avatarGrid}>
-              {ALL_AVATARS.map((id) => (
-                <button
-                  key={id}
-                  type="button"
-                  className={team.avatar === id ? `${styles.avatarOption} ${styles.avatarOptionActive}` : styles.avatarOption}
-                  onClick={() => {
-                    onChange({ ...team, avatar: id })
-                    setPickingAvatar(false)
-                  }}
-                >
-                  <AvatarAsset avatar={id} />
+
+      <div className={styles.cardBody}>
+        <div className={styles.avatarPopupAnchor} ref={popupRef}>
+          <button
+            type="button"
+            className={styles.avatarBtn}
+            onClick={() => setPickingAvatar((prev) => !prev)}
+            title="Zmień avatar drużyny"
+          >
+            <span className={styles.avatarFrame}>
+              <AvatarAsset avatar={team.avatar} size={84} />
+            </span>
+            <span className={styles.avatarHint}>Zmień avatar</span>
+          </button>
+
+          {pickingAvatar ? (
+            <div className={styles.avatarPopup}>
+              <div className={styles.avatarPopupHeader}>
+                <span className={styles.avatarPopupTitle}>Wybierz avatar</span>
+                <button type="button" className={styles.avatarPopupClose} onClick={() => setPickingAvatar(false)}>
+                  <X size={16} strokeWidth={2.5} />
                 </button>
-              ))}
+              </div>
+
+              <div
+                className={styles.avatarTabs}
+                style={{ gridTemplateColumns: `repeat(${AVATAR_CATEGORIES.length}, minmax(0, 1fr))` }}
+              >
+                {AVATAR_CATEGORIES.map((category) => (
+                  <button
+                    key={category.id}
+                    type="button"
+                    className={category.id === activeCategory ? `${styles.avatarTab} ${styles.avatarTabActive}` : styles.avatarTab}
+                    onClick={() => setActiveCategory(category.id as AvatarCategoryId)}
+                  >
+                    {category.label}
+                  </button>
+                ))}
+              </div>
+
+              <div className={styles.avatarGrid}>
+                {activeAvatars.map((avatar) => (
+                  <button
+                    key={avatar.id}
+                    type="button"
+                    className={team.avatar === avatar.id ? `${styles.avatarOption} ${styles.avatarOptionActive}` : styles.avatarOption}
+                    onClick={() => {
+                      onChange({ ...team, avatar: avatar.id })
+                      setPickingAvatar(false)
+                    }}
+                    aria-label={avatar.label}
+                    title={avatar.label}
+                  >
+                    <span className={styles.avatarOptionFrame}>
+                      <AvatarAsset avatar={avatar.id} size={42} />
+                    </span>
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
-        ) : null}
+          ) : null}
+        </div>
+
+        <div className={styles.nameBlock}>
+          <span className={styles.nameLabel}>Nazwa drużyny</span>
+          <input
+            className={styles.nameInput}
+            type="text"
+            value={team.name}
+            maxLength={20}
+            onChange={(event) => onChange({ ...team, name: event.target.value })}
+            placeholder="Nazwa drużyny"
+          />
+        </div>
       </div>
-      <input
-        className={styles.nameInput}
-        type="text"
-        value={team.name}
-        maxLength={20}
-        onChange={(e) => onChange({ ...team, name: e.target.value })}
-        placeholder="Nazwa drużyny"
-      />
     </div>
   )
 }
@@ -96,7 +159,6 @@ export function TeamsSection({ state, updateState }: GameSetupSectionComponentPr
 
   return (
     <section className={styles.section}>
-      <h3 className={styles.sectionTitle}>Drużyny</h3>
       <div className={styles.teamsGrid}>
         <TeamCard
           team={state.teams[0]}

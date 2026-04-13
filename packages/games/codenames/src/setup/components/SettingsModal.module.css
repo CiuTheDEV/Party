@@ -1,0 +1,150 @@
+.contentCompact {
+  padding-block: 20px 24px;
+  gap: 18px;
+  overflow-y: hidden;
+}
+
+.contentCompact .contentSection {
+  gap: 16px;
+}
+
+.sidebarContent {
+  display: grid;
+  gap: 0;
+  align-content: start;
+}
+
+.sidebarTabs {
+  display: grid;
+  gap: 8px;
+}
+
+.contentSection {
+  display: grid;
+  gap: 18px;
+  align-content: start;
+}
+
+.optionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.optionIntro {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.optionLabel {
+  font-size: 12px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.58);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
+
+.optionDescription {
+  margin: 0;
+  max-width: 48ch;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.optionValue {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 62px;
+  min-height: 56px;
+  padding: 10px 16px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(220, 38, 38, 0.18), rgba(220, 38, 38, 0.08));
+  border: 1px solid rgba(220, 38, 38, 0.34);
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--color-text);
+  letter-spacing: -0.03em;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 10px 22px rgba(220, 38, 38, 0.14);
+}
+
+.cancelBtn {
+  padding: 14px 28px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.cancelBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.applyBtn {
+  padding: 14px 32px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(180deg, var(--game-color-primary), var(--game-color-primary-light));
+  color: #fff;
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.15s, opacity 0.15s, box-shadow 0.15s;
+  box-shadow: 0 12px 30px rgba(220, 38, 38, 0.32);
+}
+
+.applyBtn:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
+.applyBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+  transform: none;
+  box-shadow: none;
+}
+
+.applyBtn:disabled:hover {
+  opacity: 0.42;
+}
+
+@media (max-width: 767px) {
+  .contentCompact {
+    padding: 18px 16px;
+    gap: 16px;
+    overflow-y: auto;
+  }
+
+  .contentSection {
+    gap: 16px;
+  }
+
+  .optionHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .optionValue {
+    align-self: flex-start;
+    min-width: 48px;
+    font-size: 20px;
+  }
+
+  .cancelBtn,
+  .applyBtn {
+    font-size: 15px;
+    padding: 12px 20px;
+  }
+}

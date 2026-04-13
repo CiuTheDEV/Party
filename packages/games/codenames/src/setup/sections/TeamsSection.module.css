@@ -1,162 +1,320 @@
 .section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-}
-
-.sectionTitle {
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-text-secondary, #9ca3af);
-  margin: 0;
+  gap: 18px;
+  padding: 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    radial-gradient(circle at top left, rgba(220, 38, 38, 0.12), transparent 38%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.03));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .teamsGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-@media (max-width: 480px) {
-  .teamsGrid {
-    grid-template-columns: 1fr;
-  }
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
 }
 
 .card {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 20px 16px;
-  background: rgba(255, 255, 255, 0.04);
+  gap: 16px;
+  padding: 18px;
+  border-radius: 22px;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-top: 3px solid var(--team-color);
-  border-radius: 12px;
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--team-color) 18%, transparent), transparent 38%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.03));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .cardHeader {
-  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
 }
 
 .cardLabel {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--team-color);
-}
-
-.avatarBtn {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  background: none;
-  border: 2px solid transparent;
-  border-radius: 12px;
-  padding: 8px;
-  cursor: pointer;
-  transition: border-color 0.15s;
-}
-
-.avatarBtn:hover {
-  border-color: var(--team-color);
-}
-
-.avatarHint {
-  font-size: 11px;
-  color: var(--color-text-secondary, #9ca3af);
-}
-
-.nameInput {
-  width: 100%;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-size: 14px;
-  color: var(--color-text-primary, #f9fafb);
+  display: block;
+  font-size: 20px;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: rgba(255, 255, 255, 0.96);
   text-align: center;
-  outline: none;
-  transition: border-color 0.15s;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
 }
 
-.nameInput:focus {
-  border-color: var(--team-color);
-}
-
-.nameInput::placeholder {
-  color: var(--color-text-secondary, #6b7280);
+.cardBody {
+  display: grid;
+  gap: 16px;
 }
 
 .avatarPopupAnchor {
   position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+.avatarBtn {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.avatarFrame {
+  width: 132px;
+  height: 132px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 32px;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.22), transparent 54%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+  border: 1px solid color-mix(in srgb, var(--team-color) 34%, white);
+  box-shadow:
+    0 18px 38px rgba(0, 0, 0, 0.22),
+    0 0 0 10px color-mix(in srgb, var(--team-color) 8%, transparent);
+}
+
+.avatarHint {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.62);
+  text-align: center;
+}
+
+.nameBlock {
+  display: grid;
+  gap: 8px;
+  text-align: center;
+}
+
+.nameLabel {
+  display: block;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.58);
+  text-align: center;
+}
+
+.nameInput {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text);
+  font-size: 17px;
+  font-weight: 700;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.nameInput:focus {
+  border-color: color-mix(in srgb, var(--team-color) 52%, white);
+  background: color-mix(in srgb, var(--team-color) 8%, rgba(255, 255, 255, 0.04));
+}
+
+.nameInput::placeholder {
+  color: rgba(255, 255, 255, 0.38);
 }
 
 .avatarPopup {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 10px);
   left: 50%;
   transform: translateX(-50%);
   z-index: 100;
-  width: 220px;
-  padding: 8px;
-  background: #1c1c1e;
+  width: min(360px, calc(100vw - 32px));
+  max-height: min(480px, calc(100vh - 140px));
+  padding: 14px;
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--team-color) 14%, transparent), transparent 42%),
+    rgba(16, 16, 18, 0.98);
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  border-radius: 20px;
+  box-shadow:
+    0 24px 48px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+  backdrop-filter: blur(18px);
+  display: grid;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.avatarPopupHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.avatarPopupTitle {
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.avatarPopupClose {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.78);
+  cursor: pointer;
+}
+
+.avatarPopupClose:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.avatarTabs {
+  display: grid;
+  gap: 8px;
+  width: 100%;
+}
+
+.avatarTab {
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  width: 100%;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.avatarTab:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+
+.avatarTabActive {
+  border-color: color-mix(in srgb, var(--team-color) 55%, white);
+  background: color-mix(in srgb, var(--team-color) 16%, rgba(255, 255, 255, 0.04));
+  color: #fff;
 }
 
 .avatarGrid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 4px;
-  max-height: 200px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  max-height: 320px;
   overflow-y: auto;
+  padding-right: 2px;
 }
 
 .avatarOption {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  min-width: 36px;
-  min-height: 36px;
-  background: none;
-  border: 2px solid transparent;
-  border-radius: 8px;
+  width: 100%;
+  aspect-ratio: 1;
+  min-width: 0;
+  min-height: 0;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
   padding: 0;
   cursor: pointer;
-  transition: border-color 0.1s;
-  flex-shrink: 0;
+  transition:
+    border-color 0.12s ease,
+    background 0.12s ease,
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
   overflow: hidden;
 }
 
-/* AvatarAsset span wrapper */
-.avatarOption > span {
-  display: flex;
-  width: 32px;
-  height: 32px;
-  flex-shrink: 0;
-}
-
-/* img inside AvatarAsset */
-.avatarOption > span img {
-  width: 32px;
-  height: 32px;
-  object-fit: contain;
-}
-
 .avatarOption:hover {
-  border-color: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.24);
+  background: rgba(255, 255, 255, 0.06);
+  transform: translateY(-1px);
 }
 
 .avatarOptionActive {
-  border-color: var(--team-color);
-  background: rgba(255, 255, 255, 0.08);
+  border-color: color-mix(in srgb, var(--team-color) 65%, white);
+  background:
+    radial-gradient(circle at top, color-mix(in srgb, var(--team-color) 18%, transparent), transparent 70%),
+    rgba(255, 255, 255, 0.07);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--team-color) 55%, transparent) inset,
+    0 10px 18px rgba(0, 0, 0, 0.18);
+}
+
+.avatarOptionFrame {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 767px) {
+  .section {
+    gap: 16px;
+    padding: 18px;
+    border-radius: 20px;
+  }
+
+  .teamsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .card {
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .avatarFrame {
+    width: 120px;
+    height: 120px;
+    border-radius: 30px;
+  }
+
+  .nameInput {
+    font-size: 16px;
+  }
+
+  .avatarPopup {
+    width: min(100vw - 24px, 340px);
+    padding: 12px;
+    border-radius: 18px;
+  }
+
+  .avatarGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    max-height: 280px;
+  }
 }

@@ -1,6 +1,6 @@
-﻿# Project Party - Project Context
+# Project Party - Project Context
 
-*Last updated: 2026-04-12*
+*Last updated: 2026-04-13*
 
 ---
 
@@ -143,15 +143,8 @@ This means:
 <!-- handoff:start -->
 ## Session Handoff
 - Last: 2026-04-13 by Claude Code (Sonnet)
-- Task: Tajniacy — theme czerwony + poprawki UI.
-- Did: Zmieniono theme na czerwony (`#dc2626`). Naprawiono wyciek CSS (`theme.css` zmieniony z `:root` na `.theme-codenames`, podpięty przez `rootClassName` w `GameShell`). Wszystkie hardkodowane fiolety w `@party/ui` shared komponentach zamienione na `var(--game-color-primary)` / `color-mix()`. Avatar picker przebudowany z inline gridu na absolutny popup. Rozmiar avatarów w pickerze nadal nierozwiązany — obrazki są zbyt duże.
-- Next: Naprawić rozmiar avatarów w pickerze (dodać `size` prop do `AvatarAsset` lub inny pewny mechanizm). Potem gameplay/runtime Tajniaków.
-- Blocker: AvatarAsset nie ma prop `size` — CSS child selectors przez granice CSS Modules nie działają niezawodnie.
-
-## Previous Handoff
-- Last: 2026-04-13 by Claude Code (Sonnet)
-- Task: Dodano Tajniacy — pełny moduł menu + setup (bez runtime).
-- Did: Zaimplementowano cały pakiet `@party/codenames`: menu główne, overlay ustawień, setup modal z sekcjami drużyn/rund/kategorii. Dodano hub route. Build przechodzi czysto.
-- Next: Theme + poprawki UI — wykonane w S46.
+- Task: Tajniacy - sidebar modala ustawien bez hintow.
+- Did: Usunieto dolny podglad z lewego sidebara modala ustawien, zostawiajac tylko zakladke Rozgrywka.
+- Next: jesli chcesz, moge jeszcze dopracowac tylko spacing tabu.
 - Blocker: None.
 <!-- handoff:end -->

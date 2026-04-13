@@ -1,39 +1,97 @@
 # Today - 2026-04-13
 
-### S46 (2026-04-13) [Project Party] Tajniacy — theme czerwony + avatar picker popup
+### S55 (2026-04-13) [Project Party] Tajniacy - sidebar modala ustawien bez hintow
 
-- Zmieniono theme Tajniaków z fioletowego (skopiowanego z Kalamburów) na czerwony (`#dc2626`).
-- Wykryto i naprawiono wyciek CSS — `theme.css` używał `:root` globalnie, po powrocie do huba logo pozostawało czerwone. Naprawka: scope na `.theme-codenames` / `.theme-charades`, klasa przekazana przez `rootClassName` do `GameShell`.
-- Zamieniono wszystkie hardkodowane fiolety w shared `@party/ui` (Topbar, GameSidebar, GameShell, GameSettingsTabs, SettingsPanelTabs, SettingsDetailHero, itp.) na `var(--game-color-primary)` i `color-mix()` — obie gry teraz dziedziczą właściwy kolor z theme.
-- Przebudowano avatar picker z inline gridu (rozsadzał layout karty) na absolutny popup 220px zamykany kliknięciem poza.
-- Avatar picker: obrazki w gridzie nadal renderują się zbyt duże mimo prób przez `imageClassName` i `> span img` selector — nierozwiązane, sesja zakończona przed naprawą.
+- Usunieto dolny podglad z lewego sidebara modala ustawien, zostawiajac tylko zakladke Rozgrywka.
+- Weryfikacja przechodzi: `npm run build`.
 - Experience recorded: yes
 
-### S45 (2026-04-13) [Project Party] Tajniacy — menu, settings overlay, setup modal + hub route
+### S54 (2026-04-13) [Project Party] Tajniacy - modal ustawien tylko z Rozgrywka
 
-- Dodano grę Tajniacy (Codenames) jako pełny moduł menu+setup bez runtime.
-- Zakres: menu główne, overlay ustawień (skopiowany z Kalamburów), setup modal z 3 sekcjami.
-- Model drużyn: dwie stałe drużyny (Czerwoni/Niebiescy) z avatarem i edytowalną nazwą — brak listy graczy.
-- Setup: `TeamsSection` (2 karty drużyn z avatar pickerem), `SettingsSection` (stepper rund 1-10), `CategoriesSection` (standardowe/+18).
-- Skopiowano i przemianowano wszystkie lokalne helpery z Kalamburów: `codenames-controls-bindings.ts`, `codenames-settings-overlay-helpers.ts`, `useSettingsBindingsDraft.ts`, `useSettingsGamepadDebug.ts`.
-- Dodano brakujące pliki: `css-modules.d.ts`, `minPlayers`/`maxPlayers` w `config.ts`.
-- Naprawiono props `AvatarAsset`: `id` → `avatar`, usunięto prop `size`.
-- Dodano hub route: `apps/hub/src/app/games/codenames/` — layout, page, menu-view-context, theme.css.
-- Build: `@party/codenames` ✅, `@party/hub` ✅ (route `/games/codenames` w output).
+- Usunieto zakladke Kategorie z lewego sidebaru modala ustawien i zostawiono tylko Rozgrywka.
+- Weryfikacja przechodzi: `npm run build`.
+- Experience recorded: yes
+
+### S53 (2026-04-13) [Project Party] Tajniacy - zakladki modala ustawien jak w kalamburach
+
+- Sidebar modala ustawien uproszczono do ukladu jak w kalamburach: te same taby, lepsze etykiety i lekki podglad pod spodem zamiast osobnych kart.
+- Weryfikacja przechodzi: `npm run build`.
+- Experience recorded: yes
+
+### S52 (2026-04-13) [Project Party] Tajniacy - druzyny i zakladki w modalu ustawien
+
+- Wzmocniono widocznosc nazwy druzyny w kartach oraz lekko dopieszczono avatar picker.
+- Dodano zakladki w lewym sidebarze modala ustawien z podgladem rund i kategorii.
+- Weryfikacja przechodzi: `npm run build`.
+- Experience recorded: yes
+
+### S51 (2026-04-13) [Project Party] Tajniacy - centrowanie i lepszy avatar picker
+
+- Wycentrowano labelki kart druzyn oraz tresc pola nazwy.
+- Avatar picker przebudowano na szerszy panel z naglowkiem, zakladkami kategorii i wiekszymi kafelkami avatarow.
+- Weryfikacja przechodzi: `npm run build`.
+- Experience recorded: yes
+
+### S50 (2026-04-13) [Project Party] Tajniacy - usuniecie etykiet z setupu
+
+- Usunieto naglowek drużyn, badge `Avatar + nazwa` i etykiete `Rozgrywka` z setupu Tajniakow.
+- Kategorie zostaly zachowane jako rozwijany panel bez dodatkowych opisow.
+- Weryfikacja przechodzi: `npm run build`.
+- Experience recorded: yes
+### S49 (2026-04-13) [Project Party] Tajniacy â€” usuniÄ™cie opisĂłw i rozwijane kategorie
+
+- UsuniÄ™to opisy sekcji z setupu TajniakĂłw, tak aby nagĹ‚Ăłwki byĹ‚y krĂłtsze i bliĹĽsze kalamburowemu wzorcowi.
+- Przebudowano `Kategorie` na rozwijany panel z nagĹ‚Ăłwkiem, strzaĹ‚kÄ…, podsumowaniem i kartami wewnÄ…trz, zamiast staĹ‚ej listy.
+- Weryfikacja przechodzi: `npm run build`.
+- Experience recorded: yes
+### S48 (2026-04-13) [Project Party] Tajniacy Ă˘â‚¬â€ť segment druÄąÄ˝yn w stylu kalamburÄ‚Ĺ‚w
+
+- Przebudowano segment druÄąÄ˝yn w Tajniakach na panel z nagÄąâ€šÄ‚Ĺ‚wkiem, wiĂ„â„˘kszymi kartami zespoÄąâ€šÄ‚Ĺ‚w i mocniejszym podziaÄąâ€šem wizualnym, zgodnie z jĂ„â„˘zykiem setupu kalamburÄ‚Ĺ‚w.
+- KaÄąÄ˝da druÄąÄ˝yna ma teraz wiĂ„â„˘kszy avatar frame, czytelny label, pole nazwy i popup wyboru avatara osadzony w karcie.
+- Weryfikacja przechodzi: `npm run build`.
+- Experience recorded: yes
+
+### S47 (2026-04-13) [Project Party] Tajniacy Ă˘â‚¬â€ť modal i kategorie na wzÄ‚Ĺ‚r kalamburÄ‚Ĺ‚w
+
+- Przebudowano sekcjĂ„â„˘ `Ustawienia trybu` tak, by wyglĂ„â€¦daÄąâ€ša jak w kalamburach: panel z gradientowym przyciskiem, podsumowaniem rund i kategorii oraz modal z bocznym podglĂ„â€¦dem i suwakiem 1-10 rund.
+- Przebudowano `Kategorie` na wiĂ„â„˘ksze karty z aktywnym stanem, ikonĂ„â€¦ nagÄąâ€šÄ‚Ĺ‚wka, opisem i podsumowaniem wybranych sÄąâ€šownikÄ‚Ĺ‚w.
+- Weryfikacja przechodzi: `npm run build`.
+- Experience recorded: yes
+
+### S46 (2026-04-13) [Project Party] Tajniacy Ă˘â‚¬â€ť theme czerwony + avatar picker popup
+
+- Zmieniono theme TajniakÄ‚Ĺ‚w z fioletowego (skopiowanego z KalamburÄ‚Ĺ‚w) na czerwony (`#dc2626`).
+- Wykryto i naprawiono wyciek CSS Ă˘â‚¬â€ť `theme.css` uÄąÄ˝ywaÄąâ€š `:root` globalnie, po powrocie do huba logo pozostawaÄąâ€šo czerwone. Naprawka: scope na `.theme-codenames` / `.theme-charades`, klasa przekazana przez `rootClassName` do `GameShell`.
+- Zamieniono wszystkie hardkodowane fiolety w shared `@party/ui` (Topbar, GameSidebar, GameShell, GameSettingsTabs, SettingsPanelTabs, SettingsDetailHero, itp.) na `var(--game-color-primary)` i `color-mix()` Ă˘â‚¬â€ť obie gry teraz dziedziczĂ„â€¦ wÄąâ€šaÄąâ€şciwy kolor z theme.
+- Przebudowano avatar picker z inline gridu (rozsadzaÄąâ€š layout karty) na absolutny popup 220px zamykany klikniĂ„â„˘ciem poza.
+- Avatar picker: obrazki w gridzie nadal renderujĂ„â€¦ siĂ„â„˘ zbyt duÄąÄ˝e mimo prÄ‚Ĺ‚b przez `imageClassName` i `> span img` selector Ă˘â‚¬â€ť nierozwiĂ„â€¦zane, sesja zakoÄąâ€žczona przed naprawĂ„â€¦.
+- Experience recorded: yes
+
+### S45 (2026-04-13) [Project Party] Tajniacy Ă˘â‚¬â€ť menu, settings overlay, setup modal + hub route
+
+- Dodano grĂ„â„˘ Tajniacy (Codenames) jako peÄąâ€šny moduÄąâ€š menu+setup bez runtime.
+- Zakres: menu gÄąâ€šÄ‚Ĺ‚wne, overlay ustawieÄąâ€ž (skopiowany z KalamburÄ‚Ĺ‚w), setup modal z 3 sekcjami.
+- Model druÄąÄ˝yn: dwie staÄąâ€še druÄąÄ˝yny (Czerwoni/Niebiescy) z avatarem i edytowalnĂ„â€¦ nazwĂ„â€¦ Ă˘â‚¬â€ť brak listy graczy.
+- Setup: `TeamsSection` (2 karty druÄąÄ˝yn z avatar pickerem), `SettingsSection` (stepper rund 1-10), `CategoriesSection` (standardowe/+18).
+- Skopiowano i przemianowano wszystkie lokalne helpery z KalamburÄ‚Ĺ‚w: `codenames-controls-bindings.ts`, `codenames-settings-overlay-helpers.ts`, `useSettingsBindingsDraft.ts`, `useSettingsGamepadDebug.ts`.
+- Dodano brakujĂ„â€¦ce pliki: `css-modules.d.ts`, `minPlayers`/`maxPlayers` w `config.ts`.
+- Naprawiono props `AvatarAsset`: `id` Ă˘â€ â€™ `avatar`, usuniĂ„â„˘to prop `size`.
+- Dodano hub route: `apps/hub/src/app/games/codenames/` Ă˘â‚¬â€ť layout, page, menu-view-context, theme.css.
+- Build: `@party/codenames` Ă˘Ĺ›â€¦, `@party/hub` Ă˘Ĺ›â€¦ (route `/games/codenames` w output).
 - Experience recorded: yes
 
 # Today - 2026-04-12
 
 ### S44 (2026-04-12 ~) [Project Party] Profile modal z avatar pickerem
 
-- Zastąpiono /profile osobną stroną modalem szklanym otwieranym z AuthButton.
-- Dwa taby (Konto / Dostęp) o stałej wysokości 380px — brak skoku layoutu przy przełączaniu.
-- Avatar picker wsuwa się z prawej (CSS transform), Anuluj/Akceptuj, zapis przez POST /api/auth/update-avatar.
-- Dodano kolumnę avatar_id do tabeli users w D1 (migration zastosowana przez MCP).
+- ZastĂ„â€¦piono /profile osobnĂ„â€¦ stronĂ„â€¦ modalem szklanym otwieranym z AuthButton.
+- Dwa taby (Konto / DostĂ„â„˘p) o staÄąâ€šej wysokoÄąâ€şci 380px Ă˘â‚¬â€ť brak skoku layoutu przy przeÄąâ€šĂ„â€¦czaniu.
+- Avatar picker wsuwa siĂ„â„˘ z prawej (CSS transform), Anuluj/Akceptuj, zapis przez POST /api/auth/update-avatar.
+- Dodano kolumnĂ„â„˘ avatar_id do tabeli users w D1 (migration zastosowana przez MCP).
 - Admin button (cyan) widoczny tylko dla isAdmin users, przenosi na /admin.
-- ProfileModalContext w Providers (Client Component) — brak prop drillingu przez Server Component layout.
-- AuthButton pokazuje teraz miniaturkę avatara obok displayName.
-- Przy okazji naprawiono stare błędy kodowania UTF-8 w auth-service.ts i CategoryPicker.tsx.
+- ProfileModalContext w Providers (Client Component) Ă˘â‚¬â€ť brak prop drillingu przez Server Component layout.
+- AuthButton pokazuje teraz miniaturkĂ„â„˘ avatara obok displayName.
+- Przy okazji naprawiono stare bÄąâ€šĂ„â„˘dy kodowania UTF-8 w auth-service.ts i CategoryPicker.tsx.
 - Commit i push: 884b736.
 - Experience recorded: yes
 
@@ -54,7 +112,7 @@
 
 - Added a D1-backed activation-code flow that redeems a code for the `charades_category_pack` entitlement and exposes entitlements through auth/session responses.
 - Added a profile-page activation form so signed-in users can enter a code and immediately unlock the premium Charades categories.
-- Locked the extra Charades categories behind the entitlement and added visible kłódki plus helper text so the blocked state is obvious in setup.
+- Locked the extra Charades categories behind the entitlement and added visible kÄąâ€šÄ‚Ĺ‚dki plus helper text so the blocked state is obvious in setup.
 - Verification passing in this session: `npm run build`, `npm run build --workspace @party/hub`, `node apps/hub/src/lib/auth/auth-service.check.cjs output/auth-check/auth-service.js`, and `node packages/games/charades/src/setup/category-access.check.cjs output/charades-setup/state.js`.
 - Experience recorded: yes
 
@@ -83,9 +141,9 @@
 
 ### S39 (2026-04-12 ~) [Project Party] Phase 5 auth spec rewrite
 
-- Zawęziłem zakres do MVP bez Clerka: rejestracja, logowanie, wylogowanie, sesja w `httpOnly` cookie, `/api/auth/me`, prosty profil i miejsce pod przyszłe activation codes.
-- Przepisałem spec Phase 5 na własny auth i zapisałem go w `docs/superpowers/specs/2026-04-12-phase5-auth-design.md`.
-- Next: rozpisać implementation plan i zacząć podmianę Clerka na własny provider auth.
+- ZawĂ„â„˘ziÄąâ€šem zakres do MVP bez Clerka: rejestracja, logowanie, wylogowanie, sesja w `httpOnly` cookie, `/api/auth/me`, prosty profil i miejsce pod przyszÄąâ€še activation codes.
+- PrzepisaÄąâ€šem spec Phase 5 na wÄąâ€šasny auth i zapisaÄąâ€šem go w `docs/superpowers/specs/2026-04-12-phase5-auth-design.md`.
+- Next: rozpisaĂ„â€ˇ implementation plan i zaczĂ„â€¦Ă„â€ˇ podmianĂ„â„˘ Clerka na wÄąâ€šasny provider auth.
 - Experience recorded: yes
 
 ### S18 (11:51~) [Project Party] Charades warning modal and long-word UI hardening
@@ -140,10 +198,10 @@
 ### S9 (~2026-03-27) [Project Party] Pre-MVP cleanup - Polish characters + refactors
 
 - Removed dead duplicate `Podium` from `apps/hub/src/components/charades/Podium/` (zero imports)
-- Extracted `CLEARED_WORD` constant in `game-state-transitions.ts` — eliminated 6 repetitions
+- Extracted `CLEARED_WORD` constant in `game-state-transitions.ts` Ă˘â‚¬â€ť eliminated 6 repetitions
 - Fixed 80+ missing Polish diacritic characters across 13 UI files
-- Fixed HTML entities in `CharadesMenuContent.tsx` — React was rendering them as literal text
-- Fixed Unicode escapes in `PairingPanel.tsx` — replaced with direct characters
+- Fixed HTML entities in `CharadesMenuContent.tsx` Ă˘â‚¬â€ť React was rendering them as literal text
+- Fixed Unicode escapes in `PairingPanel.tsx` Ă˘â‚¬â€ť replaced with direct characters
 - Identified and recorded pre-MVP issues list in `memory/goals.md`
 - Experience recorded: no (mechanical changes, no reusable patterns)
 
@@ -212,8 +270,8 @@
 
 ### S17 (13:23~) [Project Party] Charades pool management, start warning, and repo cleanup
 
-- Added `Zarządzaj pulą` in Charades categories with reset-all and per-category reset actions, plus immediate refresh of real `pozostałe / wszystkie` pool state in the management modal.
-- Simplified the main category accordion by removing remaining-count pills from `Łatwe / Trudne`, added confirmation before resets, and added a start-time warning when the active pool is smaller than `gracze × rundy`.
+- Added `ZarzĂ„â€¦dzaj pulĂ„â€¦` in Charades categories with reset-all and per-category reset actions, plus immediate refresh of real `pozostaÄąâ€še / wszystkie` pool state in the management modal.
+- Simplified the main category accordion by removing remaining-count pills from `ÄąÂatwe / Trudne`, added confirmation before resets, and added a start-time warning when the active pool is smaller than `gracze Ä‚â€” rundy`.
 - Cleaned Git noise by pruning stale worktree metadata, ignoring local `.vscode/mcp.json`, and merging the active charades branch safely into `main`.
 - Next: run a manual browser smoke test for pool management, start warning flow, and weighted reroll/session history behavior in real UI.
 - Experience recorded: yes
@@ -304,10 +362,10 @@
 ### S31 (2026-04-08 ~) [Project Party] Charades navigation code review + dead code cleanup
 
 - Reviewed the full host navigation system (shared framework + Charades profiles) for consistency, logic, and dead code.
-- Removed `predefined-menu-controls.ts` (entire file was dead — no callers since `useMenuControls` migrated to `resolveFixedHostNavigationAction`).
+- Removed `predefined-menu-controls.ts` (entire file was dead Ă˘â‚¬â€ť no callers since `useMenuControls` migrated to `resolveFixedHostNavigationAction`).
 - Removed dead `getNextMenuModeFocus` function and its public export from `@party/charades` index.
 - Simplified `CharadesMenuContent`: removed always-`'play'` `focusedModeAction` state, simplified `onAction` handler, simplified button onClick.
-- Extracted shared `isTypingTarget` into `charades-controls-bindings.ts` — removes the duplicate that existed in `useMenuControls` and `useHostControls`.
+- Extracted shared `isTypingTarget` into `charades-controls-bindings.ts` Ă˘â‚¬â€ť removes the duplicate that existed in `useMenuControls` and `useHostControls`.
 - Fixed indentation bug in `resolveSettingsCommand` inside `host-controls.ts`.
 - Added comment explaining intentional separation of `HostControlAction` vs `HostNavigationAction`.
 - Build passing: `@party/charades` + `@party/hub`. Controls bindings tests passing.
@@ -347,7 +405,7 @@
 - Next: do a browser-only validation pass on the current Charades motion set, and if setup-modal motion returns later, re-enter with a much smaller scope limited to one local surface at a time.
 - Experience recorded: yes
 
-### S36 (2026-04-11 ~) [Project Party] Phase 4 deploy — hub on CF Pages + PartyKit server
+### S36 (2026-04-11 ~) [Project Party] Phase 4 deploy Ă˘â‚¬â€ť hub on CF Pages + PartyKit server
 
 - Deployed hub to Cloudflare Pages as Next.js static export (`output: 'export'`, `trailingSlash: true`, `_redirects` SPA fallback).
 - Fixed multiple TypeScript strict-mode errors that only surfaced on CF (implicit any in `.map()` callbacks, missing workspace `paths` in `@party/ui/tsconfig.json`).
@@ -368,12 +426,12 @@
 - Next: resume from `main`, keep setup animation paused for now, and continue only with narrow, user-validated UI changes or a browser-first manual pass on the stable Charades runtime motion.
 - Experience recorded: yes
 
-### S38 (2026-04-12 ~) [Project Party] Phase 5 auth — Clerk dead end, własny system auth
-- Próbowano 3 podejścia z Clerk: OpenNext+Workers (niezgodność Next.js 16), @clerk/nextjs+static export (Server Actions), clerk-js CDN (headless mode bez UI). Żadne nie działało.
-- Hub wrócił do static export na CF Pages z `output: 'export'`. Build działa, deploy na CF Pages działa.
-- Zdecydowano porzucić Clerk i napisać własny auth: email+hasło+Google, D1, CF Workers API, httpOnly cookie.
-- Kluczowa lekcja: @clerk/nextjs v7 jest niekompatybilny ze static export (Server Actions). clerk-js v6 z CDN ładuje się headless bez UI components gdy używany poza @clerk/nextjs.
-- Next: Własny auth — schemat D1 + Worker API endpoint.
+### S38 (2026-04-12 ~) [Project Party] Phase 5 auth Ă˘â‚¬â€ť Clerk dead end, wÄąâ€šasny system auth
+- PrÄ‚Ĺ‚bowano 3 podejÄąâ€şcia z Clerk: OpenNext+Workers (niezgodnoÄąâ€şĂ„â€ˇ Next.js 16), @clerk/nextjs+static export (Server Actions), clerk-js CDN (headless mode bez UI). ÄąÂ»adne nie dziaÄąâ€šaÄąâ€šo.
+- Hub wrÄ‚Ĺ‚ciÄąâ€š do static export na CF Pages z `output: 'export'`. Build dziaÄąâ€ša, deploy na CF Pages dziaÄąâ€ša.
+- Zdecydowano porzuciĂ„â€ˇ Clerk i napisaĂ„â€ˇ wÄąâ€šasny auth: email+hasÄąâ€šo+Google, D1, CF Workers API, httpOnly cookie.
+- Kluczowa lekcja: @clerk/nextjs v7 jest niekompatybilny ze static export (Server Actions). clerk-js v6 z CDN Äąâ€šaduje siĂ„â„˘ headless bez UI components gdy uÄąÄ˝ywany poza @clerk/nextjs.
+- Next: WÄąâ€šasny auth Ă˘â‚¬â€ť schemat D1 + Worker API endpoint.
 - Experience recorded: yes
 
 ### S37 (2026-04-12 ~) [Project Party] Charades presenter autoscaling + mobile viewport hardening

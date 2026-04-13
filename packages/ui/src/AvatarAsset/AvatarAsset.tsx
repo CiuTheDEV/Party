@@ -9,6 +9,7 @@ type Props = {
   alt?: string
   className?: string
   imageClassName?: string
+  size?: number | string
 }
 
 type RenderMode = 'animated' | 'static' | 'glyph'
@@ -23,9 +24,12 @@ export function AvatarAsset({
   alt = '',
   className,
   imageClassName,
+  size,
 }: Props) {
   const resolvedAvatar = getPartyAvatarById(avatar)
   const [mode, setMode] = useState<RenderMode>(variant === 'animated' ? 'animated' : 'static')
+  const resolvedSize = typeof size === 'number' ? `${size}px` : size
+  const assetStyle = resolvedSize ? { width: resolvedSize, height: resolvedSize } : undefined
 
   useEffect(() => {
     setMode(variant === 'animated' ? 'animated' : 'static')
@@ -50,7 +54,7 @@ export function AvatarAsset({
   }
 
   return (
-    <span className={joinClassNames(styles.asset, className)}>
+    <span className={joinClassNames(styles.asset, className)} style={assetStyle}>
       {mode === 'glyph' && resolvedAvatar.legacyGlyph ? (
         <span className={joinClassNames(styles.glyph, imageClassName)} aria-label={alt || resolvedAvatar.label}>
           {resolvedAvatar.legacyGlyph}

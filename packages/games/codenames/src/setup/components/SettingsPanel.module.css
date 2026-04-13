@@ -1,0 +1,69 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.settingsBtn {
+  width: 100%;
+  min-height: 56px;
+  padding: 16px 18px;
+  border: none;
+  border-radius: 18px;
+  background: linear-gradient(180deg, var(--game-color-primary), var(--game-color-primary-light));
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 14px 32px rgba(220, 38, 38, 0.28);
+}
+
+.settingsBtn:hover {
+  opacity: 0.94;
+  transform: translateY(-1px);
+}
+
+.settingsTiles {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.settingsTile {
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.settingsTileLabel {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.62);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 800;
+}
+
+.settingsTileValue {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--color-text);
+}
+
+.settingsTileHint {
+  font-size: 12px;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+@media (max-width: 767px) {
+  .settingsTiles {
+    grid-template-columns: 1fr;
+  }
+}
