@@ -23,9 +23,9 @@
 }
 
 .itemActive {
-  background: linear-gradient(180deg, rgba(124, 58, 237, 0.18), rgba(124, 58, 237, 0.08));
-  border-color: rgba(124, 58, 237, 0.38);
-  box-shadow: inset 0 0 0 1px rgba(124, 58, 237, 0.14);
+  background: linear-gradient(180deg, var(--game-color-primary-glow), transparent);
+  border-color: color-mix(in srgb, var(--game-color-primary) 38%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--game-color-primary) 14%, transparent);
   color: var(--color-text);
 }
 

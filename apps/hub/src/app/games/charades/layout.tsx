@@ -258,6 +258,7 @@ function CharadesLayoutShell({ children }: { children: React.ReactNode }) {
       sleepHostInput={() => hostNavigation.sleep('mouse')}
     >
       <GameShell
+        rootClassName="theme-charades"
         activeHref={segment ? undefined : activeMenuHref}
         brandLabel={`PROJECT PARTY / ${charadesModule.shell.gameName.toUpperCase()}`}
         footerLink={footerLink}

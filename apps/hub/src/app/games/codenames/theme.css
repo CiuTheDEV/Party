@@ -1,6 +1,6 @@
-:root {
-  --game-color-primary: #7c3aed;
-  --game-color-primary-light: #6d28d9;
-  --game-color-primary-glow: rgba(124, 58, 237, 0.15);
-  --game-gradient: linear-gradient(135deg, #1a1328 0%, #3b1d63 55%, #0a0912 100%);
+.theme-codenames {
+  --game-color-primary: #dc2626;
+  --game-color-primary-light: #b91c1c;
+  --game-color-primary-glow: rgba(220, 38, 38, 0.15);
+  --game-gradient: linear-gradient(135deg, #1a0404 0%, #3d0f0f 55%, #0a0202 100%);
 }

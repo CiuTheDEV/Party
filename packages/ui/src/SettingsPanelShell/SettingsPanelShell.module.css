@@ -9,13 +9,13 @@
   padding: 18px 18px 16px;
   border-radius: 30px;
   background:
-    radial-gradient(circle at top center, rgba(124, 58, 237, 0.12), transparent 34%),
+    radial-gradient(circle at top center, var(--game-color-primary-glow), transparent 34%),
     linear-gradient(180deg, rgba(24, 24, 27, 0.82), rgba(17, 24, 39, 0.78));
   backdrop-filter: blur(14px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow:
     0 24px 48px rgba(0, 0, 0, 0.4),
-    0 0 20px 0 rgba(124, 58, 237, 0.18);
+    0 0 20px 0 color-mix(in srgb, var(--game-color-primary) 18%, transparent);
   overflow: hidden;
 }
 

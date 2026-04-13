@@ -221,6 +221,7 @@ function CodenamesLayoutShell({ children }: { children: React.ReactNode }) {
       }}
     >
       <GameShell
+        rootClassName="theme-codenames"
         activeHref={activeMenuHref}
         brandLabel={`PROJECT PARTY / ${codenamesModule.shell.gameName.toUpperCase()}`}
         footerLink={footerLink}

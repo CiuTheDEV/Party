@@ -1,5 +1,14 @@
 # Today - 2026-04-13
 
+### S46 (2026-04-13) [Project Party] Tajniacy — theme czerwony + avatar picker popup
+
+- Zmieniono theme Tajniaków z fioletowego (skopiowanego z Kalamburów) na czerwony (`#dc2626`).
+- Wykryto i naprawiono wyciek CSS — `theme.css` używał `:root` globalnie, po powrocie do huba logo pozostawało czerwone. Naprawka: scope na `.theme-codenames` / `.theme-charades`, klasa przekazana przez `rootClassName` do `GameShell`.
+- Zamieniono wszystkie hardkodowane fiolety w shared `@party/ui` (Topbar, GameSidebar, GameShell, GameSettingsTabs, SettingsPanelTabs, SettingsDetailHero, itp.) na `var(--game-color-primary)` i `color-mix()` — obie gry teraz dziedziczą właściwy kolor z theme.
+- Przebudowano avatar picker z inline gridu (rozsadzał layout karty) na absolutny popup 220px zamykany kliknięciem poza.
+- Avatar picker: obrazki w gridzie nadal renderują się zbyt duże mimo prób przez `imageClassName` i `> span img` selector — nierozwiązane, sesja zakończona przed naprawą.
+- Experience recorded: yes
+
 ### S45 (2026-04-13) [Project Party] Tajniacy — menu, settings overlay, setup modal + hub route
 
 - Dodano grę Tajniacy (Codenames) jako pełny moduł menu+setup bez runtime.

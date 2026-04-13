@@ -143,15 +143,15 @@ This means:
 <!-- handoff:start -->
 ## Session Handoff
 - Last: 2026-04-13 by Claude Code (Sonnet)
-- Task: Dodano Tajniacy — pełny moduł menu + setup (bez runtime).
-- Did: Zaimplementowano cały pakiet `@party/codenames`: menu główne, overlay ustawień (z rebindingiem kontrolera/klawiatury), setup modal z sekcjami drużyn/rund/kategorii. Dodano hub route `apps/hub/src/app/games/codenames/`. Build `@party/codenames` + `@party/hub` przechodzi czysto, `/games/codenames` widoczne w output.
-- Next: Gameplay/runtime Tajniaków — logika kart, tury, tryb Mistrza Szpiegów.
-- Blocker: None.
+- Task: Tajniacy — theme czerwony + poprawki UI.
+- Did: Zmieniono theme na czerwony (`#dc2626`). Naprawiono wyciek CSS (`theme.css` zmieniony z `:root` na `.theme-codenames`, podpięty przez `rootClassName` w `GameShell`). Wszystkie hardkodowane fiolety w `@party/ui` shared komponentach zamienione na `var(--game-color-primary)` / `color-mix()`. Avatar picker przebudowany z inline gridu na absolutny popup. Rozmiar avatarów w pickerze nadal nierozwiązany — obrazki są zbyt duże.
+- Next: Naprawić rozmiar avatarów w pickerze (dodać `size` prop do `AvatarAsset` lub inny pewny mechanizm). Potem gameplay/runtime Tajniaków.
+- Blocker: AvatarAsset nie ma prop `size` — CSS child selectors przez granice CSS Modules nie działają niezawodnie.
 
 ## Previous Handoff
-- Last: 2026-04-12 by Codex (GPT-5.4)
-- Task: Fix local dev startup and keep auth working on localhost.
-- Did: Removed Google font fetches that were blocking offline builds, kept the local auth API path selection for `localhost`/`127.0.0.1`, and made the Windows dev launcher start the local auth server plus static hub without the failing build step.
-- Next: Codenames module — completed in S45.
+- Last: 2026-04-13 by Claude Code (Sonnet)
+- Task: Dodano Tajniacy — pełny moduł menu + setup (bez runtime).
+- Did: Zaimplementowano cały pakiet `@party/codenames`: menu główne, overlay ustawień, setup modal z sekcjami drużyn/rund/kategorii. Dodano hub route. Build przechodzi czysto.
+- Next: Theme + poprawki UI — wykonane w S46.
 - Blocker: None.
 <!-- handoff:end -->

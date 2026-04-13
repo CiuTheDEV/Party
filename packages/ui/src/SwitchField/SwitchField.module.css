@@ -37,7 +37,7 @@
 .input:checked + .track {
   background: linear-gradient(180deg, var(--game-color-primary), var(--game-color-primary-light));
   border-color: rgba(255, 255, 255, 0.14);
-  box-shadow: 0 10px 24px rgba(124, 58, 237, 0.28);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--game-color-primary) 28%, transparent);
 }
 
 .input:disabled + .track {

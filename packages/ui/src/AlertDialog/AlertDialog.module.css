@@ -119,9 +119,9 @@
 
 .actionPrimary {
   border: none;
-  background: linear-gradient(180deg, #8b5cf6, #7c3aed);
+  background: linear-gradient(180deg, var(--game-color-primary), var(--game-color-primary-light));
   color: #fff;
-  box-shadow: 0 12px 30px rgba(124, 58, 237, 0.32);
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--game-color-primary) 32%, transparent);
 }
 
 .actionDanger {

@@ -18,8 +18,8 @@
 }
 
 .option:hover {
-  border-color: rgba(124, 58, 237, 0.42);
-  background: rgba(124, 58, 237, 0.08);
+  border-color: color-mix(in srgb, var(--game-color-primary) 42%, transparent);
+  background: var(--game-color-primary-glow);
   color: var(--color-text);
   transform: translateY(-1px);
 }
@@ -33,7 +33,7 @@
   background: linear-gradient(180deg, var(--game-color-primary), var(--game-color-primary-light));
   border-color: rgba(255, 255, 255, 0.14);
   color: #fff;
-  box-shadow: 0 10px 24px rgba(124, 58, 237, 0.28);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--game-color-primary) 28%, transparent);
 }
 
 .rootDisabled .option {

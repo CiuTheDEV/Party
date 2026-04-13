@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { getPartyAvatarsByCategory, AvatarAsset } from '@party/ui'
 import type { GameSetupSectionComponentProps } from '@party/game-sdk'
 import type { CodenamesSetupHelpers } from '../helpers'
@@ -25,21 +25,54 @@ type TeamCardProps = {
 
 function TeamCard({ team, label, color, onChange }: TeamCardProps) {
   const [pickingAvatar, setPickingAvatar] = useState(false)
+  const popupRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!pickingAvatar) return
+    function handleClickOutside(e: MouseEvent) {
+      if (popupRef.current && !popupRef.current.contains(e.target as Node)) {
+        setPickingAvatar(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [pickingAvatar])
 
   return (
     <div className={styles.card} style={{ '--team-color': color } as React.CSSProperties}>
       <div className={styles.cardHeader}>
         <span className={styles.cardLabel}>{label}</span>
       </div>
-      <button
-        type="button"
-        className={styles.avatarBtn}
-        onClick={() => setPickingAvatar((prev) => !prev)}
-        title="Zmień avatar drużyny"
-      >
-        <AvatarAsset avatar={team.avatar} />
-        <span className={styles.avatarHint}>Zmień</span>
-      </button>
+      <div className={styles.avatarPopupAnchor} ref={popupRef}>
+        <button
+          type="button"
+          className={styles.avatarBtn}
+          onClick={() => setPickingAvatar((prev) => !prev)}
+          title="Zmień avatar drużyny"
+        >
+          <AvatarAsset avatar={team.avatar} />
+          <span className={styles.avatarHint}>Zmień</span>
+        </button>
+        {pickingAvatar ? (
+          <div className={styles.avatarPopup}>
+            <div className={styles.avatarGrid}>
+              {ALL_AVATARS.map((id) => (
+                <button
+                  key={id}
+                  type="button"
+                  className={team.avatar === id ? `${styles.avatarOption} ${styles.avatarOptionActive}` : styles.avatarOption}
+                  onClick={() => {
+                    onChange({ ...team, avatar: id })
+                    setPickingAvatar(false)
+                  }}
+                >
+                  <AvatarAsset avatar={id} />
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </div>
       <input
         className={styles.nameInput}
         type="text"
@@ -48,23 +81,6 @@ function TeamCard({ team, label, color, onChange }: TeamCardProps) {
         onChange={(e) => onChange({ ...team, name: e.target.value })}
         placeholder="Nazwa drużyny"
       />
-      {pickingAvatar ? (
-        <div className={styles.avatarGrid}>
-          {ALL_AVATARS.map((id) => (
-            <button
-              key={id}
-              type="button"
-              className={team.avatar === id ? `${styles.avatarOption} ${styles.avatarOptionActive}` : styles.avatarOption}
-              onClick={() => {
-                onChange({ ...team, avatar: id })
-                setPickingAvatar(false)
-              }}
-            >
-              <AvatarAsset avatar={id} />
-            </button>
-          ))}
-        </div>
-      ) : null}
     </div>
   )
 }

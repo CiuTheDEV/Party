@@ -79,8 +79,8 @@
 }
 
 .devButtonActive {
-  border-color: rgba(124, 58, 237, 0.34);
-  background: linear-gradient(180deg, rgba(124, 58, 237, 0.18), rgba(124, 58, 237, 0.08));
+  border-color: rgba(220, 38, 38, 0.34);
+  background: linear-gradient(180deg, rgba(220, 38, 38, 0.18), rgba(220, 38, 38, 0.08));
   color: var(--color-text);
 }
 
@@ -177,7 +177,7 @@
 }
 
 .controlFocused {
-  outline: 2px solid rgba(196, 181, 253, 0.92);
+  outline: 2px solid var(--game-color-primary);
   outline-offset: 3px;
 }
 
@@ -197,11 +197,11 @@
 }
 
 .deviceSegmentButtonActive {
-  background: linear-gradient(180deg, rgba(124, 58, 237, 0.18), rgba(124, 58, 237, 0.08));
+  background: linear-gradient(180deg, rgba(220, 38, 38, 0.18), rgba(220, 38, 38, 0.08));
   color: var(--color-text);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    0 10px 22px rgba(124, 58, 237, 0.14);
+    0 10px 22px rgba(220, 38, 38, 0.14);
 }
 
 .deviceSegmentButtonActive .deviceSegmentIcon {
@@ -264,11 +264,11 @@
 }
 
 .optionRowActive {
-  border-color: rgba(124, 58, 237, 0.28);
-  background: linear-gradient(180deg, rgba(124, 58, 237, 0.12), rgba(124, 58, 237, 0.05));
+  border-color: rgba(220, 38, 38, 0.28);
+  background: linear-gradient(180deg, rgba(220, 38, 38, 0.12), rgba(220, 38, 38, 0.05));
   box-shadow:
-    inset 3px 0 0 rgba(124, 58, 237, 0.92),
-    0 10px 22px rgba(124, 58, 237, 0.12);
+    inset 3px 0 0 var(--game-color-primary),
+    0 10px 22px rgba(220, 38, 38, 0.12);
 }
 
 .optionInfo {
@@ -311,8 +311,8 @@
   height: 44px;
   padding: 0 16px;
   border-radius: 12px;
-  border: 1px solid rgba(124, 58, 237, 0.22);
-  background: linear-gradient(180deg, rgba(124, 58, 237, 0.12), rgba(124, 58, 237, 0.05));
+  border: 1px solid rgba(220, 38, 38, 0.22);
+  background: linear-gradient(180deg, rgba(220, 38, 38, 0.12), rgba(220, 38, 38, 0.05));
   color: var(--color-text);
   font-size: 12px;
   font-weight: 800;
@@ -321,7 +321,7 @@
   cursor: pointer;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    0 8px 18px rgba(124, 58, 237, 0.12);
+    0 8px 18px rgba(220, 38, 38, 0.12);
 }
 
 .bindingChipShell {
@@ -345,11 +345,11 @@
 }
 
 .bindingChipListening {
-  border-color: rgba(167, 139, 250, 0.42);
-  background: linear-gradient(180deg, rgba(124, 58, 237, 0.24), rgba(124, 58, 237, 0.1));
+  border-color: color-mix(in srgb, var(--game-color-primary) 42%, transparent);
+  background: linear-gradient(180deg, rgba(220, 38, 38, 0.24), rgba(220, 38, 38, 0.1));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 10px 22px rgba(124, 58, 237, 0.18);
+    0 10px 22px color-mix(in srgb, var(--game-color-primary) 18%, transparent);
 }
 
 .bindingChipEmpty {
@@ -460,7 +460,7 @@
   background: linear-gradient(180deg, rgba(24, 24, 27, 0.96), rgba(17, 24, 39, 0.94));
   box-shadow:
     0 22px 48px rgba(0, 0, 0, 0.44),
-    0 0 18px rgba(124, 58, 237, 0.16);
+    0 0 18px rgba(220, 38, 38, 0.16);
   backdrop-filter: blur(16px);
 }
 
@@ -574,7 +574,7 @@
   border: none;
   background: linear-gradient(180deg, var(--game-color-primary), var(--game-color-primary-light));
   color: #fff;
-  box-shadow: 0 12px 30px rgba(124, 58, 237, 0.32);
+  box-shadow: 0 12px 30px color-mix(in srgb, var(--game-color-primary) 32%, transparent);
 }
 
 @media (max-width: 1023px) {

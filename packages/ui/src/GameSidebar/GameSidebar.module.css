@@ -79,12 +79,12 @@
 }
 
 .navLinkActive {
-  color: #a78bfa;
-  background: rgba(167, 139, 250, 0.1);
+  color: var(--game-color-primary);
+  background: var(--game-color-primary-glow);
 }
 
 .navLinkFocused {
-  outline: 2px solid rgba(196, 181, 253, 0.86);
+  outline: 2px solid var(--game-color-primary);
   outline-offset: -2px;
   color: #ffffff;
 }
