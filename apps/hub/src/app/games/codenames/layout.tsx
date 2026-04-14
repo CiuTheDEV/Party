@@ -18,6 +18,7 @@ import { AuthButton } from '@/features/hub/components/AuthButton'
 import type { NavLink, SidebarFooterLink } from '@party/ui'
 import { ArrowLeft, Home, Play, Settings } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { useSelectedLayoutSegment } from 'next/navigation'
 import { CodenamesMenuViewProvider } from './menu-view-context'
 import './theme.css'
 
@@ -33,6 +34,7 @@ function mapNavIcon(icon: string | undefined) {
 }
 
 function CodenamesLayoutShell({ children }: { children: React.ReactNode }) {
+  const segment = useSelectedLayoutSegment()
   const [activeMenuView, setActiveMenuView] = useState<CodenamesMenuView>('mode')
   const [isRailForcedExpanded, setIsRailForcedExpanded] = useState(false)
   const [isMenuInputSuspended, setIsMenuInputSuspended] = useState(false)
@@ -101,7 +103,7 @@ function CodenamesLayoutShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     function handlePointerDown(event: PointerEvent) {
-      if (event.pointerType !== 'mouse') {
+      if (event.pointerType !== 'mouse' || segment !== null) {
         return
       }
 
@@ -111,10 +113,10 @@ function CodenamesLayoutShell({ children }: { children: React.ReactNode }) {
 
     window.addEventListener('pointerdown', handlePointerDown)
     return () => window.removeEventListener('pointerdown', handlePointerDown)
-  }, [hostNavigation])
+  }, [hostNavigation, segment])
 
   useMenuControls({
-    enabled: activeMenuView === 'mode' && !hostNavigation.state.isAwake && !isMenuInputSuspended,
+    enabled: segment === null && activeMenuView === 'mode' && !hostNavigation.state.isAwake && !isMenuInputSuspended,
     onAction: (_action, input) => {
       const nextDevice = input?.device ?? wakeDeviceRef.current
       hostNavigation.wake(nextDevice)
@@ -128,6 +130,7 @@ function CodenamesLayoutShell({ children }: { children: React.ReactNode }) {
 
   useMenuControls({
     enabled:
+      segment === null &&
       (activeMenuView === 'mode' || activeMenuView === 'settings') &&
       hostNavigation.state.isAwake &&
       hostNavigation.state.zoneId === CODENAMES_NAVIGATION_ZONES.rail &&
@@ -174,6 +177,11 @@ function CodenamesLayoutShell({ children }: { children: React.ReactNode }) {
       }
     },
   })
+
+  // Runtime screens (play, captain) render without GameShell — same pattern as Charades
+  if (segment === 'play' || segment === 'captain') {
+    return <>{children}</>
+  }
 
   return (
     <CodenamesMenuViewProvider
@@ -222,7 +230,7 @@ function CodenamesLayoutShell({ children }: { children: React.ReactNode }) {
     >
       <GameShell
         rootClassName="theme-codenames"
-        activeHref={activeMenuHref}
+        activeHref={segment ? undefined : activeMenuHref}
         brandLabel={`PROJECT PARTY / ${codenamesModule.shell.gameName.toUpperCase()}`}
         footerLink={footerLink}
         focusedHref={menuFocusArea === 'rail' ? railFocusedHref : undefined}
