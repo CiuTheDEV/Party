@@ -89,3 +89,6 @@ export type {
   CodenamesSetupHelpers,
   CodenamesWordCategory,
 } from './setup/helpers'
+
+export { HostGameScreen } from './runtime/host/HostGameScreen'
+export { CaptainScreen } from './runtime/captain/CaptainScreen'

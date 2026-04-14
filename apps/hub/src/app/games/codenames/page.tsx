@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   codenamesModule,
   CodenamesMenuContent,
@@ -12,9 +13,17 @@ import { codenamesCategories } from '@content/codenames/index'
 import { GameSetupTemplate } from '@party/ui'
 import { useCodenamesMenuView } from './menu-view-context'
 
+function createCodenamesRoomId() {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase()
+  }
+  return Math.random().toString(36).slice(2, 10).toUpperCase()
+}
+
 type SetupFocusTarget = 'close' | 'start'
 
 export default function CodenamesMenuPage() {
+  const router = useRouter()
   const {
     activeMenuView,
     requestMenuViewChange,
@@ -138,7 +147,20 @@ export default function CodenamesMenuPage() {
           subtitle="Konfiguracja meczu"
           sections={sections}
           validation={validation}
-          onStart={() => setShowSetup(false)}
+          onStart={() => {
+            if (!validation.canStart) return
+            const roomId = createCodenamesRoomId()
+            sessionStorage.setItem(
+              'codenames:config',
+              JSON.stringify({
+                roomId,
+                selectedCategories: setupState.selectedCategories,
+                settings: setupState.settings,
+                teams: setupState.teams,
+              }),
+            )
+            router.push(`/games/codenames/play?room=${roomId}`)
+          }}
           onClose={() => setShowSetup(false)}
           isFocusVisible={isHostInputAwake}
           startLabel="Zagraj"
