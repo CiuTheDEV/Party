@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import usePartySocket from 'partysocket/react'
 import type { HostEvent, IncomingMessage, RoomState } from '../shared/codenames-events'
 import { getPartykitHost } from '../shared/codenames-runtime'
@@ -25,7 +25,21 @@ type UseHostGameParams = {
 
 export function useHostGame({ roomId, wordPool }: UseHostGameParams) {
   const [roomState, setRoomState] = useState<RoomState>(initialRoomState)
-  const [pendingGameStart, setPendingGameStart] = useState(false)
+  const wordPoolRef = useRef(wordPool)
+  const awaitingResetRef = useRef(false)
+  const socketRef = useRef<ReturnType<typeof usePartySocket> | null>(null)
+
+  const startNewGame = useCallback(() => {
+    if (!socketRef.current) return
+    const board = generateBoard(wordPoolRef.current)
+    socketRef.current.send(JSON.stringify({
+      type: 'GAME_START',
+      cards: board.cards,
+      redTotal: board.redTotal,
+      blueTotal: board.blueTotal,
+      startingTeam: board.startingTeam,
+    } satisfies HostEvent))
+  }, [])
 
   const socket = usePartySocket({
     host: getPartykitHost(),
@@ -36,12 +50,29 @@ export function useHostGame({ roomId, wordPool }: UseHostGameParams) {
 
       if (msg.type === 'ROOM_STATE') {
         setRoomState(msg.state)
+        // Server just sent us current state on connect.
+        // If room is waiting (fresh room), start the game immediately.
+        if (msg.state.phase === 'waiting') {
+          startNewGame()
+        }
         return
       }
 
       setRoomState((current) => applyClientEvent(current, msg))
+
+      // After reset, server broadcasts GAME_RESET → phase goes to 'waiting' client-side,
+      // but we handle the new game start here when the reset flag is set.
+      if (msg.type === 'GAME_RESET' && awaitingResetRef.current) {
+        awaitingResetRef.current = false
+        startNewGame()
+      }
     },
   })
+
+  // Keep socketRef in sync so startNewGame can always access the current socket
+  useEffect(() => {
+    socketRef.current = socket
+  }, [socket])
 
   const sendEvent = useCallback(
     (event: HostEvent) => {
@@ -49,21 +80,6 @@ export function useHostGame({ roomId, wordPool }: UseHostGameParams) {
     },
     [socket],
   )
-
-  // Start game when we connect and room is waiting
-  useEffect(() => {
-    if (roomState.phase === 'waiting' && !pendingGameStart) {
-      setPendingGameStart(true)
-      const board = generateBoard(wordPool)
-      sendEvent({
-        type: 'GAME_START',
-        cards: board.cards,
-        redTotal: board.redTotal,
-        blueTotal: board.blueTotal,
-        startingTeam: board.startingTeam,
-      })
-    }
-  }, [roomState.phase, pendingGameStart, wordPool, sendEvent])
 
   const revealCard = useCallback(
     (index: number) => {
@@ -79,20 +95,10 @@ export function useHostGame({ roomId, wordPool }: UseHostGameParams) {
     [sendEvent],
   )
 
-  // Wait for GAME_RESET broadcast before sending GAME_START to avoid race
-  const [awaitingReset, setAwaitingReset] = useState(false)
-
   const resetGame = useCallback(() => {
-    setAwaitingReset(true)
+    awaitingResetRef.current = true
     sendEvent({ type: 'GAME_RESET' })
   }, [sendEvent])
-
-  useEffect(() => {
-    if (awaitingReset && roomState.phase === 'waiting') {
-      setAwaitingReset(false)
-      setPendingGameStart(false)
-    }
-  }, [awaitingReset, roomState.phase])
 
   return {
     roomState,
