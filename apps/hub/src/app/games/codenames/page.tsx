@@ -1,11 +1,13 @@
 'use client'
 
+import dynamic from 'next/dynamic'
 import { useMemo, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   codenamesModule,
   CodenamesMenuContent,
   useMenuControls,
+  CodenameCaptainListener,
   type CodenamesSetupHelpers,
   type CodenamesSetupState,
 } from '@party/codenames'
@@ -13,12 +15,7 @@ import { codenamesCategories } from '@content/codenames/index'
 import { GameSetupTemplate } from '@party/ui'
 import { useCodenamesMenuView } from './menu-view-context'
 
-function createCodenamesRoomId() {
-  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
-    return crypto.randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase()
-  }
-  return Math.random().toString(36).slice(2, 10).toUpperCase()
-}
+const CaptainListener = dynamic(async () => CodenameCaptainListener, { ssr: false })
 
 type SetupFocusTarget = 'close' | 'start'
 
@@ -52,6 +49,7 @@ export default function CodenamesMenuPage() {
   const helpers: CodenamesSetupHelpers = useMemo(
     () => ({
       categories: codenamesCategories,
+      CaptainListener,
     }),
     [],
   )
@@ -149,17 +147,16 @@ export default function CodenamesMenuPage() {
           validation={validation}
           onStart={() => {
             if (!validation.canStart) return
-            const roomId = createCodenamesRoomId()
             sessionStorage.setItem(
               'codenames:config',
               JSON.stringify({
-                roomId,
+                roomId: setupState.roomId,
                 selectedCategories: setupState.selectedCategories,
                 settings: setupState.settings,
                 teams: setupState.teams,
               }),
             )
-            router.push(`/games/codenames/play?room=${roomId}`)
+            router.push(`/games/codenames/play?room=${setupState.roomId}`)
           }}
           onClose={() => setShowSetup(false)}
           isFocusVisible={isHostInputAwake}

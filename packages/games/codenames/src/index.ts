@@ -6,6 +6,7 @@ import { getCodenamesMenuActiveHref, resolveCodenamesMenuViewFromHref } from './
 import { TeamsSection } from './setup/sections/TeamsSection'
 import { SettingsSection } from './setup/sections/SettingsSection'
 import { CategoriesSection } from './setup/sections/CategoriesSection'
+import { PairingSection } from './setup/sections/PairingSection'
 import type { CodenamesSetupHelpers } from './setup/helpers'
 import {
   createInitialCodenamesSetupState,
@@ -32,6 +33,7 @@ export const codenamesModule: GameModule<CodenamesSetupState, CodenamesSetupHelp
     { id: 'teams', render: TeamsSection, unstyled: true },
     { id: 'settings', render: SettingsSection, unstyled: true },
     { id: 'categories', render: CategoriesSection, unstyled: true },
+    { id: 'pairing', render: PairingSection, unstyled: true },
   ],
   validateSetup: validateCodenamesSetup,
   GameMenuContent: CodenamesMenuContent as ComponentType<GameMenuContentProps>,
@@ -88,7 +90,9 @@ export type {
 export type {
   CodenamesSetupHelpers,
   CodenamesWordCategory,
+  CaptainListenerProps,
 } from './setup/helpers'
 
 export { HostGameScreen } from './runtime/host/HostGameScreen'
 export { CaptainScreen } from './runtime/captain/CaptainScreen'
+export { default as CodenameCaptainListener } from './runtime/setup/CaptainListener'

@@ -1,18 +1,12 @@
 .screen {
   display: flex;
+  flex-direction: column;
   height: 100vh;
   background: #09090b;
   color: #fff;
   font-family: inherit;
-}
-
-.main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
   padding: 24px;
   gap: 16px;
-  min-width: 0;
 }
 
 .scores {
@@ -20,6 +14,7 @@
   gap: 24px;
   font-size: 18px;
   font-weight: 700;
+  flex-shrink: 0;
 }
 
 .scoreRed {
@@ -34,67 +29,7 @@
   flex: 1;
   display: flex;
   align-items: center;
-}
-
-.sidebar {
-  width: 260px;
-  flex-shrink: 0;
-  border-left: 1px solid #27272a;
-  padding: 24px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.captainSection {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.captainLabel {
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #3f3f46;
-  flex-shrink: 0;
-}
-
-.dotConnected {
-  background: #22c55e;
-}
-
-.captainUrl {
-  font-size: 11px;
-  color: #71717a;
-  word-break: break-all;
-  cursor: pointer;
-  padding: 6px 8px;
-  background: #18181b;
-  border-radius: 6px;
-  border: none;
-  color: #a1a1aa;
-  text-align: left;
-  width: 100%;
-}
-
-.captainUrl:hover {
-  background: #27272a;
-}
-
-.qrWrapper {
-  display: flex;
-  justify-content: center;
+  min-height: 0;
 }
 
 .endScreen {
@@ -107,9 +42,10 @@
 }
 
 .winnerText {
-  font-size: 40px;
+  font-size: 48px;
   font-weight: 800;
   letter-spacing: -0.03em;
+  margin: 0;
 }
 
 .winnerRed {
