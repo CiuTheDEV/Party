@@ -1,0 +1,51 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  width: 100%;
+}
+
+.card {
+  aspect-ratio: 3 / 2;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+  text-align: center;
+  text-transform: uppercase;
+  color: #fff;
+  transition: opacity 0.2s;
+}
+
+.card[data-color='red'] {
+  background: #dc2626;
+}
+
+.card[data-color='blue'] {
+  background: #2563eb;
+}
+
+.card[data-color='neutral'] {
+  background: #78716c;
+}
+
+.card[data-color='assassin'] {
+  background: #18181b;
+}
+
+.card.revealed {
+  opacity: 0.35;
+}
+
+.word {
+  display: block;
+}
+
+.word.strikethrough {
+  text-decoration: line-through;
+}
