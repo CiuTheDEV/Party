@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import usePartySocket from 'partysocket/react'
 import type { HostEvent, IncomingMessage, RoomState } from '../shared/codenames-events'
 import { getPartykitHost } from '../shared/codenames-runtime'
@@ -25,135 +25,121 @@ type UseHostGameParams = {
 
 export function useHostGame({ roomId, wordPool }: UseHostGameParams) {
   const [roomState, setRoomState] = useState<RoomState>(initialRoomState)
-  const wordPoolRef = useRef(wordPool)
-  const awaitingResetRef = useRef(false)
-  const socketRef = useRef<ReturnType<typeof usePartySocket> | null>(null)
 
-  const startNewGame = useCallback(() => {
-    if (!socketRef.current) return
-    const board = generateBoard(wordPoolRef.current)
-    socketRef.current.send(JSON.stringify({
-      type: 'GAME_START',
-      cards: board.cards,
-      redTotal: board.redTotal,
-      blueTotal: board.blueTotal,
-      startingTeam: board.startingTeam,
-    } satisfies HostEvent))
-  }, [])
+  // Refs that are always current — safe to use inside socket callbacks
+  const wordPoolRef = useRef(wordPool)
+  wordPoolRef.current = wordPool
+
+  // Tracks whether we already sent GAME_START for this session
+  // so reconnects don't send it again when the room is already playing
+  const gameStartedRef = useRef(false)
+
+  // Tracks whether we sent GAME_RESET and are waiting to send GAME_START after
+  const pendingNewGameRef = useRef(false)
 
   const socket = usePartySocket({
     host: getPartykitHost(),
     room: roomId,
     party: 'codenames',
-    onMessage(event) {
-      const msg = JSON.parse(event.data) as IncomingMessage
+    onMessage(evt) {
+      const msg = JSON.parse(evt.data) as IncomingMessage
 
       if (msg.type === 'ROOM_STATE') {
         setRoomState(msg.state)
-        // Server just sent us current state on connect.
-        // If room is waiting (fresh room), start the game immediately.
-        if (msg.state.phase === 'waiting') {
-          startNewGame()
+
+        // First message after connect. If room is fresh → start immediately.
+        // If already playing (host reconnected mid-game) → do nothing.
+        if (msg.state.phase === 'waiting' && !gameStartedRef.current) {
+          gameStartedRef.current = true
+          sendGameStart(socket, wordPoolRef.current)
         }
         return
       }
 
-      setRoomState((current) => applyClientEvent(current, msg))
+      setRoomState((s) => applyEvent(s, msg))
 
-      // After reset, server broadcasts GAME_RESET → phase goes to 'waiting' client-side,
-      // but we handle the new game start here when the reset flag is set.
-      if (msg.type === 'GAME_RESET' && awaitingResetRef.current) {
-        awaitingResetRef.current = false
-        startNewGame()
+      // Server confirmed our GAME_RESET — now send the new board
+      if (msg.type === 'GAME_RESET' && pendingNewGameRef.current) {
+        pendingNewGameRef.current = false
+        sendGameStart(socket, wordPoolRef.current)
       }
     },
   })
 
-  // Keep socketRef in sync so startNewGame can always access the current socket
-  useEffect(() => {
-    socketRef.current = socket
-  }, [socket])
-
-  const sendEvent = useCallback(
-    (event: HostEvent) => {
-      socket.send(JSON.stringify(event))
+  const revealCard = useCallback(
+    (index: number) => {
+      socket.send(JSON.stringify({ type: 'CARD_REVEAL', index } satisfies HostEvent))
     },
     [socket],
   )
 
-  const revealCard = useCallback(
-    (index: number) => {
-      sendEvent({ type: 'CARD_REVEAL', index })
-    },
-    [sendEvent],
-  )
-
   const setAssassinTeam = useCallback(
     (team: 'red' | 'blue') => {
-      sendEvent({ type: 'ASSASSIN_TEAM', team })
+      socket.send(JSON.stringify({ type: 'ASSASSIN_TEAM', team } satisfies HostEvent))
     },
-    [sendEvent],
+    [socket],
   )
 
   const resetGame = useCallback(() => {
-    awaitingResetRef.current = true
-    sendEvent({ type: 'GAME_RESET' })
-  }, [sendEvent])
+    pendingNewGameRef.current = true
+    gameStartedRef.current = false
+    socket.send(JSON.stringify({ type: 'GAME_RESET' } satisfies HostEvent))
+  }, [socket])
 
-  return {
-    roomState,
-    revealCard,
-    setAssassinTeam,
-    resetGame,
-  }
+  return { roomState, revealCard, setAssassinTeam, resetGame }
 }
 
-function applyClientEvent(state: RoomState, event: IncomingMessage): RoomState {
-  switch (event.type) {
+function sendGameStart(socket: { send: (data: string) => void }, wordPool: string[]) {
+  const board = generateBoard(wordPool)
+  socket.send(JSON.stringify({
+    type: 'GAME_START',
+    cards: board.cards,
+    redTotal: board.redTotal,
+    blueTotal: board.blueTotal,
+    startingTeam: board.startingTeam,
+  } satisfies HostEvent))
+}
+
+function applyEvent(state: RoomState, msg: IncomingMessage): RoomState {
+  switch (msg.type) {
     case 'GAME_START':
       return {
         ...state,
         phase: 'playing',
-        cards: event.cards,
-        redTotal: event.redTotal,
-        blueTotal: event.blueTotal,
-        startingTeam: event.startingTeam,
+        cards: msg.cards,
+        redTotal: msg.redTotal,
+        blueTotal: msg.blueTotal,
+        startingTeam: msg.startingTeam,
         winner: null,
         assassinTeam: null,
       }
+
     case 'CARD_REVEAL': {
-      if (event.index < 0 || event.index > 24) return state
-      const cards = state.cards.map((card, i) =>
-        i === event.index ? { ...card, revealed: true } : card,
+      if (msg.index < 0 || msg.index > 24) return state
+      const cards = state.cards.map((c, i) =>
+        i === msg.index ? { ...c, revealed: true } : c,
       )
-      const revealed = cards[event.index]
-      if (revealed.color === 'assassin') {
-        return { ...state, cards, phase: 'assassin-reveal' }
-      }
+      const hit = cards[msg.index]
+      if (hit.color === 'assassin') return { ...state, cards, phase: 'assassin-reveal' }
       const redRevealed = cards.filter((c) => c.color === 'red' && c.revealed).length
       const blueRevealed = cards.filter((c) => c.color === 'blue' && c.revealed).length
       if (redRevealed >= state.redTotal) return { ...state, cards, phase: 'ended', winner: 'red' }
       if (blueRevealed >= state.blueTotal) return { ...state, cards, phase: 'ended', winner: 'blue' }
       return { ...state, cards }
     }
-    case 'ASSASSIN_TEAM': {
-      const winner = event.team === 'red' ? 'blue' : 'red'
-      return { ...state, assassinTeam: event.team, winner, phase: 'ended' }
-    }
+
+    case 'ASSASSIN_TEAM':
+      return { ...state, assassinTeam: msg.team, winner: msg.team === 'red' ? 'blue' : 'red', phase: 'ended' }
+
     case 'GAME_RESET':
-      return {
-        ...initialRoomState,
-        captainRedConnected: state.captainRedConnected,
-        captainBlueConnected: state.captainBlueConnected,
-      }
+      return { ...initialRoomState, captainRedConnected: state.captainRedConnected, captainBlueConnected: state.captainBlueConnected }
+
     case 'CAPTAIN_CONNECTED':
-      return event.team === 'red'
-        ? { ...state, captainRedConnected: true }
-        : { ...state, captainBlueConnected: true }
+      return msg.team === 'red' ? { ...state, captainRedConnected: true } : { ...state, captainBlueConnected: true }
+
     case 'CAPTAIN_DISCONNECTED':
-      return event.team === 'red'
-        ? { ...state, captainRedConnected: false }
-        : { ...state, captainBlueConnected: false }
+      return msg.team === 'red' ? { ...state, captainRedConnected: false } : { ...state, captainBlueConnected: false }
+
     default:
       return state
   }

@@ -1,5 +1,15 @@
 # Today - 2026-04-14
 
+### S57 (17:00~) [Tajniacy] Runtime finalization + host screen redesign
+
+- Kontynuacja implementacji z poprzedniej sesji (po skompresowaniu kontekstu).
+- Zweryfikowano build — przeszedł bez błędów po przepisaniu useHostGame.
+- Naprawiono SSR bug w play/page.tsx: useMemo+[] zastąpiony useEffect+useState (sessionStorage czytany po hydratacji).
+- Przepisano HostGameScreen.tsx według mockupu: topbar z teamami + status kapitanów + liczniki, bottombar z awatarami odkrytych kart + "Zaczynają: X".
+- Usunięto HostGameScreen.module.css i napisano od zera zgodnie z nowym layoutem.
+- Build przeszedł po wszystkich zmianach.
+- Experience recorded: no
+
 ### S56 (2026-04-14) [Project Party] Tajniacy - visual polish + runtime implementation
 
 - Visual polish: fixed hardcoded rgba() colors in Charades and Codenames to use CSS vars.

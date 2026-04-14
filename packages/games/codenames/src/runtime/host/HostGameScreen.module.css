@@ -1,36 +1,227 @@
 .screen {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  height: 100dvh;
   background: #09090b;
   color: #fff;
   font-family: inherit;
-  padding: 24px;
-  gap: 16px;
+  overflow: hidden;
 }
 
-.scores {
+/* ── Top bar ── */
+
+.topbar {
   display: flex;
-  gap: 24px;
-  font-size: 18px;
-  font-weight: 700;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.teamLeft,
+.teamRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.teamRight {
+  justify-content: flex-end;
+}
+
+.teamDot {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
   flex-shrink: 0;
 }
 
-.scoreRed {
+.teamDot[data-team='red'] {
+  background: #dc2626;
+}
+
+.teamDot[data-team='blue'] {
+  background: #2563eb;
+}
+
+.teamLabel {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.teamLabel[data-team='red'] {
   color: #dc2626;
 }
 
-.scoreBlue {
+.teamLabel[data-team='blue'] {
   color: #2563eb;
 }
+
+.topCenter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 260px;
+}
+
+.connectionBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.connectionBadge.connected {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+}
+
+.connectionBadge.disconnected {
+  background: rgba(255, 255, 255, 0.08);
+  color: #a1a1aa;
+}
+
+.connectionDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.connectionLabel {
+  white-space: nowrap;
+}
+
+.counters {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.counter {
+  font-size: 26px;
+  font-weight: 800;
+  line-height: 1;
+  min-width: 32px;
+  text-align: center;
+}
+
+.counter[data-team='red'] {
+  color: #dc2626;
+}
+
+.counter[data-team='blue'] {
+  color: #2563eb;
+}
+
+.counterSep {
+  font-size: 20px;
+  font-weight: 800;
+  color: #52525b;
+}
+
+/* ── Board ── */
 
 .boardWrapper {
   flex: 1;
   display: flex;
   align-items: center;
+  justify-content: center;
+  padding: 10px 16px;
   min-height: 0;
 }
+
+/* ── Bottom bar ── */
+
+.bottombar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  flex-shrink: 0;
+  gap: 12px;
+}
+
+.avatarRow {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 800;
+  flex-shrink: 0;
+  transition: opacity 0.2s;
+}
+
+.avatar[data-team='red'] {
+  background: #dc2626;
+  color: #fff;
+}
+
+.avatar[data-team='blue'] {
+  background: #2563eb;
+  color: #fff;
+}
+
+.avatar.avatarRevealed {
+  opacity: 0.25;
+}
+
+.avatarNum {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.startingTeam {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 160px;
+}
+
+.startingLabel {
+  font-size: 12px;
+  color: #71717a;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.startingTeamName {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.startingTeamName[data-team='red'] {
+  color: #dc2626;
+}
+
+.startingTeamName[data-team='blue'] {
+  color: #2563eb;
+}
+
+/* ── End screen ── */
 
 .endScreen {
   flex: 1;
@@ -38,11 +229,11 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 24px;
 }
 
 .winnerText {
-  font-size: 48px;
+  font-size: 56px;
   font-weight: 800;
   letter-spacing: -0.03em;
   margin: 0;
@@ -57,12 +248,12 @@
 }
 
 .resetBtn {
-  padding: 14px 32px;
-  border-radius: 10px;
+  padding: 14px 40px;
+  border-radius: 12px;
   border: none;
   background: #27272a;
   color: #fff;
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 700;
   cursor: pointer;
   transition: background 0.15s;

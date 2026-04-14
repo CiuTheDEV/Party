@@ -1,37 +1,41 @@
 'use client'
 
 import { useSearchParams, useRouter } from 'next/navigation'
-import { useMemo, Suspense } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { HostGameScreen } from '@party/codenames'
 import { codenamesCategories } from '@content/codenames/index'
+
+const defaultWordPool = codenamesCategories.flatMap((c) => c.words)
+
+function readWordPool(): string[] {
+  try {
+    const raw = sessionStorage.getItem('codenames:config')
+    if (!raw) return defaultWordPool
+    const config = JSON.parse(raw) as { selectedCategories: Record<string, true> }
+    const selected = Object.keys(config.selectedCategories)
+    if (selected.length === 0) return defaultWordPool
+    return codenamesCategories.filter((c) => selected.includes(c.id)).flatMap((c) => c.words)
+  } catch {
+    return defaultWordPool
+  }
+}
 
 function PlayPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const roomId = searchParams.get('room')
+  const [wordPool, setWordPool] = useState<string[] | null>(null)
 
-  const wordPool = useMemo(() => {
-    const raw = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('codenames:config') : null
-    if (!raw) return codenamesCategories.flatMap((c) => c.words)
-
-    try {
-      const config = JSON.parse(raw) as { selectedCategories: Record<string, true> }
-      const selected = Object.keys(config.selectedCategories)
-      if (selected.length === 0) return codenamesCategories.flatMap((c) => c.words)
-      return codenamesCategories
-        .filter((c) => selected.includes(c.id))
-        .flatMap((c) => c.words)
-    } catch {
-      return codenamesCategories.flatMap((c) => c.words)
-    }
+  useEffect(() => {
+    setWordPool(readWordPool())
   }, [])
 
   if (!roomId) {
-    if (typeof window !== 'undefined') {
-      router.replace('/games/codenames')
-    }
+    router.replace('/games/codenames')
     return null
   }
+
+  if (!wordPool) return null
 
   return <HostGameScreen roomId={roomId} wordPool={wordPool} />
 }

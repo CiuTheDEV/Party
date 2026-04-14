@@ -61,7 +61,7 @@ project-party/
 |  |- game-sdk/             # Module contract (config, status, setup, menu, results)
 |  `- games/
 |     |- charades/          # First live game module
-|     `- codenames/         # Live game module (menu + setup, no runtime yet)
+|     `- codenames/         # Live game module (menu + setup + full runtime)
 `- content/
    `- charades/             # Word lists and categories
 ```
@@ -133,7 +133,7 @@ This means:
 ## Open Questions / Remaining Tech Debt
 
 - [ ] Finalize Phase 4 deploy path for hub + Partykit
-- [ ] Implement Codenames gameplay/runtime (menu + setup are done)
+- [ ] Deploy and test Codenames runtime end-to-end (PartyKit server + host + captain screens implemented)
 - [ ] Decide whether Hub library cards should become fully data-driven from module registry
 - [ ] Decide long-term room architecture details before production multiplayer
 - [ ] Finish the live UX polish pass for Charades runtime host controls now that the shared host-navigation framework is in place
@@ -142,9 +142,9 @@ This means:
 
 <!-- handoff:start -->
 ## Session Handoff
-- Last: 2026-04-13 by Claude Code (Sonnet)
-- Task: Tajniacy - sidebar modala ustawien bez hintow.
-- Did: Usunieto dolny podglad z lewego sidebara modala ustawien, zostawiajac tylko zakladke Rozgrywka.
-- Next: jesli chcesz, moge jeszcze dopracowac tylko spacing tabu.
+- Last: 2026-04-14 by Claude Code (Sonnet)
+- Task: Tajniacy runtime finalization + host screen redesign.
+- Did: Naprawiono SSR bug w play/page.tsx (useMemo->useEffect). Przepisano HostGameScreen wg mockupu: topbar (druzyny + status kapitan. + liczniki), plansza, bottombar (awatary + zaczynajacy).
+- Next: Deploy end-to-end test — uruchomić partykit dev i sprawdzić czy planszaz sie pojawia, kapitanowie sie laczą, odkrywanie działa.
 - Blocker: None.
 <!-- handoff:end -->
