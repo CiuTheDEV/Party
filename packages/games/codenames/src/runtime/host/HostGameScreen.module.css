@@ -1,0 +1,137 @@
+.screen {
+  display: flex;
+  height: 100vh;
+  background: #09090b;
+  color: #fff;
+  font-family: inherit;
+}
+
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  gap: 16px;
+  min-width: 0;
+}
+
+.scores {
+  display: flex;
+  gap: 24px;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.scoreRed {
+  color: #dc2626;
+}
+
+.scoreBlue {
+  color: #2563eb;
+}
+
+.boardWrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  border-left: 1px solid #27272a;
+  padding: 24px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.captainSection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.captainLabel {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #3f3f46;
+  flex-shrink: 0;
+}
+
+.dotConnected {
+  background: #22c55e;
+}
+
+.captainUrl {
+  font-size: 11px;
+  color: #71717a;
+  word-break: break-all;
+  cursor: pointer;
+  padding: 6px 8px;
+  background: #18181b;
+  border-radius: 6px;
+  border: none;
+  color: #a1a1aa;
+  text-align: left;
+  width: 100%;
+}
+
+.captainUrl:hover {
+  background: #27272a;
+}
+
+.qrWrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.endScreen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.winnerText {
+  font-size: 40px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.winnerRed {
+  color: #dc2626;
+}
+
+.winnerBlue {
+  color: #2563eb;
+}
+
+.resetBtn {
+  padding: 14px 32px;
+  border-radius: 10px;
+  border: none;
+  background: #27272a;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.resetBtn:hover {
+  background: #3f3f46;
+}
