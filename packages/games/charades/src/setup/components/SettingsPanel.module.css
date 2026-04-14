@@ -16,7 +16,7 @@
   font-weight: 800;
   cursor: pointer;
   transition: opacity 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
-  box-shadow: 0 14px 32px rgba(124, 58, 237, 0.28);
+  box-shadow: 0 14px 32px var(--game-color-primary-glow);
 }
 
 .settingsBtn:hover {

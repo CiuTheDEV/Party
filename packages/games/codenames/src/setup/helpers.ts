@@ -1,8 +1,6 @@
-export type CodenamesWordCategory = {
-  id: string
-  name: string
-  words: string[]
-}
+import type { GameWordCategory } from '@party/game-sdk'
+
+export type CodenamesWordCategory = GameWordCategory
 
 export type CodenamesSetupHelpers = {
   categories: CodenamesWordCategory[]

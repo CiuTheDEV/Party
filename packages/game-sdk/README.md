@@ -96,6 +96,79 @@ Today it already owns:
 
 So the module system is now credible end-to-end for one live game and ready to host additional games before their gameplay is implemented.
 
+## CSS Contract for Game Modules
+
+Every game module has its own CSS files for menu, setup sections, and overlays. These rules apply to all per-game CSS — violations cause color leaks when navigating between games.
+
+### No hardcoded game colors
+
+Every use of the game's color (background, shadow, border, gradient) must use CSS custom properties:
+
+```css
+/* correct */
+background: var(--game-color-primary-glow);
+border-color: color-mix(in srgb, var(--game-color-primary) 35%, transparent);
+box-shadow: 0 0 20px var(--game-color-primary-glow);
+
+/* forbidden */
+background: rgba(220, 38, 38, 0.14);
+border-color: rgba(124, 58, 237, 0.35);
+```
+
+The only place a hardcoded hex for the game color is allowed is in `apps/hub/src/app/games/[game]/theme.css`, scoped under the game's theme class.
+
+### Transparency via `color-mix()`, not `rgba()` with a hardcoded color
+
+```css
+/* correct */
+color-mix(in srgb, var(--game-color-primary) 30%, transparent)
+
+/* forbidden */
+rgba(220, 38, 38, 0.3)
+```
+
+### `theme.css` must scope to a class, never `:root`
+
+```css
+/* correct */
+.theme-codenames {
+  --game-color-primary: #dc2626;
+  --game-color-primary-glow: rgba(220, 38, 38, 0.15);
+  --game-color-primary-light: #b91c1c;
+}
+
+/* forbidden — leaks globally after SPA navigation */
+:root {
+  --game-color-primary: #dc2626;
+}
+```
+
+### All game-specific CSS custom properties must be defined in `theme.css`
+
+This includes `--game-color-primary`, `--game-color-primary-glow`, `--game-color-primary-light`, `--game-gradient`, and any other property whose value differs between games. Per-game CSS files may *use* these properties but must never *define* them.
+
+### Section title font size
+
+All setup section headings must use:
+- Desktop: `font-size: 24px`, `font-weight: 800`, `letter-spacing: -0.03em`, `line-height: 1`
+- Mobile (`max-width: 767px`): `font-size: 22px`
+
+### SettingsPanel kafelki
+
+Show only the kafelki that reflect actual settings for this game. Do not copy kafelki from another game blindly. A game with one setting (rounds) shows one kafelek.
+
+### Verification
+
+Before opening a PR for a new game, run:
+
+```bash
+grep -r "rgba(" packages/games/[game]/src --include="*.css"
+```
+
+Any match containing a hardcoded game color is a violation.
+
+---
+
 ## Host Navigation Adoption
 
 Shared host-side navigation now has a reusable framework split across:

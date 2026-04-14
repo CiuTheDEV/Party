@@ -15,4 +15,5 @@ export type {
   GameSetupStateUpdater,
   GameSetupTemplateProps,
   GameSetupValidation,
+  GameWordCategory,
 } from './types/GameSetup'

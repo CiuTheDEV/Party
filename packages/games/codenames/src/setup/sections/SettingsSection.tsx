@@ -11,13 +11,8 @@ import styles from './SettingsSection.module.css'
 export function SettingsSection({
   state,
   updateState,
-  helpers,
 }: GameSetupSectionComponentProps<CodenamesSetupState, CodenamesSetupHelpers>) {
   const [showModal, setShowModal] = useState(false)
-  const selectedCategoriesCount = Object.keys(state.selectedCategories).length
-  const selectedCategoryNames = helpers.categories
-    .filter((category) => state.selectedCategories[category.id])
-    .map((category) => category.name)
 
   return (
     <>
@@ -25,9 +20,6 @@ export function SettingsSection({
         <h3 className={styles.sectionTitle}>Ustawienia trybu</h3>
         <SettingsPanel
           rounds={state.settings.rounds}
-          selectedCategoriesCount={selectedCategoriesCount}
-          totalCategories={Math.max(helpers.categories.length, 1)}
-          selectedCategoryNames={selectedCategoryNames}
           onOpen={() => setShowModal(true)}
         />
       </section>

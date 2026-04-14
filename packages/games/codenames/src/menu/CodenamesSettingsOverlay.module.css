@@ -79,8 +79,8 @@
 }
 
 .devButtonActive {
-  border-color: rgba(220, 38, 38, 0.34);
-  background: linear-gradient(180deg, rgba(220, 38, 38, 0.18), rgba(220, 38, 38, 0.08));
+  border-color: color-mix(in srgb, var(--game-color-primary) 34%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--game-color-primary) 18%, transparent), color-mix(in srgb, var(--game-color-primary) 8%, transparent));
   color: var(--color-text);
 }
 
@@ -197,11 +197,11 @@
 }
 
 .deviceSegmentButtonActive {
-  background: linear-gradient(180deg, rgba(220, 38, 38, 0.18), rgba(220, 38, 38, 0.08));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--game-color-primary) 18%, transparent), color-mix(in srgb, var(--game-color-primary) 8%, transparent));
   color: var(--color-text);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.05),
-    0 10px 22px rgba(220, 38, 38, 0.14);
+    0 10px 22px color-mix(in srgb, var(--game-color-primary) 14%, transparent);
 }
 
 .deviceSegmentButtonActive .deviceSegmentIcon {
@@ -264,11 +264,11 @@
 }
 
 .optionRowActive {
-  border-color: rgba(220, 38, 38, 0.28);
-  background: linear-gradient(180deg, rgba(220, 38, 38, 0.12), rgba(220, 38, 38, 0.05));
+  border-color: color-mix(in srgb, var(--game-color-primary) 28%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--game-color-primary) 12%, transparent), color-mix(in srgb, var(--game-color-primary) 5%, transparent));
   box-shadow:
     inset 3px 0 0 var(--game-color-primary),
-    0 10px 22px rgba(220, 38, 38, 0.12);
+    0 10px 22px color-mix(in srgb, var(--game-color-primary) 12%, transparent);
 }
 
 .optionInfo {
@@ -311,8 +311,8 @@
   height: 44px;
   padding: 0 16px;
   border-radius: 12px;
-  border: 1px solid rgba(220, 38, 38, 0.22);
-  background: linear-gradient(180deg, rgba(220, 38, 38, 0.12), rgba(220, 38, 38, 0.05));
+  border: 1px solid color-mix(in srgb, var(--game-color-primary) 22%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--game-color-primary) 12%, transparent), color-mix(in srgb, var(--game-color-primary) 5%, transparent));
   color: var(--color-text);
   font-size: 12px;
   font-weight: 800;
@@ -321,7 +321,7 @@
   cursor: pointer;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.04),
-    0 8px 18px rgba(220, 38, 38, 0.12);
+    0 8px 18px color-mix(in srgb, var(--game-color-primary) 12%, transparent);
 }
 
 .bindingChipShell {
@@ -346,7 +346,7 @@
 
 .bindingChipListening {
   border-color: color-mix(in srgb, var(--game-color-primary) 42%, transparent);
-  background: linear-gradient(180deg, rgba(220, 38, 38, 0.24), rgba(220, 38, 38, 0.1));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--game-color-primary) 24%, transparent), color-mix(in srgb, var(--game-color-primary) 10%, transparent));
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
     0 10px 22px color-mix(in srgb, var(--game-color-primary) 18%, transparent);
@@ -460,7 +460,7 @@
   background: linear-gradient(180deg, rgba(24, 24, 27, 0.96), rgba(17, 24, 39, 0.94));
   box-shadow:
     0 22px 48px rgba(0, 0, 0, 0.44),
-    0 0 18px rgba(220, 38, 38, 0.16);
+    0 0 18px color-mix(in srgb, var(--game-color-primary) 16%, transparent);
   backdrop-filter: blur(16px);
 }
 

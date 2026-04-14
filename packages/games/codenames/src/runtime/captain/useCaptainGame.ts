@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import usePartySocket from 'partysocket/react'
 import type { IncomingMessage, RoomState } from '../shared/codenames-events'
 import { getPartykitHost } from '../shared/codenames-runtime'
@@ -24,15 +24,14 @@ type UseCaptainGameParams = {
 
 export function useCaptainGame({ roomId, team }: UseCaptainGameParams) {
   const [roomState, setRoomState] = useState<RoomState>(initialRoomState)
+  const teamRef = useRef(team)
 
-  usePartySocket({
+  const socket = usePartySocket({
     host: getPartykitHost(),
     room: roomId,
     party: 'codenames',
-    onOpen(event) {
-      // @ts-expect-error — socket is accessible via event.target
-      const socket = event.target
-      socket.send(JSON.stringify({ type: 'CAPTAIN_CONNECTED', team }))
+    onOpen() {
+      socket.send(JSON.stringify({ type: 'CAPTAIN_CONNECTED', team: teamRef.current }))
     },
     onMessage(event) {
       const msg = JSON.parse(event.data) as IncomingMessage

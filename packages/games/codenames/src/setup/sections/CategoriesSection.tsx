@@ -63,6 +63,7 @@ export function CategoriesSection({
                 >
                   <div className={styles.categoryMeta}>
                     <span className={styles.categoryName}>{category.name}</span>
+                    <span className={styles.categoryDescription}>{category.description}</span>
                     <span className={styles.categoryCount}>{category.words.length} haseł</span>
                   </div>
                   <span className={styles.categoryCheck} aria-hidden="true">

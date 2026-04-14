@@ -1,5 +1,12 @@
 import type { ComponentType, ReactNode } from 'react'
 
+export type GameWordCategory = {
+  id: string
+  name: string
+  description: string
+  words: string[]
+}
+
 export type GameSetupValidation = {
   canStart: boolean
   errors?: string[]
