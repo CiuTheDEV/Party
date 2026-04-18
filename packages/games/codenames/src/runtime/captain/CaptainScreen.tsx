@@ -127,11 +127,9 @@ export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }:
           </header>
 
           <main className={styles.boardViewport}>
-            {!isRoundIntroVisible ? (
-              <div className={styles.boardFrame}>
-                <CaptainGrid cards={roomState.cards} startingTeam={roomState.startingTeam} />
-              </div>
-            ) : null}
+            <div className={styles.boardFrame}>
+              <CaptainGrid cards={roomState.cards} startingTeam={roomState.startingTeam} isLocked={isRoundIntroVisible} />
+            </div>
           </main>
 
           <footer className={styles.bottomDock} aria-hidden={isRoundIntroVisible}>

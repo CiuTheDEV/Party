@@ -146,18 +146,11 @@ export function HostGameScreen({ roomId, wordPool, teams, roundsToWin }: HostGam
         </section>
       </div>
 
-      {!isRoundIntroVisible ? (
-        <div className={styles.boardWrapper}>
-          <div className={styles.boardScaler}>
-            <BoardGrid
-              cards={roomState.cards}
-              onReveal={revealCard}
-              isLocked={false}
-              startingTeam={roomState.startingTeam}
-            />
-          </div>
+      <div className={styles.boardWrapper}>
+        <div className={styles.boardScaler}>
+          <BoardGrid cards={roomState.cards} onReveal={revealCard} isLocked={isRoundIntroVisible} startingTeam={roomState.startingTeam} />
         </div>
-      ) : null}
+      </div>
 
       {isCaptainReconnectRequired ? (
         <CaptainPairingModal roomId={roomId} teams={teams} showCloseButton={false} />

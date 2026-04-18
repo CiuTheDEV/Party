@@ -33,11 +33,19 @@ export function BoardGrid({ cards, onReveal, isLocked = false, startingTeam = nu
             key={i}
             className={`${styles.card} ${card.revealed ? styles.revealed : ''}`}
             data-color={card.color}
+            data-round-index={i}
             data-round-card
             onClick={() => !card.revealed && !isLocked && onReveal(i)}
             disabled={card.revealed || isLocked}
           >
-            {card.word}
+            <span className={styles.cardInner} data-round-card-inner>
+              <span className={`${styles.cardFace} ${styles.cardBack}`} aria-hidden="true">
+                <span className={styles.cardBackMark} />
+              </span>
+              <span className={`${styles.cardFace} ${styles.cardFront}`}>
+                <span className={styles.cardWord}>{card.word}</span>
+              </span>
+            </span>
           </button>
         ))}
       </div>

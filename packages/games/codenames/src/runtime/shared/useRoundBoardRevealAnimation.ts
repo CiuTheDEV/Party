@@ -15,6 +15,12 @@ type RoundBoardRevealAnimationParams = {
   enabled?: boolean
 }
 
+type OrderedCardEntry = {
+  inner: HTMLElement
+  node: HTMLElement
+  index: number
+}
+
 export function useRoundBoardRevealAnimation({
   scopeRef,
   cards,
@@ -37,137 +43,139 @@ export function useRoundBoardRevealAnimation({
 
       const board = root.querySelector<HTMLElement>('[data-round-board]')
       const cardNodes = gsap.utils.toArray<HTMLElement>('[data-round-card]', root)
+      const cardInnerNodes = gsap.utils.toArray<HTMLElement>('[data-round-card-inner]', root)
       const sheen = root.querySelector<HTMLElement>('[data-round-sheen]')
 
-      if (!board || cardNodes.length === 0) {
+      if (!board || cardNodes.length === 0 || cardInnerNodes.length !== cardNodes.length) {
         return
       }
 
-      const mm = gsap.matchMedia()
+      const orderedEntries = cardNodes
+        .map<OrderedCardEntry>((node, index) => ({
+          node,
+          inner: cardInnerNodes[index],
+          index: Number(node.dataset.roundIndex ?? index),
+        }))
+        .sort((left, right) => {
+          const leftRow = Math.floor(left.index / 5)
+          const rightRow = Math.floor(right.index / 5)
 
-      mm.add(
+          if (leftRow !== rightRow) {
+            return leftRow - rightRow
+          }
+
+          return left.index - right.index
+        })
+
+      const orderedCardNodes = orderedEntries.map((entry) => entry.node)
+      const orderedCardInnerNodes = orderedEntries.map((entry) => entry.inner)
+
+      gsap.set(board, {
+        autoAlpha: 0,
+        y: 8,
+      })
+
+      gsap.set(orderedCardInnerNodes, {
+        rotationY: 180,
+        transformPerspective: 1200,
+        transformOrigin: '50% 50%',
+      })
+
+      if (sheen) {
+        gsap.set(sheen, {
+          autoAlpha: 0,
+          xPercent: -10,
+        })
+      }
+
+      const timeline = gsap.timeline({
+        defaults: {
+          ease: 'power2.out',
+        },
+        delay: 0.1,
+      })
+
+      timeline.to(
+        board,
         {
-          reduceMotion: '(prefers-reduced-motion: reduce)',
-          noReduceMotion: '(prefers-reduced-motion: no-preference)',
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.2,
+          clearProps: 'transform,opacity,visibility',
         },
-        (context) => {
-          const reduceMotion = context.conditions?.reduceMotion ?? false
-
-          if (reduceMotion) {
-            gsap.set(board, { autoAlpha: 1, clearProps: 'all' })
-            gsap.set(cardNodes, { autoAlpha: 1, clearProps: 'all' })
-            if (sheen) {
-              gsap.set(sheen, { autoAlpha: 0, clearProps: 'all' })
-            }
-            return
-          }
-
-          gsap.set(board, {
-            autoAlpha: 0,
-            y: 34,
-            scale: 0.945,
-            rotationX: 14,
-            transformPerspective: 1200,
-            filter: 'blur(14px) saturate(0.82)',
-          })
-
-          gsap.set(cardNodes, {
-            autoAlpha: 0,
-            y: 54,
-            scale: 0.78,
-            rotationX: 64,
-            transformPerspective: 1200,
-            filter: 'blur(12px) saturate(0.85)',
-          })
-
-          if (sheen) {
-            gsap.set(sheen, {
-              autoAlpha: 0,
-              xPercent: -140,
-              rotation: -10,
-            })
-          }
-
-          const timeline = gsap.timeline({
-            defaults: {
-              ease: 'power3.out',
-            },
-            delay: 0.08,
-          })
-
-          timeline.to(board, {
-            autoAlpha: 1,
-            y: 0,
-            scale: 1,
-            rotationX: 0,
-            filter: 'blur(0px) saturate(1)',
-            duration: 0.42,
-            clearProps: 'transform,filter,opacity,visibility',
-          })
-
-          if (sheen) {
-            timeline.fromTo(
-              sheen,
-              {
-                autoAlpha: 0,
-              },
-              {
-                autoAlpha: 0.96,
-                xPercent: 150,
-                rotation: -10,
-                duration: 1.02,
-                ease: 'power4.inOut',
-                clearProps: 'transform,opacity,visibility',
-              },
-              0,
-            )
-          }
-
-          timeline.to(
-            cardNodes,
-            {
-              autoAlpha: 1,
-              y: 0,
-              scale: 1,
-              rotationX: 0,
-              filter: 'blur(0px) saturate(1)',
-              duration: 0.58,
-              stagger: {
-                amount: 0.92,
-                from: 'center',
-              },
-              clearProps: 'transform,filter,opacity,visibility',
-            },
-            0.08,
-          )
-
-          if (startingTeam) {
-            const accentNodes = cardNodes.filter((node) => node.dataset.color === startingTeam)
-
-            if (accentNodes.length > 0) {
-              timeline.to(
-                accentNodes,
-                {
-                  scale: 1.035,
-                  y: -4,
-                  filter: 'brightness(1.2) saturate(1.08)',
-                  duration: 0.2,
-                  stagger: 0.015,
-                  yoyo: true,
-                  repeat: 1,
-                  ease: 'power2.out',
-                  clearProps: 'transform,filter',
-                },
-                0.42,
-              )
-            }
-          }
-        },
-        root,
+        0,
       )
 
+      timeline.to(
+        orderedCardInnerNodes,
+        {
+          rotationY: 0,
+          duration: 0.46,
+          ease: 'power2.inOut',
+          stagger: {
+            each: 0.05,
+            from: 'start',
+          },
+          clearProps: 'transform',
+        },
+        0.08,
+      )
+
+      if (sheen) {
+        timeline.fromTo(
+          sheen,
+          { autoAlpha: 0 },
+          {
+            autoAlpha: 0.18,
+            xPercent: 16,
+            duration: 0.34,
+            ease: 'power1.out',
+            clearProps: 'transform,opacity,visibility',
+          },
+          0.16,
+        )
+        timeline.to(
+          sheen,
+          {
+            autoAlpha: 0,
+            xPercent: 28,
+            duration: 0.2,
+            ease: 'power1.in',
+            clearProps: 'transform,opacity,visibility',
+          },
+          0.42,
+        )
+      }
+
+      if (startingTeam) {
+        const accentNodes = orderedCardNodes.filter((node) => node.dataset.color === startingTeam)
+
+        if (accentNodes.length > 0) {
+          timeline.fromTo(
+            accentNodes,
+            { boxShadow: '0 0 0 0 rgba(0, 0, 0, 0)' },
+            {
+              boxShadow:
+                startingTeam === 'red'
+                  ? '0 0 0 1px rgba(255, 90, 79, 0.42), 0 0 0 7px rgba(255, 90, 79, 0.08)'
+                  : '0 0 0 1px rgba(74, 167, 255, 0.42), 0 0 0 7px rgba(74, 167, 255, 0.08)',
+              duration: 0.18,
+              stagger: {
+                each: 0.018,
+                from: 'start',
+              },
+              yoyo: true,
+              repeat: 1,
+              ease: 'power1.inOut',
+              clearProps: 'boxShadow',
+            },
+            0.52,
+          )
+        }
+      }
+
       return () => {
-        mm.revert()
+        timeline.kill()
       }
     },
     {
@@ -197,7 +205,6 @@ export function useRoundBoardRevealAnimation({
     }
 
     const cardNodes = gsap.utils.toArray<HTMLElement>('[data-round-card]', root)
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
     const newlyRevealedCards = cards
       .map((card, index) => (card.revealed && previousRevealSignature[index] !== '1' ? index : -1))
       .filter((index) => index !== -1)
@@ -209,11 +216,6 @@ export function useRoundBoardRevealAnimation({
       }
 
       gsap.killTweensOf(node)
-
-      if (reducedMotion) {
-        gsap.set(node, { clearProps: 'transform,filter' })
-        return
-      }
 
       const accentColor =
         node.dataset.color === 'red'
@@ -229,20 +231,18 @@ export function useRoundBoardRevealAnimation({
         {
           scale: 1,
           y: 0,
-          rotateZ: 0,
           filter: 'brightness(1)',
           boxShadow: '0 0 0 0 rgba(0, 0, 0, 0)',
         },
         {
-          scale: 1.065,
-          y: -3,
-          rotateZ: order % 2 === 0 ? -1.2 : 1.2,
-          filter: 'brightness(1.16)',
+          scale: 1.03,
+          y: -2,
+          filter: 'brightness(1.1)',
           boxShadow: `0 0 0 2px ${accentColor}, 0 12px 30px rgba(0, 0, 0, 0.26)`,
-          duration: 0.18,
+          duration: 0.14,
           repeat: 1,
           yoyo: true,
-          ease: 'power2.out',
+          ease: 'power1.inOut',
           clearProps: 'transform,filter,boxShadow',
         },
       )
