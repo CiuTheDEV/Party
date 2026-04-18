@@ -230,6 +230,36 @@ run('broadcasts host connected when the host reconnects', () => {
   assert.equal(JSON.parse(room.broadcasts[room.broadcasts.length - 1].message).type, 'HOST_CONNECTED')
 })
 
+run('allows a new host to reclaim a waiting room and clears stale captain seats', () => {
+  const room = createRoom()
+  const server = new serverModule.default(room)
+
+  server.hostConnectionId = 'host-stale'
+  server.captainRedConnectionId = 'captain-red-stale'
+  server.captainBlueConnectionId = 'captain-blue-stale'
+  server.state = {
+    ...server.state,
+    hostConnected: true,
+    captainRedConnected: true,
+    captainBlueConnected: true,
+  }
+
+  server.onMessage(JSON.stringify({ type: 'HOST_CONNECTED' }), { id: 'host-fresh' })
+
+  assert.equal(server.hostConnectionId, 'host-fresh')
+  assert.equal(server.captainRedConnectionId, null)
+  assert.equal(server.captainBlueConnectionId, null)
+  assert.equal(server.state.hostConnected, true)
+  assert.equal(server.state.captainRedConnected, false)
+  assert.equal(server.state.captainBlueConnected, false)
+  assert.equal(room.broadcasts.length, 2)
+  assert.equal(JSON.parse(room.broadcasts[0].message).type, 'HOST_CONNECTED')
+  assert.deepEqual(JSON.parse(room.broadcasts[1].message), {
+    type: 'ROOM_STATE',
+    state: server.state,
+  })
+})
+
 run('ignores card reveals that point past the loaded board', () => {
   const room = createRoom()
   const server = new serverModule.default(room)

@@ -25,6 +25,7 @@ type AuthorityState = {
 
 type IncomingEventResult = AuthorityState & {
   accepted: boolean
+  syncRoomState?: boolean
 }
 
 export default class CodenamesServer implements Party.Server {
@@ -62,6 +63,10 @@ export default class CodenamesServer implements Party.Server {
     }
 
     this.room.broadcast(message)
+
+    if (next.syncRoomState) {
+      this.room.broadcast(JSON.stringify({ type: 'ROOM_STATE', state: this.state }))
+    }
   }
 
   onClose(conn: Party.Connection) {
@@ -118,18 +123,37 @@ export function reduceIncomingEvent(
   }
 
   if (event.type === 'HOST_CONNECTED') {
-    const resolvedHostConnectionId = current.hostConnectionId ?? senderId
+    const isHostReclaimingWaitingRoom =
+      current.state.phase === 'waiting' &&
+      current.hostConnectionId !== null &&
+      senderId !== current.hostConnectionId
 
-    if (current.hostConnectionId !== null && senderId !== current.hostConnectionId) {
+    const resolvedHostConnectionId = isHostReclaimingWaitingRoom
+      ? senderId
+      : current.hostConnectionId ?? senderId
+
+    if (
+      current.hostConnectionId !== null &&
+      senderId !== current.hostConnectionId &&
+      !isHostReclaimingWaitingRoom
+    ) {
       return { ...current, accepted: false }
     }
 
     return {
       accepted: true,
-      state: { ...current.state, hostConnected: true },
+      state: isHostReclaimingWaitingRoom
+        ? {
+            ...current.state,
+            hostConnected: true,
+            captainRedConnected: false,
+            captainBlueConnected: false,
+          }
+        : { ...current.state, hostConnected: true },
       hostConnectionId: resolvedHostConnectionId,
-      captainRedConnectionId: current.captainRedConnectionId,
-      captainBlueConnectionId: current.captainBlueConnectionId,
+      captainRedConnectionId: isHostReclaimingWaitingRoom ? null : current.captainRedConnectionId,
+      captainBlueConnectionId: isHostReclaimingWaitingRoom ? null : current.captainBlueConnectionId,
+      syncRoomState: isHostReclaimingWaitingRoom,
     }
   }
 
