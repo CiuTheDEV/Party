@@ -6,9 +6,12 @@ export const initialState: RoomState = {
   cards: [],
   redTotal: 0,
   blueTotal: 0,
+  roundWinsRed: 0,
+  roundWinsBlue: 0,
   startingTeam: null,
   winner: null,
   assassinTeam: null,
+  hostConnected: false,
   captainRedConnected: false,
   captainBlueConnected: false,
 }
@@ -58,19 +61,13 @@ export default class CodenamesServer implements Party.Server {
       return
     }
 
-    this.room.broadcast(message, [sender.id])
+    this.room.broadcast(message)
   }
 
   onClose(conn: Party.Connection) {
-    const current: AuthorityState = {
-      state: this.state,
-      hostConnectionId: this.hostConnectionId,
-      captainRedConnectionId: this.captainRedConnectionId,
-      captainBlueConnectionId: this.captainBlueConnectionId,
-    }
-
     const isRedCaptain = conn.id === this.captainRedConnectionId
     const isBlueCaptain = conn.id === this.captainBlueConnectionId
+    const isHost = conn.id === this.hostConnectionId
 
     if (isRedCaptain) {
       this.state = { ...this.state, captainRedConnected: false }
@@ -80,8 +77,10 @@ export default class CodenamesServer implements Party.Server {
       this.state = { ...this.state, captainBlueConnected: false }
       this.captainBlueConnectionId = null
       this.room.broadcast(JSON.stringify({ type: 'CAPTAIN_DISCONNECTED', team: 'blue' }))
-    } else if (conn.id === this.hostConnectionId) {
+    } else if (isHost) {
+      this.state = { ...this.state, hostConnected: false }
       this.hostConnectionId = null
+      this.room.broadcast(JSON.stringify({ type: 'HOST_DISCONNECTED' }))
     }
   }
 }
@@ -92,11 +91,6 @@ export function reduceIncomingEvent(
   event: CodenamesEvent,
 ): IncomingEventResult {
   if (event.type === 'CAPTAIN_CONNECTED') {
-    // Captain can only connect if host is already established
-    if (current.hostConnectionId === null) {
-      return { ...current, accepted: false }
-    }
-
     // Only register the first connection per team
     if (event.team === 'red') {
       if (current.captainRedConnectionId !== null) {
@@ -123,6 +117,22 @@ export function reduceIncomingEvent(
     }
   }
 
+  if (event.type === 'HOST_CONNECTED') {
+    const resolvedHostConnectionId = current.hostConnectionId ?? senderId
+
+    if (current.hostConnectionId !== null && senderId !== current.hostConnectionId) {
+      return { ...current, accepted: false }
+    }
+
+    return {
+      accepted: true,
+      state: { ...current.state, hostConnected: true },
+      hostConnectionId: resolvedHostConnectionId,
+      captainRedConnectionId: current.captainRedConnectionId,
+      captainBlueConnectionId: current.captainBlueConnectionId,
+    }
+  }
+
   // All host events: first non-captain event claims host
   const resolvedHostConnectionId = current.hostConnectionId ?? senderId
 
@@ -138,7 +148,7 @@ export function reduceIncomingEvent(
 
   return {
     accepted: true,
-    state: newState,
+    state: { ...newState, hostConnected: true },
     hostConnectionId: resolvedHostConnectionId,
     captainRedConnectionId: current.captainRedConnectionId,
     captainBlueConnectionId: current.captainBlueConnectionId,
@@ -149,6 +159,7 @@ export function applyEvent(state: RoomState, event: CodenamesEvent): RoomState {
   switch (event.type) {
     case 'GAME_START': {
       if (state.phase !== 'waiting') return state
+      if (!state.captainRedConnected || !state.captainBlueConnected) return state
       return {
         ...state,
         phase: 'playing',
@@ -163,7 +174,9 @@ export function applyEvent(state: RoomState, event: CodenamesEvent): RoomState {
 
     case 'CARD_REVEAL': {
       if (state.phase !== 'playing') return state
+      if (!state.captainRedConnected || !state.captainBlueConnected) return state
       if (event.index < 0 || event.index > 24) return state
+      if (!state.cards[event.index]) return state
       if (state.cards[event.index].revealed) return state
 
       const cards: Card[] = state.cards.map((card, i) =>
@@ -178,10 +191,10 @@ export function applyEvent(state: RoomState, event: CodenamesEvent): RoomState {
       const blueRevealed = cards.filter(c => c.color === 'blue' && c.revealed).length
 
       if (redRevealed >= state.redTotal) {
-        return { ...state, cards, phase: 'ended', winner: 'red' }
+        return { ...state, cards, phase: 'ended', winner: 'red', roundWinsRed: state.roundWinsRed + 1 }
       }
       if (blueRevealed >= state.blueTotal) {
-        return { ...state, cards, phase: 'ended', winner: 'blue' }
+        return { ...state, cards, phase: 'ended', winner: 'blue', roundWinsBlue: state.roundWinsBlue + 1 }
       }
 
       return { ...state, cards }
@@ -189,13 +202,33 @@ export function applyEvent(state: RoomState, event: CodenamesEvent): RoomState {
 
     case 'ASSASSIN_TEAM': {
       if (state.phase !== 'assassin-reveal') return state
+      if (!state.captainRedConnected || !state.captainBlueConnected) return state
       const winner = event.team === 'red' ? 'blue' : 'red'
-      return { ...state, assassinTeam: event.team, winner, phase: 'ended' }
+      return {
+        ...state,
+        assassinTeam: event.team,
+        winner,
+        phase: 'ended',
+        roundWinsRed: winner === 'red' ? state.roundWinsRed + 1 : state.roundWinsRed,
+        roundWinsBlue: winner === 'blue' ? state.roundWinsBlue + 1 : state.roundWinsBlue,
+      }
     }
 
     case 'GAME_RESET': {
       return {
         ...initialState,
+        hostConnected: state.hostConnected,
+        roundWinsRed: state.roundWinsRed,
+        roundWinsBlue: state.roundWinsBlue,
+        captainRedConnected: state.captainRedConnected,
+        captainBlueConnected: state.captainBlueConnected,
+      }
+    }
+
+    case 'MATCH_RESET': {
+      return {
+        ...initialState,
+        hostConnected: state.hostConnected,
         captainRedConnected: state.captainRedConnected,
         captainBlueConnected: state.captainBlueConnected,
       }

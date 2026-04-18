@@ -15,24 +15,30 @@ export type RoomState = {
   cards: Card[]
   redTotal: number
   blueTotal: number
+  roundWinsRed: number
+  roundWinsBlue: number
   startingTeam: 'red' | 'blue' | null
   winner: 'red' | 'blue' | null
   assassinTeam: 'red' | 'blue' | null
+  hostConnected: boolean
   captainRedConnected: boolean
   captainBlueConnected: boolean
 }
 
 export type HostEvent =
+  | { type: 'HOST_CONNECTED' }
   | { type: 'GAME_START'; cards: Card[]; redTotal: number; blueTotal: number; startingTeam: 'red' | 'blue' }
   | { type: 'CARD_REVEAL'; index: number }
   | { type: 'ASSASSIN_TEAM'; team: 'red' | 'blue' }
   | { type: 'GAME_RESET' }
+  | { type: 'MATCH_RESET' }
 
 export type CaptainEvent =
   | { type: 'CAPTAIN_CONNECTED'; team: 'red' | 'blue' }
 
 export type ServerEvent =
   | { type: 'CAPTAIN_DISCONNECTED'; team: 'red' | 'blue' }
+  | { type: 'HOST_DISCONNECTED' }
 
 export type CodenamesEvent = HostEvent | CaptainEvent | ServerEvent
 

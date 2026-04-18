@@ -95,4 +95,6 @@ export type {
 
 export { HostGameScreen } from './runtime/host/HostGameScreen'
 export { CaptainScreen } from './runtime/captain/CaptainScreen'
+export { getCaptainBoardMeta } from './runtime/captain/board-meta'
+export { useCaptainRoomStatus } from './runtime/captain/useCaptainRoomStatus'
 export { default as CodenameCaptainListener } from './runtime/setup/CaptainListener'

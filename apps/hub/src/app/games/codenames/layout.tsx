@@ -180,7 +180,7 @@ function CodenamesLayoutShell({ children }: { children: React.ReactNode }) {
 
   // Runtime screens (play, captain) render without GameShell — same pattern as Charades
   if (segment === 'play' || segment === 'captain') {
-    return <>{children}</>
+    return <div className="theme-codenames">{children}</div>
   }
 
   return (

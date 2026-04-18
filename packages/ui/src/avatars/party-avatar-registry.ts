@@ -67,6 +67,7 @@ export const PARTY_AVATARS: readonly PartyAvatarAsset[] = [
   buildAsset({ id: 'mind-blown', label: 'Szok', category: 'people', codepoint: '1f92f', legacyGlyph: '\u{1F92F}' }),
   buildAsset({ id: 'alien', label: 'Kosmita', category: 'people', codepoint: '1f47d', legacyGlyph: '\u{1F47D}' }),
   buildAsset({ id: 'joy-face', label: 'Beksa-ze-smiechu', category: 'people', codepoint: '1f602', legacyGlyph: '\u{1F602}' }),
+  buildAsset({ id: 'skull', label: 'Czaszka', category: 'people', codepoint: '1f480', legacyGlyph: '\u{1F480}' }),
   buildAsset({ id: 'heart-eyes', label: 'Zauroczony', category: 'people', codepoint: '1f60d', legacyGlyph: '\u{1F60D}' }),
   buildAsset({ id: 'kissing-face', label: 'Calus', category: 'people', codepoint: '1f618', legacyGlyph: '\u{1F618}' }),
   buildAsset({ id: 'thinking-face', label: 'Mysliciel', category: 'people', codepoint: '1f914', legacyGlyph: '\u{1F914}' }),

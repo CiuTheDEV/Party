@@ -4,6 +4,7 @@
   "private": true,
   "main": "./charades/server.ts",
   "scripts": {
-    "test:authority": "tsc --target es2022 --module commonjs --moduleResolution node --types node --skipLibCheck --outDir ../../output/partykit-authority ./charades/server.ts ./charades/types.ts && node ./charades/server.authority.check.cjs ../../output/partykit-authority/server.js"
+    "test:authority": "tsc --target es2022 --module commonjs --moduleResolution node --types node --skipLibCheck --outDir ../../output/partykit-authority ./charades/server.ts ./charades/types.ts && node ./charades/server.authority.check.cjs ../../output/partykit-authority/server.js",
+    "test:authority:codenames": "tsc --target es2022 --module commonjs --moduleResolution node --types node --skipLibCheck --outDir ../../output/partykit-codenames ./codenames/server.ts ./codenames/types.ts && node ./codenames/server.authority.check.cjs ../../output/partykit-codenames/server.js"
   }
 }

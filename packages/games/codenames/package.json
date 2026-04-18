@@ -15,7 +15,10 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@gsap/react": "^2.1.2",
     "@party/game-sdk": "*",
+    "@party/ui": "*",
+    "gsap": "^3.15.0",
     "react": "^19"
   },
   "devDependencies": {

@@ -1,5 +1,13 @@
 # Today - 2026-04-14
 
+### S58 (16:47~) [Tajniacy] GSAP board reveal + session wrap-up
+
+- Zastąpiono wcześniejsze CSS-owe próby jednym shared GSAP hookiem dla planszy i kart.
+- Plansza i captain/host renderują reveal dopiero po zejściu intro; usunięto stare keyframes i cykle remountów.
+- Dodano `gsap` + `@gsap/react` do modułu Codenames i zachowano reduced-motion path.
+- Buildy przechodzą: `npm run build --workspace @party/codenames` oraz `npm run build --workspace @party/hub`.
+- Experience recorded: yes
+
 ### S57 (17:00~) [Tajniacy] Runtime finalization + host screen redesign
 
 - Kontynuacja implementacji z poprzedniej sesji (po skompresowaniu kontekstu).

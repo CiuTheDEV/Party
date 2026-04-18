@@ -1,22 +1,38 @@
 'use client'
 
+import { Space_Grotesk } from 'next/font/google'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useState, useEffect, Suspense } from 'react'
 import { HostGameScreen } from '@party/codenames'
 import { codenamesCategories } from '@content/codenames/index'
 
 const defaultWordPool = codenamesCategories.flatMap((c) => c.words)
+const spaceGrotesk = Space_Grotesk({ subsets: ['latin'] })
 
-function readWordPool(): string[] {
+type CodenamesTeam = { name: string; avatar: string }
+type CodenamesConfig = {
+  selectedCategories: Record<string, true>
+  teams?: [CodenamesTeam, CodenamesTeam]
+  settings?: { rounds?: number }
+}
+
+const DEFAULT_TEAMS: [CodenamesTeam, CodenamesTeam] = [
+  { name: 'Czerwoni', avatar: 'star' },
+  { name: 'Niebiescy', avatar: 'moon' },
+]
+
+function readConfig(): { wordPool: string[]; teams: [CodenamesTeam, CodenamesTeam]; roundsToWin: number } {
   try {
     const raw = sessionStorage.getItem('codenames:config')
-    if (!raw) return defaultWordPool
-    const config = JSON.parse(raw) as { selectedCategories: Record<string, true> }
-    const selected = Object.keys(config.selectedCategories)
-    if (selected.length === 0) return defaultWordPool
-    return codenamesCategories.filter((c) => selected.includes(c.id)).flatMap((c) => c.words)
+    if (!raw) return { wordPool: defaultWordPool, teams: DEFAULT_TEAMS, roundsToWin: 3 }
+    const config = JSON.parse(raw) as CodenamesConfig
+    const selected = Object.keys(config.selectedCategories ?? {})
+    const wordPool = selected.length === 0
+      ? defaultWordPool
+      : codenamesCategories.filter((c) => selected.includes(c.id)).flatMap((c) => c.words)
+    return { wordPool, teams: config.teams ?? DEFAULT_TEAMS, roundsToWin: config.settings?.rounds ?? 3 }
   } catch {
-    return defaultWordPool
+    return { wordPool: defaultWordPool, teams: DEFAULT_TEAMS, roundsToWin: 3 }
   }
 }
 
@@ -24,10 +40,10 @@ function PlayPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const roomId = searchParams.get('room')
-  const [wordPool, setWordPool] = useState<string[] | null>(null)
+  const [config, setConfig] = useState<{ wordPool: string[]; teams: [CodenamesTeam, CodenamesTeam]; roundsToWin: number } | null>(null)
 
   useEffect(() => {
-    setWordPool(readWordPool())
+    setConfig(readConfig())
   }, [])
 
   if (!roomId) {
@@ -35,9 +51,13 @@ function PlayPageContent() {
     return null
   }
 
-  if (!wordPool) return null
+  if (!config) return null
 
-  return <HostGameScreen roomId={roomId} wordPool={wordPool} />
+  return (
+    <div className={spaceGrotesk.className}>
+      <HostGameScreen roomId={roomId} wordPool={config.wordPool} teams={config.teams} roundsToWin={config.roundsToWin} />
+    </div>
+  )
 }
 
 export default function PlayPage() {

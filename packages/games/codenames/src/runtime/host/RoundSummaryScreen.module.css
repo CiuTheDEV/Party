@@ -1,0 +1,185 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at center, rgba(0, 0, 0, 0.16), rgba(0, 0, 0, 0.82) 64%),
+    rgba(0, 0, 0, 0.62);
+  backdrop-filter: blur(14px) saturate(0.85);
+  animation: overlayIn 220ms ease-out;
+}
+
+.shell {
+  width: min(1080px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 56px;
+  text-align: center;
+  animation: shellIn 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 18px;
+  padding: 16px 28px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  background: rgba(12, 12, 12, 0.86);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02);
+}
+
+.bannerText {
+  font-size: clamp(24px, 2.8vw, 40px);
+  font-weight: 800;
+  line-height: 1;
+  color: #f8f8f8;
+}
+
+.vsRow {
+  display: grid;
+  grid-template-columns: auto 116px auto 116px auto;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  justify-content: center;
+}
+
+.teamSide {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.teamSide[data-side='right'] {
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+}
+
+.teamSideLabel {
+  font-size: 24px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.teamSideIcon {
+  width: 58px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+}
+
+.teamSideIcon[data-team='red'] {
+  color: #ff5a4f;
+}
+
+.teamSideIcon[data-team='blue'] {
+  color: #4aa7ff;
+}
+
+.scoreCard {
+  width: 116px;
+  height: 116px;
+  border-radius: 24px;
+  display: grid;
+  place-items: center;
+  font-size: 58px;
+  font-weight: 900;
+  color: #fff;
+}
+
+.scoreCard[data-team='red'] {
+  background: #ff5a4f;
+}
+
+.scoreCard[data-team='blue'] {
+  background: #4aa7ff;
+}
+
+.vs {
+  font-size: 24px;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.28);
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.hint {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.32);
+  font-weight: 700;
+}
+
+.nextRoundButton {
+  padding: 18px 34px;
+  border: none;
+  border-radius: 14px;
+  background: #ff5a4f;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 0 24px rgba(255, 90, 79, 0.28);
+}
+
+.nextRoundButton:hover {
+  filter: brightness(1.05);
+}
+
+@keyframes overlayIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes shellIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 900px) {
+  .shell {
+    gap: 36px;
+  }
+
+  .vsRow {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .teamSide {
+    justify-content: center;
+  }
+
+  .teamSide:last-child {
+    flex-direction: row-reverse;
+  }
+
+  .scoreCard {
+    width: 96px;
+    height: 96px;
+    font-size: 46px;
+  }
+}

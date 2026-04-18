@@ -4,25 +4,126 @@ import { useEffect, useState } from 'react'
 import { ExternalLink, Link2, X } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { getPublicOrigin } from '../../runtime/shared/codenames-runtime'
+import type { CodenamesTeam } from '../state'
 import styles from './CaptainPairingPanel.module.css'
 
-type Props = {
+type PairingModalProps = {
   roomId: string
+  teams: [CodenamesTeam, CodenamesTeam]
+  onClose?: () => void
+  showCloseButton?: boolean
+}
+
+type PanelProps = {
+  roomId: string
+  teams: [CodenamesTeam, CodenamesTeam]
   captainRedConnected: boolean
   captainBlueConnected: boolean
 }
 
-export function CaptainPairingPanel({ roomId, captainRedConnected, captainBlueConnected }: Props) {
+export function CaptainPairingModal({
+  roomId,
+  teams,
+  onClose,
+  showCloseButton = true,
+}: PairingModalProps) {
   const [captainUrl, setCaptainUrl] = useState('')
-  const [showModal, setShowModal] = useState(false)
 
   useEffect(() => {
     const origin = getPublicOrigin()
-    setCaptainUrl(origin ? `${origin}/games/codenames/captain?room=${roomId}` : '')
-  }, [roomId])
+    if (!origin) {
+      setCaptainUrl('')
+      return
+    }
+
+    const params = new URLSearchParams({
+      room: roomId,
+      redName: teams[0].name,
+      redAvatar: teams[0].avatar,
+      blueName: teams[1].name,
+      blueAvatar: teams[1].avatar,
+    })
+
+    setCaptainUrl(`${origin}/games/codenames/captain?${params.toString()}`)
+  }, [roomId, teams])
 
   const sessionCode = roomId.slice(0, 6).toUpperCase()
   const showLocalhostWarning = captainUrl !== '' && captainUrl.includes('localhost')
+  const handleOpenInNewTab = () => {
+    if (!captainUrl) return
+    window.open(captainUrl, '_blank', 'noopener,noreferrer')
+  }
+
+  return (
+    <div className={styles.backdrop} role="dialog" aria-modal="true" aria-label="Parowanie kapitanów">
+      <div className={styles.modal} onClick={(event) => event.stopPropagation()}>
+        <div className={styles.modalHeader}>
+          <div className={styles.modalHeaderCopy}>
+            <span className={styles.modalEyebrow}>Parowanie</span>
+            <span className={styles.modalTitle}>Podłącz telefony kapitanów</span>
+          </div>
+          {captainUrl || (showCloseButton && onClose) ? (
+            <div className={styles.modalActions}>
+              {captainUrl ? (
+                <button
+                  type="button"
+                  className={styles.iconBtn}
+                  aria-label="Otwórz w nowej karcie"
+                  onClick={handleOpenInNewTab}
+                >
+                  <ExternalLink size={16} />
+                </button>
+              ) : null}
+              {showCloseButton && onClose ? (
+                <button type="button" className={styles.iconBtn} aria-label="Zamknij" onClick={onClose}>
+                  <X size={16} />
+                </button>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+
+        <div className={styles.modalBody}>
+          <div className={styles.qrRow}>
+            {captainUrl ? (
+              <div className={styles.qrBox}>
+                <QRCodeSVG value={captainUrl} size={140} bgColor="#17171c" fgColor="#f0f0f0" />
+              </div>
+            ) : null}
+            <div className={styles.qrInfo}>
+              <span className={styles.roleLabel}>Tryb: kapitan</span>
+              <p className={styles.roleDesc}>
+                Zeskanuj kod telefonem kapitana. Na ekranie pojawi się wybór drużyny, a następnie klucz odpowiedzi planszy.
+              </p>
+              {showLocalhostWarning ? (
+                <p className={styles.warning}>
+                  Ten QR wskazuje na localhost. Na prawdziwym telefonie otwórz hosta po adresie sieciowym albo ustaw
+                  <code>NEXT_PUBLIC_PUBLIC_ORIGIN</code> i <code>NEXT_PUBLIC_PARTYKIT_HOST</code>.
+                </p>
+              ) : null}
+            </div>
+          </div>
+
+          <div className={styles.codeRow}>
+            <span className={styles.codeLabel}>Kod sesji</span>
+            <span className={styles.codeValue}>{sessionCode}</span>
+          </div>
+        </div>
+
+        {showCloseButton && onClose ? (
+          <div className={styles.modalFooter}>
+            <button type="button" className={styles.closeBtn} onClick={onClose}>
+              Zamknij
+            </button>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
+export function CaptainPairingPanel({ roomId, teams, captainRedConnected, captainBlueConnected }: PanelProps) {
+  const [showModal, setShowModal] = useState(false)
 
   return (
     <>
@@ -63,67 +164,7 @@ export function CaptainPairingPanel({ roomId, captainRedConnected, captainBlueCo
       </div>
 
       {showModal ? (
-        <div className={styles.backdrop} onClick={() => setShowModal(false)}>
-          <div className={styles.modal} onClick={(event) => event.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <div className={styles.modalHeaderCopy}>
-                <span className={styles.modalEyebrow}>Parowanie</span>
-                <span className={styles.modalTitle}>Podłącz telefony kapitanów</span>
-              </div>
-              <div className={styles.modalActions}>
-                <button
-                  type="button"
-                  className={styles.iconBtn}
-                  aria-label="Otwórz w nowej karcie"
-                  onClick={() => window.open(captainUrl, '_blank')}
-                >
-                  <ExternalLink size={16} />
-                </button>
-                <button
-                  type="button"
-                  className={styles.iconBtn}
-                  aria-label="Zamknij"
-                  onClick={() => setShowModal(false)}
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            </div>
-
-            <div className={styles.modalBody}>
-              <div className={styles.qrRow}>
-                {captainUrl ? (
-                  <div className={styles.qrBox}>
-                    <QRCodeSVG value={captainUrl} size={140} bgColor="#17171c" fgColor="#f0f0f0" />
-                  </div>
-                ) : null}
-                <div className={styles.qrInfo}>
-                  <span className={styles.roleLabel}>Tryb: kapitan</span>
-                  <p className={styles.roleDesc}>
-                    Zeskanuj kod telefonem kapitana. Na ekranie pojawi się wybór drużyny, a następnie klucz odpowiedzi planszy.
-                  </p>
-                  {showLocalhostWarning ? (
-                    <p className={styles.warning}>
-                      Ten QR wskazuje na localhost. Na prawdziwym telefonie otwórz hosta po adresie sieciowym albo
-                      ustaw <code>NEXT_PUBLIC_PUBLIC_ORIGIN</code> i <code>NEXT_PUBLIC_PARTYKIT_HOST</code>.
-                    </p>
-                  ) : null}
-                </div>
-              </div>
-
-              <div className={styles.codeRow}>
-                <span className={styles.codeLabel}>Kod sesji</span>
-                <span className={styles.codeValue}>{sessionCode}</span>
-              </div>
-            </div>
-
-            <div className={styles.modalFooter}>
-              <button type="button" className={styles.closeBtn} onClick={() => setShowModal(false)}>
-                Zamknij
-              </button>
-            </div>
-          </div>
-        </div>
+        <CaptainPairingModal roomId={roomId} teams={teams} onClose={() => setShowModal(false)} />
       ) : null}
     </>
   )

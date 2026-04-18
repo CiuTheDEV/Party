@@ -48,6 +48,10 @@ export function validateCodenamesSetup(state: CodenamesSetupState): GameSetupVal
     errors.push('Wybierz przynajmniej jedna kategorie.')
   }
 
+  if (!state.captainRedConnected || !state.captainBlueConnected) {
+    errors.push('Połącz obu kapitanów przed startem gry.')
+  }
+
   return {
     canStart: errors.length === 0,
     errors,

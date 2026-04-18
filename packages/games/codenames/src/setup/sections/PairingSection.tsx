@@ -21,6 +21,7 @@ export function PairingSection({ state, updateState, helpers }: Props) {
       />
       <CaptainPairingPanel
         roomId={state.roomId}
+        teams={state.teams}
         captainRedConnected={state.captainRedConnected}
         captainBlueConnected={state.captainBlueConnected}
       />

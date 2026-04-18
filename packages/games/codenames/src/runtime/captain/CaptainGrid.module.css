@@ -1,51 +1,124 @@
-.grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 6px;
+.gridShell {
+  position: relative;
   width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  perspective: 1200px;
+}
+
+.sheen {
+  position: absolute;
+  inset: -22% -18%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.16), transparent 56%),
+    linear-gradient(120deg, transparent 39%, rgba(255, 255, 255, 0.1) 47%, rgba(255, 255, 255, 0.65) 50%, rgba(255, 255, 255, 0.1) 53%, transparent 61%);
+  opacity: 0;
+  mix-blend-mode: screen;
+  transform: translateX(-130%) rotate(-10deg);
+  filter: blur(3px);
+}
+
+.grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-rows: repeat(5, minmax(0, 1fr));
+  gap: clamp(4px, 0.9vw, 10px);
+  width: 100%;
+  height: 100%;
+  min-height: 0;
 }
 
 .card {
-  aspect-ratio: 3 / 2;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  place-items: center;
+  padding: clamp(6px, 1vw, 12px);
+  border-radius: clamp(12px, 1.2vw, 18px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #fff;
   text-align: center;
   text-transform: uppercase;
-  color: #fff;
-  transition: opacity 0.2s;
+  overflow: hidden;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 14px 26px rgba(0, 0, 0, 0.3);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease,
+    filter 160ms ease;
+  will-change: transform, opacity, filter;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
 }
 
 .card[data-color='red'] {
-  background: #dc2626;
+  background: linear-gradient(180deg, #ee4d43 0%, #d93d33 100%);
 }
 
 .card[data-color='blue'] {
-  background: #2563eb;
+  background: linear-gradient(180deg, #4097e6 0%, #2d82d3 100%);
 }
 
 .card[data-color='neutral'] {
-  background: #78716c;
+  background: linear-gradient(180deg, #38383d 0%, #2f2f34 100%);
 }
 
 .card[data-color='assassin'] {
-  background: #18181b;
+  background: linear-gradient(180deg, #111111 0%, #070707 100%);
 }
 
-.card.revealed {
-  opacity: 0.35;
+.revealed {
+  opacity: 0.38;
+  filter: saturate(0.82);
 }
 
 .word {
-  display: block;
+  max-width: 100%;
+  font-size: clamp(0.85rem, 2vw, 1.65rem);
+  font-weight: 900;
+  line-height: 0.92;
+  letter-spacing: -0.055em;
+  padding-inline: 4px;
+  word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
-.word.strikethrough {
+.strikethrough {
   text-decoration: line-through;
+  text-decoration-thickness: 0.12em;
+  text-decoration-color: rgba(255, 255, 255, 0.72);
+}
+
+.assassinMark {
+  position: absolute;
+  right: clamp(4px, 0.7vw, 8px);
+  bottom: clamp(4px, 0.7vw, 8px);
+  width: clamp(16px, 1.8vw, 22px);
+  height: clamp(16px, 1.8vw, 22px);
+  display: grid;
+  place-items: center;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+}
+
+@media (max-width: 900px) {
+  .grid {
+    gap: clamp(3px, 0.9vw, 7px);
+  }
+
+  .word {
+    font-size: clamp(0.82rem, 2.8vw, 1.28rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: opacity 160ms ease, transform 160ms ease, filter 160ms ease;
+  }
 }

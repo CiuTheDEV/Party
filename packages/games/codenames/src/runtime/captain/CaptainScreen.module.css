@@ -1,43 +1,673 @@
 .screen {
+  --panel-bg: rgba(16, 16, 16, 0.98);
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --team-red: #ff5a4f;
+  --team-blue: #4aa7ff;
+
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100dvh;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  background: #09090b;
-  color: #fff;
-  padding: 16px;
-  gap: 16px;
+  gap: clamp(6px, 1vw, 12px);
+  padding: clamp(10px, 1.2vw, 16px);
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.03), transparent 28%),
+    #050505;
+  color: #f3f4f6;
+  font-family: 'Space Grotesk', 'Arial Narrow', 'Franklin Gothic Medium', 'Arial', sans-serif;
+  overflow: clip;
+  overscroll-behavior: none;
 }
 
-.header {
+.boardShell {
+  min-height: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: clamp(6px, 0.9vw, 10px);
+  position: relative;
+}
+
+.waitingShell {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.waitingCard {
+  width: min(380px, 100%);
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 28px 24px 30px;
   text-align: center;
 }
 
-.teamName {
-  font-size: 20px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-  margin: 0;
+.teamDot {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  box-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.45),
+    0 0 0 2px rgba(0, 0, 0, 0.45);
 }
 
 .teamRed {
-  color: #dc2626;
+  background: var(--team-red);
+  color: var(--team-red);
 }
 
 .teamBlue {
-  color: #2563eb;
+  background: var(--team-blue);
+  color: var(--team-blue);
 }
 
-.role {
+.waitingEyebrow {
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  color: rgba(255, 255, 255, 0.32);
+}
+
+.teamName {
+  margin: 0;
+  font-size: clamp(22px, 4vw, 34px);
+  font-weight: 900;
+  line-height: 0.98;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+}
+
+.loader {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  border: 3px solid rgba(255, 255, 255, 0.12);
+  animation: spin 0.9s linear infinite;
+}
+
+.loader[data-team='red'] {
+  border-top-color: var(--team-red);
+}
+
+.loader[data-team='blue'] {
+  border-top-color: var(--team-blue);
+}
+
+.waitingTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.84);
+}
+
+.waitingCopy {
+  margin: 0;
   font-size: 13px;
-  color: #71717a;
-  margin: 4px 0 0;
+  color: rgba(255, 255, 255, 0.34);
 }
 
-.waiting {
+.changeRoleButton {
+  margin-top: 10px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.changeRoleButton:hover {
+  color: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.topbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) auto;
+  gap: clamp(6px, 0.8vw, 10px);
+  flex-shrink: 0;
+}
+
+.teamPanelCaptain,
+.scorePanel,
+.roundPanel,
+.bottomDock {
+  border: 1px solid var(--panel-border);
+  border-radius: clamp(16px, 1.5vw, 22px);
+  background: var(--panel-bg);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.teamPanelCaptain {
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 14px;
+  padding: 10px 16px;
+  overflow: hidden;
+}
+
+.teamPanelCaptain[data-team='red'] {
+  box-shadow: inset 0 0 0 1px rgba(255, 90, 79, 0.08);
+}
+
+.teamPanelCaptain[data-team='blue'] {
+  box-shadow: inset 0 0 0 1px rgba(74, 167, 255, 0.08);
+}
+
+.teamPanelCaptainLeftRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.teamAvatarFrame {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.teamAvatarFrame[data-team='red'] {
+  background: var(--team-red);
+}
+
+.teamAvatarFrame[data-team='blue'] {
+  background: var(--team-blue);
+}
+
+.teamLabel {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.scorePanel {
+  min-height: 68px;
+  display: grid;
+  place-items: center;
+  padding: 10px 14px;
+  text-align: center;
+}
+
+.scoreLine {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: clamp(1.35rem, 3vw, 2rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.06em;
+}
+
+.scoreValue {
+  min-width: 1ch;
+}
+
+.scoreRed {
+  color: var(--team-red);
+}
+
+.scoreBlue {
+  color: var(--team-blue);
+}
+
+.scoreSeparator {
+  opacity: 0.25;
+}
+
+.startingLine {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: baseline;
+  gap: 4px;
+  text-wrap: balance;
+}
+
+.startingLabel {
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.34);
+}
+
+.startingTeamName {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.startingTeamName[data-team='red'] {
+  color: var(--team-red);
+}
+
+.startingTeamName[data-team='blue'] {
+  color: var(--team-blue);
+}
+
+.roundPanel {
+  min-width: 88px;
+  min-height: 68px;
+  display: grid;
+  place-items: center;
+  padding: 10px 12px;
+  text-align: center;
+}
+
+.roundChipLabel {
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.roundChipValue {
+  font-size: clamp(1.15rem, 2.4vw, 1.5rem);
+  font-weight: 900;
+  line-height: 1;
+}
+
+.boardViewport {
+  min-height: 0;
   flex: 1;
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.boardFrame {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.bottomDock {
+  min-height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
-  color: #71717a;
+  padding: 4px;
+}
+
+.connectionOverlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(5, 5, 5, 0.66);
+  backdrop-filter: blur(8px);
+}
+
+.connectionModal {
+  width: min(420px, 100%);
+  display: grid;
+  gap: 8px;
+  padding: 22px 20px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(16, 16, 16, 0.96);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.42);
+  text-align: center;
+}
+
+.connectionEyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.34);
+}
+
+.connectionTitle {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.connectionCopy {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.64);
+}
+
+.bottomTray {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: fit-content;
+}
+
+.countBadge {
+  min-width: 84px;
+  min-height: 32px;
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-areas:
+    'icon value'
+    'icon label';
+  column-gap: 6px;
+  align-items: center;
+  padding: 4px 10px 3px;
+  border-radius: 12px;
+  border: 1px solid var(--panel-border);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.countBadge[data-team='red'] {
+  background: linear-gradient(180deg, rgba(255, 90, 79, 0.08), rgba(255, 90, 79, 0.03));
+}
+
+.countBadge[data-team='blue'] {
+  background: linear-gradient(180deg, rgba(74, 167, 255, 0.08), rgba(74, 167, 255, 0.03));
+}
+
+.countBadgeIcon {
+  grid-area: icon;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
+}
+
+.countBadgeValue {
+  grid-area: value;
+  font-size: 0.95rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: #f5f5f5;
+}
+
+.countBadgeLabel {
+  grid-area: label;
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.34);
+}
+
+@media (max-width: 900px) {
+  .teamPanelCaptain {
+    min-height: 58px;
+    padding: 8px 10px;
+  }
+
+  .teamAvatarFrame {
+    width: 40px;
+    height: 40px;
+  }
+
+  .teamLabel {
+    font-size: 15px;
+  }
+
+  .scorePanel {
+    min-height: 58px;
+    padding: 8px 10px;
+  }
+
+  .roundPanel {
+    min-height: 58px;
+    min-width: 72px;
+  }
+
+  .bottomDock {
+    min-height: 38px;
+  }
+}
+
+@media (max-width: 720px) {
+  .screen {
+    padding: 4px;
+    gap: 2px;
+  }
+
+  .topbar {
+    gap: 2px;
+  }
+
+  .teamPanelCaptain {
+    min-height: 50px;
+    padding: 7px 8px;
+    gap: 10px;
+  }
+
+  .teamAvatarFrame {
+    width: 32px;
+    height: 32px;
+  }
+
+  .teamLabel {
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+  }
+
+  .scorePanel {
+    min-height: 50px;
+    padding: 4px 8px;
+  }
+
+  .scoreLine {
+    gap: 6px;
+    font-size: clamp(1rem, 5vw, 1.35rem);
+  }
+
+  .roundPanel {
+    min-width: 48px;
+    min-height: 50px;
+    padding: 4px 6px;
+  }
+
+  .roundChipValue {
+    font-size: 1rem;
+  }
+
+  .bottomDock {
+    min-height: 34px;
+    padding: 2px;
+  }
+
+  .bottomTray {
+    gap: 4px;
+  }
+
+  .countBadge {
+    min-width: 72px;
+    min-height: 28px;
+    padding: 3px 8px 2px;
+    column-gap: 5px;
+  }
+
+  .countBadgeIcon {
+    width: 16px;
+    height: 16px;
+  }
+
+  .countBadgeValue {
+    font-size: 0.9rem;
+  }
+
+  .countBadgeLabel {
+    font-size: 6px;
+  }
+}
+
+@media (max-width: 560px) {
+  .teamPanelCaptain {
+    min-height: 46px;
+    padding: 6px 7px;
+  }
+
+  .teamAvatarFrame {
+    width: 28px;
+    height: 28px;
+  }
+
+  .teamLabel {
+    font-size: 0.72rem;
+    letter-spacing: 0.035em;
+  }
+
+  .scorePanel {
+    min-height: 46px;
+    padding: 3px 6px;
+  }
+
+  .scoreLine {
+    gap: 4px;
+    font-size: clamp(0.9rem, 4.6vw, 1.2rem);
+  }
+
+  .startingLine {
+    gap: 3px;
+  }
+
+  .roundPanel {
+    min-height: 46px;
+    min-width: 42px;
+    padding: 3px 4px;
+  }
+
+  .roundChipLabel {
+    font-size: 8px;
+  }
+
+  .roundChipValue {
+    font-size: 0.9rem;
+  }
+
+  .bottomDock {
+    min-height: 32px;
+  }
+
+  .countBadge {
+    min-width: 66px;
+    min-height: 26px;
+    padding: 2px 7px 2px;
+  }
+
+  .countBadgeLabel {
+    font-size: 6px;
+  }
+}
+
+@media (max-width: 420px) {
+  .countBadgeLabel {
+    display: none;
+  }
+
+  .countBadge {
+    min-width: 58px;
+    min-height: 22px;
+    padding: 2px 6px;
+    grid-template-areas: 'icon value';
+    column-gap: 4px;
+  }
+
+  .startingLine {
+    gap: 2px;
+  }
+
+  .startingLabel {
+    font-size: 7px;
+  }
+
+  .startingTeamName {
+    font-size: 9px;
+  }
+
+  .bottomDock {
+    min-height: 28px;
+  }
+}
+
+@media (max-height: 480px) and (orientation: landscape) {
+  .teamPanelCaptain,
+  .scorePanel,
+  .roundPanel {
+    min-height: 34px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+
+  .countBadgeLabel {
+    display: none;
+  }
+
+  .scorePanel {
+    padding-inline: 6px;
+  }
+
+  .scoreLine {
+    gap: 4px;
+    font-size: 1.05rem;
+  }
+
+  .startingLine {
+    display: flex;
+    gap: 3px;
+    margin-top: 1px;
+  }
+
+  .startingLabel {
+    font-size: 7px;
+  }
+
+  .startingTeamName {
+    font-size: 8px;
+  }
+
+  .teamPanelCaptain {
+    gap: 8px;
+  }
+
+  .teamAvatarFrame {
+    width: 28px;
+    height: 28px;
+  }
+
+  .teamLabel {
+    font-size: 12px;
+  }
+
+  .roundPanel {
+    min-width: 52px;
+  }
+
+  .bottomDock {
+    min-height: 24px;
+  }
+
+  .countBadge {
+    min-height: 20px;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

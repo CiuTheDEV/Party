@@ -142,9 +142,9 @@ This means:
 
 <!-- handoff:start -->
 ## Session Handoff
-- Last: 2026-04-14 by Claude Code (Sonnet)
-- Task: Tajniacy runtime finalization + host screen redesign.
-- Did: Naprawiono SSR bug w play/page.tsx (useMemo->useEffect). Przepisano HostGameScreen wg mockupu: topbar (druzyny + status kapitan. + liczniki), plansza, bottombar (awatary + zaczynajacy).
-- Next: Deploy end-to-end test — uruchomić partykit dev i sprawdzić czy planszaz sie pojawia, kapitanowie sie laczą, odkrywanie działa.
+- Last: 2026-04-18 by Codex
+- Task: Tajniacy GSAP reveal + session wrap-up.
+- Did: Domknięto refaktor revealu planszy na GSAP, usunięto stare CSS keyframes, plansza mountuje się dopiero po intro i buildy przechodzą.
+- Next: Manualny playtest host/captain na mobile i desktop, potem ewentualny tuning feelu animacji.
 - Blocker: None.
 <!-- handoff:end -->
