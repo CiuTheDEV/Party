@@ -128,6 +128,28 @@ function mimeTypeFor(filePath) {
   }
 }
 
+function rewriteHubUrl(url) {
+  const charadesMatch = url.pathname.match(/^\/games\/charades\/present\/([^/]+)\/?$/)
+
+  if (charadesMatch) {
+    const nextUrl = new URL(url.toString())
+    nextUrl.pathname = '/games/charades/present/'
+    nextUrl.searchParams.set('room', decodeURIComponent(charadesMatch[1]))
+    return nextUrl
+  }
+
+  const codenamesMatch = url.pathname.match(/^\/games\/codenames\/captain\/([^/]+)\/?$/)
+
+  if (codenamesMatch) {
+    const nextUrl = new URL(url.toString())
+    nextUrl.pathname = '/games/codenames/captain/'
+    nextUrl.searchParams.set('room', decodeURIComponent(codenamesMatch[1]))
+    return nextUrl
+  }
+
+  return url
+}
+
 async function resolveStaticFile(requestPath) {
   const cleanPath = decodeURIComponent(requestPath).replace(/\\/g, '/')
   const normalized = cleanPath.startsWith('/') ? cleanPath : `/${cleanPath}`
@@ -163,7 +185,7 @@ async function startStaticServer() {
 
   staticServer = createServer(async (request, response) => {
     try {
-      const url = new URL(request.url ?? '/', 'http://127.0.0.1:3000')
+      const url = rewriteHubUrl(new URL(request.url ?? '/', 'http://127.0.0.1:3000'))
       const file = await resolveStaticFile(url.pathname)
 
       if (!file) {
