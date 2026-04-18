@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { ExternalLink, Link2, Smartphone, X } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
-import { getPresenterOrigin, isLocalPresenterOrigin } from '../runtime'
+import { buildPresenterUrl, getPresenterOrigin, isLocalPresenterOrigin } from '../runtime'
 import styles from './PairingPanel.module.css'
 
 type Props = {
@@ -18,7 +18,7 @@ export function PairingPanel({ roomId, isConnected, onDisconnect }: Props) {
 
   useEffect(() => {
     const origin = getPresenterOrigin()
-    setPresenterUrl(origin ? `${origin}/games/charades/present?room=${roomId}` : '')
+    setPresenterUrl(origin ? buildPresenterUrl(origin, roomId) : '')
   }, [roomId])
 
   useEffect(() => {

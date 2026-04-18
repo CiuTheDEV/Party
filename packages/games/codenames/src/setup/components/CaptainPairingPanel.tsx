@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { ExternalLink, Link2, X } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
-import { getPublicOrigin } from '../../runtime/shared/codenames-runtime'
+import { buildCaptainUrl, getPublicOrigin } from '../../runtime/shared/codenames-runtime'
 import type { CodenamesTeam } from '../state'
 import styles from './CaptainPairingPanel.module.css'
 
@@ -36,16 +36,8 @@ export function CaptainPairingModal({
       return
     }
 
-    const params = new URLSearchParams({
-      room: roomId,
-      redName: teams[0].name,
-      redAvatar: teams[0].avatar,
-      blueName: teams[1].name,
-      blueAvatar: teams[1].avatar,
-    })
-
-    setCaptainUrl(`${origin}/games/codenames/captain?${params.toString()}`)
-  }, [roomId, teams])
+    setCaptainUrl(buildCaptainUrl(origin, roomId))
+  }, [roomId])
 
   const sessionCode = roomId.slice(0, 6).toUpperCase()
   const showLocalhostWarning = captainUrl !== '' && captainUrl.includes('localhost')

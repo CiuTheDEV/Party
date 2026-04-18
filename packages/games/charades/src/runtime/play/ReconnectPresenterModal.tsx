@@ -1,6 +1,6 @@
 import { ExternalLink, Smartphone } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
-import { getPresenterOrigin, isLocalPresenterOrigin } from '../shared/charades-runtime'
+import { buildPresenterUrl, getPresenterOrigin, isLocalPresenterOrigin } from '../shared/charades-runtime'
 import styles from './ReconnectPresenterModal.module.css'
 
 type Props = {
@@ -10,7 +10,7 @@ type Props = {
 
 export function ReconnectPresenterModal({ roomId, onBackToMenu }: Props) {
   const presenterOrigin = getPresenterOrigin()
-  const presenterUrl = presenterOrigin ? `${presenterOrigin}/games/charades/present?room=${roomId}` : ''
+  const presenterUrl = presenterOrigin ? buildPresenterUrl(presenterOrigin, roomId) : ''
   const showLocalhostWarning = presenterUrl !== '' && isLocalPresenterOrigin(presenterUrl)
   const sessionCode = roomId.slice(0, 6).toUpperCase()
 

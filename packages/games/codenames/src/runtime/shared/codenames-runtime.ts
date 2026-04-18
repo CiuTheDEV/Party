@@ -5,6 +5,10 @@ function isLoopbackHost(hostname: string) {
   return hostname === 'localhost' || hostname === '127.0.0.1'
 }
 
+function trimTrailingSlash(value: string) {
+  return value.endsWith('/') ? value.slice(0, -1) : value
+}
+
 type PartykitHostResolverParams = {
   envHost?: string
   windowHostname?: string
@@ -43,4 +47,18 @@ export function getPublicOrigin() {
   }
 
   return ''
+}
+
+export function buildCaptainPath(roomId: string, team?: 'red' | 'blue') {
+  const basePath = `/games/codenames/captain/${encodeURIComponent(roomId)}`
+
+  if (!team) {
+    return basePath
+  }
+
+  return `${basePath}?team=${team}`
+}
+
+export function buildCaptainUrl(origin: string, roomId: string) {
+  return `${trimTrailingSlash(origin)}${buildCaptainPath(roomId)}`
 }

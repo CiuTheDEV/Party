@@ -12,7 +12,8 @@
     }
   },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test:device-links": "tsc --target es2022 --module commonjs --moduleResolution node --types node --skipLibCheck --outDir ../../../output/codenames-device-links ./src/runtime/shared/codenames-runtime.ts && node ./src/runtime/shared/codenames-device-links.check.cjs ../../../output/codenames-device-links/codenames-runtime.js"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

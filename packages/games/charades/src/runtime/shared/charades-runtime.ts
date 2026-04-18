@@ -5,6 +5,10 @@ function isLoopbackHost(hostname: string) {
   return hostname === 'localhost' || hostname === '127.0.0.1'
 }
 
+function trimTrailingSlash(value: string) {
+  return value.endsWith('/') ? value.slice(0, -1) : value
+}
+
 type PartykitHostResolverParams = {
   envHost?: string
   windowHostname?: string
@@ -44,6 +48,14 @@ export function getPresenterOrigin() {
   }
 
   return ''
+}
+
+export function buildPresenterPath(roomId: string) {
+  return `/games/charades/present/${encodeURIComponent(roomId)}`
+}
+
+export function buildPresenterUrl(origin: string, roomId: string) {
+  return `${trimTrailingSlash(origin)}${buildPresenterPath(roomId)}`
 }
 
 export function isLocalPresenterOrigin(origin: string) {
