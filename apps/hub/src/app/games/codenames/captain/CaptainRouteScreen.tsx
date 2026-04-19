@@ -1,7 +1,6 @@
 'use client'
 
-import { CaptainScreen, buildCaptainPath, useCaptainRoomStatus } from '@party/codenames'
-import { useEffect } from 'react'
+import { CaptainScreen, buildCaptainRoutePath, useCaptainRoomStatus } from '@party/codenames'
 import { useRouter } from 'next/navigation'
 import styles from './page.module.css'
 
@@ -26,7 +25,7 @@ export function CaptainRouteScreen({
   const router = useRouter()
 
   if (teamParam !== 'red' && teamParam !== 'blue') {
-    return <CaptainTeamSelect roomId={roomId} onChooseTeam={(team) => router.replace(buildCaptainPath(roomId, team))} />
+    return <CaptainTeamSelect roomId={roomId} onChooseTeam={(team) => router.replace(buildCaptainRoutePath(roomId, team))} />
   }
 
   return (
@@ -35,7 +34,7 @@ export function CaptainRouteScreen({
       team={teamParam}
       redTeam={redTeam}
       blueTeam={blueTeam}
-      onChangeRole={() => router.replace(buildCaptainPath(roomId))}
+      onChangeRole={() => router.replace(buildCaptainRoutePath(roomId))}
     />
   )
 }
@@ -47,16 +46,9 @@ function CaptainTeamSelect({
   roomId: string
   onChooseTeam: (team: 'red' | 'blue') => void
 }) {
-  const router = useRouter()
-  const { roomState, hasSyncedRoomState, hostDisconnected } = useCaptainRoomStatus({ roomId })
+  const { roomState, hasSyncedRoomState } = useCaptainRoomStatus({ roomId })
   const redTaken = roomState.captainRedConnected
   const blueTaken = roomState.captainBlueConnected
-
-  useEffect(() => {
-    if (hasSyncedRoomState && hostDisconnected) {
-      router.replace('/games/codenames')
-    }
-  }, [hasSyncedRoomState, hostDisconnected, router])
 
   return (
     <div className={styles.teamSelect}>

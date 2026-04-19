@@ -1,16 +1,36 @@
 'use client'
 
-import { useRouter, useSearchParams } from 'next/navigation'
-import { Suspense } from 'react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { Suspense, useEffect } from 'react'
 import { CaptainRouteScreen } from './CaptainRouteScreen'
+
+function readCaptainRoomId(pathname: string, searchParams: URLSearchParams) {
+  const queryRoomId = searchParams.get('room')
+  if (queryRoomId) {
+    return queryRoomId
+  }
+
+  const match = pathname.match(/^\/games\/codenames\/captain\/([^/]+)\/?$/)
+  if (!match) {
+    return ''
+  }
+
+  return decodeURIComponent(match[1])
+}
 
 function LegacyCaptainPageContent() {
   const router = useRouter()
+  const pathname = usePathname()
   const searchParams = useSearchParams()
-  const roomId = searchParams.get('room')
+  const roomId = readCaptainRoomId(pathname, searchParams)
+
+  useEffect(() => {
+    if (!roomId) {
+      router.replace('/games/codenames')
+    }
+  }, [roomId, router])
 
   if (!roomId) {
-    router.replace('/games/codenames')
     return null
   }
 

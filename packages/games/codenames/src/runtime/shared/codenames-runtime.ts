@@ -59,6 +59,16 @@ export function buildCaptainPath(roomId: string, team?: 'red' | 'blue') {
   return `${basePath}?team=${team}`
 }
 
+export function buildCaptainRoutePath(roomId: string, team?: 'red' | 'blue') {
+  const params = new URLSearchParams({ room: roomId })
+
+  if (team) {
+    params.set('team', team)
+  }
+
+  return `/games/codenames/captain?${params.toString()}`
+}
+
 export function buildCaptainUrl(origin: string, roomId: string) {
   return `${trimTrailingSlash(origin)}${buildCaptainPath(roomId)}`
 }

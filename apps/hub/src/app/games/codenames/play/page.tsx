@@ -46,8 +46,13 @@ function PlayPageContent() {
     setConfig(readConfig())
   }, [])
 
+  useEffect(() => {
+    if (!roomId) {
+      router.replace('/games/codenames')
+    }
+  }, [roomId, router])
+
   if (!roomId) {
-    router.replace('/games/codenames')
     return null
   }
 

@@ -11,6 +11,8 @@ const runtimeModule = require(path.resolve(process.cwd(), builtModulePath))
 
 assert.equal(runtimeModule.buildCaptainPath('866B72DD'), '/games/codenames/captain/866B72DD')
 assert.equal(runtimeModule.buildCaptainPath('866B72DD', 'red'), '/games/codenames/captain/866B72DD?team=red')
+assert.equal(runtimeModule.buildCaptainRoutePath('866B72DD'), '/games/codenames/captain?room=866B72DD')
+assert.equal(runtimeModule.buildCaptainRoutePath('866B72DD', 'red'), '/games/codenames/captain?room=866B72DD&team=red')
 assert.equal(
   runtimeModule.buildCaptainUrl('https://party-9pe.pages.dev', '866B72DD'),
   'https://party-9pe.pages.dev/games/codenames/captain/866B72DD',

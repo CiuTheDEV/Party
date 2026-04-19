@@ -43,9 +43,13 @@ export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }:
     !hostDisconnected &&
     (roomState.phase === 'playing' || roomState.phase === 'assassin-reveal') &&
     (!roomState.captainRedConnected || !roomState.captainBlueConnected)
+  const shouldExitAfterHostDisconnect =
+    hasSyncedRoomState &&
+    hostDisconnected &&
+    roomState.phase !== 'waiting'
 
   useEffect(() => {
-    if (!hasSyncedRoomState || !hostDisconnected) {
+    if (!shouldExitAfterHostDisconnect) {
       return
     }
 
@@ -54,7 +58,7 @@ export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }:
     }, 1200)
 
     return () => window.clearTimeout(timeoutId)
-  }, [hasSyncedRoomState, hostDisconnected, router])
+  }, [router, shouldExitAfterHostDisconnect])
 
   return (
     <div className={styles.screen}>
@@ -67,7 +71,7 @@ export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }:
             <div className={styles.loader} data-team={team} aria-hidden="true">
               <span />
             </div>
-            {hasSyncedRoomState && hostDisconnected ? (
+            {shouldExitAfterHostDisconnect ? (
               <>
                 <p className={styles.waitingTitle}>Host opuścił pokój</p>
                 <p className={styles.waitingCopy}>Wracam do menu głównego...</p>
@@ -162,7 +166,7 @@ export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }:
             </div>
           ) : null}
 
-          {hasSyncedRoomState && hostDisconnected ? (
+          {shouldExitAfterHostDisconnect ? (
             <div className={styles.connectionOverlay} role="dialog" aria-modal="true" aria-label="Host opuścił pokój">
               <div className={styles.connectionModal}>
                 <span className={styles.connectionEyebrow}>Pokój zamknięty</span>
