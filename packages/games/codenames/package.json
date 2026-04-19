@@ -13,7 +13,8 @@
   },
   "scripts": {
     "build": "tsc",
-    "test:device-links": "tsc --target es2022 --module commonjs --moduleResolution node --types node --skipLibCheck --outDir ../../../output/codenames-device-links ./src/runtime/shared/codenames-runtime.ts && node ./src/runtime/shared/codenames-device-links.check.cjs ../../../output/codenames-device-links/codenames-runtime.js"
+    "test:device-links": "tsc --target es2022 --module commonjs --moduleResolution node --types node --skipLibCheck --outDir ../../../output/codenames-device-links ./src/runtime/shared/codenames-runtime.ts && node ./src/runtime/shared/codenames-device-links.check.cjs ../../../output/codenames-device-links/codenames-runtime.js",
+    "test:captain-pairing": "tsc --target es2022 --module commonjs --moduleResolution node --types node --skipLibCheck --outDir ../../../output/codenames-captain-pairing ./src/setup/components/captain-pairing-modal-state.ts && node ./src/setup/components/captain-pairing-modal-state.check.cjs ../../../output/codenames-captain-pairing/captain-pairing-modal-state.js"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

@@ -216,6 +216,7 @@ async function startStaticServer() {
 
 async function main() {
   const tscBin = path.join(repoRoot, 'node_modules', 'typescript', 'bin', 'tsc')
+  const nextBin = path.join(repoRoot, 'node_modules', 'next', 'dist', 'bin', 'next')
 
   const tscProcess = spawnProcess(process.execPath, [
     tscBin,
@@ -242,6 +243,15 @@ async function main() {
 
   await new Promise((resolve, reject) => {
     void waitForProcessExit(tscProcess, 'tsc').then(resolve, reject)
+  })
+
+  const nextBuildProcess = spawnProcess(process.execPath, [nextBin, 'build'], {
+    cwd: hubDir,
+    env: process.env,
+  })
+
+  await new Promise((resolve, reject) => {
+    void waitForProcessExit(nextBuildProcess, 'next build').then(resolve, reject)
   })
 
   authProcess = spawnProcess(process.execPath, [authBundle], {

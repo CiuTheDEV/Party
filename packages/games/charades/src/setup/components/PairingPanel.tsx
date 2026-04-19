@@ -15,6 +15,7 @@ type Props = {
 export function PairingPanel({ roomId, isConnected, onDisconnect }: Props) {
   const [presenterUrl, setPresenterUrl] = useState('')
   const [showModal, setShowModal] = useState(false)
+  const [copyState, setCopyState] = useState<'idle' | 'success' | 'error'>('idle')
 
   useEffect(() => {
     const origin = getPresenterOrigin()
@@ -27,8 +28,32 @@ export function PairingPanel({ roomId, isConnected, onDisconnect }: Props) {
     }
   }, [isConnected])
 
-  const sessionCode = roomId.slice(0, 6).toUpperCase()
+  useEffect(() => {
+    if (copyState === 'idle') return
+
+    const timeoutId = window.setTimeout(() => {
+      setCopyState('idle')
+    }, 1800)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [copyState])
+
+  const sessionCode = roomId.toUpperCase()
   const showLocalhostWarning = presenterUrl !== '' && isLocalPresenterOrigin(presenterUrl)
+  const copyHint =
+    copyState === 'success'
+      ? 'Skopiowano'
+      : copyState === 'error'
+        ? 'Nie udalo sie skopiowac'
+        : 'Kliknij, aby skopiowac'
+  const handleCopySessionCode = async () => {
+    try {
+      await navigator.clipboard.writeText(sessionCode)
+      setCopyState('success')
+    } catch {
+      setCopyState('error')
+    }
+  }
 
   return (
     <>
@@ -121,7 +146,10 @@ export function PairingPanel({ roomId, isConnected, onDisconnect }: Props) {
 
               <div className={styles.codeRow}>
                 <span className={styles.codeLabel}>Kod sesji</span>
-                <span className={styles.codeValue}>{sessionCode}</span>
+                <button type="button" className={styles.codeButton} onClick={handleCopySessionCode} aria-label="Kopiuj kod sesji">
+                  <span className={styles.codeValue}>{sessionCode}</span>
+                  <span className={styles.codeHint}>{copyHint}</span>
+                </button>
               </div>
             </div>
 

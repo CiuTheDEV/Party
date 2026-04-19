@@ -1,5 +1,6 @@
 import { ExternalLink, Smartphone } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
+import { useEffect, useState } from 'react'
 import { buildPresenterUrl, getPresenterOrigin, isLocalPresenterOrigin } from '../shared/charades-runtime'
 import styles from './ReconnectPresenterModal.module.css'
 
@@ -9,10 +10,36 @@ type Props = {
 }
 
 export function ReconnectPresenterModal({ roomId, onBackToMenu }: Props) {
+  const [copyState, setCopyState] = useState<'idle' | 'success' | 'error'>('idle')
   const presenterOrigin = getPresenterOrigin()
   const presenterUrl = presenterOrigin ? buildPresenterUrl(presenterOrigin, roomId) : ''
   const showLocalhostWarning = presenterUrl !== '' && isLocalPresenterOrigin(presenterUrl)
-  const sessionCode = roomId.slice(0, 6).toUpperCase()
+  const sessionCode = roomId.toUpperCase()
+
+  useEffect(() => {
+    if (copyState === 'idle') return
+
+    const timeoutId = window.setTimeout(() => {
+      setCopyState('idle')
+    }, 1800)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [copyState])
+
+  const copyHint =
+    copyState === 'success'
+      ? 'Skopiowano'
+      : copyState === 'error'
+        ? 'Nie udalo sie skopiowac'
+        : 'Kliknij, aby skopiowac'
+  const handleCopySessionCode = async () => {
+    try {
+      await navigator.clipboard.writeText(sessionCode)
+      setCopyState('success')
+    } catch {
+      setCopyState('error')
+    }
+  }
 
   return (
     <div className={styles.backdrop}>
@@ -58,7 +85,10 @@ export function ReconnectPresenterModal({ roomId, onBackToMenu }: Props) {
 
           <div className={styles.codeRow}>
             <span className={styles.codeLabel}>Kod sesji</span>
-            <span className={styles.codeValue}>{sessionCode}</span>
+            <button type="button" className={styles.codeButton} onClick={handleCopySessionCode} aria-label="Kopiuj kod sesji">
+              <span className={styles.codeValue}>{sessionCode}</span>
+              <span className={styles.codeHint}>{copyHint}</span>
+            </button>
           </div>
         </div>
 

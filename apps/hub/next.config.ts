@@ -16,6 +16,14 @@ const nextConfig: NextConfig = {
 
           return [
             {
+              source: '/games/charades/present/:roomId',
+              destination: '/games/charades/present?room=:roomId',
+            },
+            {
+              source: '/games/codenames/captain/:roomId',
+              destination: '/games/codenames/captain?room=:roomId',
+            },
+            {
               source: '/api/auth',
               destination: `${localAuthApi}/api/auth`,
             },

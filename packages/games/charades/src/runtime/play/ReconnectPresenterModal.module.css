@@ -132,6 +132,38 @@
   letter-spacing: 0.08em;
 }
 
+.codeButton {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: right;
+}
+
+.codeButton:hover .codeValue,
+.codeButton:focus-visible .codeValue {
+  color: color-mix(in srgb, var(--game-color-primary) 60%, white);
+}
+
+.codeButton:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--game-color-primary) 65%, white);
+  outline-offset: 6px;
+  border-radius: 10px;
+}
+
+.codeHint {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .actions {
   display: flex;
   justify-content: center;
@@ -162,5 +194,10 @@
 
   .codeRow {
     flex-direction: column;
+  }
+
+  .codeButton {
+    align-items: center;
+    text-align: center;
   }
 }

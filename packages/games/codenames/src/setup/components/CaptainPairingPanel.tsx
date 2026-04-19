@@ -5,11 +5,14 @@ import { ExternalLink, Link2, X } from 'lucide-react'
 import { QRCodeSVG } from 'qrcode.react'
 import { buildCaptainUrl, getPublicOrigin } from '../../runtime/shared/codenames-runtime'
 import type { CodenamesTeam } from '../state'
+import { getCaptainPairingSummary, shouldAutoCloseCaptainPairingModal } from './captain-pairing-modal-state'
 import styles from './CaptainPairingPanel.module.css'
 
 type PairingModalProps = {
   roomId: string
   teams: [CodenamesTeam, CodenamesTeam]
+  captainRedConnected: boolean
+  captainBlueConnected: boolean
   onClose?: () => void
   showCloseButton?: boolean
 }
@@ -24,10 +27,13 @@ type PanelProps = {
 export function CaptainPairingModal({
   roomId,
   teams,
+  captainRedConnected,
+  captainBlueConnected,
   onClose,
   showCloseButton = true,
 }: PairingModalProps) {
   const [captainUrl, setCaptainUrl] = useState('')
+  const [copyState, setCopyState] = useState<'idle' | 'success' | 'error'>('idle')
 
   useEffect(() => {
     const origin = getPublicOrigin()
@@ -39,12 +45,43 @@ export function CaptainPairingModal({
     setCaptainUrl(buildCaptainUrl(origin, roomId))
   }, [roomId])
 
-  const sessionCode = roomId.slice(0, 6).toUpperCase()
+  useEffect(() => {
+    if (showCloseButton && onClose && shouldAutoCloseCaptainPairingModal(captainRedConnected, captainBlueConnected)) {
+      onClose()
+    }
+  }, [captainRedConnected, captainBlueConnected, onClose, showCloseButton])
+
+  useEffect(() => {
+    if (copyState === 'idle') return
+
+    const timeoutId = window.setTimeout(() => {
+      setCopyState('idle')
+    }, 1800)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [copyState])
+
+  const sessionCode = roomId.toUpperCase()
   const showLocalhostWarning = captainUrl !== '' && captainUrl.includes('localhost')
+  const pairingSummary = getCaptainPairingSummary(captainRedConnected, captainBlueConnected)
   const handleOpenInNewTab = () => {
     if (!captainUrl) return
     window.open(captainUrl, '_blank', 'noopener,noreferrer')
   }
+  const handleCopySessionCode = async () => {
+    try {
+      await navigator.clipboard.writeText(sessionCode)
+      setCopyState('success')
+    } catch {
+      setCopyState('error')
+    }
+  }
+  const copyHint =
+    copyState === 'success'
+      ? 'Skopiowano'
+      : copyState === 'error'
+        ? 'Nie udalo sie skopiowac'
+        : 'Kliknij, aby skopiowac'
 
   return (
     <div className={styles.backdrop} role="dialog" aria-modal="true" aria-label="Parowanie kapitanów">
@@ -87,6 +124,19 @@ export function CaptainPairingModal({
               <p className={styles.roleDesc}>
                 Zeskanuj kod telefonem kapitana. Na ekranie pojawi się wybór drużyny, a następnie klucz odpowiedzi planszy.
               </p>
+              <div className={styles.connectionList} aria-label="Status kapitanow">
+                <div className={`${styles.connectionItem} ${captainRedConnected ? styles.connectionItemConnected : ''}`}>
+                  <span className={`${styles.connectionDot} ${styles.connectionDotRed}`} aria-hidden="true" />
+                  <span className={styles.connectionLabel}>Kapitan Czerwonych</span>
+                  <span className={styles.connectionState}>{captainRedConnected ? 'Połączono' : 'Czeka'}</span>
+                </div>
+                <div className={`${styles.connectionItem} ${captainBlueConnected ? styles.connectionItemConnected : ''}`}>
+                  <span className={`${styles.connectionDot} ${styles.connectionDotBlue}`} aria-hidden="true" />
+                  <span className={styles.connectionLabel}>Kapitan Niebieskich</span>
+                  <span className={styles.connectionState}>{captainBlueConnected ? 'Połączono' : 'Czeka'}</span>
+                </div>
+              </div>
+              <p className={styles.connectionSummary}>{pairingSummary}</p>
               {showLocalhostWarning ? (
                 <p className={styles.warning}>
                   Ten QR wskazuje na localhost. Na prawdziwym telefonie otwórz hosta po adresie sieciowym albo ustaw
@@ -98,7 +148,10 @@ export function CaptainPairingModal({
 
           <div className={styles.codeRow}>
             <span className={styles.codeLabel}>Kod sesji</span>
-            <span className={styles.codeValue}>{sessionCode}</span>
+            <button type="button" className={styles.codeButton} onClick={handleCopySessionCode} aria-label="Kopiuj kod sesji">
+              <span className={styles.codeValue}>{sessionCode}</span>
+              <span className={styles.codeHint}>{copyHint}</span>
+            </button>
           </div>
         </div>
 
@@ -156,7 +209,13 @@ export function CaptainPairingPanel({ roomId, teams, captainRedConnected, captai
       </div>
 
       {showModal ? (
-        <CaptainPairingModal roomId={roomId} teams={teams} onClose={() => setShowModal(false)} />
+        <CaptainPairingModal
+          roomId={roomId}
+          teams={teams}
+          captainRedConnected={captainRedConnected}
+          captainBlueConnected={captainBlueConnected}
+          onClose={() => setShowModal(false)}
+        />
       ) : null}
     </>
   )

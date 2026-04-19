@@ -153,7 +153,13 @@ export function HostGameScreen({ roomId, wordPool, teams, roundsToWin }: HostGam
       </div>
 
       {isCaptainReconnectRequired ? (
-        <CaptainPairingModal roomId={roomId} teams={teams} showCloseButton={false} />
+        <CaptainPairingModal
+          roomId={roomId}
+          teams={teams}
+          captainRedConnected={roomState.captainRedConnected}
+          captainBlueConnected={roomState.captainBlueConnected}
+          showCloseButton={false}
+        />
       ) : null}
 
       <div className={styles.bottombar} aria-hidden={isRoundIntroVisible}>

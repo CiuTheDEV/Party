@@ -245,6 +245,66 @@
   gap: 8px;
 }
 
+.connectionList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.connectionItem {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.connectionItemConnected {
+  border-color: rgba(34, 197, 94, 0.28);
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.connectionDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.connectionDotRed {
+  background: #f87171;
+}
+
+.connectionDotBlue {
+  background: #60a5fa;
+}
+
+.connectionLabel {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.connectionState {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.connectionItemConnected .connectionState {
+  color: #86efac;
+}
+
+.connectionSummary {
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.72);
+  margin: 0;
+}
+
 .roleLabel {
   font-size: 12px;
   font-weight: 800;
@@ -291,6 +351,38 @@
   font-weight: 900;
   letter-spacing: 0.14em;
   color: var(--color-text);
+}
+
+.codeButton {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: right;
+}
+
+.codeButton:hover .codeValue,
+.codeButton:focus-visible .codeValue {
+  color: color-mix(in srgb, var(--game-color-primary) 72%, #fff);
+}
+
+.codeButton:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--game-color-primary) 70%, #fff);
+  outline-offset: 6px;
+  border-radius: 10px;
+}
+
+.codeHint {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.58);
 }
 
 .modalFooter {
@@ -349,5 +441,10 @@
   .codeRow {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .codeButton {
+    align-items: flex-start;
+    text-align: left;
   }
 }
