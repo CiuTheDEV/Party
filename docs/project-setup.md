@@ -8,7 +8,7 @@
 ## Prerequisites
 
 - Node.js 20+
-- pnpm 9+ (`npm install -g pnpm`)
+- npm 11+
 - Git configured
 - Cloudflare account (free)
 - GitHub account
@@ -21,7 +21,7 @@
 
 ```bash
 cd C:\Users\Mateo\Desktop\Party
-pnpm dlx create-turbo@latest . --package-manager pnpm
+npx create-turbo@latest . --package-manager npm
 ```
 
 Accept the defaults, then clean up the generated example apps.
@@ -37,11 +37,10 @@ Party/
 |  |- game-sdk/               # Module contract + availability status
 |  `- games/
 |     |- charades/            # First live game module
-|     `- codenames/           # Coming-soon game scaffold
+|     `- codenames/           # Second live game module
 |- content/
 |  `- charades/               # Word lists
 |- turbo.json
-|- pnpm-workspace.yaml
 `- package.json
 ```
 
@@ -56,7 +55,8 @@ Baseline root scripts should expose:
 - `dev`
 - `build`
 - `lint`
-- `test`
+- `test:e2e`
+- `test:e2e:live`
 
 ---
 
@@ -147,14 +147,22 @@ Partykit is the default direction for room-based multiplayer and presenter/host 
 ## First Run Verification
 
 ```bash
-pnpm install
-pnpm dev
+npm install
+npm run dev
 ```
 
 Expected result:
 - the hub starts locally,
 - shared packages resolve correctly,
 - the workspace can build without hidden paid dependencies.
+
+For visible browser verification:
+
+```bash
+npm run test:e2e:live
+```
+
+This runs Playwright in headed mode with slower interactions so host/setup flows can be inspected in a real browser window.
 
 ---
 

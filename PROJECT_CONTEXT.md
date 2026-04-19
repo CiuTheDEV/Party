@@ -1,6 +1,6 @@
 # Project Party - Project Context
 
-*Last updated: 2026-04-13*
+*Last updated: 2026-04-19*
 
 ---
 
@@ -98,7 +98,7 @@ Current repo now matches the intended split much more closely:
 - `apps/hub` is platform routing + registry + hub feature code,
 - `@party/ui` owns shared shell/setup primitives,
 - `charades` owns menu, setup, results, and runtime,
-- `codenames` is live with full menu + settings overlay + setup modal (no gameplay runtime yet).
+- `codenames` is live with full menu, setup, captain/host runtime, and ongoing validation/polish work.
 
 ### Shared Setup Model
 

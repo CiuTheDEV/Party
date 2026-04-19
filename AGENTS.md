@@ -96,6 +96,9 @@ When a task changes behavior, run the smallest relevant verification available:
 - build
 - focused test
 
+For browser-facing changes, default to Playwright verification with a visible browser so the agent can inspect the real UI flow instead of relying only on static reasoning.
+Capture screenshots when they help diagnose, compare, or present UI behavior; use them for self-review first, and show them to the owner when useful.
+
 Read the output and report what actually happened.
 If verification cannot be run, say so clearly.
 
@@ -123,7 +126,7 @@ If verification cannot be run, say so clearly.
 ### Current modules
 
 - `charades` - live reference game module
-- `codenames` - live menu/setup module; gameplay runtime still needs end-to-end rollout and testing
+- `codenames` - live game module; runtime is implemented and still needs ongoing end-to-end validation/polish
 
 ---
 
@@ -132,7 +135,9 @@ If verification cannot be run, say so clearly.
 - Prefer `context7` for current framework and library docs when available.
 - Prefer GitHub tooling for repo, PR, and issue context when available.
 - Do not rely on stale model memory for changing APIs.
-- Avoid `playwright` MCP by default in this project; prefer lint/build/typecheck and manual browser verification unless the task explicitly needs Playwright.
+- Prefer local Playwright verification (`npm run test:e2e`, `npm run test:e2e:live`) for browser flows in this project.
+- For UI/runtime changes, treat Playwright plus screenshots as the default inspection workflow.
+- Avoid `playwright` MCP by default unless the task specifically needs MCP-only browser automation.
 
 ---
 
@@ -197,4 +202,4 @@ Handoff format:
 
 ---
 
-*Last updated: 2026-04-18*
+*Last updated: 2026-04-19*
