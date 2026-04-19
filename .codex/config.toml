@@ -1,49 +1,63 @@
 #:schema https://developers.openai.com/codex/config-schema.json
 
-# Lean, stable Windows config for ChatGPT Plus usage
-# Goal: lower usage, fewer surprises, MCP/Playwright works reliably
+# Repo-scoped Codex config for Windows-native app usage
+# Playwright-first, minimal friction, full access for trusted repositories only.
 
-# model = "gpt-5.4-mini"
-# model_reasoning_effort = "medium"
+model = "gpt-5.4"
+model_provider = "openai"
+service_tier = "fast"
+
+model_reasoning_effort = "high"
 plan_mode_reasoning_effort = "high"
 model_reasoning_summary = "none"
-model_verbosity = "low"
+model_verbosity = "medium"
 hide_agent_reasoning = true
 
-# Keep search available, but in cached mode
+# Safer than live browsing by default; switch in-app when you specifically need live fetches.
 web_search = "cached"
 
-# Avoid oversized tool output being stored in history/context
-tool_output_token_limit = 3000
+# Keep more MCP / Playwright logs in context before truncation.
+tool_output_token_limit = 12000
 
-# Good balance for local work: write inside workspace, ask when needed
-approval_policy = "on-request"
-sandbox_mode = "workspace-write"
+# Full-access mode: no sandbox boundary, no approval prompts.
+# Use only in a trusted repo.
+approval_policy = "never"
+sandbox_mode = "danger-full-access"
 
-# Keep the tone neutral and compact
-personality = "none"
+personality = "pragmatic"
+allow_login_shell = true
+mcp_oauth_credentials_store = "keyring"
 
-# Prefer the normal priced tier; avoid fast mode (which costs more credits)
-service_tier = "flex"
+developer_instructions = """
+Always respond in Polish unless the user explicitly asks for another language.
+Be concise, pragmatic, and action-oriented.
+For code edits, prefer minimal targeted diffs instead of rewriting entire files.
+Preserve file structure, line endings, and encoding.
+Assume UTF-8 by default, but verify actual bytes or repository conventions before declaring encoding corruption.
+Do not claim mojibake unless it is confirmed from bytes, tool output, or repository conventions.
+Avoid unnecessary reformatting, mass rewrites, and line-ending churn.
+On Windows, prefer Windows-native commands and do not assume WSL.
+For Playwright work, favor small reproducible steps and keep logs concise.
+Before risky changes, briefly state the plan. After changes, summarize exactly what changed and what still needs verification.
+"""
 
-# Small history footprint; no local transcript growth
 [history]
 persistence = "none"
 
 [agents]
-# Multi-agent can be useful, but it tends to add complexity/usage
 max_threads = 1
 max_depth = 1
 
-[sandbox_workspace_write]
-# Playwright via npx and some MCP flows need network access
-network_access = true
-writable_roots = []
+[shell_environment_policy]
+inherit = "all"
+experimental_use_profile = true
+
+[shell_environment_policy.set]
+PYTHONUTF8 = "1"
+PYTHONIOENCODING = "utf-8"
 
 [windows]
-# Recommended native Windows sandbox mode
 sandbox = "elevated"
-# Keep stronger isolation unless you hit a compatibility edge case
 sandbox_private_desktop = true
 
 [tools]
@@ -51,25 +65,15 @@ view_image = true
 
 [features]
 multi_agent = false
-apps = false
 prevent_idle_sleep = true
-
-[tui]
-# Better default on Windows terminals; preserves behavior more predictably
-alternate_screen = "auto"
-animations = false
-
-# Store auth in OS keychain when possible
-cli_auth_credentials_store = "keyring"
-mcp_oauth_credentials_store = "keyring"
 
 [mcp_servers.playwright]
 enabled = true
 required = false
 command = "npx"
-args = ["-y", "@playwright/mcp@latest"]
-startup_timeout_sec = 45
-tool_timeout_sec = 180
+args = ["-y", "@playwright/mcp@0.0.70"]
+startup_timeout_sec = 60
+tool_timeout_sec = 300
 
 [mcp_servers.context7]
 enabled = true
@@ -85,8 +89,3 @@ url = "https://api.githubcopilot.com/mcp/"
 bearer_token_env_var = "GITHUB_MCP_PAT"
 startup_timeout_sec = 20
 tool_timeout_sec = 120
-
-# Optional upgrade path for heavier tasks:
-# model = "gpt-5.4"
-# model_reasoning_effort = "medium"
-# plan_mode_reasoning_effort = "high"
