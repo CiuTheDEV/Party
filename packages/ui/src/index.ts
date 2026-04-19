@@ -8,6 +8,7 @@ export { GameIcon } from './GameIcon/GameIcon'
 export { GameSetupTemplate } from './GameSetupTemplate/GameSetupTemplate'
 export { PremiumModal } from './PremiumModal/PremiumModal'
 export { AlertDialog } from './AlertDialog/AlertDialog'
+export { WordPoolManagerModal } from './WordPoolManagerModal/WordPoolManagerModal'
 export { SettingsPanelShell } from './SettingsPanelShell/SettingsPanelShell'
 export { SettingsPanelFooter } from './SettingsPanelFooter/SettingsPanelFooter'
 export { SettingsPanelTabs } from './SettingsPanelTabs/SettingsPanelTabs'
@@ -55,6 +56,7 @@ export {
 } from './avatars/party-avatar-registry'
 export type { GameSetupTemplateSection } from './GameSetupTemplate/types'
 export type { GameSettingsTabItem } from './GameSettingsTabs/GameSettingsTabs'
+export type { WordPoolManagerRow } from './WordPoolManagerModal/WordPoolManagerModal'
 export type {
   CreateHostNavigationStateInput,
   HostNavigationFocusSnapshot,

@@ -29,5 +29,15 @@
                       "created":  "2026-03-27",
                       "updated":  "2026-04-08"
                   },
+                  {
+                      "id":  "T002",
+                      "title":  "Codenames pool manager polish and browser validation",
+                      "status":  "blocked",
+                      "context":  "Persistent non-repeating words are implemented for Tajniacy with per-category history, active-pool blocking below 25 fresh words, shared pool-manager modal reuse, and per-category resets from the setup modal. Code-level checks and package builds pass. The remaining work is UX polish in the modal/setup flow and a deliberate browser verification pass for the exhausted-pool flow.",
+                      "next_action":  "Run a visible browser pass on the Tajniacy setup modal and pool manager, then polish remaining copy/layout issues discovered there.",
+                      "blocker":  "Existing Tajniacy e2e/setup-opening issue: after clicking `Zagraj teraz`, Playwright does not reliably see the setup dialog, which blocks stable browser verification in the current automated flow.",
+                      "created":  "2026-04-19",
+                      "updated":  "2026-04-19"
+                  }
               ]
 }

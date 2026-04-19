@@ -97,13 +97,34 @@ export type {
   CodenamesWordCategory,
   CaptainListenerProps,
 } from './setup/helpers'
+export {
+  CODENAMES_BOARD_WORD_COUNT,
+  appendPoolValidationError,
+  getCodenamesCategoryPoolSummaries,
+  getCodenamesPoolSummary,
+} from './setup/pool-validation'
 
 export { HostGameScreen } from './runtime/host/HostGameScreen'
+export { prepareCodenamesGameStart } from './runtime/host/start-game'
 export { CaptainScreen } from './runtime/captain/CaptainScreen'
 export { getCaptainBoardMeta } from './runtime/captain/board-meta'
 export { useCaptainRoomStatus } from './runtime/captain/useCaptainRoomStatus'
 export { default as CodenameCaptainListener } from './runtime/setup/CaptainListener'
 export { buildCaptainPath, buildCaptainRoutePath } from './runtime/shared/codenames-runtime'
+export {
+  CODENAMES_WORD_HISTORY_STORAGE_KEY,
+  buildCodenamesPoolKey,
+  createEmptyCodenamesWordHistory,
+  getFreshWordsForCategories,
+  getFreshWordsForPool,
+  normalizeCodenamesWordHistory,
+  readCodenamesWordHistory,
+  recordUsedWordsForCategories,
+  recordUsedWordsForPool,
+  resetCodenamesCategoryHistories,
+  resetCodenamesPoolHistory,
+  writeCodenamesWordHistory,
+} from './runtime/shared/codenames-word-history'
 export {
   getCaptainRuntimeStatus,
   getHostRuntimeStatus,

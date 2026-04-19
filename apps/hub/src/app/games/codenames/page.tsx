@@ -4,13 +4,20 @@ import dynamic from 'next/dynamic'
 import { useMemo, useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
+  appendPoolValidationError,
+  getCodenamesCategoryPoolSummaries,
+  getCodenamesPoolSummary,
   codenamesModule,
   CodenamesMenuContent,
   useMenuControls,
   CodenameCaptainListener,
   CODENAMES_SETUP_STORAGE_KEY,
+  readCodenamesWordHistory,
+  resetCodenamesCategoryHistories,
+  resetCodenamesPoolHistory,
   restoreCodenamesSetupState,
   serializeCodenamesSetupState,
+  writeCodenamesWordHistory,
   type CodenamesSetupHelpers,
   type CodenamesSetupState,
 } from '@party/codenames'
@@ -48,14 +55,82 @@ export default function CodenamesMenuPage() {
   const [hasRestoredSetup, setHasRestoredSetup] = useState(false)
   const [setupFocus, setSetupFocus] = useState<SetupFocusTarget>('start')
 
-  const validation = useMemo(() => codenamesModule.validateSetup(setupState), [setupState])
+  const wordHistory = useMemo(
+    () => (hasRestoredSetup ? readCodenamesWordHistory() : null),
+    [hasRestoredSetup, setupState.selectedCategories],
+  )
+
+  const poolSummary = useMemo(
+    () =>
+      getCodenamesPoolSummary({
+        categories: codenamesCategories,
+        selectedCategories: setupState.selectedCategories,
+        history: wordHistory,
+      }),
+    [setupState.selectedCategories, wordHistory],
+  )
+
+  const categoryPoolSummaries = useMemo(
+    () =>
+      getCodenamesCategoryPoolSummaries({
+        categories: codenamesCategories,
+        selectedCategories: setupState.selectedCategories,
+        history: wordHistory,
+      }),
+    [setupState.selectedCategories, wordHistory],
+  )
+
+  const validation = useMemo(() => {
+    const baseValidation = codenamesModule.validateSetup(setupState)
+    const errors = appendPoolValidationError({
+      errors: baseValidation.errors ?? [],
+      summary: poolSummary,
+    })
+
+    return {
+      canStart: errors.length === 0,
+      errors,
+    }
+  }, [poolSummary, setupState])
 
   const helpers: CodenamesSetupHelpers = useMemo(
     () => ({
       categories: codenamesCategories,
+      categoryPoolSummaries,
       CaptainListener,
+      poolSummary,
+      resetActivePoolHistory: () => {
+        const activeCategoryIds = Object.keys(setupState.selectedCategories)
+
+        if (activeCategoryIds.length === 0) {
+          return
+        }
+
+        writeCodenamesWordHistory(
+          resetCodenamesCategoryHistories({
+            history: readCodenamesWordHistory(),
+            categoryIds: activeCategoryIds,
+          }),
+        )
+        setSetupState((current) => ({
+          ...current,
+          selectedCategories: { ...current.selectedCategories },
+        }))
+      },
+      resetCategoryPoolHistory: (categoryId: string) => {
+        writeCodenamesWordHistory(
+          resetCodenamesPoolHistory({
+            history: readCodenamesWordHistory(),
+            poolKey: categoryId,
+          }),
+        )
+        setSetupState((current) => ({
+          ...current,
+          selectedCategories: { ...current.selectedCategories },
+        }))
+      },
     }),
-    [],
+    [categoryPoolSummaries, poolSummary, setupState.selectedCategories],
   )
 
   useEffect(() => {

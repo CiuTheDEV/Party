@@ -35,6 +35,16 @@
 
 **How to prevent it:** Any shared runtime surface rendered inside native form controls should explicitly inherit typography. For game cards, treat font inheritance as part of the component contract, not an accident of the parent screen.
 
+### 2026-04-19 - Per-category pool reset requires per-category history, not combined selection keys
+
+**Symptom:** The Codenames pool manager could show selected categories in the modal, but a "reset this category" action could not be made truthful while history was stored only under one combined key like `adult|standard`.
+
+**Root cause:** Combined-pool history works for blocking board generation across the current selection, but it destroys ownership of used words at the category level. Once history is stored only for the whole combination, resetting one category has no precise state to clear.
+
+**Fix:** Store Codenames word history per category ID, then derive active-pool totals by aggregating fresh words across the currently selected categories. Runtime board generation and setup validation must use that same per-category aggregation logic.
+
+**How to prevent it:** If the UX needs row-level management or reset for individual categories, model persistence at the same granularity from the start. Do not choose a coarser storage key than the smallest user-visible management unit.
+
 ### 2026-04-18 - Cloudflare Pages push does not deploy PartyKit server changes
 
 **Symptom:** The Codenames captain screen stayed on "Sprawdzam dostepnosc druzyn..." in production even though the frontend deploy succeeded and local multiplayer worked.

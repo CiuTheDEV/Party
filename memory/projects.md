@@ -25,7 +25,7 @@
 **Current implementation truth**:
 - `charades` owns config, menu, setup, results, and its runtime hooks/components,
 - charades now has presenter word change, weighted reroll logic, browser-side word history, prompt-pool management/reset UI, low-pool start warning, and a custom avatar asset system,
-- `codenames` now has live menu/setup/runtime polish work, fresh Playwright coverage for smoke/setup flows, and a cleaned-up local repo/tooling baseline,
+- `codenames` now has live menu/setup/runtime polish work, persistent non-repeating word history with shared pool-manager UI and per-category resets, fresh Playwright coverage for smoke/setup flows, and a cleaned-up local repo/tooling baseline,
 - the next product milestone is still deploy/runtime validation hardening before moving deeper into Phase 6 work.
 
 **Stack**: Next.js + Turborepo + Cloudflare Pages + Partykit + D1 + Clerk later + Stripe stub

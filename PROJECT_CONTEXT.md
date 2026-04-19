@@ -141,12 +141,11 @@ This means:
 ---
 
 <!-- handoff:start -->
-## Session Handoff
-- Last: 2026-04-19 16:21 by Codex
-- Task: Playwright clean reinstall, visible-browser e2e setup, and safe repo cleanup pass on top of the current Codenames runtime work.
-- Did: Reinstalled Playwright from scratch, aligned browser binaries with the installed package version, added a headed/slow `test:e2e:live` flow, and verified both standard and visible-browser e2e runs. Cleaned obvious tracked local artifacts (`.partykit`, `.superpowers`, `.playwright-mcp`, stale logs/reports) plus generated `js/d.ts` files that had leaked into `packages/ui/src/host-navigation/`. Left `rules/`, `docs/`, `memory/`, agent/tooling folders, and root utilities in place because they are not yet proven dead.
-- Next: Continue with manual runtime validation for Codenames/Charades and, if desired, run a separate deliberate cleanup pass for optional root tooling files and heavy assets.
-- Note: `npm install` and `npx playwright install chromium` must not be parallelized in this repo; doing so can download a mismatched browser revision versus the final installed Playwright package.
-- Blocker: None.
+- Last: 2026-04-19 18:13 by Codex
+- Task: Add persistent non-repeating words to Tajniacy with manual pool reset and board-start blocking below 25 fresh words, then refactor pool management UI to reuse the Charades modal pattern and support per-category resets.
+- Did: Added host-local `localStorage` word-history helpers for Codenames, setup-side pool summary/validation/reset wiring, runtime guarded board start with history persistence, and focused checks for word history, pool validation, and guarded board generation. Extracted a shared `WordPoolManagerModal` in `@party/ui`, switched Charades pool management to that shared component, and replaced the bespoke Codenames pool panel with the same modal flow. Refined Codenames history from combined-pool tracking to per-category tracking so the modal can reset individual categories independently while active-pool totals still aggregate correctly across the current selection. Verified `build` in `@party/ui`, `build` in `@party/charades`, plus `test:word-history`, `test:pool-validation`, `test:start-game`, `test:start-policy`, `test:setup-storage`, and `build` in `@party/codenames`.
+- Next: Run a deliberate browser verification pass for the Tajniacy setup and pool-manager UX once the existing setup-opening automation issue is understood, then polish remaining modal copy/layout issues found there.
+- Note: Attempted visible-browser e2e verification hit an existing Codenames problem where Playwright clicks `Zagraj teraz` but the setup dialog does not appear; this also breaks the pre-existing `codenames keeps the draft and opens captain pairing` test, so browser verification is currently blocked separately from the new pool logic.
+- Blocker: Browser verification for Tajniacy setup is blocked by the existing e2e/setup-opening failure described above.
 <!-- handoff:end -->
 

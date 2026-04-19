@@ -4,8 +4,9 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import usePartySocket from 'partysocket/react'
 import type { HostEvent, IncomingMessage, RoomState } from '../shared/codenames-events'
 import { getPartykitHost } from '../shared/codenames-runtime'
-import { generateBoard } from '../shared/board-generator'
+import { readCodenamesWordHistory, writeCodenamesWordHistory } from '../shared/codenames-word-history'
 import { ROUND_INTRO_DURATION_MS } from '../shared/RoundIntroOverlay'
+import { prepareCodenamesGameStart } from './start-game'
 import { canStartWaitingGame, shouldAutoStartPendingRound } from './start-policy'
 
 const initialRoomState: RoomState = {
@@ -27,17 +28,18 @@ const initialRoomState: RoomState = {
 }
 
 type UseHostGameParams = {
+  categories: Array<{ id: string; words: string[] }>
   roomId: string
-  wordPool: string[]
 }
 
-export function useHostGame({ roomId, wordPool }: UseHostGameParams) {
+export function useHostGame({ categories, roomId }: UseHostGameParams) {
   const [roomState, setRoomState] = useState<RoomState>(initialRoomState)
   const [hasSyncedRoomState, setHasSyncedRoomState] = useState(false)
   const [isRoundIntroVisible, setIsRoundIntroVisible] = useState(false)
+  const [startBlockedReason, setStartBlockedReason] = useState<string | null>(null)
 
-  const wordPoolRef = useRef(wordPool)
-  wordPoolRef.current = wordPool
+  const categoriesRef = useRef(categories)
+  categoriesRef.current = categories
   const previousBoardUnlockedRef = useRef(false)
   const gameStartedRef = useRef(false)
   const pendingNewGameRef = useRef(false)
@@ -77,8 +79,7 @@ export function useHostGame({ roomId, wordPool }: UseHostGameParams) {
     }
 
     initialStartTriggeredRef.current = true
-    sendGameStart(socket, wordPoolRef.current)
-    gameStartedRef.current = true
+    gameStartedRef.current = trySendGameStart(socket, categoriesRef.current, setStartBlockedReason)
   }, [roomState, socket])
 
   useEffect(() => {
@@ -91,8 +92,7 @@ export function useHostGame({ roomId, wordPool }: UseHostGameParams) {
     }
 
     pendingNewGameRef.current = false
-    sendGameStart(socket, wordPoolRef.current)
-    gameStartedRef.current = true
+    gameStartedRef.current = trySendGameStart(socket, categoriesRef.current, setStartBlockedReason)
   }, [roomState, socket])
 
   useEffect(() => {
@@ -136,11 +136,11 @@ export function useHostGame({ roomId, wordPool }: UseHostGameParams) {
       return
     }
 
-    sendGameStart(socket, wordPoolRef.current)
-    gameStartedRef.current = true
+    gameStartedRef.current = trySendGameStart(socket, categoriesRef.current, setStartBlockedReason)
   }, [roomState, socket])
 
   const resetGame = useCallback(() => {
+    setStartBlockedReason(null)
     pendingNewGameRef.current = true
     gameStartedRef.current = false
     initialStartTriggeredRef.current = true
@@ -149,6 +149,7 @@ export function useHostGame({ roomId, wordPool }: UseHostGameParams) {
   }, [socket])
 
   const restartMatch = useCallback(() => {
+    setStartBlockedReason(null)
     pendingNewGameRef.current = true
     gameStartedRef.current = false
     initialStartTriggeredRef.current = true
@@ -156,7 +157,22 @@ export function useHostGame({ roomId, wordPool }: UseHostGameParams) {
     socket.send(JSON.stringify(event satisfies HostEvent))
   }, [socket])
 
-  return { roomState, hasSyncedRoomState, revealCard, setAssassinTeam, resetGame, restartMatch, startGame, isRoundIntroVisible }
+  const clearStartBlockedReason = useCallback(() => {
+    setStartBlockedReason(null)
+  }, [])
+
+  return {
+    roomState,
+    hasSyncedRoomState,
+    revealCard,
+    setAssassinTeam,
+    resetGame,
+    restartMatch,
+    startGame,
+    isRoundIntroVisible,
+    startBlockedReason,
+    clearStartBlockedReason,
+  }
 }
 
 export function applyEvent(state: RoomState, msg: IncomingMessage): RoomState {
@@ -255,15 +271,31 @@ export function applyEvent(state: RoomState, msg: IncomingMessage): RoomState {
   }
 }
 
-function sendGameStart(socket: { send: (data: string) => void }, wordPool: string[]) {
-  const board = generateBoard(wordPool)
+function trySendGameStart(
+  socket: { send: (data: string) => void },
+  categories: Array<{ id: string; words: string[] }>,
+  setStartBlockedReason: (reason: string | null) => void,
+) {
+  const result = prepareCodenamesGameStart({
+    categories,
+    history: readCodenamesWordHistory(),
+  })
+
+  if (!result.ok) {
+    setStartBlockedReason(result.reason)
+    return false
+  }
+
+  writeCodenamesWordHistory(result.history)
+  setStartBlockedReason(null)
   const event = {
     type: 'GAME_START' as const,
-    cards: board.cards,
-    redTotal: board.redTotal,
-    blueTotal: board.blueTotal,
-    startingTeam: board.startingTeam,
+    cards: result.board.cards,
+    redTotal: result.board.redTotal,
+    blueTotal: result.board.blueTotal,
+    startingTeam: result.board.startingTeam,
   }
 
   socket.send(JSON.stringify(event satisfies HostEvent))
+  return true
 }

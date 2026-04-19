@@ -1,8 +1,9 @@
 'use client'
 
-import { ChevronDown, LibraryBig } from 'lucide-react'
-import { useState } from 'react'
 import type { GameSetupSectionComponentProps } from '@party/game-sdk'
+import { WordPoolManagerModal } from '@party/ui'
+import { ChevronDown, LibraryBig } from 'lucide-react'
+import { useMemo, useState } from 'react'
 import type { CodenamesSetupHelpers } from '../helpers'
 import type { CodenamesSetupState } from '../state'
 import styles from './CategoriesSection.module.css'
@@ -13,21 +14,41 @@ export function CategoriesSection({
   helpers,
 }: GameSetupSectionComponentProps<CodenamesSetupState, CodenamesSetupHelpers>) {
   const [open, setOpen] = useState(false)
+  const [isPoolManagerOpen, setIsPoolManagerOpen] = useState(false)
 
   const selectedLabels = helpers.categories
     .filter((category) => state.selectedCategories[category.id])
     .map((category) => category.name)
 
   const summaryText = selectedLabels.length > 0 ? `Wybrane: ${selectedLabels.join(', ')}` : 'Wybrane: brak'
+  const poolSummaryText =
+    helpers.poolSummary.total > 0
+      ? `Pozostalo ${helpers.poolSummary.remaining}/${helpers.poolSummary.total} swiezych hasel`
+      : 'Wybierz kategorie, aby zbudowac pule hasel'
+
+  const categoryRows = useMemo(
+    () =>
+      helpers.categoryPoolSummaries
+        .filter((summary) => summary.isSelected)
+        .map((summary) => ({
+          name: summary.name,
+          pills: [`${summary.remaining}/${summary.total} swiezych hasel`],
+          actionLabel: 'Resetuj',
+          onAction: () => helpers.resetCategoryPoolHistory(summary.categoryId),
+        })),
+    [helpers.categoryPoolSummaries, helpers.resetCategoryPoolHistory],
+  )
 
   function toggle(id: string) {
     updateState((current) => {
       const next = { ...current.selectedCategories }
+
       if (next[id]) {
         delete next[id]
       } else {
         next[id] = true
       }
+
       return { ...current, selectedCategories: next }
     })
   }
@@ -54,6 +75,7 @@ export function CategoriesSection({
           <div className={styles.categoryList}>
             {helpers.categories.map((category) => {
               const isSelected = Boolean(state.selectedCategories[category.id])
+
               return (
                 <button
                   key={category.id}
@@ -73,8 +95,35 @@ export function CategoriesSection({
               )
             })}
           </div>
+
+          <button type="button" className={styles.managementStrip} onClick={() => setIsPoolManagerOpen(true)}>
+            {'Zarz\u0105dzaj pul\u0105 unikalnych hase\u0142'}
+          </button>
         </div>
       ) : null}
+
+      <WordPoolManagerModal
+        open={isPoolManagerOpen}
+        onClose={() => setIsPoolManagerOpen(false)}
+        title={'Zarz\u0105dzaj pul\u0105 unikalnych hase\u0142'}
+        description={
+          'Tutaj sprawdzisz stan aktywnej puli i recznie wyczyscisz historie zuzytych plansz dla aktywnego wyboru kategorii.'
+        }
+        summaryTitle="Aktywna pula"
+        summaryDescription={'Aktywna pula dla biezacego wyboru kategorii ma teraz tyle swiezych hasel:'}
+        summaryValue={poolSummaryText}
+        summaryActionLabel="Resetuj aktywne"
+        onSummaryAction={helpers.resetActivePoolHistory}
+        rowsTitle="Kategorie"
+        rowsDescription="Aktywna pula buduje plansze tylko z aktualnie zaznaczonych kategorii. Kazda kategorie mozesz zresetowac osobno."
+        rows={categoryRows}
+        theme="game"
+        footer={
+          helpers.poolSummary.isExhausted ? (
+            <p className={styles.poolWarning}>Za malo swiezych hasel na nowa plansze. Zresetuj potrzebne kategorie.</p>
+          ) : null
+        }
+      />
     </section>
   )
 }

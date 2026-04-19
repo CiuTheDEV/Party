@@ -78,6 +78,13 @@
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
+.poolWarning {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #f7c66b;
+}
+
 .categoryList {
   display: grid;
   gap: 12px;
@@ -155,6 +162,27 @@
   color: white;
 }
 
+.managementStrip {
+  width: 100%;
+  min-height: 52px;
+  margin-top: 16px;
+  padding: 0 20px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: color-mix(in srgb, var(--game-color-primary) 72%, white);
+  font-size: 16px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.managementStrip:hover {
+  border-color: color-mix(in srgb, var(--game-color-primary) 38%, transparent);
+  background: color-mix(in srgb, var(--game-color-primary) 10%, transparent);
+  color: white;
+}
+
 @media (max-width: 767px) {
   .header {
     padding: 16px;
@@ -178,5 +206,10 @@
 
   .categoryCard {
     padding: 14px 16px;
+  }
+
+  .managementStrip {
+    min-height: 52px;
+    font-size: 15px;
   }
 }

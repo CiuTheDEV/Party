@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertDialog } from '@party/ui'
+import { AlertDialog, WordPoolManagerModal, type WordPoolManagerRow } from '@party/ui'
 import { Check, CheckCheck, ChevronDown, Dices, Eraser, LibraryBig, LockKeyhole } from 'lucide-react'
 import { type FormEvent, useEffect, useMemo, useState } from 'react'
 import {
@@ -226,6 +226,24 @@ export function CategoryPicker({
     }
   }, [categories, hasCategoryAccess, selected, usedPromptKeys])
 
+  const categoryResetRows = useMemo<WordPoolManagerRow[]>(
+    () =>
+      categories
+        .filter((category) => hasCategoryAccess(category.id))
+        .map((category) => {
+          const easyStats = getWordStats(category, 'easy')
+          const hardStats = getWordStats(category, 'hard')
+
+          return {
+            name: category.name,
+            pills: [`Latwe ${easyStats.remaining}/${easyStats.total}`, `Trudne ${hardStats.remaining}/${hardStats.total}`],
+            actionLabel: 'Resetuj',
+            onAction: () => handleResetCategoryPoolHistory(category.name),
+          }
+        }),
+    [categories, hasCategoryAccess, historyVersion],
+  )
+
   return (
     <div className={`${styles.accordion} ${open ? styles.accordionOpen : ''}`}>
       <button className={styles.header} type="button" onClick={() => setOpen((current) => !current)}>
@@ -376,90 +394,32 @@ export function CategoryPicker({
             })}
           </div>
 
-          <button type="button" className={styles.managementStrip} onClick={() => setIsPoolManagerOpen(true)}>
+          <button
+            type="button"
+            className={styles.managementStrip}
+            onClick={() => setIsPoolManagerOpen(true)}
+          >
             Zarządzaj pulą unikalnych haseł
           </button>
         </div>
       ) : null}
 
-      {isPoolManagerOpen ? (
-        <div className={styles.modalOverlay} role="presentation" onClick={() => setIsPoolManagerOpen(false)}>
-          <div
-            className={styles.modal}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="charades-pool-manager-title"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className={styles.modalHeader}>
-              <div className={styles.modalHeading}>
-                <h3 id="charades-pool-manager-title" className={styles.modalTitle}>
-                  Zarządzaj pulą unikalnych haseł
-                </h3>
-                <p className={styles.modalDescription}>
-                  Tutaj sprawdzisz stan aktywnej puli i ręcznie wyczyścisz historię zużytych oraz odrzuconych haseł.
-                </p>
-              </div>
-              <button
-                type="button"
-                className={styles.modalClose}
-                aria-label="Zamknij zarządzanie pulą"
-                onClick={() => setIsPoolManagerOpen(false)}
-              >
-                Zamknij
-              </button>
-            </div>
-
-            <section className={styles.modalSection}>
-              <div className={styles.modalSectionCopy}>
-                <h4 className={styles.modalSectionTitle}>Cała pula</h4>
-                <p className={styles.modalSectionDescription}>
-                  Aktywna pula dla bieżącego wyboru kategorii ma teraz tyle świeżych haseł:
-                </p>
-                <div className={styles.poolSummaryValue}>{`${activePoolStats.remaining}/${activePoolStats.total}`}</div>
-              </div>
-              <button type="button" className={styles.resetAllButton} onClick={handleResetAllPoolHistory}>
-                Resetuj wszystko
-              </button>
-            </section>
-
-            <section className={styles.modalSectionColumn}>
-              <div className={styles.modalSectionCopy}>
-                <h4 className={styles.modalSectionTitle}>Kategorie</h4>
-                <p className={styles.modalSectionDescription}>
-                  Reset kategorii czyści jej historię dla wszystkich graczy w tej sesji.
-                </p>
-              </div>
-
-              <div className={styles.categoryResetList}>
-                {categories.filter((category) => hasCategoryAccess(category.id)).map((category) => {
-                  const easyStats = getWordStats(category, 'easy')
-                  const hardStats = getWordStats(category, 'hard')
-
-                  return (
-                    <div key={category.id} className={styles.categoryResetRow}>
-                      <div className={styles.categoryResetMeta}>
-                        <span className={styles.categoryResetName}>{category.name}</span>
-                        <div className={styles.categoryStatsRow}>
-                          <span className={styles.categoryStatPill}>{`Łatwe ${easyStats.remaining}/${easyStats.total}`}</span>
-                          <span className={styles.categoryStatPill}>{`Trudne ${hardStats.remaining}/${hardStats.total}`}</span>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        className={styles.categoryResetButton}
-                        onClick={() => handleResetCategoryPoolHistory(category.name)}
-                      >
-                        Resetuj
-                      </button>
-                    </div>
-                  )
-                })}
-              </div>
-            </section>
-          </div>
-        </div>
-      ) : null}
+      <WordPoolManagerModal
+        open={isPoolManagerOpen}
+        onClose={() => setIsPoolManagerOpen(false)}
+        title={'Zarz\u0105dzaj pul\u0105 unikalnych hase\u0142'}
+        description={
+          'Tutaj sprawdzisz stan aktywnej puli i r\u0119cznie wyczy\u015bcisz histori\u0119 zu\u017cytych oraz odrzuconych hase\u0142.'
+        }
+        summaryTitle={'Ca\u0142a pula'}
+        summaryDescription={'Aktywna pula dla bie\u017c\u0105cego wyboru kategorii ma teraz tyle \u015bwie\u017cych hase\u0142:'}
+        summaryValue={`${activePoolStats.remaining}/${activePoolStats.total}`}
+        summaryActionLabel="Resetuj wszystko"
+        onSummaryAction={handleResetAllPoolHistory}
+        rowsTitle="Kategorie"
+        rowsDescription={'Reset kategorii czy\u015bci jej histori\u0119 dla wszystkich graczy w tej sesji.'}
+        rows={categoryResetRows}
+      />
 
       {lockedCategory ? (
         <div className={styles.modalOverlay} role="presentation" onClick={() => setLockedCategory(null)}>

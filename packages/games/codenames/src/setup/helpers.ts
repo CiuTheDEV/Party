@@ -13,5 +13,21 @@ export type CaptainListenerProps = {
 
 export type CodenamesSetupHelpers = {
   categories: CodenamesWordCategory[]
+  categoryPoolSummaries: Array<{
+    categoryId: string
+    name: string
+    total: number
+    remaining: number
+    isExhausted: boolean
+    isSelected: boolean
+  }>
   CaptainListener: ComponentType<CaptainListenerProps>
+  poolSummary: {
+    poolKey: string
+    total: number
+    remaining: number
+    isExhausted: boolean
+  }
+  resetActivePoolHistory: () => void
+  resetCategoryPoolHistory: (categoryId: string) => void
 }

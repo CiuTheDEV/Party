@@ -18,15 +18,26 @@ import styles from './HostGameScreen.module.css'
 type CodenamesTeam = { name: string; avatar: string }
 
 type HostGameScreenProps = {
+  categories: Array<{ id: string; words: string[] }>
   roomId: string
-  wordPool: string[]
   teams: [CodenamesTeam, CodenamesTeam]
   roundsToWin: number
 }
 
-export function HostGameScreen({ roomId, wordPool, teams, roundsToWin }: HostGameScreenProps) {
+export function HostGameScreen({ roomId, categories, teams, roundsToWin }: HostGameScreenProps) {
   const router = useRouter()
-  const { roomState, hasSyncedRoomState, revealCard, setAssassinTeam, resetGame, restartMatch, startGame, isRoundIntroVisible } = useHostGame({ roomId, wordPool })
+  const {
+    roomState,
+    hasSyncedRoomState,
+    revealCard,
+    setAssassinTeam,
+    resetGame,
+    restartMatch,
+    startGame,
+    isRoundIntroVisible,
+    startBlockedReason,
+    clearStartBlockedReason,
+  } = useHostGame({ roomId, categories })
   const [showEntryIntro, setShowEntryIntro] = useState(true)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isSettingsExitConfirmOpen, setIsSettingsExitConfirmOpen] = useState(false)
@@ -355,6 +366,22 @@ export function HostGameScreen({ roomId, wordPool, teams, roundsToWin }: HostGam
           />
         ) : null}
       </div>
+
+      <AlertDialog
+        open={Boolean(startBlockedReason)}
+        variant="warning"
+        eyebrow="Pula hasel"
+        title="Brak swiezych hasel na nowa plansze"
+        description={startBlockedReason ?? ''}
+        actions={[
+          {
+            label: 'Rozumiem',
+            onClick: () => clearStartBlockedReason(),
+            variant: 'primary',
+            fullWidth: true,
+          },
+        ]}
+      />
 
       <AlertDialog
         open={isResetConfirmOpen}
