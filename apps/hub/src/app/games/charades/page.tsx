@@ -246,7 +246,7 @@ export default function CharadesMenuPage() {
       }
 
       if (action === 'back' || action === 'secondary' || action === 'menu') {
-        setShowSetup(false)
+        setSetupFocus('close')
         return
       }
 

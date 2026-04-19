@@ -16,6 +16,109 @@
   overflow: hidden;
 }
 
+.entryIntro {
+  position: fixed;
+  inset: 0;
+  z-index: 16;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 18% 22%, rgba(255, 90, 79, 0.14), transparent 22%),
+    radial-gradient(circle at 82% 22%, rgba(74, 167, 255, 0.14), transparent 24%),
+    rgba(5, 5, 5, 0.9);
+  backdrop-filter: blur(10px);
+}
+
+.entryIntroCard {
+  width: min(640px, 100%);
+  display: grid;
+  justify-items: center;
+  gap: 18px;
+  padding: 34px 28px;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(17, 17, 17, 0.92);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.38);
+  text-align: center;
+}
+
+.entryIntroEyebrow {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.entryIntroTitle {
+  margin: 0;
+  font-size: clamp(34px, 5vw, 56px);
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  line-height: 0.96;
+  color: #fff;
+}
+
+.entryIntroTeams {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.entryIntroTeam {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 68px;
+  padding: 12px 16px;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.entryIntroTeam[data-team='red'] {
+  box-shadow: inset 0 0 0 1px rgba(255, 90, 79, 0.1);
+}
+
+.entryIntroTeam[data-team='blue'] {
+  box-shadow: inset 0 0 0 1px rgba(74, 167, 255, 0.1);
+}
+
+.entryIntroAvatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.entryIntroAvatar[data-team='red'] {
+  background: var(--team-red);
+}
+
+.entryIntroAvatar[data-team='blue'] {
+  background: var(--team-blue);
+}
+
+.entryIntroTeamName {
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  color: #fff;
+}
+
+.entryIntroVs {
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.34);
+}
+
 .topbar,
 .bottombar {
   display: grid;
@@ -83,6 +186,40 @@
   line-height: 1;
   color: #f5f5f5;
   white-space: nowrap;
+}
+
+.teamMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.teamMeta[data-align='right'] {
+  justify-content: flex-end;
+}
+
+.readyBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 90, 79, 0.22);
+  background: rgba(255, 90, 79, 0.12);
+  color: #ff8a82;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.readyBadgeReady {
+  background: rgba(100, 214, 144, 0.14);
+  border-color: rgba(100, 214, 144, 0.26);
+  color: #9df0b7;
 }
 
 .teamScore {
@@ -155,6 +292,41 @@
   overflow: hidden;
 }
 
+.statusBanner {
+  display: grid;
+  gap: 2px;
+  padding: 10px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 184, 0, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(255, 184, 0, 0.08);
+}
+
+.statusBannerDanger {
+  background: rgba(255, 90, 79, 0.09);
+  box-shadow: inset 0 0 0 1px rgba(255, 90, 79, 0.1);
+}
+
+.statusEyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.statusTitle {
+  font-size: 16px;
+  font-weight: 900;
+  color: #f7f7f7;
+}
+
+.statusDescription {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.72);
+}
+
 .boardScaler {
   width: 100%;
   height: 100%;
@@ -165,6 +337,34 @@
 
 .bottombar {
   align-items: end;
+}
+
+.waitingBottomBar {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  grid-column: 1 / -1;
+  padding: 12px 16px;
+  border: 1px solid var(--panel-border);
+  border-radius: 18px;
+  background: var(--panel-bg);
+  text-align: center;
+  place-items: center;
+  min-height: 62px;
+}
+
+.waitingBottomEyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.42);
+}
+
+.waitingBottomTitle {
+  font-size: 16px;
+  font-weight: 900;
+  color: #f7f7f7;
 }
 
 .connectionOverlay {
@@ -352,6 +552,10 @@
     font-size: 16px;
   }
 
+  .teamMeta {
+    gap: 8px;
+  }
+
   .teamScore {
     font-size: 28px;
   }
@@ -396,5 +600,9 @@
 
   .teamPanel {
     min-height: 60px;
+  }
+
+  .waitingBottomBar {
+    text-align: center;
   }
 }

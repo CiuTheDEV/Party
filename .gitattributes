@@ -1,7 +1,7 @@
-# Auto detect text files and perform LF normalization
+# Normalize text files by default
 * text=auto
 
-# Keep source and config files on UTF-8/LF to reduce mojibake on Windows toolchains
+# Keep source, config, and docs on LF in the repository
 *.ts text eol=lf
 *.tsx text eol=lf
 *.js text eol=lf
@@ -10,12 +10,21 @@
 *.cjs text eol=lf
 *.css text eol=lf
 *.scss text eol=lf
+*.html text eol=lf
 *.json text eol=lf
 *.jsonc text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
+*.toml text eol=lf
 *.md text eol=lf
+*.txt text eol=lf
+*.svg text eol=lf
+*.sh text eol=lf
 
-# Codex config - track config but never auth credentials
-.codex/config.toml text=auto
-.codex/auth.json linguist-generated
+# Windows-native script files should stay CRLF in the working tree
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Keep Codex config normalized; auth should be ignored in .gitignore, not here
+.codex/config.toml text eol=lf

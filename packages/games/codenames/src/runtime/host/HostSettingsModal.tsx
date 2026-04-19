@@ -14,11 +14,13 @@ type ToggleCardProps = {
 }
 
 type Props = {
+  canStartGame?: boolean
   soundEnabled: boolean
   animationsEnabled: boolean
   isExitConfirmOpen: boolean
   focusedTarget: SettingsFocusTarget
   exitConfirmFocusedTarget: SettingsExitConfirmFocusTarget
+  onStartGame?: () => void
   onToggleSound: () => void
   onToggleAnimations: () => void
   onOpenExitConfirm: () => void
@@ -47,11 +49,13 @@ function ToggleCard({ label, description, enabled, focused = false, onToggle }: 
 }
 
 export function HostSettingsModal({
+  canStartGame = false,
   soundEnabled,
   animationsEnabled,
   isExitConfirmOpen,
   focusedTarget,
   exitConfirmFocusedTarget,
+  onStartGame,
   onToggleSound,
   onToggleAnimations,
   onOpenExitConfirm,
@@ -65,9 +69,9 @@ export function HostSettingsModal({
         {isExitConfirmOpen ? (
           <>
             <span className={styles.eyebrow}>Potwierdzenie</span>
-            <h2 className={styles.title}>Na pewno wrócić do menu?</h2>
+            <h2 className={styles.title}>Na pewno wrocic do menu?</h2>
             <p className={styles.confirmCopy}>
-              Bieżąca rozgrywka zostanie przerwana. Użyj tej opcji tylko wtedy, gdy naprawdę chcesz opuścić mecz.
+              Biezaca rozgrywka zostanie przerwana. Uzyj tej opcji tylko wtedy, gdy naprawde chcesz opuscic mecz.
             </p>
             <div className={styles.actions}>
               <button
@@ -79,7 +83,7 @@ export function HostSettingsModal({
                 }
                 onClick={onCancelExitConfirm}
               >
-                Zostań w grze
+                Zostan w grze
               </button>
               <button
                 type="button"
@@ -90,18 +94,18 @@ export function HostSettingsModal({
                 }
                 onClick={onExitToMenu}
               >
-                Tak, wróć do menu
+                Tak, wroc do menu
               </button>
             </div>
           </>
         ) : (
           <>
-            <span className={styles.eyebrow}>Pauza</span>
-            <h2 className={styles.title}>Ustawienia gry</h2>
+            <span className={styles.eyebrow}>{canStartGame ? 'Start gry' : 'Pauza'}</span>
+            <h2 className={styles.title}>{canStartGame ? 'Kapitanowie gotowi do startu' : 'Ustawienia gry'}</h2>
 
             <div className={styles.toggleGrid}>
               <ToggleCard
-                label="Dźwięk"
+                label="Dzwiek"
                 description="Przygotowane pod efekty audio w trakcie rozgrywki."
                 enabled={soundEnabled}
                 focused={focusedTarget === 'sound'}
@@ -109,7 +113,7 @@ export function HostSettingsModal({
               />
               <ToggleCard
                 label="Animacje"
-                description="Wyłącza ruch i skraca przyszłe animacje w interfejsie."
+                description="Wylacza ruch i skraca przyszle animacje w interfejsie."
                 enabled={animationsEnabled}
                 focused={focusedTarget === 'animations'}
                 onToggle={onToggleAnimations}
@@ -122,15 +126,25 @@ export function HostSettingsModal({
                 className={focusedTarget === 'exit' ? `${styles.secondaryButton} ${styles.controlFocused}` : styles.secondaryButton}
                 onClick={onOpenExitConfirm}
               >
-                Powrót do menu
+                Powrot do menu
               </button>
-              <button
-                type="button"
-                className={focusedTarget === 'continue' ? `${styles.primaryButton} ${styles.controlFocused}` : styles.primaryButton}
-                onClick={onContinue}
-              >
-                Kontynuuj
-              </button>
+              {canStartGame ? (
+                <button
+                  type="button"
+                  className={focusedTarget === 'continue' ? `${styles.primaryButton} ${styles.controlFocused}` : styles.primaryButton}
+                  onClick={onStartGame}
+                >
+                  Rozpocznij gre
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className={focusedTarget === 'continue' ? `${styles.primaryButton} ${styles.controlFocused}` : styles.primaryButton}
+                  onClick={onContinue}
+                >
+                  Kontynuuj
+                </button>
+              )}
             </div>
           </>
         )}

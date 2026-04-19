@@ -46,6 +46,11 @@ export {
   CODENAMES_NAVIGATION_COMMANDS,
 } from './navigation/codenames-navigation-actions'
 export {
+  CODENAMES_SETUP_STORAGE_KEY,
+  restoreCodenamesSetupState,
+  serializeCodenamesSetupState,
+} from './setup/setup-storage'
+export {
   CODENAMES_NAVIGATION_SCREENS,
   CODENAMES_NAVIGATION_TARGETS,
   CODENAMES_NAVIGATION_ZONES,
@@ -99,3 +104,8 @@ export { getCaptainBoardMeta } from './runtime/captain/board-meta'
 export { useCaptainRoomStatus } from './runtime/captain/useCaptainRoomStatus'
 export { default as CodenameCaptainListener } from './runtime/setup/CaptainListener'
 export { buildCaptainPath, buildCaptainRoutePath } from './runtime/shared/codenames-runtime'
+export {
+  getCaptainRuntimeStatus,
+  getHostRuntimeStatus,
+  shouldWarnBeforeUnload,
+} from './runtime/shared/runtime-status'

@@ -14,7 +14,12 @@
   "scripts": {
     "build": "tsc",
     "test:device-links": "tsc --target es2022 --module commonjs --moduleResolution node --types node --skipLibCheck --outDir ../../../output/codenames-device-links ./src/runtime/shared/codenames-runtime.ts && node ./src/runtime/shared/codenames-device-links.check.cjs ../../../output/codenames-device-links/codenames-runtime.js",
-    "test:captain-pairing": "tsc --target es2022 --module commonjs --moduleResolution node --types node --skipLibCheck --outDir ../../../output/codenames-captain-pairing ./src/setup/components/captain-pairing-modal-state.ts && node ./src/setup/components/captain-pairing-modal-state.check.cjs ../../../output/codenames-captain-pairing/captain-pairing-modal-state.js"
+    "test:captain-pairing": "tsc --target es2022 --module commonjs --moduleResolution node --types node --skipLibCheck --outDir ../../../output/codenames-captain-pairing ./src/setup/components/captain-pairing-modal-state.ts && node ./src/setup/components/captain-pairing-modal-state.check.cjs ../../../output/codenames-captain-pairing/captain-pairing-modal-state.js",
+    "test:setup-storage": "tsc --target es2022 --module commonjs --moduleResolution node --types node --skipLibCheck --outDir ../../../output/codenames-setup-storage ./src/setup/setup-storage.ts ./src/setup/state.ts && node ./src/setup/setup-storage.check.cjs ../../../output/codenames-setup-storage/setup-storage.js",
+    "test:runtime-status": "tsc --target es2022 --module commonjs --moduleResolution node --types node --skipLibCheck --outDir ../../../output/codenames-runtime-status ./src/runtime/shared/runtime-status.ts && node ./src/runtime/shared/runtime-status.check.cjs ../../../output/codenames-runtime-status/runtime-status.js",
+    "test:start-policy": "tsc --target es2022 --module commonjs --moduleResolution node --types node --skipLibCheck --outDir ../../../output/codenames-start-policy ./src/runtime/host/start-policy.ts ./src/runtime/shared/codenames-events.ts && node ./src/runtime/host/start-policy.check.cjs ../../../output/codenames-start-policy/host/start-policy.js",
+    "test:card-back": "tsc --target es2022 --module commonjs --moduleResolution node --jsx react-jsx --esModuleInterop --types node,react --skipLibCheck --outDir ../../../output/codenames-card-back ./src/runtime/shared/codenames-card-back.tsx && node ./src/runtime/shared/codenames-card-back.check.cjs ../../../output/codenames-card-back/codenames-card-back.js",
+    "test:runtime-fonts": "node ./src/runtime/shared/runtime-fonts.check.cjs"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

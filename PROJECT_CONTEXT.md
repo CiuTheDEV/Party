@@ -142,9 +142,11 @@ This means:
 
 <!-- handoff:start -->
 ## Session Handoff
-- Last: 2026-04-18 by Codex
-- Task: Tajniacy GSAP reveal + session wrap-up.
-- Did: Domknięto refaktor revealu planszy na GSAP, usunięto stare CSS keyframes, plansza mountuje się dopiero po intro i buildy przechodzą.
-- Next: Manualny playtest host/captain na mobile i desktop, potem ewentualny tuning feelu animacji.
+- Last: 2026-04-19 16:21 by Codex
+- Task: Playwright clean reinstall, visible-browser e2e setup, and safe repo cleanup pass on top of the current Codenames runtime work.
+- Did: Reinstalled Playwright from scratch, aligned browser binaries with the installed package version, added a headed/slow `test:e2e:live` flow, and verified both standard and visible-browser e2e runs. Cleaned obvious tracked local artifacts (`.partykit`, `.superpowers`, `.playwright-mcp`, stale logs/reports) plus generated `js/d.ts` files that had leaked into `packages/ui/src/host-navigation/`. Left `rules/`, `docs/`, `memory/`, agent/tooling folders, and root utilities in place because they are not yet proven dead.
+- Next: Continue with manual runtime validation for Codenames/Charades and, if desired, run a separate deliberate cleanup pass for optional root tooling files and heavy assets.
+- Note: `npm install` and `npx playwright install chromium` must not be parallelized in this repo; doing so can download a mismatched browser revision versus the final installed Playwright package.
 - Blocker: None.
 <!-- handoff:end -->
+

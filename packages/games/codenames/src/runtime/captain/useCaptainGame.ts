@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import usePartySocket from 'partysocket/react'
 import type { IncomingMessage, RoomState } from '../shared/codenames-events'
 import { getPartykitHost } from '../shared/codenames-runtime'
@@ -19,6 +19,9 @@ const initialRoomState: RoomState = {
   hostConnected: false,
   captainRedConnected: false,
   captainBlueConnected: false,
+  captainRedReady: false,
+  captainBlueReady: false,
+  boardUnlocked: false,
 }
 
 type UseCaptainGameParams = {
@@ -32,7 +35,7 @@ export function useCaptainGame({ roomId, team }: UseCaptainGameParams) {
   const [hostDisconnected, setHostDisconnected] = useState(false)
   const [isRoundIntroVisible, setIsRoundIntroVisible] = useState(false)
   const teamRef = useRef(team)
-  const previousPhaseRef = useRef<RoomState['phase'] | null>(null)
+  const previousBoardUnlockedRef = useRef(false)
 
   const socket = usePartySocket({
     host: getPartykitHost(),
@@ -72,32 +75,29 @@ export function useCaptainGame({ roomId, team }: UseCaptainGameParams) {
   })
 
   useEffect(() => {
-    const previousPhase = previousPhaseRef.current
+    const previousBoardUnlocked = previousBoardUnlockedRef.current
+    previousBoardUnlockedRef.current = roomState.boardUnlocked
 
-    if (previousPhase === null) {
-      previousPhaseRef.current = roomState.phase
-      return
-    }
-
-    if (roomState.phase === 'playing' && previousPhase !== 'playing') {
+    if (roomState.phase === 'playing' && roomState.boardUnlocked && !previousBoardUnlocked) {
       setIsRoundIntroVisible(true)
 
       const timeoutId = window.setTimeout(() => {
         setIsRoundIntroVisible(false)
       }, ROUND_INTRO_DURATION_MS)
 
-      previousPhaseRef.current = roomState.phase
       return () => window.clearTimeout(timeoutId)
     }
 
-    if (roomState.phase !== 'playing') {
+    if (roomState.phase !== 'playing' || !roomState.boardUnlocked) {
       setIsRoundIntroVisible(false)
     }
+  }, [roomState.boardUnlocked, roomState.phase])
 
-    previousPhaseRef.current = roomState.phase
-  }, [roomState.phase])
+  const markReady = useCallback(() => {
+    socket.send(JSON.stringify({ type: 'CAPTAIN_READY', team: teamRef.current }))
+  }, [socket])
 
-  return { roomState, hasSyncedRoomState, hostDisconnected, isRoundIntroVisible }
+  return { roomState, hasSyncedRoomState, hostDisconnected, isRoundIntroVisible, markReady }
 }
 
 function applyServerEvent(state: RoomState, event: IncomingMessage): RoomState {
@@ -113,6 +113,9 @@ function applyServerEvent(state: RoomState, event: IncomingMessage): RoomState {
         startingTeam: event.startingTeam,
         winner: null,
         assassinTeam: null,
+        captainRedReady: false,
+        captainBlueReady: false,
+        boardUnlocked: false,
       }
     case 'HOST_CONNECTED':
       return { ...state, hostConnected: true }
@@ -154,6 +157,9 @@ function applyServerEvent(state: RoomState, event: IncomingMessage): RoomState {
         roundWinsBlue: state.roundWinsBlue,
         captainRedConnected: state.captainRedConnected,
         captainBlueConnected: state.captainBlueConnected,
+        captainRedReady: false,
+        captainBlueReady: false,
+        boardUnlocked: false,
       }
     case 'MATCH_RESET':
       return {
@@ -161,15 +167,22 @@ function applyServerEvent(state: RoomState, event: IncomingMessage): RoomState {
         hostConnected: true,
         captainRedConnected: state.captainRedConnected,
         captainBlueConnected: state.captainBlueConnected,
+        captainRedReady: false,
+        captainBlueReady: false,
+        boardUnlocked: false,
       }
     case 'CAPTAIN_CONNECTED':
       return event.team === 'red'
         ? { ...state, captainRedConnected: true }
         : { ...state, captainBlueConnected: true }
+    case 'CAPTAIN_READY':
+      return event.team === 'red'
+        ? { ...state, captainRedReady: true, boardUnlocked: state.captainBlueReady }
+        : { ...state, captainBlueReady: true, boardUnlocked: state.captainRedReady }
     case 'CAPTAIN_DISCONNECTED':
       return event.team === 'red'
-        ? { ...state, captainRedConnected: false }
-        : { ...state, captainBlueConnected: false }
+        ? { ...state, captainRedConnected: false, captainRedReady: state.boardUnlocked ? state.captainRedReady : false }
+        : { ...state, captainBlueConnected: false, captainBlueReady: state.boardUnlocked ? state.captainBlueReady : false }
     default:
       return state
   }

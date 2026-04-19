@@ -14,6 +14,9 @@ export const initialState: RoomState = {
   hostConnected: false,
   captainRedConnected: false,
   captainBlueConnected: false,
+  captainRedReady: false,
+  captainBlueReady: false,
+  boardUnlocked: false,
 }
 
 type AuthorityState = {
@@ -75,11 +78,19 @@ export default class CodenamesServer implements Party.Server {
     const isHost = conn.id === this.hostConnectionId
 
     if (isRedCaptain) {
-      this.state = { ...this.state, captainRedConnected: false }
+      this.state = {
+        ...this.state,
+        captainRedConnected: false,
+        captainRedReady: this.state.boardUnlocked ? this.state.captainRedReady : false,
+      }
       this.captainRedConnectionId = null
       this.room.broadcast(JSON.stringify({ type: 'CAPTAIN_DISCONNECTED', team: 'red' }))
     } else if (isBlueCaptain) {
-      this.state = { ...this.state, captainBlueConnected: false }
+      this.state = {
+        ...this.state,
+        captainBlueConnected: false,
+        captainBlueReady: this.state.boardUnlocked ? this.state.captainBlueReady : false,
+      }
       this.captainBlueConnectionId = null
       this.room.broadcast(JSON.stringify({ type: 'CAPTAIN_DISCONNECTED', team: 'blue' }))
     } else if (isHost) {
@@ -95,6 +106,46 @@ export function reduceIncomingEvent(
   senderId: string,
   event: CodenamesEvent,
 ): IncomingEventResult {
+  if (event.type === 'HOST_SETUP_CONNECTED') {
+    const isWaitingRoom = current.state.phase === 'waiting'
+    const canResetStaleRuntime = current.state.phase !== 'waiting' && !current.state.hostConnected
+    const resolvedHostConnectionId =
+      isWaitingRoom || canResetStaleRuntime
+        ? senderId
+        : current.hostConnectionId ?? senderId
+
+    if (
+      current.hostConnectionId !== null &&
+      senderId !== current.hostConnectionId &&
+      current.state.hostConnected &&
+      !isWaitingRoom
+    ) {
+      return { ...current, accepted: false }
+    }
+
+    if (canResetStaleRuntime) {
+      return {
+        accepted: true,
+        state: {
+          ...initialState,
+          hostConnected: true,
+        },
+        hostConnectionId: resolvedHostConnectionId,
+        captainRedConnectionId: null,
+        captainBlueConnectionId: null,
+        syncRoomState: true,
+      }
+    }
+
+    return {
+      accepted: true,
+      state: { ...current.state, hostConnected: true },
+      hostConnectionId: resolvedHostConnectionId,
+      captainRedConnectionId: current.captainRedConnectionId,
+      captainBlueConnectionId: current.captainBlueConnectionId,
+    }
+  }
+
   if (event.type === 'CAPTAIN_CONNECTED') {
     // Only register the first connection per team
     if (event.team === 'red') {
@@ -119,6 +170,52 @@ export function reduceIncomingEvent(
         captainRedConnectionId: current.captainRedConnectionId,
         captainBlueConnectionId: senderId,
       }
+    }
+  }
+
+  if (event.type === 'CAPTAIN_READY') {
+    if (current.state.phase !== 'playing' || current.state.boardUnlocked) {
+      return { ...current, accepted: false }
+    }
+
+    if (event.team === 'red') {
+      if (current.captainRedConnectionId !== senderId) {
+        return { ...current, accepted: false }
+      }
+
+      const nextState = {
+        ...current.state,
+        captainRedReady: true,
+        boardUnlocked: current.state.captainBlueReady,
+      }
+
+      return {
+        accepted: true,
+        state: nextState,
+        hostConnectionId: current.hostConnectionId,
+        captainRedConnectionId: current.captainRedConnectionId,
+        captainBlueConnectionId: current.captainBlueConnectionId,
+        syncRoomState: nextState.boardUnlocked,
+      }
+    }
+
+    if (current.captainBlueConnectionId !== senderId) {
+      return { ...current, accepted: false }
+    }
+
+    const nextState = {
+      ...current.state,
+      captainBlueReady: true,
+      boardUnlocked: current.state.captainRedReady,
+    }
+
+    return {
+      accepted: true,
+      state: nextState,
+      hostConnectionId: current.hostConnectionId,
+      captainRedConnectionId: current.captainRedConnectionId,
+      captainBlueConnectionId: current.captainBlueConnectionId,
+      syncRoomState: nextState.boardUnlocked,
     }
   }
 
@@ -148,6 +245,9 @@ export function reduceIncomingEvent(
             hostConnected: true,
             captainRedConnected: false,
             captainBlueConnected: false,
+            captainRedReady: false,
+            captainBlueReady: false,
+            boardUnlocked: false,
           }
         : { ...current.state, hostConnected: true },
       hostConnectionId: resolvedHostConnectionId,
@@ -193,11 +293,15 @@ export function applyEvent(state: RoomState, event: CodenamesEvent): RoomState {
         startingTeam: event.startingTeam,
         winner: null,
         assassinTeam: null,
+        captainRedReady: false,
+        captainBlueReady: false,
+        boardUnlocked: false,
       }
     }
 
     case 'CARD_REVEAL': {
       if (state.phase !== 'playing') return state
+      if (!state.boardUnlocked) return state
       if (!state.captainRedConnected || !state.captainBlueConnected) return state
       if (event.index < 0 || event.index > 24) return state
       if (!state.cards[event.index]) return state
@@ -246,6 +350,9 @@ export function applyEvent(state: RoomState, event: CodenamesEvent): RoomState {
         roundWinsBlue: state.roundWinsBlue,
         captainRedConnected: state.captainRedConnected,
         captainBlueConnected: state.captainBlueConnected,
+        captainRedReady: false,
+        captainBlueReady: false,
+        boardUnlocked: false,
       }
     }
 
@@ -255,6 +362,9 @@ export function applyEvent(state: RoomState, event: CodenamesEvent): RoomState {
         hostConnected: state.hostConnected,
         captainRedConnected: state.captainRedConnected,
         captainBlueConnected: state.captainBlueConnected,
+        captainRedReady: false,
+        captainBlueReady: false,
+        boardUnlocked: false,
       }
     }
 

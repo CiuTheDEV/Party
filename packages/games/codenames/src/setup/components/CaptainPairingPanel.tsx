@@ -42,8 +42,13 @@ export function CaptainPairingModal({
       return
     }
 
-    setCaptainUrl(buildCaptainUrl(origin, roomId))
-  }, [roomId])
+    setCaptainUrl(
+      buildCaptainUrl(origin, roomId, {
+        redTeam: teams[0],
+        blueTeam: teams[1],
+      }),
+    )
+  }, [roomId, teams])
 
   useEffect(() => {
     if (showCloseButton && onClose && shouldAutoCloseCaptainPairingModal(captainRedConnected, captainBlueConnected)) {
@@ -128,12 +133,16 @@ export function CaptainPairingModal({
                 <div className={`${styles.connectionItem} ${captainRedConnected ? styles.connectionItemConnected : ''}`}>
                   <span className={`${styles.connectionDot} ${styles.connectionDotRed}`} aria-hidden="true" />
                   <span className={styles.connectionLabel}>Kapitan Czerwonych</span>
-                  <span className={styles.connectionState}>{captainRedConnected ? 'Połączono' : 'Czeka'}</span>
+                  <span className={`${styles.connectionState} ${captainRedConnected ? styles.connectionStateConnected : styles.connectionStateDisconnected}`}>
+                    {captainRedConnected ? 'Polaczony' : 'Niepolaczony'}
+                  </span>
                 </div>
                 <div className={`${styles.connectionItem} ${captainBlueConnected ? styles.connectionItemConnected : ''}`}>
                   <span className={`${styles.connectionDot} ${styles.connectionDotBlue}`} aria-hidden="true" />
                   <span className={styles.connectionLabel}>Kapitan Niebieskich</span>
-                  <span className={styles.connectionState}>{captainBlueConnected ? 'Połączono' : 'Czeka'}</span>
+                  <span className={`${styles.connectionState} ${captainBlueConnected ? styles.connectionStateConnected : styles.connectionStateDisconnected}`}>
+                    {captainBlueConnected ? 'Polaczony' : 'Niepolaczony'}
+                  </span>
                 </div>
               </div>
               <p className={styles.connectionSummary}>{pairingSummary}</p>
@@ -220,3 +229,4 @@ export function CaptainPairingPanel({ roomId, teams, captainRedConnected, captai
     </>
   )
 }
+

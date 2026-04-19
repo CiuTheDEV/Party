@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import PartySocket from 'partysocket'
 import { getPartykitHost } from '../shared/codenames-runtime'
+import type { HostEvent, IncomingMessage } from '../shared/codenames-events'
 
 type Props = {
   roomId: string
@@ -29,8 +30,12 @@ export default function CaptainListener({ roomId, onRedConnect, onRedDisconnect,
     const host = getPartykitHost()
     const ws = new PartySocket({ host, room: roomId, party: 'codenames' })
 
+    ws.addEventListener('open', () => {
+      ws.send(JSON.stringify({ type: 'HOST_SETUP_CONNECTED' } satisfies HostEvent))
+    })
+
     ws.addEventListener('message', (event: MessageEvent) => {
-      const msg = JSON.parse(event.data)
+      const msg = JSON.parse(event.data) as IncomingMessage
 
       if (msg.type === 'ROOM_STATE') {
         if (msg.state?.captainRedConnected) onRedConnectRef.current()

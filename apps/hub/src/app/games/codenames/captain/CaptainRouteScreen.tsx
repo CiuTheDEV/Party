@@ -1,6 +1,7 @@
 'use client'
 
 import { CaptainScreen, buildCaptainRoutePath, useCaptainRoomStatus } from '@party/codenames'
+import { AvatarAsset } from '@party/ui'
 import { useRouter } from 'next/navigation'
 import styles from './page.module.css'
 
@@ -23,9 +24,17 @@ export function CaptainRouteScreen({
   blueTeam?: CaptainTeam
 }) {
   const router = useRouter()
+  const routeTeams = { redTeam, blueTeam }
 
   if (teamParam !== 'red' && teamParam !== 'blue') {
-    return <CaptainTeamSelect roomId={roomId} onChooseTeam={(team) => router.replace(buildCaptainRoutePath(roomId, team))} />
+    return (
+      <CaptainTeamSelect
+        roomId={roomId}
+        redTeam={redTeam}
+        blueTeam={blueTeam}
+        onChooseTeam={(team) => router.replace(buildCaptainRoutePath(roomId, team, routeTeams))}
+      />
+    )
   }
 
   return (
@@ -34,47 +43,100 @@ export function CaptainRouteScreen({
       team={teamParam}
       redTeam={redTeam}
       blueTeam={blueTeam}
-      onChangeRole={() => router.replace(buildCaptainRoutePath(roomId))}
+      onChangeRole={() => router.replace(buildCaptainRoutePath(roomId, undefined, routeTeams))}
     />
   )
 }
 
 function CaptainTeamSelect({
   roomId,
+  redTeam,
+  blueTeam,
   onChooseTeam,
 }: {
   roomId: string
+  redTeam: CaptainTeam
+  blueTeam: CaptainTeam
   onChooseTeam: (team: 'red' | 'blue') => void
 }) {
   const { roomState, hasSyncedRoomState } = useCaptainRoomStatus({ roomId })
   const redTaken = roomState.captainRedConnected
   const blueTaken = roomState.captainBlueConnected
+  const statusCopy = !hasSyncedRoomState
+    ? 'Sprawdzam dostepnosc druzyn...'
+    : redTaken && blueTaken
+      ? 'Obie druzyny maja juz kapitanow.'
+      : 'Wybierz wolna druzyne i przejmij klucz planszy.'
 
   return (
     <div className={styles.teamSelect}>
-      <h1 className={styles.teamSelectTitle}>Wybierz dru\u017cyn\u0119</h1>
-      <p className={styles.teamSelectDesc}>
-        {!hasSyncedRoomState
-          ? 'Sprawdzam dost\u0119pno\u015b\u0107 dru\u017cyn...'
-          : redTaken && blueTaken
-            ? 'Obie dru\u017cyny maj\u0105 ju\u017c kapitan\u00f3w.'
-            : 'Wybierz tylko woln\u0105 dru\u017cyn\u0119.'}
-      </p>
-      <div className={styles.teamSelectButtons}>
-        <button
-          className={`${styles.teamBtn} ${styles.teamBtnRed}`}
-          disabled={!hasSyncedRoomState || redTaken}
-          onClick={() => onChooseTeam('red')}
-        >
-          Czerwoni
-        </button>
-        <button
-          className={`${styles.teamBtn} ${styles.teamBtnBlue}`}
-          disabled={!hasSyncedRoomState || blueTaken}
-          onClick={() => onChooseTeam('blue')}
-        >
-          Niebiescy
-        </button>
+      <div className={styles.teamSelectGlow} aria-hidden="true" />
+      <div className={styles.teamSelectShell}>
+        <div className={styles.teamSelectHeader}>
+          <span className={styles.teamSelectEyebrow}>Tajniacy</span>
+          <h1 className={styles.teamSelectTitle}>Wybierz druzyne</h1>
+          <p className={styles.teamSelectDesc}>{statusCopy}</p>
+          <div className={styles.roomBadge}>
+            <span className={styles.roomBadgeLabel}>Pokoj</span>
+            <strong className={styles.roomBadgeValue}>{roomId.toUpperCase()}</strong>
+          </div>
+        </div>
+
+        <div className={styles.teamSelectButtons}>
+          <button
+            className={`${styles.teamBtn} ${styles.teamBtnRed}`}
+            disabled={!hasSyncedRoomState || redTaken}
+            onClick={() => onChooseTeam('red')}
+          >
+            <span className={styles.teamBtnGlow} aria-hidden="true" />
+            <span className={styles.teamBtnEyebrow}>Kapitan</span>
+            <div className={styles.teamBtnIdentity}>
+              <div className={styles.teamBtnAvatar} data-team="red" aria-hidden="true">
+                <AvatarAsset avatar={redTeam.avatar} size={54} />
+              </div>
+              <div className={styles.teamBtnNameBlock}>
+                <span className={styles.teamBtnSystemName}>Czerwoni</span>
+                <strong className={styles.teamBtnTitle}>{redTeam.name}</strong>
+              </div>
+            </div>
+            <span className={styles.teamBtnDesc}>
+              {redTaken ? `Druzyna ${redTeam.name} ma juz swojego kapitana.` : `Przejmij klucz odpowiedzi druzyny ${redTeam.name}.`}
+            </span>
+            <span className={`${styles.teamBtnState} ${redTaken ? styles.teamBtnStateTaken : styles.teamBtnStateOpen}`}>
+              {redTaken ? 'Zajete' : 'Wolne'}
+            </span>
+          </button>
+
+          <button
+            className={`${styles.teamBtn} ${styles.teamBtnBlue}`}
+            disabled={!hasSyncedRoomState || blueTaken}
+            onClick={() => onChooseTeam('blue')}
+          >
+            <span className={styles.teamBtnGlow} aria-hidden="true" />
+            <span className={styles.teamBtnEyebrow}>Kapitan</span>
+            <div className={styles.teamBtnIdentity}>
+              <div className={styles.teamBtnAvatar} data-team="blue" aria-hidden="true">
+                <AvatarAsset avatar={blueTeam.avatar} size={54} />
+              </div>
+              <div className={styles.teamBtnNameBlock}>
+                <span className={styles.teamBtnSystemName}>Niebiescy</span>
+                <strong className={styles.teamBtnTitle}>{blueTeam.name}</strong>
+              </div>
+            </div>
+            <span className={styles.teamBtnDesc}>
+              {blueTaken ? `Druzyna ${blueTeam.name} ma juz swojego kapitana.` : `Przejmij klucz odpowiedzi druzyny ${blueTeam.name}.`}
+            </span>
+            <span className={`${styles.teamBtnState} ${blueTaken ? styles.teamBtnStateTaken : styles.teamBtnStateOpen}`}>
+              {blueTaken ? 'Zajete' : 'Wolne'}
+            </span>
+          </button>
+        </div>
+
+        <div className={styles.teamSelectFooter}>
+          <span className={styles.footerDot} data-team="red" aria-hidden="true" />
+          <span className={styles.footerText}>Po wyborze zobaczysz plansze kapitana tylko dla swojej druzyny.</span>
+          <span className={styles.footerDot} data-team="blue" aria-hidden="true" />
+        </div>
       </div>
     </div>
   )

@@ -8,6 +8,9 @@ import {
   CodenamesMenuContent,
   useMenuControls,
   CodenameCaptainListener,
+  CODENAMES_SETUP_STORAGE_KEY,
+  restoreCodenamesSetupState,
+  serializeCodenamesSetupState,
   type CodenamesSetupHelpers,
   type CodenamesSetupState,
 } from '@party/codenames'
@@ -42,6 +45,7 @@ export default function CodenamesMenuPage() {
   const [showSetup, setShowSetup] = useState(false)
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const [setupState, setSetupState] = useState<CodenamesSetupState>(() => codenamesModule.createInitialSetupState())
+  const [hasRestoredSetup, setHasRestoredSetup] = useState(false)
   const [setupFocus, setSetupFocus] = useState<SetupFocusTarget>('start')
 
   const validation = useMemo(() => codenamesModule.validateSetup(setupState), [setupState])
@@ -55,9 +59,37 @@ export default function CodenamesMenuPage() {
   )
 
   useEffect(() => {
+    setSetupState(restoreCodenamesSetupState(window.localStorage.getItem(CODENAMES_SETUP_STORAGE_KEY)))
+    setHasRestoredSetup(true)
+  }, [])
+
+  useEffect(() => {
     setIsMenuInputSuspended(showSetup || isSettingsModalOpen)
     return () => setIsMenuInputSuspended(false)
   }, [isSettingsModalOpen, setIsMenuInputSuspended, showSetup])
+
+  useEffect(() => {
+    if (!hasRestoredSetup) {
+      return
+    }
+
+    window.localStorage.setItem(CODENAMES_SETUP_STORAGE_KEY, serializeCodenamesSetupState(setupState))
+  }, [hasRestoredSetup, setupState])
+
+  const startGameFromSetup = () => {
+    if (!validation.canStart) return
+
+    sessionStorage.setItem(
+      'codenames:config',
+      JSON.stringify({
+        roomId: setupState.roomId,
+        selectedCategories: setupState.selectedCategories,
+        settings: setupState.settings,
+        teams: setupState.teams,
+      }),
+    )
+    router.push(`/games/codenames/play?room=${setupState.roomId}`)
+  }
 
   const sections = codenamesModule.setupSections.map((section: (typeof codenamesModule.setupSections)[number]) => {
     const SectionComponent = section.render
@@ -88,7 +120,7 @@ export default function CodenamesMenuPage() {
       }
 
       if (action === 'back' || action === 'secondary' || action === 'menu') {
-        setShowSetup(false)
+        setSetupFocus('close')
         return
       }
 
@@ -99,7 +131,7 @@ export default function CodenamesMenuPage() {
         }
 
         if (validation.canStart) {
-          setShowSetup(false)
+          startGameFromSetup()
         }
       }
     },
@@ -145,19 +177,7 @@ export default function CodenamesMenuPage() {
           subtitle="Konfiguracja meczu"
           sections={sections}
           validation={validation}
-          onStart={() => {
-            if (!validation.canStart) return
-            sessionStorage.setItem(
-              'codenames:config',
-              JSON.stringify({
-                roomId: setupState.roomId,
-                selectedCategories: setupState.selectedCategories,
-                settings: setupState.settings,
-                teams: setupState.teams,
-              }),
-            )
-            router.push(`/games/codenames/play?room=${setupState.roomId}`)
-          }}
+          onStart={startGameFromSetup}
           onClose={() => setShowSetup(false)}
           isFocusVisible={isHostInputAwake}
           startLabel="Zagraj"

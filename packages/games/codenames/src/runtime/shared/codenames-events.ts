@@ -23,9 +23,13 @@ export type RoomState = {
   hostConnected: boolean
   captainRedConnected: boolean
   captainBlueConnected: boolean
+  captainRedReady: boolean
+  captainBlueReady: boolean
+  boardUnlocked: boolean
 }
 
 export type HostEvent =
+  | { type: 'HOST_SETUP_CONNECTED' }
   | { type: 'HOST_CONNECTED' }
   | { type: 'GAME_START'; cards: Card[]; redTotal: number; blueTotal: number; startingTeam: 'red' | 'blue' }
   | { type: 'CARD_REVEAL'; index: number }
@@ -35,6 +39,7 @@ export type HostEvent =
 
 export type CaptainEvent =
   | { type: 'CAPTAIN_CONNECTED'; team: 'red' | 'blue' }
+  | { type: 'CAPTAIN_READY'; team: 'red' | 'blue' }
 
 export type ServerEvent =
   | { type: 'CAPTAIN_DISCONNECTED'; team: 'red' | 'blue' }

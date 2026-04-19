@@ -289,13 +289,30 @@
 }
 
 .connectionState {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
   font-size: 12px;
   font-weight: 700;
   color: rgba(255, 255, 255, 0.62);
+  background: rgba(255, 255, 255, 0.04);
+  white-space: nowrap;
 }
 
-.connectionItemConnected .connectionState {
+.connectionStateConnected {
   color: #86efac;
+  border-color: rgba(34, 197, 94, 0.26);
+  background: rgba(34, 197, 94, 0.14);
+}
+
+.connectionStateDisconnected {
+  color: #ff8a82;
+  border-color: rgba(255, 90, 79, 0.24);
+  background: rgba(255, 90, 79, 0.12);
 }
 
 .connectionSummary {

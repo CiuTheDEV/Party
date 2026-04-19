@@ -1,54 +1,92 @@
-model = "gpt-5.4-mini"
-model_reasoning_effort = "high"
+#:schema https://developers.openai.com/codex/config-schema.json
+
+# Lean, stable Windows config for ChatGPT Plus usage
+# Goal: lower usage, fewer surprises, MCP/Playwright works reliably
+
+# model = "gpt-5.4-mini"
+# model_reasoning_effort = "medium"
 plan_mode_reasoning_effort = "high"
 model_reasoning_summary = "none"
 model_verbosity = "low"
 hide_agent_reasoning = true
+
+# Keep search available, but in cached mode
 web_search = "cached"
-tool_output_token_limit = 4000
+
+# Avoid oversized tool output being stored in history/context
+tool_output_token_limit = 3000
+
+# Good balance for local work: write inside workspace, ask when needed
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
+
+# Keep the tone neutral and compact
 personality = "none"
 
+# Prefer the normal priced tier; avoid fast mode (which costs more credits)
+service_tier = "flex"
+
+# Small history footprint; no local transcript growth
+[history]
+persistence = "none"
+
 [agents]
-max_threads = 4
+# Multi-agent can be useful, but it tends to add complexity/usage
+max_threads = 1
 max_depth = 1
 
 [sandbox_workspace_write]
-network_access = false
+# Playwright via npx and some MCP flows need network access
+network_access = true
+writable_roots = []
 
 [windows]
+# Recommended native Windows sandbox mode
 sandbox = "elevated"
+# Keep stronger isolation unless you hit a compatibility edge case
+sandbox_private_desktop = true
 
 [tools]
 view_image = true
 
 [features]
-multi_agent = true
+multi_agent = false
 apps = false
-rmcp_client = true
+prevent_idle_sleep = true
 
 [tui]
-alternate_screen = "always"
+# Better default on Windows terminals; preserves behavior more predictably
+alternate_screen = "auto"
 animations = false
 
-[permissions.filesystem.":project_roots"]
-"." = "write"
-
-[permissions.filesystem."/"]
-".env" = "none"
-".env.*" = "none"
-
-[permissions.network]
-allow_upstream_proxy = false
+# Store auth in OS keychain when possible
+cli_auth_credentials_store = "keyring"
+mcp_oauth_credentials_store = "keyring"
 
 [mcp_servers.playwright]
+enabled = true
+required = false
 command = "npx"
-args = ["@playwright/mcp@latest"]
+args = ["-y", "@playwright/mcp@latest"]
+startup_timeout_sec = 45
+tool_timeout_sec = 180
 
 [mcp_servers.context7]
+enabled = true
+required = false
 url = "https://mcp.context7.com/mcp"
+startup_timeout_sec = 20
+tool_timeout_sec = 120
 
 [mcp_servers.github]
+enabled = false
+required = false
 url = "https://api.githubcopilot.com/mcp/"
 bearer_token_env_var = "GITHUB_MCP_PAT"
+startup_timeout_sec = 20
+tool_timeout_sec = 120
+
+# Optional upgrade path for heavier tasks:
+# model = "gpt-5.4"
+# model_reasoning_effort = "medium"
+# plan_mode_reasoning_effort = "high"

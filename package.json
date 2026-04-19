@@ -5,12 +5,18 @@
     "build": "turbo build",
     "dev": "dev.bat",
     "lint": "turbo lint",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed --project=chromium",
+    "test:e2e:live": "powershell -NoProfile -Command \"$env:PLAYWRIGHT_HEADED='1'; $env:PLAYWRIGHT_SLOWMO_MS='250'; playwright test --project=chromium\"",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:debug": "playwright test --debug --project=chromium",
     "verify:encoding": "npm run encoding:check && npm run docs:check-encoding",
     "encoding:check": "powershell -ExecutionPolicy Bypass -File ./scripts/check-text-encoding.ps1",
     "docs:normalize": "powershell -ExecutionPolicy Bypass -File ./scripts/normalize-markdown.ps1",
     "docs:check-encoding": "powershell -ExecutionPolicy Bypass -File ./scripts/check-markdown-encoding.ps1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.59.1",
     "turbo": "^2.8.20"
   },
   "packageManager": "npm@11.12.0",

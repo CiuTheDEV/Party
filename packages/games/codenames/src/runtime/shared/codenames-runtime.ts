@@ -1,6 +1,16 @@
 const DEFAULT_PARTYKIT_PORT = '1999'
 const PRODUCTION_PARTYKIT_HOST = 'project-party.ciuthedev.partykit.dev'
 
+type CaptainRouteTeam = {
+  name: string
+  avatar: string
+}
+
+type CaptainRouteTeams = {
+  redTeam: CaptainRouteTeam
+  blueTeam: CaptainRouteTeam
+}
+
 function isLoopbackHost(hostname: string) {
   return hostname === 'localhost' || hostname === '127.0.0.1'
 }
@@ -49,26 +59,43 @@ export function getPublicOrigin() {
   return ''
 }
 
-export function buildCaptainPath(roomId: string, team?: 'red' | 'blue') {
-  const basePath = `/games/codenames/captain/${encodeURIComponent(roomId)}`
-
-  if (!team) {
-    return basePath
+function appendCaptainTeamParams(params: URLSearchParams, teams?: CaptainRouteTeams) {
+  if (!teams) {
+    return
   }
 
-  return `${basePath}?team=${team}`
+  params.set('redName', teams.redTeam.name)
+  params.set('redAvatar', teams.redTeam.avatar)
+  params.set('blueName', teams.blueTeam.name)
+  params.set('blueAvatar', teams.blueTeam.avatar)
 }
 
-export function buildCaptainRoutePath(roomId: string, team?: 'red' | 'blue') {
+export function buildCaptainPath(roomId: string, team?: 'red' | 'blue', teams?: CaptainRouteTeams) {
+  const basePath = `/games/codenames/captain/${encodeURIComponent(roomId)}`
+  const params = new URLSearchParams()
+
+  if (!team) {
+    appendCaptainTeamParams(params, teams)
+    return params.size > 0 ? `${basePath}?${params.toString()}` : basePath
+  }
+
+  params.set('team', team)
+  appendCaptainTeamParams(params, teams)
+  return `${basePath}?${params.toString()}`
+}
+
+export function buildCaptainRoutePath(roomId: string, team?: 'red' | 'blue', teams?: CaptainRouteTeams) {
   const params = new URLSearchParams({ room: roomId })
 
   if (team) {
     params.set('team', team)
   }
 
+  appendCaptainTeamParams(params, teams)
+
   return `/games/codenames/captain?${params.toString()}`
 }
 
-export function buildCaptainUrl(origin: string, roomId: string) {
-  return `${trimTrailingSlash(origin)}${buildCaptainPath(roomId)}`
+export function buildCaptainUrl(origin: string, roomId: string, teams?: CaptainRouteTeams) {
+  return `${trimTrailingSlash(origin)}${buildCaptainPath(roomId, undefined, teams)}`
 }

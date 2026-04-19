@@ -1,13 +1,22 @@
 root = true
 
-[*.{ts,tsx,js,jsx,mjs,cjs,css,scss,json,jsonc,yml,yaml,md}]
+[*]
 charset = utf-8
 end_of_line = lf
 insert_final_newline = true
-trim_trailing_whitespace = false
+trim_trailing_whitespace = true
 
 [*.md]
+trim_trailing_whitespace = false
+
+[*.{ts,tsx,js,jsx,mjs,cjs,css,scss,json,jsonc,yml,yaml,toml,html,txt,svg}]
 charset = utf-8
 end_of_line = lf
 insert_final_newline = true
-trim_trailing_whitespace = false
+trim_trailing_whitespace = true
+
+[*.{bat,cmd,ps1}]
+end_of_line = crlf
+
+[Makefile]
+end_of_line = lf

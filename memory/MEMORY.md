@@ -15,6 +15,36 @@
 
 ## Entries
 
+### 2026-04-19 - Parallel Playwright install can fetch the wrong browser build
+
+**Symptom:** `npm run test:e2e` and headed Playwright runs failed right after a "clean reinstall", even though `npx playwright install chromium` had just completed successfully.
+
+**Root cause:** `npm install -D @playwright/test` and `npx playwright install chromium` were started in parallel. The browser download used an older Playwright CLI/build while the final `node_modules` ended up on `@playwright/test` / `playwright` 1.59.1, which expected Chromium revision `1217`, not the earlier downloaded revision `1208`.
+
+**Fix:** Install the npm dependency first, then run `npx playwright install chromium` sequentially from the repo root so the downloaded browser revision matches the installed Playwright package.
+
+**How to prevent it:** Do not parallelize Playwright package install and browser install in the same workspace. Treat them as an ordered pair: package first, browsers second.
+
+### 2026-04-19 - Button-based board cards can silently drop the runtime font
+
+**Symptom:** The Codenames card back and/or front stopped matching the runtime typography even though the surrounding host/captain screen still used `Space Grotesk`.
+
+**Root cause:** The host board uses `button` elements for cards, and the board styles did not explicitly inherit typography. At the same time, the shared card-back CSS overrode part of the typography with `font-family: monospace` for corner labels. That combination made the card surfaces drift away from the intended runtime font stack.
+
+**Fix:** Set `font: inherit` on the host board button, set `font-family: inherit` on both host and captain card faces, and avoid hardcoding `monospace` inside the shared card-back component.
+
+**How to prevent it:** Any shared runtime surface rendered inside native form controls should explicitly inherit typography. For game cards, treat font inheritance as part of the component contract, not an accident of the parent screen.
+
+### 2026-04-18 - Cloudflare Pages push does not deploy PartyKit server changes
+
+**Symptom:** The Codenames captain screen stayed on "Sprawdzam dostepnosc druzyn..." in production even though the frontend deploy succeeded and local multiplayer worked.
+
+**Root cause:** The hub was redeployed on Cloudflare Pages, but the realtime server under `packages/partykit/codenames/server.ts` was not deployed separately. The frontend kept trying to open `wss://project-party.ciuthedev.partykit.dev/parties/codenames/...`, but the production PartyKit worker was still stale or unavailable for that named party.
+
+**Fix:** Verify the PartyKit endpoint directly, then deploy the realtime server explicitly with `npx partykit deploy` from the repo root. After deploy, confirm the `codenames` WebSocket opens and sends the initial `ROOM_STATE`.
+
+**How to prevent it:** Treat Cloudflare Pages deploys and PartyKit deploys as two separate release steps. Any change under `packages/partykit/**` requires its own PartyKit deployment even if the frontend is already live.
+
 ### 2026-04-12 - Cloudflare Pages Git deploys need root-level build config and root-level Functions shims
 
 **Symptom:** A Pages deployment built from the repo root could not find the Hub export output, and root Functions bundling failed to resolve imports that pointed into `apps/hub`.

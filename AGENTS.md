@@ -1,304 +1,188 @@
-# Project Party - Agent Global Memory
+# Project Party - Agent Operating Rules
 
-> Auto-loaded: `rules/` (`behaviors.md`, `skill-triggers.md`, `memory-flush.md`)
-> On-demand: `docs/` (`agents.md`, `content-safety.md`, `behaviors-extended.md`, `scaffolding-checkpoint.md`, `task-routing.md`, `behaviors-reference.md`)
-> Hot data layer: `memory/today.md` + `memory/active-tasks.json`
+Keep this file short, practical, and safe for all agents.
 
 ---
 
-## Project Info
+## Project Snapshot
 
-- **Name**: Mati
-- **Project dir**: `C:\Users\Mateo\Desktop\Party`
-- **Identity**: The product owner is not a developer - AI agents write the code
-- **Philosophy**: Build simply, verify always, never over-engineer
+- **Product**: Polish browser-based party game portal for hangouts and friend gatherings
+- **Owner**: not a developer; explain decisions in plain language
+- **Philosophy**: build simply, verify always, avoid over-engineering
+- **Budget rule**: free tiers only unless the owner explicitly approves otherwise
 
-### Platform Accounts
-
-| Platform | Account |
-|----------|---------|
-| Cloudflare | [account] |
-| GitHub | [account] |
-
----
-
-## Agents & Models
-
-Documentation must stay readable for all agents so session handoff remains seamless.
-
-| Agent | Model | When |
-|-------|-------|------|
-| **Claude Code** | Sonnet | Primary - daily sessions |
-| **Claude Code** | Haiku | Lightweight tasks - quick lookups, simple Q&A |
-| **Codex** | GPT-5.4 | Token limit fallback + cross-verification |
-| **Codex** | GPT-5.4-mini | Lightweight fallback tasks at token limit |
-| **Antigravity** | - | Alternative fallback |
-
-### Token & Session Rules
-
-- Claude Pro workflow: use Sonnet, not Opus
-- Split work into small sessions to avoid burning context
-- At token limit or handoff point, update project memory and hand off cleanly
-- Every agent starts from the same project memory and the same repo rules
-
-### Starting a Session (mandatory)
-
-1. Read `PROJECT_CONTEXT.md` - architecture, current phase, latest handoff
-2. Read `memory/today.md` - what happened today, current task
-3. Read `memory/active-tasks.json` - in-flight tasks
-4. Read `memory/MEMORY.md` - technical pitfalls (if present)
-5. Read `memory/patterns.md` - reusable solutions (if present)
-6. Only then start working
-
-### MCP Defaults
-
-- Do not use `playwright` MCP in this project; prefer build/lint verification and manual in-browser checks when needed
-- Use `context7` MCP for current framework and library docs instead of stale model memory
-- Use `github` MCP for issues, PRs, and repo context when `GITHUB_MCP_PAT` or IDE auth is configured
-
----
-
-## About the Project
-
-**Project Party** is a Polish browser-based party game portal for hangouts and friend gatherings.
-
-### Concept
-
-- **Hub** - landing page, game list, game selection, redirect into a game module
-- **Modules** - each game is an independent module in `packages/games/[game]`
-- The hub redirects into a game, and the game owns its own menu, setup, and gameplay
-- Adding a new game should mean adding a new package, not rewriting the hub
-
-### Players
-
-- **Guest** - plays without registration, joins by room code or link
-- **Account** - optional, unlocks leaderboards, game history, and future paid content
-- **Host** - creates a room, picks the game and settings, starts the session
-
-### Join Modes
-
-- **Room code** - host on the big screen, others on phones (Jackbox-style)
-- **Link** - everyone joins from their own device
-
-### Monetization - design now, wire later
-
-This is a hobby project with **no budget for paid services at launch**. Only free tiers are allowed.
-
-Even so, the architecture must be monetization-ready from day one:
-- payment gateway slots exist as stubs,
-- premium labels can exist in UI now,
-- Stripe is not connected yet,
-- future payment work should fill stubs, not force a rewrite.
-
----
-
-## Technical Architecture
+### Current repo direction
 
 ```text
 project-party/
 |- apps/
 |  `- hub/                  # Next.js platform shell
 |- packages/
-|  |- ui/                   # Shared UI, shell, setup chrome, modal primitives
-|  |- game-sdk/             # Game module contract + module availability status
+|  |- ui/                   # Shared shell, setup chrome, modal primitives
+|  |- game-sdk/             # Module contract + shared interfaces
 |  `- games/
 |     |- charades/          # First live game module
-|     `- codenames/         # Coming-soon game scaffold
+|     `- codenames/         # Live menu/setup module, runtime still evolving
 `- content/
    `- charades/             # Word lists and categories
 ```
 
-**Stack - free tiers only**
+### Product model
 
-| Layer | Technology | Tier |
-|-------|------------|------|
-| Frontend / Hub | Next.js (React) | Free |
-| Monorepo | Turborepo | Free |
-| Real-time | Partykit | Free tier |
-| Database | Cloudflare D1 | Free |
-| Auth | Clerk | Free |
-| Hosting | Cloudflare Pages | Free |
-| Payments | Stripe | Stub only |
-| Language | TypeScript | - |
-
-> Before adding any new service, verify that it has a free tier. If it does not, stop and ask the product owner.
+- `hub` owns routing, registry, and platform shell concerns
+- each game module owns its own config, menu, setup sections, validation, results, and gameplay runtime
+- shared setup shell lives in shared layers; games inject their own sections
+- adding a game should mean adding a module, not rewriting the platform
 
 ---
 
-## Game Modules
+## Mandatory Session Start
 
-| Module | Status | Description |
-|--------|--------|-------------|
-| `charades` | MVP | Pantomime - gestures, expressions, body language. No drawing, no words. |
-| `codenames` | Scaffold | Registered in hub as `coming-soon`; gameplay not started yet. |
+Read these before making changes:
 
-### Module Contract
+1. `PROJECT_CONTEXT.md`
+2. `memory/today.md`
+3. `memory/active-tasks.json`
+4. `memory/MEMORY.md` if present
+5. `memory/patterns.md` if present
 
-Each module should own:
-- `GameConfig`
-- explicit availability via `GameConfig.status` (`live` or `coming-soon`)
-- menu content
-- setup sections and validation
-- results UI
-- gameplay entrypoints and runtime
-
-Details live in `packages/game-sdk/README.md`.
+Use `PROJECT_CONTEXT.md` as the source of truth for current architecture and current phase.
+If this file and `PROJECT_CONTEXT.md` ever disagree, follow `PROJECT_CONTEXT.md`.
 
 ---
 
-## Design System
+## Core Editing Rules
 
-### Theme
+### Minimal diff only
 
-- Each game defines its own theme through CSS custom properties
-- Never hardcode colors in shared components
-- Shared layout should stay reusable while colors remain game-specific
+- Make the smallest possible change that solves the task.
+- Do **not** rewrite entire files unless the owner explicitly asks for it.
+- Do **not** mix bug fixes, copy rewrites, formatting, and refactors in one patch unless required.
+- Do **not** reorder imports, rename symbols, or reformat unrelated code just because it looks cleaner.
+- Prefer patch-style edits over full-file replacement.
 
-### Responsiveness
+### Encoding / mojibake safety
 
-- **Desktop** (`>= 768px`): left sidebar + main content
-- **Mobile** (`< 768px`): bottom tab bar instead of sidebar
-- Every new component must work on both breakpoints before merging
+- Treat files with Polish UI copy as UTF-8-sensitive.
+- Preserve existing encoding, BOM behavior, and line endings.
+- If you detect mojibake, broken Polish diacritics, or encoding ambiguity, **stop and report it before editing**.
+- Do not use encoding cleanup as an excuse to rewrite the whole file.
+- After editing a UTF-8-sensitive file, verify the resulting text in the file before continuing.
 
-### Sidebar Navigation
+### Scope discipline
 
-- Always present: `Play now`, `Settings`
-- Optional per game: `Stats`, `Leaderboard`, `How to play`
-- Bottom action: `Back to lobby`
-- Topbar: game logo + login button or avatar
-
-### Navigation Flow
-
-1. Hub -> click game -> **game menu**
-2. Click `Play` -> **config modal**
-3. Modal handles players, settings, deck, devices, and `Start`
-4. -> **Gameplay**
-5. -> **Results** -> back to menu
-
-### Config Modal
-
-- Closing it returns to the menu while preserving mode selection
-- Each game decides which sections and options it exposes
-- `Start` stays disabled until the minimum requirements are met
+- Touch only files required for the task.
+- Keep changes reviewable and easy to diff.
+- Prefer local fixes over broad architectural churn.
+- 300 lines is a **review threshold**, not an automatic split rule.
+- Split files only when responsibilities are clearly mixed or navigation becomes hard.
 
 ---
 
-## Code Rules - No Exceptions
+## Code Quality Rules
 
-### File Structure
+- No commented-out code.
+- No `TODO` unless it maps to an active task in `memory/active-tasks.json`.
+- Comments should explain **why**, not **what**.
+- Every function should have one clear responsibility.
+- Never claim something works without checking it.
+- Banned phrases: `Should be fine`, `Probably passes`, `I think it works`.
 
-- **300 lines is a review threshold, not an automatic split rule**
-- If a CSS/TS/TSX file grows past ~300 lines, first assess cohesion:
-  - keep it as one file if it still has one clear responsibility and is easy to reason about,
-  - split it only when responsibilities are mixed, the file becomes hard to navigate, or extracted parts have a natural boundary
-- Component styles live next to the component
-- One component = one file
-- `globals.css` only for reset, custom properties, and base typography
+### Verification
 
-### Quality
+When a task changes behavior, run the smallest relevant verification available:
+- lint
+- typecheck
+- build
+- focused test
 
-- No AI slop - comments explain *why*, never *what*
-- No commented-out code in the repo
-- No `TODO` without an active task in `memory/active-tasks.json`
-- Every function should do one thing
-- Treat every file with Polish UI copy as **UTF-8-sensitive**
-- If a file shows any mojibake or broken Polish diacritics, stop partial editing immediately
-- In UTF-8-sensitive files, prefer either:
-  - the smallest possible non-text patch, or
-  - a deliberate full-file rewrite in clean UTF-8
-- Do not mix logic/layout edits with copy rewrites in the same risky patch
-- After editing a UTF-8-sensitive file, verify the resulting text in the file before continuing
+Read the output and report what actually happened.
+If verification cannot be run, say so clearly.
 
-### Commits
+### Sandbox-aware verification
 
-- Atomic: one commit = one change
-- Types: `fix`, `feat`, `refactor`, `docs`, `test`, `chore`
-- Avoid mixed commits and oversized commits without justification
-
----
-
-## Delivery Standards
-
-- **Truth > Speed**: never claim something works without running it
-- **Small Batch**: prefer small, reviewable changes
-- **No Secrets**: never commit keys or tokens
-- **Self-verify**: run lint/build/test and read the output
-- **Banned phrases**: `Should be fine`, `Probably passes`, `I think it works`
+- On Windows/Codex sandbox, local verification can fail with `spawn EPERM` due to process spawning restrictions.
+- Treat `spawn EPERM` as a possible environment limitation first, not automatic proof of broken code.
+- If `spawn EPERM` appears, report:
+  - which command failed,
+  - whether the failure looks environmental or code-related,
+  - what was still verified successfully.
+- Do not claim the app is broken solely because a sandboxed build hit `spawn EPERM`.
+- Prefer secondary checks such as lint, typecheck, narrower package-level commands, targeted inspection, or non-sandbox verification when full build is blocked by the environment.
 
 ---
 
-## Collaboration Preferences
+## UX / Product Guardrails
 
-- The product owner is not a developer - explain technical decisions in plain language
-- When choosing between options, always recommend one and explain why
-- **Auto-execute**: bug fixes, small UI changes, very small code changes
-- **Ask before**:
-  - adding any new external service,
-  - changing database schema,
-  - creating a new game module,
-  - making real-time architecture decisions,
-  - anything that could cost money
-- **Never self-decide**: deleting data or deploying to production
+- The UI must stay readable on desktop and mobile.
+- Shared components must stay reusable across games.
+- Never hardcode game-specific colors in shared UI.
+- Closing setup should preserve mode selection where applicable.
+- Do not add paid services, schema changes, new game modules, or production-destructive actions without asking first.
 
----
+### Current modules
 
-## SSOT Ownership
-
-| Info Type | SSOT File | Never write to |
-|-----------|-----------|----------------|
-| Infrastructure / CF config | `memory/infra.md` | Code comments |
-| Project status | `PROJECT_CONTEXT.md` | `today.md` |
-| Project overview | `memory/projects.md` | Other files |
-| Technical pitfalls | `memory/MEMORY.md` | `today.md` |
-| Daily progress | `memory/today.md` | Other files |
-| In-flight tasks | `memory/active-tasks.json` | Other files |
-| Game content | `content/[game]/` | Source code |
-| SDK contract | `packages/game-sdk/README.md` | Other files |
+- `charades` - live reference game module
+- `codenames` - live menu/setup module; gameplay runtime still needs end-to-end rollout and testing
 
 ---
 
-## What You Can Touch
+## MCP / Tooling Defaults
 
-| Allowed | Never touch |
-|---------|-------------|
-| `apps/` - all code files | `rules/` |
-| `packages/` - all code files | Secrets / credentials |
-| `content/` - word lists | Production data without explicit request |
-| `docs/` - only when the task concerns docs/process/rules |  |
-| `memory/` - read freely, update when required by workflow |  |
-| `PROJECT_CONTEXT.md` handoff block |  |
-| `AGENTS.md` and `CLAUDE.md` - only when explicitly synchronizing agent rules |  |
+- Prefer `context7` for current framework and library docs when available.
+- Prefer GitHub tooling for repo, PR, and issue context when available.
+- Do not rely on stale model memory for changing APIs.
+- Avoid `playwright` MCP by default in this project; prefer lint/build/typecheck and manual browser verification unless the task explicitly needs Playwright.
 
 ---
 
-## On-Demand Loading Index
+## Ownership / SSOT
 
-| Scenario | Load file |
-|----------|-----------|
-| Project setup / Phase 0 init | `docs/project-setup.md` |
-| Project overview | `memory/projects.md` |
-| New service / architecture decision | `docs/scaffolding-checkpoint.md` |
-| Handing off to another agent | `docs/agents.md` |
-| Agent routing / model costs | `docs/task-routing.md` |
-| Goals and priorities | `memory/goals.md` |
-| Patterns and reusable solutions | `memory/patterns.md` |
+Use these as the main ownership rules:
+
+| Info Type | Source of truth |
+|-----------|-----------------|
+| Current architecture / current phase | `PROJECT_CONTEXT.md` |
+| Daily progress | `memory/today.md` |
+| In-flight tasks | `memory/active-tasks.json` |
 | Technical pitfalls | `memory/MEMORY.md` |
-| AI content safety | `docs/content-safety.md` |
-| Extended behavior rules | `docs/behaviors-extended.md` |
-| Memory search / reference details | `docs/behaviors-reference.md` |
+| Reusable patterns | `memory/patterns.md` |
+| Game content | `content/[game]/` |
+| SDK contract | `packages/game-sdk/README.md` |
+
+Do not spread project state across random files or code comments.
 
 ---
 
-## Completing a Session
+## What Can Be Changed
 
-When wrapping or handing off a session:
+Allowed when needed:
+- `apps/`
+- `packages/`
+- `content/`
+- `docs/` when the task is about docs/process/rules
+- `memory/` when the workflow requires an update
+- `PROJECT_CONTEXT.md` handoff block when wrapping a session
+
+Never touch without explicit request:
+- secrets or credentials
+- production data
+- destructive deploy actions
+- agent-rule files only for stylistic rewrites with no clear reason
+
+---
+
+## Session Wrap-up
+
+When a meaningful session ends:
+
 1. Update the handoff block in `PROJECT_CONTEXT.md`
-2. Update `memory/today.md` when the session produced meaningful progress
-3. Update `memory/active-tasks.json` when a multi-session task changed state
-4. Update `memory/MEMORY.md` or `memory/patterns.md` when a reusable lesson was discovered
-5. Commit only when the user asked for it or when the task explicitly includes a commit
+2. Update `memory/today.md` if meaningful progress happened
+3. Update `memory/active-tasks.json` if task state changed
+4. Update `memory/MEMORY.md` or `memory/patterns.md` if a reusable lesson was learned
+5. Commit only when the owner asked for it or the task explicitly includes it
 
-Handoff block format:
+Handoff format:
 
 ```md
 <!-- handoff:start -->
@@ -313,4 +197,4 @@ Handoff block format:
 
 ---
 
-*Last updated: 2026-03-26*
+*Last updated: 2026-04-18*

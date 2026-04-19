@@ -2,17 +2,20 @@
 
 import { AvatarAsset } from '@party/ui'
 import { useRef } from 'react'
+import { CodenamesCardBackMark } from '../shared/codenames-card-back'
 import type { Card } from '../shared/codenames-events'
 import { useRoundBoardRevealAnimation } from '../shared/useRoundBoardRevealAnimation'
+import cardBackStyles from '../shared/CodenamesCardBackMark.module.css'
 import styles from './CaptainGrid.module.css'
 
 type CaptainGridProps = {
   cards: Card[]
   startingTeam?: 'red' | 'blue' | null
   isLocked?: boolean
+  isConcealed?: boolean
 }
 
-export function CaptainGrid({ cards, startingTeam = null, isLocked = false }: CaptainGridProps) {
+export function CaptainGrid({ cards, startingTeam = null, isLocked = false, isConcealed = false }: CaptainGridProps) {
   const rootRef = useRef<HTMLDivElement | null>(null)
   const boardKey = cards.map((card) => card.word).join('|')
 
@@ -21,11 +24,11 @@ export function CaptainGrid({ cards, startingTeam = null, isLocked = false }: Ca
     cards,
     boardKey,
     startingTeam,
-    enabled: !isLocked && cards.length > 0,
+    enabled: !isLocked && !isConcealed && cards.length > 0,
   })
 
   return (
-    <div ref={rootRef} className={styles.gridShell}>
+    <div ref={rootRef} className={`${styles.gridShell} ${isConcealed ? styles.concealed : ''}`}>
       <div className={styles.sheen} data-round-sheen aria-hidden="true" />
       <div className={styles.grid} data-round-board>
         {cards.map((card, index) => (
@@ -38,7 +41,19 @@ export function CaptainGrid({ cards, startingTeam = null, isLocked = false }: Ca
           >
             <span className={styles.cardInner} data-round-card-inner>
               <span className={`${styles.cardFace} ${styles.cardBack}`} aria-hidden="true">
-                <span className={styles.cardBackMark} />
+                <CodenamesCardBackMark
+                  rootClassName={cardBackStyles.root}
+                  compactClassName={cardBackStyles.compact}
+                  surfaceClassName={cardBackStyles.surface}
+                  gridClassName={cardBackStyles.grid}
+                  topMetaClassName={cardBackStyles.topMeta}
+                  bottomMetaClassName={cardBackStyles.bottomMeta}
+                  centerClassName={cardBackStyles.center}
+                  badgeClassName={cardBackStyles.badge}
+                  emojiClassName={cardBackStyles.emoji}
+                  labelClassName={cardBackStyles.label}
+                  density="compact"
+                />
               </span>
               <span className={`${styles.cardFace} ${styles.cardFront}`}>
                 <span className={`${styles.word} ${card.revealed ? styles.strikethrough : ''}`}>{card.word}</span>

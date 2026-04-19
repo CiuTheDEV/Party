@@ -6,6 +6,7 @@ import type { HostEvent, IncomingMessage, RoomState } from '../shared/codenames-
 import { getPartykitHost } from '../shared/codenames-runtime'
 import { generateBoard } from '../shared/board-generator'
 import { ROUND_INTRO_DURATION_MS } from '../shared/RoundIntroOverlay'
+import { canStartWaitingGame, shouldAutoStartPendingRound } from './start-policy'
 
 const initialRoomState: RoomState = {
   phase: 'waiting',
@@ -20,6 +21,9 @@ const initialRoomState: RoomState = {
   hostConnected: false,
   captainRedConnected: false,
   captainBlueConnected: false,
+  captainRedReady: false,
+  captainBlueReady: false,
+  boardUnlocked: false,
 }
 
 type UseHostGameParams = {
@@ -29,19 +33,15 @@ type UseHostGameParams = {
 
 export function useHostGame({ roomId, wordPool }: UseHostGameParams) {
   const [roomState, setRoomState] = useState<RoomState>(initialRoomState)
+  const [hasSyncedRoomState, setHasSyncedRoomState] = useState(false)
   const [isRoundIntroVisible, setIsRoundIntroVisible] = useState(false)
 
-  // Refs that are always current — safe to use inside socket callbacks
   const wordPoolRef = useRef(wordPool)
   wordPoolRef.current = wordPool
-  const previousPhaseRef = useRef<RoomState['phase'] | null>(null)
-
-  // Tracks whether we already sent GAME_START for this session
-  // so reconnects don't send it again when the room is already playing
+  const previousBoardUnlockedRef = useRef(false)
   const gameStartedRef = useRef(false)
-
-  // Tracks whether we sent GAME_RESET and are waiting to send GAME_START after
   const pendingNewGameRef = useRef(false)
+  const initialStartTriggeredRef = useRef(false)
 
   const socket = usePartySocket({
     host: getPartykitHost(),
@@ -54,40 +54,39 @@ export function useHostGame({ roomId, wordPool }: UseHostGameParams) {
       const msg = JSON.parse(evt.data) as IncomingMessage
 
       if (msg.type === 'ROOM_STATE') {
-        setRoomState((current) => {
-          const nextState = { ...msg.state, hostConnected: msg.state.hostConnected || current.hostConnected }
-
-          // First message after connect. If room is fresh → start immediately.
-          // If already playing (host reconnected mid-game) → do nothing.
-          if (
-            nextState.phase === 'waiting' &&
-            !gameStartedRef.current &&
-            nextState.captainRedConnected &&
-            nextState.captainBlueConnected
-          ) {
-            sendGameStart(socket, wordPoolRef.current)
-            gameStartedRef.current = true
-          }
-
-          return nextState
-        })
+        setRoomState((current) => ({ ...msg.state, hostConnected: msg.state.hostConnected || current.hostConnected }))
+        setHasSyncedRoomState(true)
         return
       }
 
-      setRoomState((s) => applyEvent(s, msg))
+      setRoomState((current) => applyEvent(current, msg))
     },
   })
+
+  useEffect(() => {
+    if (pendingNewGameRef.current) {
+      return
+    }
+
+    if (initialStartTriggeredRef.current || gameStartedRef.current) {
+      return
+    }
+
+    if (!canStartWaitingGame(roomState)) {
+      return
+    }
+
+    initialStartTriggeredRef.current = true
+    sendGameStart(socket, wordPoolRef.current)
+    gameStartedRef.current = true
+  }, [roomState, socket])
 
   useEffect(() => {
     if (!pendingNewGameRef.current) {
       return
     }
 
-    if (roomState.phase !== 'waiting') {
-      return
-    }
-
-    if (!roomState.captainRedConnected || !roomState.captainBlueConnected) {
+    if (!shouldAutoStartPendingRound(roomState)) {
       return
     }
 
@@ -97,38 +96,31 @@ export function useHostGame({ roomId, wordPool }: UseHostGameParams) {
   }, [roomState, socket])
 
   useEffect(() => {
-    const previousPhase = previousPhaseRef.current
+    const previousBoardUnlocked = previousBoardUnlockedRef.current
+    previousBoardUnlockedRef.current = roomState.boardUnlocked
 
-    if (previousPhase === null) {
-      previousPhaseRef.current = roomState.phase
-      return
-    }
-
-      if (roomState.phase === 'playing' && previousPhase !== 'playing') {
+    if (roomState.phase === 'playing' && roomState.boardUnlocked && !previousBoardUnlocked) {
       setIsRoundIntroVisible(true)
 
       const timeoutId = window.setTimeout(() => {
         setIsRoundIntroVisible(false)
       }, ROUND_INTRO_DURATION_MS)
 
-      previousPhaseRef.current = roomState.phase
       return () => window.clearTimeout(timeoutId)
     }
 
-    if (roomState.phase !== 'playing') {
+    if (roomState.phase !== 'playing' || !roomState.boardUnlocked) {
       setIsRoundIntroVisible(false)
     }
-
-    previousPhaseRef.current = roomState.phase
-  }, [roomState.phase])
+  }, [roomState.boardUnlocked, roomState.phase])
 
   const revealCard = useCallback(
     (index: number) => {
-      if (isRoundIntroVisible) return
+      if (isRoundIntroVisible || !roomState.boardUnlocked) return
       const event = { type: 'CARD_REVEAL' as const, index }
       socket.send(JSON.stringify(event satisfies HostEvent))
     },
-    [isRoundIntroVisible, socket],
+    [isRoundIntroVisible, roomState.boardUnlocked, socket],
   )
 
   const setAssassinTeam = useCallback(
@@ -139,9 +131,19 @@ export function useHostGame({ roomId, wordPool }: UseHostGameParams) {
     [socket],
   )
 
+  const startGame = useCallback(() => {
+    if (!canStartWaitingGame(roomState) || gameStartedRef.current) {
+      return
+    }
+
+    sendGameStart(socket, wordPoolRef.current)
+    gameStartedRef.current = true
+  }, [roomState, socket])
+
   const resetGame = useCallback(() => {
     pendingNewGameRef.current = true
     gameStartedRef.current = false
+    initialStartTriggeredRef.current = true
     const event = { type: 'GAME_RESET' as const }
     socket.send(JSON.stringify(event satisfies HostEvent))
   }, [socket])
@@ -149,13 +151,13 @@ export function useHostGame({ roomId, wordPool }: UseHostGameParams) {
   const restartMatch = useCallback(() => {
     pendingNewGameRef.current = true
     gameStartedRef.current = false
+    initialStartTriggeredRef.current = true
     const event = { type: 'MATCH_RESET' as const }
     socket.send(JSON.stringify(event satisfies HostEvent))
   }, [socket])
 
-  return { roomState, revealCard, setAssassinTeam, resetGame, restartMatch, isRoundIntroVisible }
+  return { roomState, hasSyncedRoomState, revealCard, setAssassinTeam, resetGame, restartMatch, startGame, isRoundIntroVisible }
 }
-
 
 export function applyEvent(state: RoomState, msg: IncomingMessage): RoomState {
   switch (msg.type) {
@@ -171,6 +173,9 @@ export function applyEvent(state: RoomState, msg: IncomingMessage): RoomState {
         startingTeam: msg.startingTeam,
         winner: null,
         assassinTeam: null,
+        captainRedReady: false,
+        captainBlueReady: false,
+        boardUnlocked: false,
       }
 
     case 'HOST_CONNECTED':
@@ -178,12 +183,11 @@ export function applyEvent(state: RoomState, msg: IncomingMessage): RoomState {
 
     case 'CARD_REVEAL': {
       if (state.phase !== 'playing') return state
+      if (!state.boardUnlocked) return state
       if (msg.index < 0 || msg.index > 24) return state
       if (!state.cards[msg.index]) return state
       if (state.cards[msg.index].revealed) return state
-      const cards = state.cards.map((c, i) =>
-        i === msg.index ? { ...c, revealed: true } : c,
-      )
+      const cards = state.cards.map((c, i) => (i === msg.index ? { ...c, revealed: true } : c))
       const hit = cards[msg.index]
       if (hit.color === 'assassin') return { ...state, hostConnected: true, cards, phase: 'assassin-reveal' }
       const redRevealed = cards.filter((c) => c.color === 'red' && c.revealed).length
@@ -214,6 +218,9 @@ export function applyEvent(state: RoomState, msg: IncomingMessage): RoomState {
         roundWinsBlue: state.roundWinsBlue,
         captainRedConnected: state.captainRedConnected,
         captainBlueConnected: state.captainBlueConnected,
+        captainRedReady: false,
+        captainBlueReady: false,
+        boardUnlocked: false,
       }
 
     case 'MATCH_RESET':
@@ -222,13 +229,23 @@ export function applyEvent(state: RoomState, msg: IncomingMessage): RoomState {
         hostConnected: true,
         captainRedConnected: state.captainRedConnected,
         captainBlueConnected: state.captainBlueConnected,
+        captainRedReady: false,
+        captainBlueReady: false,
+        boardUnlocked: false,
       }
 
     case 'CAPTAIN_CONNECTED':
       return msg.team === 'red' ? { ...state, captainRedConnected: true } : { ...state, captainBlueConnected: true }
 
+    case 'CAPTAIN_READY':
+      return msg.team === 'red'
+        ? { ...state, captainRedReady: true, boardUnlocked: state.captainBlueReady }
+        : { ...state, captainBlueReady: true, boardUnlocked: state.captainRedReady }
+
     case 'CAPTAIN_DISCONNECTED':
-      return msg.team === 'red' ? { ...state, captainRedConnected: false } : { ...state, captainBlueConnected: false }
+      return msg.team === 'red'
+        ? { ...state, captainRedConnected: false, captainRedReady: state.boardUnlocked ? state.captainRedReady : false }
+        : { ...state, captainBlueConnected: false, captainBlueReady: state.boardUnlocked ? state.captainBlueReady : false }
 
     case 'HOST_DISCONNECTED':
       return { ...state, hostConnected: false }

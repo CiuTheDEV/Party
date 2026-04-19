@@ -18,6 +18,9 @@ const initialRoomState: RoomState = {
   hostConnected: false,
   captainRedConnected: false,
   captainBlueConnected: false,
+  captainRedReady: false,
+  captainBlueReady: false,
+  boardUnlocked: false,
 }
 
 type UseCaptainRoomStatusParams = {
@@ -75,6 +78,10 @@ function applyRoomStatusEvent(state: RoomState, event: IncomingMessage): RoomSta
       return event.team === 'red'
         ? { ...state, captainRedConnected: false }
         : { ...state, captainBlueConnected: false }
+    case 'CAPTAIN_READY':
+      return event.team === 'red'
+        ? { ...state, captainRedReady: true, boardUnlocked: state.captainBlueReady }
+        : { ...state, captainBlueReady: true, boardUnlocked: state.captainRedReady }
     case 'GAME_START':
       return {
         ...state,
@@ -86,14 +93,30 @@ function applyRoomStatusEvent(state: RoomState, event: IncomingMessage): RoomSta
         startingTeam: event.startingTeam,
         winner: null,
         assassinTeam: null,
+        captainRedReady: false,
+        captainBlueReady: false,
+        boardUnlocked: false,
       }
     case 'HOST_CONNECTED':
       return { ...state, hostConnected: true }
     case 'CARD_REVEAL':
     case 'ASSASSIN_TEAM':
     case 'GAME_RESET':
+      return {
+        ...initialRoomState,
+        hostConnected: true,
+        roundWinsRed: state.roundWinsRed,
+        roundWinsBlue: state.roundWinsBlue,
+        captainRedConnected: state.captainRedConnected,
+        captainBlueConnected: state.captainBlueConnected,
+      }
     case 'MATCH_RESET':
-      return { ...state, hostConnected: true }
+      return {
+        ...initialRoomState,
+        hostConnected: true,
+        captainRedConnected: state.captainRedConnected,
+        captainBlueConnected: state.captainBlueConnected,
+      }
     default:
       return state
   }

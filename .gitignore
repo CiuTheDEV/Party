@@ -40,6 +40,8 @@ output/
 .partykit/
 .playwright-cli/
 .playwright-mcp/
+playwright-report/
+test-results/
 .superpowers/
 .obsidian/
 apps/hub/out/
