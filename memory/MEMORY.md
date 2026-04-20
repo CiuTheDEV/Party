@@ -15,6 +15,26 @@
 
 ## Entries
 
+### 2026-04-20 - `localhost` i `127.0.0.1` nie są równoważne dla lokalnego HMR huba
+
+**Symptom:** Ten sam lokalny hub pod `http://127.0.0.1:3000` zachowywał się jak częściowo martwy build: klik `Zagraj teraz` nie otwierał modala, a w konsoli pojawiał się błąd HMR `ERR_INVALID_HTTP_RESPONSE`. Pod `http://localhost:3000` ten sam ekran hydratuje się poprawnie i modal otwiera się normalnie.
+
+**Root cause:** W tym środowisku lokalny webpackowy dev server Next.js zestawia poprawny HMR przez `localhost`, ale nie przez `127.0.0.1`. To daje fałszywy sygnał regresji UI, mimo że problem siedzi w warstwie lokalnego serwera / websocketu HMR.
+
+**Fix:** Do browserowej weryfikacji huba na lokalnym dev serverze używaj najpierw `http://localhost:3000`, a nie `http://127.0.0.1:3000`. Jeśli `127.0.0.1` pokazuje martwy UI albo nie otwiera modalów, sprawdź konsolę pod kątem błędów HMR zanim uznasz to za bug aplikacji.
+
+**How to prevent it:** W lokalnych Playwright passach dla `apps/hub` traktuj `localhost` jako domyślny host dla dev servera. `127.0.0.1` jest OK dla statycznych serwerów, ale nie musi być wiarygodny dla dev runtime z HMR.
+
+### 2026-04-20 - `dev-hub-dev.mjs` może być zablokowany przez obcy błąd typów poza aktualnym taskiem
+
+**Symptom:** Próba uruchomienia zalecanego lokalnego stacku huba (`npm run dev --workspace @party/hub`) nie podnosiła serwera pod `:3000`, mimo że wcześniejsze buildy pakietów gry przechodziły.
+
+**Root cause:** `scripts/dev-hub-dev.mjs` robi pełny `next build` przed startem statycznego serwera i auth API. W tej sesji zatrzymywał się na niezależnym błędzie typów w `apps/hub/src/app/auth/page.tsx`, więc blokował lokalny pass runtime dla gier, mimo że sam task dotyczył modalów i host controls.
+
+**Fix:** Gdy `dev-hub-dev.mjs` nie wstaje, sprawdź jego stdout/stderr zamiast zakładać problem z bieżącym featurem. Jeśli blocker siedzi w obcym obszarze, nie mieszaj go do aktualnego tasku bez wyraźnej decyzji właściciela; użyj alternatywnego lokalnego serwera tylko do zawężonej weryfikacji.
+
+**How to prevent it:** Traktuj `dev-hub-dev.mjs` jako cały lokalny stack, nie tylko „serwer dla bieżącej gry”. Każdy obcy błąd builda może zablokować weryfikację gry, więc czytaj logi startowe zanim zaczniesz poprawiać feature, który akurat testujesz.
+
 ### 2026-04-20 - Hostowy Windows PowerShell 5.1 może fałszywie wyglądać jak zepsuty UTF-8, mimo że pliki są poprawne
 
 **Symptom:** Odczyt tych samych plików z polską treścią wyglądał różnie zależnie od narzędzia: `Get-Content` w hostowym Windows PowerShell 5.1 pokazywał klasyczne ciągi mojibake, podczas gdy Node i `pwsh` 7.6 czytały ten sam plik poprawnie.

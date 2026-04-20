@@ -5,6 +5,7 @@ import styles from './AlertDialog.module.css'
 
 type AlertDialogAction = {
   label: string
+  hintLabel?: string | null
   onClick: () => void
   variant?: 'primary' | 'secondary' | 'danger'
   fullWidth?: boolean
@@ -91,7 +92,8 @@ export function AlertDialog({
                   .join(' ')}
                 onClick={action.onClick}
               >
-                {action.label}
+                <span className={styles.actionLabel}>{action.label}</span>
+                {action.hintLabel ? <span className={styles.actionHint}>{action.hintLabel}</span> : null}
               </button>
             )
           })}

@@ -341,6 +341,27 @@ run('navigates settings exit confirm and confirms selected action', () => {
       },
       'down',
     ),
+    null,
+  )
+
+  assert.deepEqual(
+    hostControlsModule.resolveHostControlCommand(
+      {
+        phase: 'prepare',
+        isRoundOrderRevealing: false,
+        isSettingsOpen: true,
+        isSettingsExitConfirmOpen: true,
+        settingsFocusTarget: 'continue',
+        settingsExitConfirmFocusTarget: 'stay',
+        isVerdictPickerOpen: false,
+        selectedGuessedPlayerIdx: null,
+        guessedPlayerIndexes: [],
+        isReconnectBlocking: false,
+        canToggleScoreRail: true,
+        isVerdictWordVisible: false,
+      },
+      'left',
+    ),
     { type: 'set-settings-exit-confirm-focus', target: 'exit' },
   )
 

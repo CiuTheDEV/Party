@@ -78,6 +78,20 @@ export function PlaySettingsModal({
               <button
                 type="button"
                 className={
+                  isFocusVisible && exitConfirmFocusedTarget === 'exit'
+                    ? `${styles.dangerButton} ${styles.controlFocused}`
+                    : styles.dangerButton
+                }
+                onClick={onExitToMenu}
+              >
+                <span>Tak, wróć do menu</span>
+                <ActionHint
+                  label={isFocusVisible && exitConfirmFocusedTarget === 'exit' ? actionHints?.confirm : null}
+                />
+              </button>
+              <button
+                type="button"
+                className={
                   isFocusVisible && exitConfirmFocusedTarget === 'stay'
                     ? `${styles.secondaryButton} ${styles.controlFocused}`
                     : styles.secondaryButton
@@ -89,18 +103,6 @@ export function PlaySettingsModal({
                   label={isFocusVisible && exitConfirmFocusedTarget === 'stay' ? actionHints?.confirm : null}
                   muted
                 />
-              </button>
-              <button
-                type="button"
-                className={
-                  isFocusVisible && exitConfirmFocusedTarget === 'exit'
-                    ? `${styles.dangerButton} ${styles.controlFocused}`
-                    : styles.dangerButton
-                }
-                onClick={onExitToMenu}
-              >
-                <span>Tak, wróć do menu</span>
-                <ActionHint label={isFocusVisible && exitConfirmFocusedTarget === 'exit' ? actionHints?.confirm : null} />
               </button>
             </div>
           </>

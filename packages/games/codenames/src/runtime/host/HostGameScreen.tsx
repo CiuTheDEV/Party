@@ -1,8 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { AlertDialog, AvatarAsset } from '@party/ui'
+import { AlertDialog, AvatarAsset, type HostNavigationFocusSnapshot } from '@party/ui'
 import { useHostGame } from './useHostGame'
 import { BoardGrid } from './BoardGrid'
 import { AssassinModal } from './AssassinModal'
@@ -10,9 +10,27 @@ import { RoundSummaryScreen } from './RoundSummaryScreen'
 import { MatchSummaryScreen } from './MatchSummaryScreen'
 import { HostSettingsModal } from './HostSettingsModal'
 import { getHostEndScreenMode } from './end-screen-mode'
+import {
+  CODENAMES_BINDINGS_STORAGE_KEY,
+  CODENAMES_BINDINGS_UPDATED_EVENT,
+  formatControllerLabelForProfile,
+  getBindingValue,
+  loadPersistedBindings,
+  type GamepadProfile,
+} from '../../menu/codenames-controls-bindings'
+import {
+  CODENAMES_NAVIGATION_SCREENS,
+  CODENAMES_NAVIGATION_TARGETS,
+  CODENAMES_NAVIGATION_ZONES,
+  getCodenamesRuntimeEntryTarget,
+  parseCodenamesRuntimeBoardTargetId,
+} from '../../navigation/codenames-navigation-targets'
 import { RoundIntroOverlay } from '../shared/RoundIntroOverlay'
 import { getHostRuntimeStatus, shouldWarnBeforeUnload } from '../shared/runtime-status'
 import { CaptainPairingModal } from '../../setup/components/CaptainPairingPanel'
+import { getVisibleHostControlActionLabel, type HostControlCommand } from './host-controls'
+import { useHostControls } from './useHostControls'
+import { RuntimeStatusRail } from './RuntimeStatusRail'
 import styles from './HostGameScreen.module.css'
 
 type CodenamesTeam = { name: string; avatar: string }
@@ -37,16 +55,19 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin }: HostG
     isRoundIntroVisible,
     startBlockedReason,
     clearStartBlockedReason,
-  } = useHostGame({ roomId, categories })
+    resetPoolAndRetryStart,
+  } = useHostGame({ roomId, categories, teams })
   const [showEntryIntro, setShowEntryIntro] = useState(true)
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const [isSettingsExitConfirmOpen, setIsSettingsExitConfirmOpen] = useState(false)
-  const [settingsFocusTarget, setSettingsFocusTarget] = useState<'sound' | 'animations' | 'exit' | 'continue'>('sound')
-  const [settingsExitConfirmFocusTarget, setSettingsExitConfirmFocusTarget] = useState<'stay' | 'exit'>('stay')
   const [soundEnabled, setSoundEnabled] = useState(true)
   const [animationsEnabled, setAnimationsEnabled] = useState(true)
-  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false)
-  const [isBrowserExitAlertOpen, setIsBrowserExitAlertOpen] = useState(false)
+  const [isStatusRailOpen, setIsStatusRailOpen] = useState(false)
+  const [boardSelectionIndex, setBoardSelectionIndex] = useState(12)
+  const [assassinFocusedTeam, setAssassinFocusedTeam] = useState<'red' | 'blue'>('red')
+  const [activeInputDevice, setActiveInputDevice] = useState<'keyboard' | 'controller'>('keyboard')
+  const [controllerProfile, setControllerProfile] = useState<GamepadProfile>('generic')
+  const [controlBindings, setControlBindings] = useState(() => loadPersistedBindings())
+  const openModalRef = useRef<(target: HostNavigationFocusSnapshot) => void>(() => undefined)
+  const closeModalRef = useRef<() => void>(() => undefined)
 
   const redTeam = teams[0]
   const blueTeam = teams[1]
@@ -79,14 +100,6 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin }: HostG
   const showReadyBadges = roomState.phase === 'playing' && !roomState.boardUnlocked
 
   useEffect(() => {
-    if (!isSettingsOpen) {
-      setIsSettingsExitConfirmOpen(false)
-      setSettingsFocusTarget('sound')
-      setSettingsExitConfirmFocusTarget('stay')
-    }
-  }, [isSettingsOpen])
-
-  useEffect(() => {
     if (!hasSyncedRoomState) {
       return
     }
@@ -113,7 +126,11 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin }: HostG
 
     const popStateHandler = () => {
       window.history.pushState({ guard: 'codenames-host-play' }, '', currentUrl)
-      setIsBrowserExitAlertOpen(true)
+      openModalRef.current({
+        screenId: CODENAMES_NAVIGATION_SCREENS.runtime,
+        zoneId: CODENAMES_NAVIGATION_ZONES.runtimeBrowserExit,
+        targetId: CODENAMES_NAVIGATION_TARGETS.runtimeBrowserExitStay,
+      })
     }
 
     window.addEventListener('beforeunload', beforeUnloadHandler)
@@ -125,6 +142,195 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin }: HostG
     }
   }, [roomState.phase])
 
+  const handleHostControlCommand = useCallback(
+    (command: HostControlCommand) => {
+      switch (command.type) {
+        case 'reveal-card':
+          revealCard(command.index)
+          return
+        case 'toggle-status-rail':
+          setIsStatusRailOpen((current) => !current)
+          return
+        case 'open-settings':
+          openModalRef.current({
+            screenId: CODENAMES_NAVIGATION_SCREENS.runtime,
+            zoneId: CODENAMES_NAVIGATION_ZONES.runtimeSettings,
+            targetId: CODENAMES_NAVIGATION_TARGETS.runtimePauseSound,
+          })
+          return
+        case 'close-settings':
+          closeModalRef.current()
+          return
+        case 'toggle-settings-sound':
+          setSoundEnabled((current) => !current)
+          return
+        case 'toggle-settings-animations':
+          setAnimationsEnabled((current) => !current)
+          return
+        case 'start-game':
+          startGame()
+          closeModalRef.current()
+          return
+        case 'confirm-reset':
+          closeModalRef.current()
+          resetGame()
+          return
+        case 'confirm-assassin-team':
+          setAssassinTeam(command.team)
+          return
+        case 'close-start-blocked':
+          clearStartBlockedReason()
+          closeModalRef.current()
+          return
+        case 'reset-pool-and-retry':
+          closeModalRef.current()
+          resetPoolAndRetryStart()
+          return
+        case 'exit-to-menu':
+          router.push('/games/codenames')
+          return
+      }
+    },
+    [clearStartBlockedReason, resetGame, resetPoolAndRetryStart, revealCard, router, setAssassinTeam, startGame],
+  )
+
+  const runtimeControls = useHostControls({
+    enabled: !showEntryIntro && hasSyncedRoomState,
+    commandContext: {
+      phase: roomState.phase,
+      boardSelectionIndex,
+      boardUnlocked: roomState.boardUnlocked && !isRoundIntroVisible,
+      assassinFocusedTeam,
+      canStartGame: roomState.phase === 'waiting' && roomState.captainRedConnected && roomState.captainBlueConnected,
+      boardCardCount: roomState.cards.length,
+      isStatusRailOpen,
+    },
+    onCommand: handleHostControlCommand,
+    onDeviceChange: setActiveInputDevice,
+    onControllerProfileChange: setControllerProfile,
+  })
+
+  useEffect(() => {
+    openModalRef.current = runtimeControls.openModal
+    closeModalRef.current = runtimeControls.closeModal
+  }, [runtimeControls.closeModal, runtimeControls.openModal])
+
+  useEffect(() => {
+    function handleStorage(event: StorageEvent) {
+      if (event.key === CODENAMES_BINDINGS_STORAGE_KEY) {
+        setControlBindings(loadPersistedBindings())
+      }
+    }
+
+    function handleBindingsUpdated() {
+      setControlBindings(loadPersistedBindings())
+    }
+
+    window.addEventListener('storage', handleStorage)
+    window.addEventListener(CODENAMES_BINDINGS_UPDATED_EVENT, handleBindingsUpdated)
+    return () => {
+      window.removeEventListener('storage', handleStorage)
+      window.removeEventListener(CODENAMES_BINDINGS_UPDATED_EVENT, handleBindingsUpdated)
+    }
+  }, [])
+
+  useEffect(() => {
+    function handlePointerDown(event: PointerEvent) {
+      if (event.pointerType !== 'mouse') {
+        return
+      }
+
+      runtimeControls.sleep()
+    }
+
+    window.addEventListener('pointerdown', handlePointerDown)
+    return () => window.removeEventListener('pointerdown', handlePointerDown)
+  }, [runtimeControls.sleep])
+
+  useEffect(() => {
+    if (runtimeControls.focusState.zoneId === CODENAMES_NAVIGATION_ZONES.runtimeBoard) {
+      const nextBoardIndex = parseCodenamesRuntimeBoardTargetId(runtimeControls.focusState.targetId)
+      if (nextBoardIndex !== null) {
+        setBoardSelectionIndex(nextBoardIndex)
+      }
+    }
+
+    if (runtimeControls.focusState.zoneId === CODENAMES_NAVIGATION_ZONES.runtimeAssassin) {
+      setAssassinFocusedTeam(
+        runtimeControls.focusState.targetId === CODENAMES_NAVIGATION_TARGETS.runtimeAssassinBlue ? 'blue' : 'red',
+      )
+    }
+  }, [runtimeControls.focusState])
+
+  useEffect(() => {
+    if (!startBlockedReason) {
+      return
+    }
+
+    if (runtimeControls.focusState.zoneId === CODENAMES_NAVIGATION_ZONES.runtimeStartBlocked) {
+      return
+    }
+
+    runtimeControls.openModal({
+      screenId: CODENAMES_NAVIGATION_SCREENS.runtime,
+      zoneId: CODENAMES_NAVIGATION_ZONES.runtimeStartBlocked,
+      targetId: CODENAMES_NAVIGATION_TARGETS.runtimeStartBlockedReset,
+    })
+  }, [startBlockedReason, runtimeControls.focusState.zoneId, runtimeControls.openModal])
+
+  useEffect(() => {
+    if (roomState.phase !== 'assassin-reveal') {
+      return
+    }
+
+    if (runtimeControls.focusState.zoneId === CODENAMES_NAVIGATION_ZONES.runtimeAssassin) {
+      return
+    }
+
+    runtimeControls.openModal({
+      screenId: CODENAMES_NAVIGATION_SCREENS.runtime,
+      zoneId: CODENAMES_NAVIGATION_ZONES.runtimeAssassin,
+      targetId: CODENAMES_NAVIGATION_TARGETS.runtimeAssassinRed,
+    })
+  }, [roomState.phase, runtimeControls.focusState.zoneId, runtimeControls.openModal])
+
+  const isSettingsOpen =
+    runtimeControls.focusState.zoneId === CODENAMES_NAVIGATION_ZONES.runtimeSettings ||
+    runtimeControls.focusState.zoneId === CODENAMES_NAVIGATION_ZONES.runtimeSettingsConfirm
+  const isSettingsExitConfirmOpen =
+    runtimeControls.focusState.zoneId === CODENAMES_NAVIGATION_ZONES.runtimeSettingsConfirm
+  const settingsFocusTarget: 'sound' | 'animations' | 'exit' | 'continue' = useMemo(() => {
+    switch (runtimeControls.focusState.targetId) {
+      case CODENAMES_NAVIGATION_TARGETS.runtimePauseAnimations:
+        return 'animations'
+      case CODENAMES_NAVIGATION_TARGETS.runtimePauseExit:
+        return 'exit'
+      case CODENAMES_NAVIGATION_TARGETS.runtimePauseContinue:
+        return 'continue'
+      default:
+        return 'sound'
+    }
+  }, [runtimeControls.focusState.targetId])
+  const settingsExitConfirmFocusTarget: 'stay' | 'exit' =
+    runtimeControls.focusState.targetId === CODENAMES_NAVIGATION_TARGETS.runtimePauseConfirmExit ? 'exit' : 'stay'
+  const isResetConfirmOpen =
+    runtimeControls.focusState.zoneId === CODENAMES_NAVIGATION_ZONES.runtimeResetConfirm
+  const isBrowserExitAlertOpen =
+    runtimeControls.focusState.zoneId === CODENAMES_NAVIGATION_ZONES.runtimeBrowserExit
+  const visibleControlLabel = useCallback(
+    (action: 'confirm' | 'back' | 'menu' | 'rail') =>
+      getVisibleHostControlActionLabel(
+        controlBindings,
+        activeInputDevice,
+        action,
+        formatControllerLabelForProfile,
+        controllerProfile,
+      ),
+    [activeInputDevice, controlBindings, controllerProfile],
+  )
+  const selectedCardActionLabel = useMemo(() => {
+    return visibleControlLabel('confirm')
+  }, [visibleControlLabel])
   if (roomState.phase === 'ended') {
     const winnerTeam = roomState.winner === 'red' ? redTeam : blueTeam
     const loserTeam = roomState.winner === 'red' ? blueTeam : redTeam
@@ -140,7 +346,15 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin }: HostG
           redRoundWins={redRoundWins}
           blueRoundWins={blueRoundWins}
           roundsToWin={roundsToWin}
-          onReplayMatch={restartMatch}
+          onReplayMatch={() => {
+            const entryTarget = getCodenamesRuntimeEntryTarget()
+            runtimeControls.setFocus({
+              screenId: CODENAMES_NAVIGATION_SCREENS.runtime,
+              zoneId: entryTarget.zoneId,
+              targetId: entryTarget.targetId,
+            })
+            restartMatch()
+          }}
           onExitToMenu={() => router.push('/games/codenames')}
         />
       )
@@ -156,7 +370,15 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin }: HostG
         redRoundWins={redRoundWins}
         blueRoundWins={blueRoundWins}
         roundsToWin={roundsToWin}
-        onNextRound={resetGame}
+        onNextRound={() => {
+          const entryTarget = getCodenamesRuntimeEntryTarget()
+          runtimeControls.setFocus({
+            screenId: CODENAMES_NAVIGATION_SCREENS.runtime,
+            zoneId: entryTarget.zoneId,
+            targetId: entryTarget.targetId,
+          })
+          resetGame()
+        }}
       />
     )
   }
@@ -198,8 +420,26 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin }: HostG
         ) : null}
 
         {roomState.phase === 'assassin-reveal' ? (
-          <AssassinModal redTeam={redTeam} blueTeam={blueTeam} onSelectTeam={setAssassinTeam} />
+          <AssassinModal
+            redTeam={redTeam}
+            blueTeam={blueTeam}
+            focusedTeam={assassinFocusedTeam}
+            confirmActionLabel={selectedCardActionLabel}
+            isFocusVisible={runtimeControls.inputState.isAwake}
+            onSelectTeam={setAssassinTeam}
+          />
         ) : null}
+
+        <RuntimeStatusRail
+          open={isStatusRailOpen}
+          roomId={roomId}
+          redTeam={redTeam}
+          blueTeam={blueTeam}
+          roundsToWin={roundsToWin}
+          roomState={roomState}
+          status={hostStatus}
+          railLabel={visibleControlLabel('rail')}
+        />
 
         <div className={styles.topbar} aria-hidden={isRoundIntroVisible}>
           <section className={styles.teamPanel} data-team="red">
@@ -225,7 +465,13 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin }: HostG
             <button
               type="button"
               className={styles.controlButton}
-              onClick={() => setIsResetConfirmOpen(true)}
+              onClick={() =>
+                runtimeControls.openModal({
+                  screenId: CODENAMES_NAVIGATION_SCREENS.runtime,
+                  zoneId: CODENAMES_NAVIGATION_ZONES.runtimeResetConfirm,
+                  targetId: CODENAMES_NAVIGATION_TARGETS.runtimeResetCancel,
+                })
+              }
               aria-label="Nowa plansza"
             >
               ↻
@@ -234,11 +480,16 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin }: HostG
               type="button"
               className={styles.controlButton}
               aria-label="Ustawienia"
-              onClick={() => setIsSettingsOpen(true)}
+              onClick={() =>
+                runtimeControls.openModal({
+                  screenId: CODENAMES_NAVIGATION_SCREENS.runtime,
+                  zoneId: CODENAMES_NAVIGATION_ZONES.runtimeSettings,
+                  targetId: CODENAMES_NAVIGATION_TARGETS.runtimePauseSound,
+                })
+              }
             >
               ⚙
             </button>
-            <div className={styles.controlBadge}>DEV</div>
           </div>
 
           <section className={styles.teamPanel} data-team="blue">
@@ -269,6 +520,12 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin }: HostG
               isLocked={isRoundIntroVisible}
               isConcealed={!roomState.boardUnlocked}
               startingTeam={roomState.startingTeam}
+              selectedIndex={boardSelectionIndex}
+              selectedActionLabel={selectedCardActionLabel}
+              isFocusVisible={
+                runtimeControls.inputState.isAwake &&
+                runtimeControls.focusState.zoneId === CODENAMES_NAVIGATION_ZONES.runtimeBoard
+              }
             />
           </div>
         </div>
@@ -347,21 +604,23 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin }: HostG
             isExitConfirmOpen={isSettingsExitConfirmOpen}
             focusedTarget={settingsFocusTarget}
             exitConfirmFocusedTarget={settingsExitConfirmFocusTarget}
+            confirmActionLabel={visibleControlLabel('confirm')}
+            isFocusVisible={runtimeControls.inputState.isAwake}
             onStartGame={() => {
               startGame()
-              setIsSettingsOpen(false)
+              runtimeControls.closeModal()
             }}
             onToggleSound={() => setSoundEnabled((current) => !current)}
             onToggleAnimations={() => setAnimationsEnabled((current) => !current)}
-            onOpenExitConfirm={() => {
-              setSettingsExitConfirmFocusTarget('stay')
-              setIsSettingsExitConfirmOpen(true)
-            }}
-            onCancelExitConfirm={() => {
-              setSettingsExitConfirmFocusTarget('stay')
-              setIsSettingsExitConfirmOpen(false)
-            }}
-            onContinue={() => setIsSettingsOpen(false)}
+            onOpenExitConfirm={() =>
+              runtimeControls.openModal({
+                screenId: CODENAMES_NAVIGATION_SCREENS.runtime,
+                zoneId: CODENAMES_NAVIGATION_ZONES.runtimeSettingsConfirm,
+                targetId: CODENAMES_NAVIGATION_TARGETS.runtimePauseConfirmStay,
+              })
+            }
+            onCancelExitConfirm={() => runtimeControls.closeModal()}
+            onContinue={() => runtimeControls.closeModal()}
             onExitToMenu={() => router.push('/games/codenames')}
           />
         ) : null}
@@ -371,12 +630,35 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin }: HostG
         open={Boolean(startBlockedReason)}
         variant="warning"
         eyebrow="Pula hasel"
-            title="Brak świeżych haseł na nową planszę"
+        title="Brak świeżych haseł na nową planszę"
         description={startBlockedReason ?? ''}
+        focusedActionIndex={
+          runtimeControls.focusState.targetId === CODENAMES_NAVIGATION_TARGETS.runtimeStartBlockedReset ? 1 : 0
+        }
+        isFocusVisible={runtimeControls.inputState.isAwake}
         actions={[
           {
-            label: 'Rozumiem',
-            onClick: () => clearStartBlockedReason(),
+            label: 'Nie teraz',
+            hintLabel:
+              runtimeControls.focusState.targetId === CODENAMES_NAVIGATION_TARGETS.runtimeStartBlockedClose
+                ? visibleControlLabel('confirm')
+                : null,
+            onClick: () => {
+              clearStartBlockedReason()
+              runtimeControls.closeModal()
+            },
+            variant: 'secondary',
+          },
+          {
+            label: 'Zresetuj pule i sprobuj ponownie',
+            hintLabel:
+              runtimeControls.focusState.targetId === CODENAMES_NAVIGATION_TARGETS.runtimeStartBlockedReset
+                ? visibleControlLabel('confirm')
+                : null,
+            onClick: () => {
+              runtimeControls.closeModal()
+              resetPoolAndRetryStart()
+            },
             variant: 'primary',
             fullWidth: true,
           },
@@ -389,16 +671,20 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin }: HostG
         eyebrow="Nowa plansza"
         title="Wylosowac nowa plansze?"
         description="Biezacy uklad kart zostanie zastapiony nowym."
+        focusedActionIndex={
+          runtimeControls.focusState.targetId === CODENAMES_NAVIGATION_TARGETS.runtimeResetConfirm ? 1 : 0
+        }
+        isFocusVisible={runtimeControls.inputState.isAwake}
         actions={[
           {
             label: 'Nie teraz',
-            onClick: () => setIsResetConfirmOpen(false),
+            onClick: () => runtimeControls.closeModal(),
             variant: 'secondary',
           },
           {
             label: 'Tak, odswiez plansze',
             onClick: () => {
-              setIsResetConfirmOpen(false)
+              runtimeControls.closeModal()
               resetGame()
             },
             variant: 'primary',
@@ -407,25 +693,31 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin }: HostG
         ]}
       />
 
-      <AlertDialog
-        open={isBrowserExitAlertOpen}
-        variant="danger"
-        eyebrow="Gra w toku"
-        title="Wrócić do menu?"
+        <AlertDialog
+          open={isBrowserExitAlertOpen}
+          variant="danger"
+          eyebrow="Gra w toku"
+          title="Wrócić do menu?"
         description="Bieżąca rozgrywka zostanie przerwana i utracisz aktualny postęp."
-        actions={[
-          {
-            label: 'Zostan w grze',
-            onClick: () => setIsBrowserExitAlertOpen(false),
-            variant: 'secondary',
-          },
-          {
-            label: 'Tak, wroc do menu',
-            onClick: () => router.push('/games/codenames'),
-            variant: 'danger',
-            fullWidth: true,
-          },
-        ]}
+        focusedActionIndex={
+          runtimeControls.focusState.targetId === CODENAMES_NAVIGATION_TARGETS.runtimeBrowserExitExit ? 1 : 0
+        }
+        isFocusVisible={runtimeControls.inputState.isAwake}
+          actions={[
+            {
+              label: 'Zostan w grze',
+              hintLabel: visibleControlLabel('confirm'),
+              onClick: () => runtimeControls.closeModal(),
+              variant: 'secondary',
+            },
+            {
+              label: 'Tak, wroc do menu',
+              hintLabel: visibleControlLabel('confirm'),
+              onClick: () => router.push('/games/codenames'),
+              variant: 'danger',
+              fullWidth: true,
+            },
+          ]}
       />
     </>
   )

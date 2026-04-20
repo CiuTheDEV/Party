@@ -6,10 +6,8 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background:
-    radial-gradient(circle at center, rgba(0, 0, 0, 0.22), rgba(0, 0, 0, 0.72) 62%),
-    rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(14px) saturate(0.9);
+  background: var(--modal-backdrop-bg);
+  backdrop-filter: blur(var(--modal-backdrop-blur)) saturate(0.9);
 }
 
 .modal {
@@ -18,6 +16,14 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
+  gap: 18px;
+  padding: 24px 24px 28px;
+  border-radius: calc(var(--modal-surface-radius) + 4px);
+  border: 1px solid var(--modal-surface-border);
+  background:
+    radial-gradient(circle at 50% 10%, rgba(255, 85, 63, 0.16), transparent 42%),
+    var(--modal-surface-bg);
+  box-shadow: var(--modal-surface-shadow-lg);
   color: #f4f4f5;
 }
 
@@ -26,7 +32,7 @@
   height: 124px;
   display: grid;
   place-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 0;
   font-size: 86px;
   filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.12));
 }
@@ -42,14 +48,14 @@
 }
 
 .subtitle {
-  margin: 22px 0 0;
+  margin: 0;
   font-size: 20px;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.62);
 }
 
 .question {
-  margin: 32px 0 18px;
+  margin: 2px 0 0;
   font-size: 22px;
   font-weight: 800;
   color: #fafafa;
@@ -63,10 +69,11 @@
 }
 
 .btn {
+  position: relative;
   min-height: 220px;
   border-radius: 28px;
   border: 2px solid transparent;
-  background: rgba(12, 12, 12, 0.9);
+  background: var(--modal-section-bg);
   color: #f8f8f8;
   display: flex;
   flex-direction: column;
@@ -75,11 +82,17 @@
   gap: 20px;
   cursor: pointer;
   transition: transform 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02), inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .btn:hover {
   transform: translateY(-2px);
+}
+
+.btnFocused {
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.94),
+    0 0 0 10px rgba(255, 255, 255, 0.16);
 }
 
 .btnRed {
@@ -102,6 +115,32 @@
   font-size: 22px;
   font-weight: 800;
   line-height: 1;
+}
+
+.actionBadge {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(8, 8, 8, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.26);
+  pointer-events: none;
+}
+
+.actionBadgeLabel {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  color: #fff;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 @media (max-width: 720px) {
@@ -137,5 +176,15 @@
 
   .btnLabel {
     font-size: 18px;
+  }
+
+  .actionBadge {
+    bottom: 12px;
+    min-height: 24px;
+    padding: 0 9px;
+  }
+
+  .actionBadgeLabel {
+    font-size: 11px;
   }
 }

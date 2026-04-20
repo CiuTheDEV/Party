@@ -61,6 +61,18 @@ const controllerProfileLabelMap: Record<string, Record<Exclude<GamepadProfile, '
   'Select / View': { xbox: 'View', playstation: 'Create' },
 }
 
+const genericControllerLabelMap: Record<string, string> = {
+  'A / Cross': 'A',
+  'B / Circle': 'B',
+  'X / Square': 'X',
+  'Y / Triangle': 'Y',
+  'L1 / LB': 'LB',
+  'R1 / RB': 'RB',
+  'L2 / LT': 'LT',
+  'R2 / RT': 'RT',
+  'Select / View': 'View',
+}
+
 const controlsBindings = codenamesSettingsCategories.find((category) => category.id === 'controls')?.bindings ?? []
 const ignoredGamepadIdParts = ['audio', 'headset', 'headphone', 'hyperx', 'cloud', 'mic', 'speaker']
 const legacyBindingMigrations: Record<string, string> = {}
@@ -113,7 +125,8 @@ export function detectGamepadProfile(gamepadId: string): GamepadProfile {
 }
 
 export function formatControllerLabelForProfile(label: string, profile: GamepadProfile) {
-  if (!label || profile === 'generic') return label
+  if (!label) return label
+  if (profile === 'generic') return genericControllerLabelMap[label] ?? label
   return controllerProfileLabelMap[label]?.[profile] ?? label
 }
 

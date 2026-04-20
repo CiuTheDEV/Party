@@ -32,4 +32,33 @@
   --game-color-primary-light: #6d28d9;
   --game-color-primary-glow: rgba(124, 58, 237, 0.15);
   --game-gradient: linear-gradient(135deg, #7c3aed, #6d28d9);
+
+  /* Shared modal language */
+  --modal-backdrop-bg: rgba(4, 5, 9, 0.74);
+  --modal-backdrop-blur: 14px;
+  --modal-surface-bg:
+    radial-gradient(circle at 50% 12%, color-mix(in srgb, var(--game-color-primary) 14%, transparent), transparent 52%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+    rgba(9, 10, 16, 0.96);
+  --modal-surface-border: rgba(255, 255, 255, 0.08);
+  --modal-surface-border-strong: rgba(255, 255, 255, 0.12);
+  --modal-surface-radius: 24px;
+  --modal-surface-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 30px 60px rgba(0, 0, 0, 0.32);
+  --modal-surface-shadow-lg:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 30px 80px rgba(0, 0, 0, 0.42);
+  --modal-divider: rgba(255, 255, 255, 0.06);
+  --modal-section-bg:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02)),
+    rgba(7, 8, 13, 0.68);
+  --modal-section-border: rgba(255, 255, 255, 0.1);
+  --modal-copy: rgba(255, 255, 255, 0.76);
+  --modal-copy-muted: rgba(255, 255, 255, 0.64);
+  --modal-eyebrow: color-mix(in srgb, var(--game-color-primary) 42%, white);
+  --modal-action-secondary-bg: rgba(255, 255, 255, 0.04);
+  --modal-action-secondary-border: rgba(255, 255, 255, 0.12);
+  --modal-action-secondary-hover-bg: rgba(255, 255, 255, 0.08);
+  --modal-action-secondary-hover-border: rgba(255, 255, 255, 0.2);
 }

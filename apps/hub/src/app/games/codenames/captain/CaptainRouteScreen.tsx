@@ -15,16 +15,14 @@ const DEFAULT_TEAMS: [CaptainTeam, CaptainTeam] = [
 export function CaptainRouteScreen({
   roomId,
   teamParam,
-  redTeam = DEFAULT_TEAMS[0],
-  blueTeam = DEFAULT_TEAMS[1],
 }: {
   roomId: string
   teamParam: string | null
-  redTeam?: CaptainTeam
-  blueTeam?: CaptainTeam
 }) {
   const router = useRouter()
-  const routeTeams = { redTeam, blueTeam }
+  const { roomState } = useCaptainRoomStatus({ roomId })
+  const redTeam = roomState.redTeam.name ? roomState.redTeam : DEFAULT_TEAMS[0]
+  const blueTeam = roomState.blueTeam.name ? roomState.blueTeam : DEFAULT_TEAMS[1]
 
   if (teamParam !== 'red' && teamParam !== 'blue') {
     return (
@@ -32,7 +30,7 @@ export function CaptainRouteScreen({
         roomId={roomId}
         redTeam={redTeam}
         blueTeam={blueTeam}
-        onChooseTeam={(team) => router.replace(buildCaptainRoutePath(roomId, team, routeTeams))}
+        onChooseTeam={(team) => router.replace(buildCaptainRoutePath(roomId, team))}
       />
     )
   }
@@ -43,7 +41,7 @@ export function CaptainRouteScreen({
       team={teamParam}
       redTeam={redTeam}
       blueTeam={blueTeam}
-      onChangeRole={() => router.replace(buildCaptainRoutePath(roomId, undefined, routeTeams))}
+      onChangeRole={() => router.replace(buildCaptainRoutePath(roomId))}
     />
   )
 }

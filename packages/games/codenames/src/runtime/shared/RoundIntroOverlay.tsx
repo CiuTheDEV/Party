@@ -30,7 +30,7 @@ export function RoundIntroOverlay({
 
         <div className={styles.heroRow}>
           <div className={styles.teamOrb} data-team={startingTeam} aria-hidden="true">
-            <AvatarAsset avatar={startingTeamAvatar} size={72} />
+            <AvatarAsset avatar={startingTeamAvatar} size="74%" />
           </div>
 
           <div className={styles.copyBlock}>

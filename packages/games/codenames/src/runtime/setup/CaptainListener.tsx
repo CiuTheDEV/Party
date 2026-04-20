@@ -4,16 +4,18 @@ import { useEffect, useRef } from 'react'
 import PartySocket from 'partysocket'
 import { getPartykitHost } from '../shared/codenames-runtime'
 import type { HostEvent, IncomingMessage } from '../shared/codenames-events'
+import type { CodenamesTeam } from '../../setup/state'
 
 type Props = {
   roomId: string
+  teams: [CodenamesTeam, CodenamesTeam]
   onRedConnect: () => void
   onRedDisconnect: () => void
   onBlueConnect: () => void
   onBlueDisconnect: () => void
 }
 
-export default function CaptainListener({ roomId, onRedConnect, onRedDisconnect, onBlueConnect, onBlueDisconnect }: Props) {
+export default function CaptainListener({ roomId, teams, onRedConnect, onRedDisconnect, onBlueConnect, onBlueDisconnect }: Props) {
   const onRedConnectRef = useRef(onRedConnect)
   const onRedDisconnectRef = useRef(onRedDisconnect)
   const onBlueConnectRef = useRef(onBlueConnect)
@@ -31,7 +33,13 @@ export default function CaptainListener({ roomId, onRedConnect, onRedDisconnect,
     const ws = new PartySocket({ host, room: roomId, party: 'codenames' })
 
     ws.addEventListener('open', () => {
-      ws.send(JSON.stringify({ type: 'HOST_SETUP_CONNECTED' } satisfies HostEvent))
+      ws.send(
+        JSON.stringify({
+          type: 'HOST_SETUP_CONNECTED',
+          redTeam: teams[0],
+          blueTeam: teams[1],
+        } satisfies HostEvent),
+      )
     })
 
     ws.addEventListener('message', (event: MessageEvent) => {
@@ -58,7 +66,7 @@ export default function CaptainListener({ roomId, onRedConnect, onRedDisconnect,
     })
 
     return () => ws.close()
-  }, [roomId])
+  }, [roomId, teams])
 
   return null
 }

@@ -45,6 +45,13 @@ function makeCards({ red = 0, blue = 0, assassin = 0, neutral = 0 } = {}) {
   return cards
 }
 
+function makeTeams() {
+  return {
+    redTeam: { name: 'Kutaski', avatar: 'fire' },
+    blueTeam: { name: 'Cipeczki', avatar: 'unicorn' },
+  }
+}
+
 run('echoes accepted host events back to the sender', () => {
   assert.equal(typeof serverModule.default, 'function')
 
@@ -266,9 +273,9 @@ run('broadcasts host connected when the host reconnects', () => {
   const room = createRoom()
   const server = new serverModule.default(room)
 
-  server.onMessage(JSON.stringify({ type: 'HOST_CONNECTED' }), { id: 'host-1' })
+  server.onMessage(JSON.stringify({ type: 'HOST_CONNECTED', ...makeTeams() }), { id: 'host-1' })
   server.onClose({ id: 'host-1' })
-  server.onMessage(JSON.stringify({ type: 'HOST_CONNECTED' }), { id: 'host-1' })
+  server.onMessage(JSON.stringify({ type: 'HOST_CONNECTED', ...makeTeams() }), { id: 'host-1' })
 
   assert.equal(server.state.hostConnected, true)
   assert.equal(JSON.parse(room.broadcasts[room.broadcasts.length - 1].message).type, 'HOST_CONNECTED')
@@ -288,7 +295,7 @@ run('allows a new host to reclaim a waiting room and clears stale captain seats'
     captainBlueConnected: true,
   }
 
-  server.onMessage(JSON.stringify({ type: 'HOST_CONNECTED' }), { id: 'host-fresh' })
+  server.onMessage(JSON.stringify({ type: 'HOST_CONNECTED', ...makeTeams() }), { id: 'host-fresh' })
 
   assert.equal(server.hostConnectionId, 'host-fresh')
   assert.equal(server.captainRedConnectionId, null)
@@ -324,7 +331,7 @@ run('setup host reclaims a stale runtime and resets the room back to waiting', (
     winner: 'red',
   }
 
-  server.onMessage(JSON.stringify({ type: 'HOST_SETUP_CONNECTED' }), { id: 'host-setup' })
+  server.onMessage(JSON.stringify({ type: 'HOST_SETUP_CONNECTED', ...makeTeams() }), { id: 'host-setup' })
 
   assert.equal(server.hostConnectionId, 'host-setup')
   assert.equal(server.captainRedConnectionId, null)
@@ -356,7 +363,7 @@ run('setup host keeps already paired captains while the room is still waiting', 
   server.captainRedConnectionId = 'captain-red'
   server.captainBlueConnectionId = 'captain-blue'
 
-  server.onMessage(JSON.stringify({ type: 'HOST_SETUP_CONNECTED' }), { id: 'host-setup' })
+  server.onMessage(JSON.stringify({ type: 'HOST_SETUP_CONNECTED', ...makeTeams() }), { id: 'host-setup' })
 
   assert.equal(server.hostConnectionId, 'host-setup')
   assert.equal(server.state.phase, 'waiting')

@@ -153,7 +153,7 @@ export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }:
               <section className={styles.teamPanelCaptain} data-team={team}>
                 <div className={styles.teamPanelCaptainLeftRow}>
                   <div className={styles.teamAvatarFrame} data-team={team} aria-hidden="true">
-                    <AvatarAsset avatar={activeTeamAvatar} size={38} />
+                    <AvatarAsset avatar={activeTeamAvatar} size="72%" />
                   </div>
                   <span className={styles.teamLabel}>{activeTeamLabel}</span>
                 </div>

@@ -260,15 +260,15 @@ function resolveSettingsCommand(
 
   if (context.isSettingsExitConfirmOpen) {
     if (action === 'left' || action === 'up') {
-      return settingsExitConfirmFocusTarget === 'stay'
-        ? null
-        : { type: 'set-settings-exit-confirm-focus', target: 'stay' }
-    }
-
-    if (action === 'right' || action === 'down') {
       return settingsExitConfirmFocusTarget === 'exit'
         ? null
         : { type: 'set-settings-exit-confirm-focus', target: 'exit' }
+    }
+
+    if (action === 'right' || action === 'down') {
+      return settingsExitConfirmFocusTarget === 'stay'
+        ? null
+        : { type: 'set-settings-exit-confirm-focus', target: 'stay' }
     }
 
     if (action === 'confirm') {

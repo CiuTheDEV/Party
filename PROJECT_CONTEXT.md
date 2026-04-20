@@ -98,7 +98,7 @@ Current repo now matches the intended split much more closely:
 - `apps/hub` is platform routing + registry + hub feature code,
 - `@party/ui` owns shared shell/setup primitives,
 - `charades` owns menu, setup, results, and runtime,
-- `codenames` is live with full menu, setup, captain/host runtime, and ongoing validation/polish work.
+- `codenames` is live with full menu, setup, captain/host runtime, and full host keyboard/controller controls verified in browser.
 
 ### Shared Setup Model
 
@@ -133,7 +133,6 @@ This means:
 ## Open Questions / Remaining Tech Debt
 
 - [ ] Finalize Phase 4 deploy path for hub + Partykit
-- [ ] Deploy and test Codenames runtime end-to-end (PartyKit server + host + captain screens implemented)
 - [ ] Decide whether Hub library cards should become fully data-driven from module registry
 - [ ] Decide long-term room architecture details before production multiplayer
 - [ ] Finish the live UX polish pass for Charades runtime host controls now that the shared host-navigation framework is in place
@@ -141,10 +140,10 @@ This means:
 ---
 
 <!-- handoff:start -->
-- Last: 2026-04-19 19:31 by Codex
-- Task: Run a wording-quality pass across Tajniacy and Kalambury UI copy after the UTF-8 check.
-- Did: Reviewed Tajniacy and Kalambury strings for missing Polish diacritics and obvious wording errors, then patched the clear UI-facing issues in captain routing, runtime status/modals, setup copy, avatar selection, and both games' settings-overlay labels/descriptions. Re-ran a focused scan afterward; no obvious ASCII-only Polish copy issues remain in the touched files, and the last scan hit was only a false positive on the correct word `Potwierdzenie`.
-- Next: If more copy work is needed later, focus on style consistency (for example `awatar` vs `avatar`, `rail` naming, and any intentional English controller labels) rather than encoding or diacritic repair.
-- Blocker: None.
+- Last: 2026-04-20 11:51 by Codex
+- Task: Modal/theme parity pass across Tajniacy and Kalambury, including Charades pause-confirm controller parity.
+- Did: Unified shared modal tokens and hover states across `@party/ui`, Tajniacy, and Kalambury; fixed per-game theme token inheritance so modal surfaces/eyebrows follow the active game's color; corrected Codenames modal action ordering; fixed Kalambury pause-confirm ordering in both UI and runtime control logic (`PlaySettingsModal`, `host-controls`, `charades-runtime-navigation-profile`) and updated focused checks. Verified with `npm run build --workspace @party/charades`, `npm run test:host-controls --workspace @party/charades`, `npm run test:navigation-profiles --workspace @party/charades`, and `npm run build --workspace @party/hub`.
+- Next: Finish a true browser runtime pass for Kalambury modals once the local stack is stable enough to run host + presenter end-to-end on the recommended path.
+- Blocker: Local verification stack is split: `localhost:3000` hydrates the hub correctly but current PartyKit/live wiring did not complete the presenter connection in this session, while `127.0.0.1:3000` gives broken HMR for hub UI and is not a reliable browser-validation target.
 <!-- handoff:end -->
 

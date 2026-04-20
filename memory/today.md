@@ -1,4 +1,25 @@
-# Today - 2026-04-18
+# Today - 2026-04-20
+
+### S69 (11:51~) [Tajniacy/Kalambury] Unified modal pass + Charades confirm parity
+
+- Ujednolicono modalowe tokeny, hover states i theme propagation w shared UI oraz głównych modalach Tajniaków i Kalamburów, tak aby modale dziedziczyły kolor aktywnej gry zamiast fallbackowego akcentu.
+- W Tajniakach dopracowano kolejność akcji i browserowy wygląd modali po refactorze, w tym pause confirm zgodnie z zasadą `złe po lewej / dobre po prawej`.
+- W Kalamburach poprawiono ten sam runtime zgrzyt w pause confirm: układ przycisków, `host-controls` i runtime navigation profile zostały zgrane do nowej logiki `left/up -> exit`, `right/down -> stay`.
+- Weryfikacja przechodzi: `npm run build --workspace @party/charades`, `npm run test:host-controls --workspace @party/charades`, `npm run test:navigation-profiles --workspace @party/charades`, `npm run build --workspace @party/hub`.
+- Browser pass ujawnił ważne ograniczenia lokalnego stacku: `127.0.0.1:3000` daje fałszywie martwy HMR dla huba, `localhost:3000` działa poprawnie dla modali/setupu, a zalecany `dev-hub-dev.mjs` może zostać zablokowany przez obcy błąd typów w `apps/hub/src/app/auth/page.tsx`.
+- Next: dokończyć pełny runtime browser pass Kalamburów, gdy lokalny stack (`localhost:3000` + PartyKit + auth-free build path) będzie stabilny end-to-end.
+- Experience recorded: yes
+
+### S68 (2026-04-20) [Tajniacy] Pelne sterowanie hosta klawiatura i kontrolerem
+
+- Dowieziono pelny host-side flow sterowania Tajniakow klawiatura i kontrolerem od menu/setup/settings do runtime hosta.
+- Dodano runtime layer dla inputu i mapowania komend: `runtime-input-state.ts`, `runtime-input-helpers.ts`, `host-controls.ts`, `useHostControls.ts`.
+- Dodano runtime host-navigation profile dla Tajniakow wraz z runtime screen/zones/targets/command IDs oraz focused checks dla input-state, runtime profile i host-controls.
+- `HostGameScreen` zostal wpiety w te same zapisane bindingi co menu/settings, dostal wake/sleep, board selection, modal focus i runtime status rail pod akcje `rail`.
+- Poprawiono copy bindingu `rail` na prawdziwy panel statusu zamiast mylacego `rail / ranking`.
+- Dodano browserowy smoke test `apps/hub/e2e/codenames-host-controls.spec.ts`, ktory przechodzi na pelnym lokalnym stacku z PartyKit i dwiema stronami kapitanow.
+- Weryfikacja przechodzi: `npm run build --workspace @party/codenames`, `npm run lint --workspace @party/hub`, `runtime-input-state.check.cjs`, `codenames-runtime-navigation-profile.check.cjs`, `host-controls.check.cjs`, headed Playwright dla `codenames-host-controls.spec.ts`.
+- Experience recorded: no
 
 ### S67 (2026-04-19) [Tajniacy/Kalambury] Pass po copy quality
 

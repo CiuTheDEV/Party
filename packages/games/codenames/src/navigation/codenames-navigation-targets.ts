@@ -5,6 +5,7 @@ export const CODENAMES_NAVIGATION_SCREENS = {
   menu: 'codenames-menu',
   settings: 'codenames-settings',
   setup: 'codenames-setup',
+  runtime: 'codenames-runtime',
 } as const
 
 export const CODENAMES_NAVIGATION_ZONES = {
@@ -15,6 +16,15 @@ export const CODENAMES_NAVIGATION_ZONES = {
   bindings: 'bindings',
   footer: 'footer',
   dialog: 'dialog',
+  runtimeBoard: 'runtime-board',
+  runtimeCenterControls: 'runtime-center-controls',
+  runtimeStatusRail: 'runtime-status-rail',
+  runtimeSettings: 'runtime-settings',
+  runtimeSettingsConfirm: 'runtime-settings-confirm',
+  runtimeResetConfirm: 'runtime-reset-confirm',
+  runtimeAssassin: 'runtime-assassin',
+  runtimeBrowserExit: 'runtime-browser-exit',
+  runtimeStartBlocked: 'runtime-start-blocked',
 } as const
 
 export const CODENAMES_NAVIGATION_TARGETS = {
@@ -32,6 +42,23 @@ export const CODENAMES_NAVIGATION_TARGETS = {
   settingsFooterSave: 'settings-footer-save',
   setupClose: 'setup-close',
   setupStart: 'setup-start',
+  runtimeCenterNewBoard: 'runtime-center-new-board',
+  runtimeCenterSettings: 'runtime-center-settings',
+  runtimeRailPanel: 'runtime-rail-panel',
+  runtimePauseSound: 'runtime-pause-sound',
+  runtimePauseAnimations: 'runtime-pause-animations',
+  runtimePauseExit: 'runtime-pause-exit',
+  runtimePauseContinue: 'runtime-pause-continue',
+  runtimePauseConfirmStay: 'runtime-pause-confirm-stay',
+  runtimePauseConfirmExit: 'runtime-pause-confirm-exit',
+  runtimeResetCancel: 'runtime-reset-cancel',
+  runtimeResetConfirm: 'runtime-reset-confirm',
+  runtimeAssassinRed: 'runtime-assassin-red',
+  runtimeAssassinBlue: 'runtime-assassin-blue',
+  runtimeBrowserExitStay: 'runtime-browser-exit-stay',
+  runtimeBrowserExitExit: 'runtime-browser-exit-exit',
+  runtimeStartBlockedClose: 'runtime-start-blocked-close',
+  runtimeStartBlockedReset: 'runtime-start-blocked-reset',
 } as const
 
 const CODENAMES_RAIL_HREF_BY_TARGET: Record<string, string> = {
@@ -92,6 +119,24 @@ export function getCodenamesBindingsEntryTarget(bindingIds: string[]): HostNavig
 
 export function getCodenamesSetupEntryTarget(): HostNavigationTarget {
   return { zoneId: CODENAMES_NAVIGATION_ZONES.dialog, targetId: CODENAMES_NAVIGATION_TARGETS.setupStart }
+}
+
+export function getCodenamesRuntimeBoardTargetId(index: number) {
+  return `runtime-board-card-${index}`
+}
+
+export function parseCodenamesRuntimeBoardTargetId(targetId: string) {
+  if (!targetId.startsWith('runtime-board-card-')) return null
+
+  const parsed = Number.parseInt(targetId.slice('runtime-board-card-'.length), 10)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+export function getCodenamesRuntimeEntryTarget(index = 12): HostNavigationTarget {
+  return {
+    zoneId: CODENAMES_NAVIGATION_ZONES.runtimeBoard,
+    targetId: getCodenamesRuntimeBoardTargetId(index),
+  }
 }
 
 export function getNextTargetInList<T extends string>(items: readonly T[], current: T, direction: -1 | 1): T {

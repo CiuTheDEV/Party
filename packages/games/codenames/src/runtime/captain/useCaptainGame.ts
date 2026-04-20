@@ -22,6 +22,8 @@ const initialRoomState: RoomState = {
   captainRedReady: false,
   captainBlueReady: false,
   boardUnlocked: false,
+  redTeam: { name: 'Czerwoni', avatar: 'star' },
+  blueTeam: { name: 'Niebiescy', avatar: 'moon' },
 }
 
 type UseCaptainGameParams = {
@@ -118,7 +120,7 @@ function applyServerEvent(state: RoomState, event: IncomingMessage): RoomState {
         boardUnlocked: false,
       }
     case 'HOST_CONNECTED':
-      return { ...state, hostConnected: true }
+      return { ...state, hostConnected: true, redTeam: event.redTeam, blueTeam: event.blueTeam }
     case 'CARD_REVEAL': {
       if (event.index < 0 || event.index > 24) return state
       if (!state.cards[event.index]) return state
@@ -160,6 +162,8 @@ function applyServerEvent(state: RoomState, event: IncomingMessage): RoomState {
         captainRedReady: false,
         captainBlueReady: false,
         boardUnlocked: false,
+        redTeam: state.redTeam,
+        blueTeam: state.blueTeam,
       }
     case 'MATCH_RESET':
       return {
@@ -170,6 +174,8 @@ function applyServerEvent(state: RoomState, event: IncomingMessage): RoomState {
         captainRedReady: false,
         captainBlueReady: false,
         boardUnlocked: false,
+        redTeam: state.redTeam,
+        blueTeam: state.blueTeam,
       }
     case 'CAPTAIN_CONNECTED':
       return event.team === 'red'

@@ -14,6 +14,7 @@
   color: #f3f4f6;
   font-family: 'Space Grotesk', 'Arial Narrow', 'Franklin Gothic Medium', 'Arial', sans-serif;
   overflow: hidden;
+  position: relative;
 }
 
 .entryIntro {
@@ -245,8 +246,7 @@
   padding: 0 4px;
 }
 
-.controlButton,
-.controlBadge {
+.controlButton {
   width: 46px;
   height: 46px;
   border-radius: 999px;
@@ -270,16 +270,6 @@
 .controlButton:disabled {
   opacity: 0.45;
   cursor: not-allowed;
-}
-
-.controlBadge {
-  min-width: 46px;
-  width: auto;
-  padding: 0 12px;
-  font-size: 11px;
-  font-weight: 900;
-  letter-spacing: 0.14em;
-  color: #8a8a8a;
 }
 
 .boardWrapper {
@@ -564,8 +554,7 @@
     gap: 6px;
   }
 
-  .controlButton,
-  .controlBadge {
+  .controlButton {
     width: 42px;
     height: 42px;
   }

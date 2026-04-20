@@ -344,3 +344,95 @@
     font-size: 13px;
   }
 }
+
+@media (max-height: 460px) and (orientation: landscape) {
+  .teamSelect {
+    padding: 10px 14px;
+    overflow: auto;
+  }
+
+  .teamSelectShell {
+    gap: 10px;
+  }
+
+  .teamSelectHeader {
+    gap: 4px;
+  }
+
+  .teamSelectEyebrow {
+    font-size: 10px;
+    letter-spacing: 0.16em;
+  }
+
+  .teamSelectTitle {
+    font-size: clamp(24px, 5.2vw, 44px);
+  }
+
+  .teamSelectDesc {
+    font-size: 12px;
+  }
+
+  .roomBadge {
+    min-height: 32px;
+    padding: 0 12px;
+  }
+
+  .roomBadgeLabel {
+    font-size: 9px;
+  }
+
+  .roomBadgeValue {
+    font-size: 13px;
+  }
+
+  .teamSelectButtons {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .teamBtn {
+    min-height: 0;
+    gap: 8px;
+    padding: 14px 16px;
+    border-radius: 22px;
+  }
+
+  .teamBtnEyebrow,
+  .teamBtnSystemName {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+  }
+
+  .teamBtnIdentity {
+    gap: 12px;
+  }
+
+  .teamBtnAvatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+  }
+
+  .teamBtnNameBlock {
+    gap: 4px;
+  }
+
+  .teamBtnTitle {
+    font-size: clamp(22px, 3.6vw, 32px);
+  }
+
+  .teamBtnDesc {
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .teamBtnState {
+    min-height: 28px;
+    padding: 0 12px;
+    font-size: 10px;
+  }
+
+  .teamSelectFooter {
+    display: none;
+  }
+}

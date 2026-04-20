@@ -1,6 +1,16 @@
 'use client'
 
+import { useEffect, useMemo, useState } from 'react'
 import { AvatarAsset } from '@party/ui'
+import {
+  CODENAMES_BINDINGS_STORAGE_KEY,
+  CODENAMES_BINDINGS_UPDATED_EVENT,
+  formatControllerLabelForProfile,
+  getBindingValue,
+  loadPersistedBindings,
+  type GamepadProfile,
+} from '../../menu/codenames-controls-bindings'
+import { useMenuControls } from '../../menu/useMenuControls'
 import styles from './RoundSummaryScreen.module.css'
 
 type CodenamesTeam = { name: string; avatar: string }
@@ -29,6 +39,70 @@ export function RoundSummaryScreen({
   roundsToWin,
   onNextRound,
 }: RoundSummaryScreenProps) {
+  const [isInputAwake, setIsInputAwake] = useState(true)
+  const [activeInputDevice, setActiveInputDevice] = useState<'keyboard' | 'controller'>('keyboard')
+  const [controllerProfile, setControllerProfile] = useState<GamepadProfile>('generic')
+  const [controlBindings, setControlBindings] = useState(() => loadPersistedBindings())
+
+  useMenuControls({
+    enabled: true,
+    onAction: (action, input) => {
+      if (!isInputAwake) {
+        setActiveInputDevice(input?.device ?? 'keyboard')
+        setIsInputAwake(true)
+        return
+      }
+
+      if (action === 'confirm' || action === 'primary') {
+        onNextRound()
+      }
+    },
+    onDeviceChange: setActiveInputDevice,
+    onControllerProfileChange: setControllerProfile,
+  })
+
+  useEffect(() => {
+    function handleStorage(event: StorageEvent) {
+      if (event.key === CODENAMES_BINDINGS_STORAGE_KEY) {
+        setControlBindings(loadPersistedBindings())
+      }
+    }
+
+    function handleBindingsUpdated() {
+      setControlBindings(loadPersistedBindings())
+    }
+
+    function handlePointerMove(event: PointerEvent) {
+      if (event.pointerType === 'mouse') {
+        setIsInputAwake(false)
+      }
+    }
+
+    window.addEventListener('storage', handleStorage)
+    window.addEventListener(CODENAMES_BINDINGS_UPDATED_EVENT, handleBindingsUpdated)
+    window.addEventListener('pointermove', handlePointerMove)
+    return () => {
+      window.removeEventListener('storage', handleStorage)
+      window.removeEventListener(CODENAMES_BINDINGS_UPDATED_EVENT, handleBindingsUpdated)
+      window.removeEventListener('pointermove', handlePointerMove)
+    }
+  }, [])
+
+  const confirmActionLabel = useMemo(() => {
+    const bindingId = activeInputDevice === 'controller' ? 'controller-confirm' : 'keyboard-confirm'
+    const labels = [getBindingValue(controlBindings, bindingId, 'primary'), getBindingValue(controlBindings, bindingId, 'secondary')].filter(Boolean)
+
+    if (labels.length === 0) {
+      return null
+    }
+
+    return labels
+      .map((label) =>
+        activeInputDevice === 'controller' ? formatControllerLabelForProfile(label, controllerProfile) : formatKeyboardBadgeLabel(label),
+      )
+      .join(' / ')
+  }, [activeInputDevice, controlBindings, controllerProfile])
+
   const bannerText =
     reason === 'assassin'
       ? `${loserTeam.name} trafili na zabójcę!`
@@ -66,11 +140,39 @@ export function RoundSummaryScreen({
 
         <div className={styles.footer}>
           <div className={styles.hint}>Do {roundsToWin} wygranych rund</div>
-          <button type="button" className={styles.nextRoundButton} onClick={onNextRound}>
+          <button
+            type="button"
+            className={isInputAwake ? `${styles.nextRoundButton} ${styles.nextRoundButtonFocused}` : styles.nextRoundButton}
+            onClick={onNextRound}
+          >
             Kolejna runda
+            {isInputAwake && confirmActionLabel ? (
+              <span className={styles.actionBadge} aria-hidden="true">
+                <span className={styles.actionBadgeLabel}>{confirmActionLabel}</span>
+              </span>
+            ) : null}
           </button>
         </div>
       </div>
     </div>
   )
+}
+
+function formatKeyboardBadgeLabel(label: string) {
+  switch (label) {
+    case 'Enter':
+      return '↵'
+    case 'Space':
+      return '␣'
+    case 'Arrow Left':
+      return '←'
+    case 'Arrow Right':
+      return '→'
+    case 'Arrow Up':
+      return '↑'
+    case 'Arrow Down':
+      return '↓'
+    default:
+      return label
+  }
 }

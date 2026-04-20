@@ -5,10 +5,13 @@ import {
   CODENAMES_NAVIGATION_SCREENS,
   CODENAMES_NAVIGATION_TARGETS,
   CODENAMES_NAVIGATION_ZONES,
+  getCurrentGamepadInputLabel,
   getCodenamesMenuActiveHref,
   getCodenamesMenuEntryTarget,
   getCodenamesRailHref,
   getCodenamesRailTargetFromHref,
+  listConnectedGamepads,
+  pickPreferredGamepad,
   resolveCodenamesMenuViewFromHref,
   useMenuControls,
   type CodenamesMenuView,
@@ -177,6 +180,29 @@ function CodenamesLayoutShell({ children }: { children: React.ReactNode }) {
       }
     },
   })
+
+  useEffect(() => {
+    if (!hostNavigation.state.isControllerWakeGuardActive) {
+      return
+    }
+
+    let frameId = 0
+
+    const tick = () => {
+      const activeGamepad = pickPreferredGamepad(listConnectedGamepads())
+      const currentInput = activeGamepad ? getCurrentGamepadInputLabel(activeGamepad) : null
+
+      if (!currentInput) {
+        hostNavigation.updateWakeGuard(true)
+        return
+      }
+
+      frameId = window.requestAnimationFrame(tick)
+    }
+
+    frameId = window.requestAnimationFrame(tick)
+    return () => window.cancelAnimationFrame(frameId)
+  }, [hostNavigation, hostNavigation.state.isControllerWakeGuardActive])
 
   // Runtime screens (play, captain) render without GameShell — same pattern as Charades
   if (segment === 'play' || segment === 'captain') {

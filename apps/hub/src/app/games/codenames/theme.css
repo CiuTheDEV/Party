@@ -3,4 +3,9 @@
   --game-color-primary-light: #b91c1c;
   --game-color-primary-glow: rgba(220, 38, 38, 0.15);
   --game-gradient: linear-gradient(135deg, #1a0404 0%, #3d0f0f 55%, #0a0202 100%);
+  --modal-surface-bg:
+    radial-gradient(circle at 50% 12%, color-mix(in srgb, var(--game-color-primary) 14%, transparent), transparent 52%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
+    rgba(9, 10, 16, 0.96);
+  --modal-eyebrow: color-mix(in srgb, var(--game-color-primary) 42%, white);
 }

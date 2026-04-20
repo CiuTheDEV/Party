@@ -122,6 +122,7 @@
 }
 
 .nextRoundButton {
+  position: relative;
   padding: 18px 34px;
   border: none;
   border-radius: 14px;
@@ -133,8 +134,41 @@
   box-shadow: 0 0 24px rgba(255, 90, 79, 0.28);
 }
 
+.nextRoundButtonFocused {
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.94),
+    0 0 0 10px rgba(255, 255, 255, 0.16),
+    0 0 24px rgba(255, 90, 79, 0.28);
+}
+
 .nextRoundButton:hover {
   filter: brightness(1.05);
+}
+
+.actionBadge {
+  position: absolute;
+  left: 50%;
+  bottom: -34px;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(8, 8, 8, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.26);
+  pointer-events: none;
+}
+
+.actionBadgeLabel {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  color: #fff;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 @keyframes overlayIn {
@@ -181,5 +215,15 @@
     width: 96px;
     height: 96px;
     font-size: 46px;
+  }
+
+  .actionBadge {
+    bottom: -30px;
+    min-height: 24px;
+    padding: 0 9px;
+  }
+
+  .actionBadgeLabel {
+    font-size: 11px;
   }
 }

@@ -43,10 +43,7 @@ export function CaptainPairingModal({
     }
 
     setCaptainUrl(
-      buildCaptainUrl(origin, roomId, {
-        redTeam: teams[0],
-        blueTeam: teams[1],
-      }),
+      buildCaptainUrl(origin, roomId),
     )
   }, [roomId, teams])
 
@@ -71,6 +68,7 @@ export function CaptainPairingModal({
   const pairingSummary = getCaptainPairingSummary(captainRedConnected, captainBlueConnected)
   const handleOpenInNewTab = () => {
     if (!captainUrl) return
+    window.open(captainUrl, '_blank', 'noopener,noreferrer')
     window.open(captainUrl, '_blank', 'noopener,noreferrer')
   }
   const handleCopySessionCode = async () => {

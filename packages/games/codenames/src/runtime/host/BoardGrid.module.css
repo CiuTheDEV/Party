@@ -53,6 +53,16 @@
   transform: translateY(-1px);
 }
 
+.card[data-selected='true'] {
+  transform: translateY(-2px);
+}
+
+.card[data-focused='true'] .cardFace {
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.92),
+    0 0 0 8px rgba(255, 255, 255, 0.14);
+}
+
 .card:active:not(.revealed) {
   transform: translateY(0);
 }
@@ -117,6 +127,39 @@
   text-transform: uppercase;
 }
 
+.cardActionBadge {
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: rgba(8, 8, 8, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.26);
+  opacity: 0;
+  transition: opacity 0.16s ease, transform 0.16s ease;
+  pointer-events: none;
+}
+
+.cardActionBadgeLabel {
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  color: #fff;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.card[data-focused='true'] .cardActionBadge {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-1px);
+}
+
 .card[data-color='red'].revealed .cardFront {
   background: #ff5a4f;
   border-color: rgba(255, 90, 79, 0.85);
@@ -144,6 +187,16 @@
 @media (max-width: 1080px) {
   .cardFace {
     padding: 14px 12px;
+  }
+
+  .cardActionBadge {
+    bottom: 10px;
+    min-height: 24px;
+    padding: 0 9px;
+  }
+
+  .cardActionBadgeLabel {
+    font-size: 11px;
   }
 }
 

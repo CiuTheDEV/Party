@@ -73,9 +73,17 @@ export {
 export {
   codenamesSetupNavigationProfile,
 } from './navigation/codenames-setup-navigation-profile'
+export {
+  codenamesRuntimeNavigationProfile,
+} from './navigation/codenames-runtime-navigation-profile'
 export { useMenuControls } from './menu/useMenuControls'
 export { resolveMenuModeCommand } from './menu/menu-controls'
 export { getCodenamesMenuActiveHref, resolveCodenamesMenuViewFromHref }
+export {
+  getCurrentGamepadInputLabel,
+  listConnectedGamepads,
+  pickPreferredGamepad,
+} from './menu/codenames-controls-bindings'
 export type { CodenamesMenuView } from './menu/menu-view'
 export type { CodenamesNavigationCommandId } from './navigation/codenames-navigation-actions'
 export type {
@@ -87,6 +95,9 @@ export type {
 export type {
   CodenamesSetupNavigationContext,
 } from './navigation/codenames-setup-navigation-profile'
+export type {
+  CodenamesRuntimeNavigationContext,
+} from './navigation/codenames-runtime-navigation-profile'
 export type {
   CodenamesSetupState,
   CodenamesTeam,

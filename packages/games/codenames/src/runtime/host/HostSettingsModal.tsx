@@ -10,6 +10,7 @@ type ToggleCardProps = {
   description: string
   enabled: boolean
   focused?: boolean
+  isFocusVisible?: boolean
   onToggle: () => void
 }
 
@@ -20,6 +21,8 @@ type Props = {
   isExitConfirmOpen: boolean
   focusedTarget: SettingsFocusTarget
   exitConfirmFocusedTarget: SettingsExitConfirmFocusTarget
+  confirmActionLabel?: string | null
+  isFocusVisible?: boolean
   onStartGame?: () => void
   onToggleSound: () => void
   onToggleAnimations: () => void
@@ -29,11 +32,11 @@ type Props = {
   onExitToMenu: () => void
 }
 
-function ToggleCard({ label, description, enabled, focused = false, onToggle }: ToggleCardProps) {
+function ToggleCard({ label, description, enabled, focused = false, isFocusVisible = true, onToggle }: ToggleCardProps) {
   return (
     <button
       type="button"
-      className={focused ? `${styles.toggleCard} ${styles.controlFocused}` : styles.toggleCard}
+      className={focused && isFocusVisible ? `${styles.toggleCard} ${styles.controlFocused}` : styles.toggleCard}
       onClick={onToggle}
       aria-pressed={enabled}
     >
@@ -55,6 +58,8 @@ export function HostSettingsModal({
   isExitConfirmOpen,
   focusedTarget,
   exitConfirmFocusedTarget,
+  confirmActionLabel = null,
+  isFocusVisible = true,
   onStartGame,
   onToggleSound,
   onToggleAnimations,
@@ -77,24 +82,24 @@ export function HostSettingsModal({
               <button
                 type="button"
                 className={
-                  exitConfirmFocusedTarget === 'stay'
-                    ? `${styles.secondaryButton} ${styles.controlFocused}`
-                    : styles.secondaryButton
-                }
-                onClick={onCancelExitConfirm}
-              >
-                Zostań w grze
-              </button>
-              <button
-                type="button"
-                className={
-                  exitConfirmFocusedTarget === 'exit'
+                  exitConfirmFocusedTarget === 'exit' && isFocusVisible
                     ? `${styles.dangerButton} ${styles.controlFocused}`
                     : styles.dangerButton
                 }
                 onClick={onExitToMenu}
               >
                 Tak, wróć do menu
+              </button>
+              <button
+                type="button"
+                className={
+                  exitConfirmFocusedTarget === 'stay' && isFocusVisible
+                    ? `${styles.secondaryButton} ${styles.controlFocused}`
+                    : styles.secondaryButton
+                }
+                onClick={onCancelExitConfirm}
+              >
+                Zostań w grze
               </button>
             </div>
           </>
@@ -109,6 +114,7 @@ export function HostSettingsModal({
                 description="Przygotowane pod efekty audio w trakcie rozgrywki."
                 enabled={soundEnabled}
                 focused={focusedTarget === 'sound'}
+                isFocusVisible={isFocusVisible}
                 onToggle={onToggleSound}
               />
               <ToggleCard
@@ -116,6 +122,7 @@ export function HostSettingsModal({
                 description="Wyłącza ruch i skraca przyszłe animacje w interfejsie."
                 enabled={animationsEnabled}
                 focused={focusedTarget === 'animations'}
+                isFocusVisible={isFocusVisible}
                 onToggle={onToggleAnimations}
               />
             </div>
@@ -123,26 +130,41 @@ export function HostSettingsModal({
             <div className={styles.actions}>
               <button
                 type="button"
-                className={focusedTarget === 'exit' ? `${styles.secondaryButton} ${styles.controlFocused}` : styles.secondaryButton}
+                className={
+                  focusedTarget === 'exit' && isFocusVisible
+                    ? `${styles.secondaryButton} ${styles.controlFocused}`
+                    : styles.secondaryButton
+                }
                 onClick={onOpenExitConfirm}
               >
                 Powrót do menu
+                {confirmActionLabel ? <span className={styles.actionHint}>{confirmActionLabel}</span> : null}
               </button>
               {canStartGame ? (
                 <button
                   type="button"
-                  className={focusedTarget === 'continue' ? `${styles.primaryButton} ${styles.controlFocused}` : styles.primaryButton}
+                  className={
+                    focusedTarget === 'continue' && isFocusVisible
+                      ? `${styles.primaryButton} ${styles.controlFocused}`
+                      : styles.primaryButton
+                  }
                   onClick={onStartGame}
                 >
                   Rozpocznij grę
+                  {confirmActionLabel ? <span className={styles.actionHint}>{confirmActionLabel}</span> : null}
                 </button>
               ) : (
                 <button
                   type="button"
-                  className={focusedTarget === 'continue' ? `${styles.primaryButton} ${styles.controlFocused}` : styles.primaryButton}
+                  className={
+                    focusedTarget === 'continue' && isFocusVisible
+                      ? `${styles.primaryButton} ${styles.controlFocused}`
+                      : styles.primaryButton
+                  }
                   onClick={onContinue}
                 >
                   Kontynuuj
+                  {confirmActionLabel ? <span className={styles.actionHint}>{confirmActionLabel}</span> : null}
                 </button>
               )}
             </div>

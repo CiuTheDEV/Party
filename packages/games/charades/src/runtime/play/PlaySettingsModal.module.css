@@ -5,8 +5,8 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(4, 5, 9, 0.72);
-  backdrop-filter: blur(14px);
+  background: var(--modal-backdrop-bg);
+  backdrop-filter: blur(var(--modal-backdrop-blur));
   z-index: 30;
 }
 
@@ -15,15 +15,10 @@
   display: grid;
   gap: 18px;
   padding: 24px;
-  border-radius: 28px;
-  background:
-    radial-gradient(circle at 50% 12%, color-mix(in srgb, var(--game-color-primary) 14%, transparent), transparent 52%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
-    rgba(9, 10, 16, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 30px 60px rgba(0, 0, 0, 0.32);
+  border-radius: calc(var(--modal-surface-radius) + 4px);
+  background: var(--modal-surface-bg);
+  border: 1px solid var(--modal-surface-border);
+  box-shadow: var(--modal-surface-shadow);
 }
 
 .eyebrow {
@@ -32,7 +27,7 @@
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--game-color-primary) 42%, white);
+  color: var(--modal-eyebrow);
 }
 
 .title {
@@ -57,13 +52,23 @@
   width: 100%;
   padding: 18px 20px;
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.02)),
-    rgba(7, 8, 13, 0.68);
+  border: 1px solid var(--modal-section-border);
+  background: var(--modal-section-bg);
   color: var(--color-text);
   text-align: left;
   cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.toggleCard:hover {
+  border-color: var(--modal-surface-border-strong);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.03)),
+    rgba(7, 8, 13, 0.74);
+  transform: translateY(-1px);
 }
 
 .controlFocused {
@@ -84,7 +89,7 @@
 }
 
 .toggleDescription {
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--modal-copy);
   font-size: 0.92rem;
   line-height: 1.35;
 }
@@ -139,6 +144,11 @@
   font-size: 1rem;
   font-weight: 800;
   cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease,
+    filter 0.15s ease;
 }
 
 .primaryButton {
@@ -147,10 +157,21 @@
   color: #fff;
 }
 
+.primaryButton:hover {
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+}
+
 .secondaryButton {
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--modal-action-secondary-border);
+  background: var(--modal-action-secondary-bg);
   color: var(--color-text);
+}
+
+.secondaryButton:hover {
+  border-color: var(--modal-action-secondary-hover-border);
+  background: var(--modal-action-secondary-hover-bg);
+  transform: translateY(-1px);
 }
 
 .dangerButton {
@@ -159,10 +180,16 @@
   color: #fff;
 }
 
+.dangerButton:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+}
+
 .confirmCopy {
   margin: 0;
   text-align: center;
-  color: rgba(255, 255, 255, 0.78);
+  color: var(--modal-copy);
   line-height: 1.5;
 }
 

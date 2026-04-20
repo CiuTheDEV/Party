@@ -10,6 +10,11 @@ export type Card = {
 
 export type RoomPhase = 'waiting' | 'playing' | 'assassin-reveal' | 'ended'
 
+export type TeamMetadata = {
+  name: string
+  avatar: string
+}
+
 export type RoomState = {
   phase: RoomPhase
   cards: Card[]
@@ -26,11 +31,13 @@ export type RoomState = {
   captainRedReady: boolean
   captainBlueReady: boolean
   boardUnlocked: boolean
+  redTeam: TeamMetadata
+  blueTeam: TeamMetadata
 }
 
 export type HostEvent =
-  | { type: 'HOST_SETUP_CONNECTED' }
-  | { type: 'HOST_CONNECTED' }
+  | { type: 'HOST_SETUP_CONNECTED'; redTeam: TeamMetadata; blueTeam: TeamMetadata }
+  | { type: 'HOST_CONNECTED'; redTeam: TeamMetadata; blueTeam: TeamMetadata }
   | { type: 'GAME_START'; cards: Card[]; redTotal: number; blueTotal: number; startingTeam: 'red' | 'blue' }
   | { type: 'CARD_REVEAL'; index: number }
   | { type: 'ASSASSIN_TEAM'; team: 'red' | 'blue' }

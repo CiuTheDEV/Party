@@ -13,9 +13,21 @@ type BoardGridProps = {
   isLocked?: boolean
   isConcealed?: boolean
   startingTeam?: 'red' | 'blue' | null
+  selectedIndex?: number | null
+  selectedActionLabel?: string | null
+  isFocusVisible?: boolean
 }
 
-export function BoardGrid({ cards, onReveal, isLocked = false, isConcealed = false, startingTeam = null }: BoardGridProps) {
+export function BoardGrid({
+  cards,
+  onReveal,
+  isLocked = false,
+  isConcealed = false,
+  startingTeam = null,
+  selectedIndex = null,
+  selectedActionLabel = null,
+  isFocusVisible = false,
+}: BoardGridProps) {
   const rootRef = useRef<HTMLDivElement | null>(null)
   const boardKey = cards.map((card) => card.word).join('|')
 
@@ -36,8 +48,11 @@ export function BoardGrid({ cards, onReveal, isLocked = false, isConcealed = fal
             key={i}
             className={`${styles.card} ${card.revealed ? styles.revealed : ''}`}
             data-color={card.color}
+            data-selected={selectedIndex === i ? 'true' : 'false'}
+            data-focused={selectedIndex === i && isFocusVisible ? 'true' : 'false'}
             data-round-index={i}
             data-round-card
+            aria-current={selectedIndex === i ? 'true' : undefined}
             onClick={() => !card.revealed && !isLocked && !isConcealed && onReveal(i)}
             disabled={card.revealed || isLocked || isConcealed}
           >
@@ -57,8 +72,13 @@ export function BoardGrid({ cards, onReveal, isLocked = false, isConcealed = fal
                   density="compact"
                 />
               </span>
-              <span className={`${styles.cardFace} ${styles.cardFront}`}>
-                <span className={styles.cardWord}>{card.word}</span>
+                <span className={`${styles.cardFace} ${styles.cardFront}`}>
+                  <span className={styles.cardWord}>{card.word}</span>
+                {!card.revealed && selectedActionLabel ? (
+                  <span className={styles.cardActionBadge} aria-hidden="true">
+                    <span className={styles.cardActionBadgeLabel}>{selectedActionLabel}</span>
+                  </span>
+                ) : null}
               </span>
             </span>
           </button>

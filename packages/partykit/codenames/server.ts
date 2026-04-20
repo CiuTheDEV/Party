@@ -17,6 +17,8 @@ export const initialState: RoomState = {
   captainRedReady: false,
   captainBlueReady: false,
   boardUnlocked: false,
+  redTeam: { name: 'Czerwoni', avatar: 'star' },
+  blueTeam: { name: 'Niebiescy', avatar: 'moon' },
 }
 
 type AuthorityState = {
@@ -129,6 +131,8 @@ export function reduceIncomingEvent(
         state: {
           ...initialState,
           hostConnected: true,
+          redTeam: event.redTeam,
+          blueTeam: event.blueTeam,
         },
         hostConnectionId: resolvedHostConnectionId,
         captainRedConnectionId: null,
@@ -139,7 +143,7 @@ export function reduceIncomingEvent(
 
     return {
       accepted: true,
-      state: { ...current.state, hostConnected: true },
+      state: { ...current.state, hostConnected: true, redTeam: event.redTeam, blueTeam: event.blueTeam },
       hostConnectionId: resolvedHostConnectionId,
       captainRedConnectionId: current.captainRedConnectionId,
       captainBlueConnectionId: current.captainBlueConnectionId,
@@ -243,13 +247,15 @@ export function reduceIncomingEvent(
         ? {
             ...current.state,
             hostConnected: true,
+            redTeam: event.redTeam,
+            blueTeam: event.blueTeam,
             captainRedConnected: false,
             captainBlueConnected: false,
             captainRedReady: false,
             captainBlueReady: false,
             boardUnlocked: false,
           }
-        : { ...current.state, hostConnected: true },
+        : { ...current.state, hostConnected: true, redTeam: event.redTeam, blueTeam: event.blueTeam },
       hostConnectionId: resolvedHostConnectionId,
       captainRedConnectionId: isHostReclaimingWaitingRoom ? null : current.captainRedConnectionId,
       captainBlueConnectionId: isHostReclaimingWaitingRoom ? null : current.captainBlueConnectionId,
@@ -353,6 +359,8 @@ export function applyEvent(state: RoomState, event: CodenamesEvent): RoomState {
         captainRedReady: false,
         captainBlueReady: false,
         boardUnlocked: false,
+        redTeam: state.redTeam,
+        blueTeam: state.blueTeam,
       }
     }
 
@@ -365,6 +373,8 @@ export function applyEvent(state: RoomState, event: CodenamesEvent): RoomState {
         captainRedReady: false,
         captainBlueReady: false,
         boardUnlocked: false,
+        redTeam: state.redTeam,
+        blueTeam: state.blueTeam,
       }
     }
 

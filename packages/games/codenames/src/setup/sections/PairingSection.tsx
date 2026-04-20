@@ -14,6 +14,7 @@ export function PairingSection({ state, updateState, helpers }: Props) {
     <>
       <CaptainListenerComponent
         roomId={state.roomId}
+        teams={state.teams}
         onRedConnect={() => updateState((s) => ({ ...s, captainRedConnected: true }))}
         onRedDisconnect={() => updateState((s) => ({ ...s, captainRedConnected: false }))}
         onBlueConnect={() => updateState((s) => ({ ...s, captainBlueConnected: true }))}

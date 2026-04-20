@@ -140,22 +140,22 @@ export const charadesRuntimeNavigationProfile: HostNavigationProfile<CharadesRun
 
     if (current.zoneId === CHARADES_NAVIGATION_ZONES.runtimeSettingsConfirm) {
       if (action === 'left' || action === 'up') {
-        return current.targetId === CHARADES_NAVIGATION_TARGETS.runtimePauseConfirmStay
-          ? { type: 'stay' }
-          : {
-              type: 'move',
-              zoneId: current.zoneId,
-              targetId: CHARADES_NAVIGATION_TARGETS.runtimePauseConfirmStay,
-            }
-      }
-
-      if (action === 'right' || action === 'down') {
         return current.targetId === CHARADES_NAVIGATION_TARGETS.runtimePauseConfirmExit
           ? { type: 'stay' }
           : {
               type: 'move',
               zoneId: current.zoneId,
               targetId: CHARADES_NAVIGATION_TARGETS.runtimePauseConfirmExit,
+            }
+      }
+
+      if (action === 'right' || action === 'down') {
+        return current.targetId === CHARADES_NAVIGATION_TARGETS.runtimePauseConfirmStay
+          ? { type: 'stay' }
+          : {
+              type: 'move',
+              zoneId: current.zoneId,
+              targetId: CHARADES_NAVIGATION_TARGETS.runtimePauseConfirmStay,
             }
       }
 

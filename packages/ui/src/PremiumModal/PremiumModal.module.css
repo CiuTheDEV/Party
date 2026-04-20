@@ -5,43 +5,61 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-overlay);
-  backdrop-filter: blur(4px);
+  background: var(--modal-backdrop-bg);
+  backdrop-filter: blur(var(--modal-backdrop-blur));
 }
 
 .modal {
   width: min(360px, 90%);
-  padding: 32px;
+  display: grid;
+  gap: 14px;
+  padding: 28px;
   text-align: center;
-  background: var(--color-surface-elevated);
-  border-radius: 16px;
+  background: var(--modal-surface-bg);
+  border: 1px solid var(--modal-surface-border);
+  border-radius: var(--modal-surface-radius);
+  box-shadow: var(--modal-surface-shadow-lg);
 }
 
 .icon {
-  margin-bottom: 16px;
+  margin-bottom: 4px;
   font-size: 2.5rem;
 }
 
 .title {
-  margin-bottom: 8px;
+  margin: 0;
   font-size: 1.25rem;
-  font-weight: 700;
+  font-weight: 900;
+  letter-spacing: -0.03em;
 }
 
 .description {
-  margin-bottom: 24px;
-  color: var(--color-text-muted);
+  margin: 0;
+  color: var(--modal-copy);
   font-size: 0.9rem;
+  line-height: 1.55;
 }
 
 .closeButton {
+  min-height: 46px;
   padding: 10px 24px;
-  border: 1px solid var(--color-outline-variant);
-  border-radius: 8px;
-  background: var(--color-surface);
+  border: 1px solid var(--modal-action-secondary-border);
+  border-radius: 14px;
+  background: var(--modal-action-secondary-bg);
   color: var(--color-text);
   font-size: 0.875rem;
+  font-weight: 800;
   cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.closeButton:hover {
+  border-color: var(--modal-action-secondary-hover-border);
+  background: var(--modal-action-secondary-hover-bg);
+  transform: translateY(-1px);
 }
 
 .closeButton:focus-visible {

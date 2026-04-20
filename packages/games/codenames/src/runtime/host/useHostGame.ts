@@ -4,7 +4,11 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import usePartySocket from 'partysocket/react'
 import type { HostEvent, IncomingMessage, RoomState } from '../shared/codenames-events'
 import { getPartykitHost } from '../shared/codenames-runtime'
-import { readCodenamesWordHistory, writeCodenamesWordHistory } from '../shared/codenames-word-history'
+import {
+  readCodenamesWordHistory,
+  resetCodenamesCategoryHistories,
+  writeCodenamesWordHistory,
+} from '../shared/codenames-word-history'
 import { ROUND_INTRO_DURATION_MS } from '../shared/RoundIntroOverlay'
 import { prepareCodenamesGameStart } from './start-game'
 import { canStartWaitingGame, shouldAutoStartPendingRound } from './start-policy'
@@ -25,14 +29,17 @@ const initialRoomState: RoomState = {
   captainRedReady: false,
   captainBlueReady: false,
   boardUnlocked: false,
+  redTeam: { name: 'Czerwoni', avatar: 'star' },
+  blueTeam: { name: 'Niebiescy', avatar: 'moon' },
 }
 
 type UseHostGameParams = {
   categories: Array<{ id: string; words: string[] }>
   roomId: string
+  teams: [{ name: string; avatar: string }, { name: string; avatar: string }]
 }
 
-export function useHostGame({ categories, roomId }: UseHostGameParams) {
+export function useHostGame({ categories, roomId, teams }: UseHostGameParams) {
   const [roomState, setRoomState] = useState<RoomState>(initialRoomState)
   const [hasSyncedRoomState, setHasSyncedRoomState] = useState(false)
   const [isRoundIntroVisible, setIsRoundIntroVisible] = useState(false)
@@ -44,13 +51,21 @@ export function useHostGame({ categories, roomId }: UseHostGameParams) {
   const gameStartedRef = useRef(false)
   const pendingNewGameRef = useRef(false)
   const initialStartTriggeredRef = useRef(false)
+  const teamsRef = useRef(teams)
+  teamsRef.current = teams
 
   const socket = usePartySocket({
     host: getPartykitHost(),
     room: roomId,
     party: 'codenames',
     onOpen() {
-      socket.send(JSON.stringify({ type: 'HOST_CONNECTED' }))
+      socket.send(
+        JSON.stringify({
+          type: 'HOST_CONNECTED',
+          redTeam: teamsRef.current[0],
+          blueTeam: teamsRef.current[1],
+        } satisfies HostEvent),
+      )
     },
     onMessage(evt) {
       const msg = JSON.parse(evt.data) as IncomingMessage
@@ -161,6 +176,27 @@ export function useHostGame({ categories, roomId }: UseHostGameParams) {
     setStartBlockedReason(null)
   }, [])
 
+  const resetPoolAndRetryStart = useCallback(() => {
+    const activeCategoryIds = categoriesRef.current.map((category) => category.id)
+
+    if (activeCategoryIds.length > 0) {
+      writeCodenamesWordHistory(
+        resetCodenamesCategoryHistories({
+          history: readCodenamesWordHistory(),
+          categoryIds: activeCategoryIds,
+        }),
+      )
+    }
+
+    setStartBlockedReason(null)
+
+    if (!canStartWaitingGame(roomState) || gameStartedRef.current) {
+      return
+    }
+
+    gameStartedRef.current = trySendGameStart(socket, categoriesRef.current, setStartBlockedReason)
+  }, [roomState, socket])
+
   return {
     roomState,
     hasSyncedRoomState,
@@ -172,6 +208,7 @@ export function useHostGame({ categories, roomId }: UseHostGameParams) {
     isRoundIntroVisible,
     startBlockedReason,
     clearStartBlockedReason,
+    resetPoolAndRetryStart,
   }
 }
 
@@ -195,7 +232,7 @@ export function applyEvent(state: RoomState, msg: IncomingMessage): RoomState {
       }
 
     case 'HOST_CONNECTED':
-      return { ...state, hostConnected: true }
+      return { ...state, hostConnected: true, redTeam: msg.redTeam, blueTeam: msg.blueTeam }
 
     case 'CARD_REVEAL': {
       if (state.phase !== 'playing') return state
@@ -237,6 +274,8 @@ export function applyEvent(state: RoomState, msg: IncomingMessage): RoomState {
         captainRedReady: false,
         captainBlueReady: false,
         boardUnlocked: false,
+        redTeam: state.redTeam,
+        blueTeam: state.blueTeam,
       }
 
     case 'MATCH_RESET':
@@ -248,6 +287,8 @@ export function applyEvent(state: RoomState, msg: IncomingMessage): RoomState {
         captainRedReady: false,
         captainBlueReady: false,
         boardUnlocked: false,
+        redTeam: state.redTeam,
+        blueTeam: state.blueTeam,
       }
 
     case 'CAPTAIN_CONNECTED':

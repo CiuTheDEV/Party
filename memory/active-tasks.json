@@ -38,6 +38,16 @@
                       "blocker":  "Existing Tajniacy e2e/setup-opening issue: after clicking `Zagraj teraz`, Playwright does not reliably see the setup dialog, which blocks stable browser verification in the current automated flow.",
                       "created":  "2026-04-19",
                       "updated":  "2026-04-19"
+                  },
+                  {
+                      "id":  "T003",
+                      "title":  "Charades modal parity browser validation",
+                      "status":  "blocked",
+                      "context":  "Shared modal theming/hover pass and Charades pause-confirm parity are implemented. Code-level checks pass for host controls and runtime navigation, but a full browser runtime pass of Kalambury modals was not completed in this session because the local verification stack was inconsistent: `localhost:3000` hydrates the hub correctly, `127.0.0.1:3000` shows broken HMR behavior, and the recommended `dev-hub-dev.mjs` path was blocked by an unrelated auth page type error.",
+                      "next_action":  "Re-run the Kalambury host + presenter browser flow on a stable local stack and verify pause/settings/reconnect/runtime modals end-to-end.",
+                      "blocker":  "Local stack instability across hub dev/HMR and presenter connection prevented an honest end-to-end runtime modal pass in this session.",
+                      "created":  "2026-04-20",
+                      "updated":  "2026-04-20"
                   }
               ]
 }

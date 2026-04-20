@@ -399,6 +399,23 @@ run('runtime settings exit confirm moves between stay and exit', () => {
       },
       action: 'right',
     }),
+    { type: 'stay' },
+  )
+
+  assert.deepEqual(
+    runtimeProfileModule.charadesRuntimeNavigationProfile.resolveAction({
+      context: {
+        canOpenVerdictPicker: false,
+        isPauseModalOpen: true,
+        isSettingsExitConfirmOpen: true,
+        isVerdictPickerOpen: false,
+      },
+      current: {
+        zoneId: targetsModule.CHARADES_NAVIGATION_ZONES.runtimeSettingsConfirm,
+        targetId: targetsModule.CHARADES_NAVIGATION_TARGETS.runtimePauseConfirmStay,
+      },
+      action: 'left',
+    }),
     {
       type: 'move',
       zoneId: targetsModule.CHARADES_NAVIGATION_ZONES.runtimeSettingsConfirm,

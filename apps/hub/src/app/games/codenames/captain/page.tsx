@@ -38,14 +38,6 @@ function LegacyCaptainPageContent() {
     <CaptainRouteScreen
       roomId={roomId}
       teamParam={searchParams.get('team')}
-      redTeam={{
-        name: searchParams.get('redName') ?? 'Czerwoni',
-        avatar: searchParams.get('redAvatar') ?? 'star',
-      }}
-      blueTeam={{
-        name: searchParams.get('blueName') ?? 'Niebiescy',
-        avatar: searchParams.get('blueAvatar') ?? 'moon',
-      }}
     />
   )
 }

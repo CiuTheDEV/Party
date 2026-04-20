@@ -247,6 +247,89 @@
   }
 }
 
+@media (max-height: 460px) and (orientation: landscape) {
+  .overlay {
+    padding: 10px 14px;
+  }
+
+  .panel {
+    width: min(760px, 100%);
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 18px;
+    row-gap: 8px;
+    align-items: center;
+    justify-items: start;
+    padding: 16px 20px;
+    max-height: calc(100dvh - 20px);
+    overflow: auto;
+  }
+
+  .panel::before {
+    top: 10px;
+  }
+
+  .panel::after {
+    bottom: 10px;
+  }
+
+  .roundBadge {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    min-width: 92px;
+    padding: 10px 12px 8px;
+    border-radius: 16px;
+    align-self: center;
+  }
+
+  .roundBadgeLabel {
+    font-size: 10px;
+    letter-spacing: 0.16em;
+  }
+
+  .roundBadgeValue {
+    font-size: clamp(2.1rem, 5vw, 3.2rem);
+  }
+
+  .heroRow {
+    grid-column: 2;
+    width: 100%;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 14px;
+    align-items: center;
+  }
+
+  .teamOrb {
+    width: 68px;
+    height: 68px;
+    border-radius: 16px;
+  }
+
+  .copyBlock {
+    gap: 5px;
+    justify-items: start;
+    text-align: left;
+  }
+
+  .eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.16em;
+  }
+
+  .title {
+    font-size: clamp(2.3rem, 7vw, 3.9rem);
+    line-height: 0.94;
+  }
+
+  .subtitle {
+    font-size: 0.95rem;
+  }
+
+  .footerPill {
+    display: none;
+  }
+}
+
 @keyframes introScale {
   from {
     opacity: 0;

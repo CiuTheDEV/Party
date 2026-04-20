@@ -5,8 +5,8 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(4, 5, 9, 0.74);
-  backdrop-filter: blur(14px);
+  background: var(--modal-backdrop-bg);
+  backdrop-filter: blur(var(--modal-backdrop-blur));
   z-index: 32;
 }
 
@@ -15,15 +15,10 @@
   display: grid;
   gap: 18px;
   padding: 24px;
-  border-radius: 28px;
-  background:
-    radial-gradient(circle at 50% 12%, color-mix(in srgb, var(--game-color-primary) 14%, transparent), transparent 52%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02)),
-    rgba(9, 10, 16, 0.96);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.06),
-    0 30px 60px rgba(0, 0, 0, 0.32);
+  border-radius: calc(var(--modal-surface-radius) + 4px);
+  background: var(--modal-surface-bg);
+  border: 1px solid var(--modal-surface-border);
+  box-shadow: var(--modal-surface-shadow-lg);
 }
 
 .header {
@@ -47,10 +42,21 @@
   align-items: center;
   justify-content: center;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--modal-action-secondary-border);
+  background: var(--modal-action-secondary-bg);
   color: var(--color-text);
   cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.iconButton:hover {
+  border-color: var(--modal-action-secondary-hover-border);
+  background: var(--modal-action-secondary-hover-bg);
+  transform: translateY(-1px);
 }
 
 .body {
@@ -73,7 +79,7 @@
   justify-content: center;
   border-radius: 22px;
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--modal-section-border);
 }
 
 .info {
@@ -82,7 +88,7 @@
 }
 
 .eyebrow {
-  color: color-mix(in srgb, var(--game-color-primary) 42%, white);
+  color: var(--modal-eyebrow);
   font-size: 0.84rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -91,7 +97,7 @@
 
 .description {
   margin: 0;
-  color: var(--color-text);
+  color: var(--modal-copy);
   line-height: 1.5;
 }
 
@@ -116,7 +122,7 @@
   gap: 12px;
   padding: 12px 14px;
   border-radius: 18px;
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--modal-section-bg);
 }
 
 .codeLabel {
@@ -157,7 +163,7 @@
 }
 
 .codeHint {
-  color: rgba(255, 255, 255, 0.62);
+  color: var(--modal-copy-muted);
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -173,12 +179,22 @@
   min-height: 48px;
   padding: 12px 22px;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--modal-action-secondary-border);
+  background: var(--modal-action-secondary-bg);
   color: var(--color-text);
   font-size: 1rem;
   font-weight: 800;
   cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.secondaryButton:hover {
+  border-color: var(--modal-action-secondary-hover-border);
+  background: var(--modal-action-secondary-hover-bg);
+  transform: translateY(-1px);
 }
 
 @media (max-width: 640px) {

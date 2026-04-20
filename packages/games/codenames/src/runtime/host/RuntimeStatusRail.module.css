@@ -1,0 +1,77 @@
+.rail {
+  position: absolute;
+  top: 96px;
+  right: 18px;
+  z-index: 12;
+  width: min(320px, calc(100vw - 36px));
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 24px;
+  background: rgba(10, 10, 14, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.38);
+  transform: translateX(calc(100% + 28px));
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+}
+
+.railOpen {
+  transform: translateX(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.section {
+  display: grid;
+  gap: 4px;
+}
+
+.eyebrow {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.46);
+}
+
+.title {
+  font-size: 17px;
+  line-height: 1.15;
+  color: #fff;
+}
+
+.copy {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.72);
+}
+
+.hint {
+  margin-top: 4px;
+  display: inline-flex;
+  width: fit-content;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+}
+
+@media (max-width: 900px) {
+  .rail {
+    top: auto;
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    width: auto;
+    transform: translateY(calc(100% + 18px));
+  }
+
+  .railOpen {
+    transform: translateY(0);
+  }
+}

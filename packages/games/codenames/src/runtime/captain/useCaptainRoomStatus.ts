@@ -21,6 +21,8 @@ const initialRoomState: RoomState = {
   captainRedReady: false,
   captainBlueReady: false,
   boardUnlocked: false,
+  redTeam: { name: 'Czerwoni', avatar: 'star' },
+  blueTeam: { name: 'Niebiescy', avatar: 'moon' },
 }
 
 type UseCaptainRoomStatusParams = {
@@ -98,7 +100,7 @@ function applyRoomStatusEvent(state: RoomState, event: IncomingMessage): RoomSta
         boardUnlocked: false,
       }
     case 'HOST_CONNECTED':
-      return { ...state, hostConnected: true }
+      return { ...state, hostConnected: true, redTeam: event.redTeam, blueTeam: event.blueTeam }
     case 'CARD_REVEAL':
     case 'ASSASSIN_TEAM':
     case 'GAME_RESET':
@@ -109,6 +111,8 @@ function applyRoomStatusEvent(state: RoomState, event: IncomingMessage): RoomSta
         roundWinsBlue: state.roundWinsBlue,
         captainRedConnected: state.captainRedConnected,
         captainBlueConnected: state.captainBlueConnected,
+        redTeam: state.redTeam,
+        blueTeam: state.blueTeam,
       }
     case 'MATCH_RESET':
       return {
@@ -116,6 +120,8 @@ function applyRoomStatusEvent(state: RoomState, event: IncomingMessage): RoomSta
         hostConnected: true,
         captainRedConnected: state.captainRedConnected,
         captainBlueConnected: state.captainBlueConnected,
+        redTeam: state.redTeam,
+        blueTeam: state.blueTeam,
       }
     default:
       return state
