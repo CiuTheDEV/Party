@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { ExternalLink, Link2, Smartphone, X } from 'lucide-react'
-import { QRCodeSVG } from 'qrcode.react'
+import { Link2, Smartphone } from 'lucide-react'
+import { DevicePairingModal } from '@party/ui'
 import { buildPresenterUrl, getPresenterOrigin, isLocalPresenterOrigin } from '../runtime'
 import styles from './PairingPanel.module.css'
 
@@ -96,64 +96,30 @@ export function PairingPanel({ roomId, isConnected, onDisconnect }: Props) {
       </div>
 
       {showModal ? (
-        <div className={styles.backdrop} onClick={() => setShowModal(false)}>
-          <div className={styles.modal} onClick={(event) => event.stopPropagation()}>
-            <div className={styles.modalHeader}>
-              <div className={styles.modalHeaderCopy}>
-                <span className={styles.modalEyebrow}>Parowanie</span>
-                <span className={styles.modalTitle}>Podłącz urządzenie prezentera</span>
-              </div>
-              <div className={styles.modalActions}>
-                <button
-                  type="button"
-                  className={styles.iconBtn}
-                  aria-label="Otwórz w nowej karcie"
-                  onClick={() => window.open(presenterUrl, '_blank')}
-                >
-                  <ExternalLink size={16} />
-                </button>
-                <button
-                  type="button"
-                  className={styles.iconBtn}
-                  aria-label="Zamknij"
-                  onClick={() => setShowModal(false)}
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            </div>
-
-            <div className={styles.modalBody}>
-              <div className={styles.qrRow}>
-                {presenterUrl ? (
-                  <div className={styles.qrBox}>
-                    <QRCodeSVG value={presenterUrl} size={140} bgColor="#17171c" fgColor="#f0f0f0" />
-                  </div>
-                ) : null}
-                <div className={styles.qrInfo}>
-                  <span className={styles.roleLabel}>Tryb: prezenter</span>
-                  <p className={styles.roleDesc}>
-                    Zeskanuj kod telefonem prezentera. Na ekranie pojawi się karta hasła i czas tury.
-                  </p>
-                  {showLocalhostWarning ? (
-                    <p className={styles.warning}>
-                      Ten QR wskazuje na localhost. Na prawdziwym telefonie otwórz hosta po adresie sieciowym albo
-                      ustaw `NEXT_PUBLIC_PUBLIC_ORIGIN` i `NEXT_PUBLIC_PARTYKIT_HOST`.
-                    </p>
-                  ) : null}
-                </div>
-              </div>
-
-              <div className={styles.codeRow}>
-                <span className={styles.codeLabel}>Kod sesji</span>
-                <button type="button" className={styles.codeButton} onClick={handleCopySessionCode} aria-label="Kopiuj kod sesji">
-                  <span className={styles.codeValue}>{sessionCode}</span>
-                  <span className={styles.codeHint}>{copyHint}</span>
-                </button>
-              </div>
-            </div>
-
-            <div className={styles.modalFooter}>
+        <DevicePairingModal
+          eyebrow="Parowanie"
+          title="Podłącz urządzenie prezentera"
+          qrValue={presenterUrl}
+          roleLabel="Tryb: prezenter"
+          description="Zeskanuj kod telefonem prezentera. Na ekranie pojawi się karta hasła i czas tury."
+          warning={
+            showLocalhostWarning ? (
+              <>
+                Ten QR wskazuje na localhost. Na prawdziwym telefonie otwórz hosta po adresie sieciowym albo ustaw
+                `NEXT_PUBLIC_PUBLIC_ORIGIN` i `NEXT_PUBLIC_PARTYKIT_HOST`.
+              </>
+            ) : null
+          }
+          sessionCode={sessionCode}
+          copyHint={copyHint}
+          onCopy={handleCopySessionCode}
+          onOpenExternal={() => {
+            if (!presenterUrl) return
+            window.open(presenterUrl, '_blank', 'noopener,noreferrer')
+          }}
+          onClose={() => setShowModal(false)}
+          footer={
+            <>
               <button type="button" className={styles.closeBtn} onClick={() => setShowModal(false)}>
                 Zamknij
               </button>
@@ -167,9 +133,9 @@ export function PairingPanel({ roomId, isConnected, onDisconnect }: Props) {
               >
                 Rozłącz wszystkie urządzenia
               </button>
-            </div>
-          </div>
-        </div>
+            </>
+          }
+        />
       ) : null}
     </>
   )

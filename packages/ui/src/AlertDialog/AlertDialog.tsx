@@ -1,6 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
+import { ControlHintBadge } from '../ControlHintBadge/ControlHintBadge'
 import styles from './AlertDialog.module.css'
 
 type AlertDialogAction = {
@@ -93,7 +94,11 @@ export function AlertDialog({
                 onClick={action.onClick}
               >
                 <span className={styles.actionLabel}>{action.label}</span>
-                {action.hintLabel ? <span className={styles.actionHint}>{action.hintLabel}</span> : null}
+                <ControlHintBadge
+                  label={action.hintLabel}
+                  muted={action.variant !== 'primary'}
+                  visible={isFocusVisible && focusedActionIndex === index}
+                />
               </button>
             )
           })}

@@ -14,16 +14,42 @@ type PresenterPhaseRevealProps = {
   revealDuration: number
 }
 
-function getRevealWordSizing(word: string) {
+export const PRESENTER_REVEAL_GLYPH_WIDTH = 0.66
+
+export function getRevealWordSizing(word: string) {
   const normalized = word.trim()
   const wordCount = normalized.split(/\s+/).filter(Boolean).length
   const length = normalized.length
 
   if (wordCount <= 1) {
+    if (length <= 6) {
+      return {
+        wrapMode: 'nowrap' as const,
+        minFontSize: 52,
+        maxFontSize: 132,
+      }
+    }
+
+    if (length <= 10) {
+      return {
+        wrapMode: 'nowrap' as const,
+        minFontSize: 40,
+        maxFontSize: 104,
+      }
+    }
+
+    if (length <= 14) {
+      return {
+        wrapMode: 'nowrap' as const,
+        minFontSize: 34,
+        maxFontSize: 88,
+      }
+    }
+
     return {
       wrapMode: 'nowrap' as const,
-      minFontSize: length > 14 ? 42 : 58,
-      maxFontSize: length > 14 ? 120 : 164,
+      minFontSize: 30,
+      maxFontSize: 72,
     }
   }
 
@@ -89,7 +115,7 @@ export function PresenterPhaseReveal({
             lineHeight={1.04}
             horizontalPadding={12}
             verticalPadding={12}
-            averageGlyphWidth={0.54}
+            averageGlyphWidth={PRESENTER_REVEAL_GLYPH_WIDTH}
             wrapMode={revealSizing.wrapMode}
           />
         </div>

@@ -1,6 +1,6 @@
 # Project Party - Project Context
 
-*Last updated: 2026-04-19*
+*Last updated: 2026-04-20*
 
 ---
 
@@ -140,10 +140,10 @@ This means:
 ---
 
 <!-- handoff:start -->
-- Last: 2026-04-20 11:51 by Codex
-- Task: Modal/theme parity pass across Tajniacy and Kalambury, including Charades pause-confirm controller parity.
-- Did: Unified shared modal tokens and hover states across `@party/ui`, Tajniacy, and Kalambury; fixed per-game theme token inheritance so modal surfaces/eyebrows follow the active game's color; corrected Codenames modal action ordering; fixed Kalambury pause-confirm ordering in both UI and runtime control logic (`PlaySettingsModal`, `host-controls`, `charades-runtime-navigation-profile`) and updated focused checks. Verified with `npm run build --workspace @party/charades`, `npm run test:host-controls --workspace @party/charades`, `npm run test:navigation-profiles --workspace @party/charades`, and `npm run build --workspace @party/hub`.
-- Next: Finish a true browser runtime pass for Kalambury modals once the local stack is stable enough to run host + presenter end-to-end on the recommended path.
-- Blocker: Local verification stack is split: `localhost:3000` hydrates the hub correctly but current PartyKit/live wiring did not complete the presenter connection in this session, while `127.0.0.1:3000` gives broken HMR for hub UI and is not a reliable browser-validation target.
+- Last: 2026-04-20 23:19 by Codex
+- Task: Session wrap-up after Codex-only docs/rules cleanup and Charades presenter word overflow fix.
+- Did: Reworked repo docs/rules around a true Codex-only model with a real on-demand loading index, clarified `docs/superpowers` as active historical reference, and fixed Charades presenter reveal-word sizing with a dedicated regression check to stop wide words overflowing on narrow mobile screens.
+- Next: Re-test the Charades presenter on a stable live/local runtime stack so the reveal screen can be verified in browser, then continue the remaining Charades cleanup pass and the blocked Codenames pool-manager browser validation.
+- Blocker: Honest presenter browser verification is still limited by the current local runtime stack; on the static `:3001` flow the presenter did not advance from `waiting` after pairing.
 <!-- handoff:end -->
 

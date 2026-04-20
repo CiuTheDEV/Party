@@ -1,0 +1,1 @@
+export { ControlHintBadge } from './ControlHintBadge'

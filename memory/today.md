@@ -1,5 +1,29 @@
 # Today - 2026-04-20
 
+### S72 (23:19~) [Kalambury] Presenter reveal word overflow fix
+
+- Naprawiono overflow pojedynczych haseł na urządzeniu prezentera w Kalamburach przez bardziej konserwatywną heurystykę skalowania w `PresenterPhaseReveal`.
+- Wyeksportowano helper sizingu i dodano focused regression check `presenter-reveal-word.check.cjs`, żeby szerokie słowa na wąskim telefonie nie wracały do zbyt dużego fontu.
+- Weryfikacja przechodzi: `node packages/games/charades/src/runtime/presenter/presenter-reveal-word.check.cjs`, `node packages/games/charades/src/runtime/presenter/presenter-layout.check.cjs`, `node packages/games/charades/src/runtime/shared/autoscaled-word-layout.check.cjs`, `npm run build --workspace @party/charades`, `npm run build --workspace @party/hub`.
+- Browser verify reveal screen nie był uczciwie domykalny na statycznym `:3001`, bo presenter nie przechodził z `waiting` do aktywnej fazy po sparowaniu; potraktowano to jako ograniczenie lokalnego stacku, nie jako dowód regresji.
+- Experience recorded: no
+
+### S71 (23:19~) [Repo docs/rules] Codex-only cleanup + true on-demand index
+
+- Przepisano dokumentację repo pod model `Codex-only`: `AGENTS.md`, `docs/agents.md`, `docs/task-routing.md`, `rules/behaviors.md` i drobny wording w `docs/behaviors-extended.md`.
+- `AGENTS.md` ma już prawdziwy `On-demand Loading Index` zgodny z realnym stanem repo, obejmujący zarówno `/docs`, jak i `/rules`.
+- `docs/superpowers/specs/*` i `plans/*` zostały doprecyzowane jako aktywna historyczna referencja dla kontynuowanych obszarów, a nie martwe archiwum.
+- Dodano reusable pattern do `memory/patterns.md` dla podziału dokumentacji na warstwy `mandatory / on-demand / active historical reference`.
+- Experience recorded: yes
+
+### S70 (13:02~) [Shared UI] Stage 3 controls settings overlay extraction
+
+- Wyciągnięto wspólną infrastrukturę overlayu ustawień sterowania do `@party/ui`: `ControlsSettingsOverlay.tsx`, `useControlsSettingsOverlay.ts` i `types.ts`.
+- `CharadesSettingsOverlay` i `CodenamesSettingsOverlay` zostały zredukowane do cienkich wrapperów, a game-local data, binding helpers i navigation targets zostały zostawione w swoich modułach.
+- Zachowano dotychczasowe zachowanie: wake/sleep, controller wake guard, dialog ordering, parity lewo/prawo, listening binding flow, debug popup i focus-visible rules.
+- Weryfikacja przechodzi: `npm run build --workspace @party/ui`, `npm run build --workspace @party/charades`, `npm run build --workspace @party/codenames`.
+- Experience recorded: yes
+
 ### S69 (11:51~) [Tajniacy/Kalambury] Unified modal pass + Charades confirm parity
 
 - Ujednolicono modalowe tokeny, hover states i theme propagation w shared UI oraz głównych modalach Tajniaków i Kalamburów, tak aby modale dziedziczyły kolor aktywnej gry zamiast fallbackowego akcentu.

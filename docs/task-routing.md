@@ -1,96 +1,67 @@
 # Task Routing
 
-> On-demand loading. Core routing rules live in `rules/behaviors.md`.
+> On-demand only. This file does not route work between models. It routes work between repo playbooks.
 
 ---
 
-## Model Setup
+## Purpose
 
-**Claude Pro - Sonnet as primary, Haiku for lightweight tasks.**
+This repo is operated by **Codex only**.
 
-| Model | Status | Use |
-|-------|--------|-----|
-| Sonnet | Active | Primary - all development work |
-| Haiku | Active | Lightweight tasks: quick lookups, simple formatting, low-stakes Q&A |
-| Codex / GPT-5.4 | Active | Token limit fallback + cross-verification |
-| Codex / GPT-5.4-mini | Active | Lightweight fallback tasks when token limit is reached |
-| Antigravity | Active | Alternative fallback |
-| Opus | Not used | Too expensive on Claude Pro |
-| Local (Ollama) | Not used | Not set up |
+So "task routing" here means:
+- which local rules matter,
+- which docs to load,
+- and which verification style to prefer
+
+for a given task type.
+
+---
 
 ## Routing Table
 
-### Sonnet Handles Directly
-
-| Task Type | Notes |
-|-----------|-------|
-| UI / frontend development | Components, styles, layouts |
-| Bug fixes | Any size |
-| Docs, comments, README | Any `.md` file |
-| Config files | Non-secret parameters |
-| Game logic | Room management, scoring, state |
-| API routes | Cloudflare Workers, D1 queries |
-| Contained refactors | Small to medium changes |
-| Auth flow (custom email/password) | Integration work |
-| Partykit setup | Multiplayer architecture |
-
-### Hand Off to Codex / Antigravity
-
-| Trigger | Model | Action |
-|---------|-------|--------|
-| Token limit reached mid-task | GPT-5.4 | Save state and hand off with full context |
-| Cross-verification of critical logic | GPT-5.4 | Codex reviews Claude output |
-| Lightweight token-limit tasks | GPT-5.4-mini | Simple, well-defined tasks only |
-| Large non-sensitive refactor | GPT-5.4 | Optional outsource |
-
-### Use Haiku For
-
-| Task | Notes |
-|------|-------|
-| Quick factual lookups | No code involved |
-| Simple text formatting | No architecture decisions |
-| Low-stakes Q&A | When Sonnet would be overkill |
-
-## Handoff Template
-
-```text
-# Project Party - Handoff
-
-## Read first
-1. PROJECT_CONTEXT.md
-2. memory/today.md
-3. memory/active-tasks.json
-4. memory/MEMORY.md
-5. memory/patterns.md
-
-## Task
-[Specific description]
-
-## Context
-[What has been done, what remains]
-
-## Completion requirements
-1. Run: npm run lint && npm run build
-2. Confirm PASS from output
-3. Update PROJECT_CONTEXT.md handoff block
-4. Report results with evidence
-```
-
-## Free Tier Constraints
-
-All services must have a free tier. Before adding anything new:
-
-| Service | Free tier | Action if exceeded |
-|---------|-----------|-------------------|
-| Cloudflare Pages | Yes | Ask the product owner if limits matter |
-| Cloudflare D1 | Yes | Ask the product owner |
-| Cloudflare Workers | Yes | Ask the product owner |
-| Custom auth | Yes | Ask the product owner if it adds cost |
-| Partykit | Yes | Verify limits before heavy use |
-| Stripe | Transaction-based | Not connected yet |
-
-> Any service without a free tier means stop and ask the product owner.
+| Task type | Load / use | Verification default |
+|-----------|------------|----------------------|
+| Regular bug fix or feature in `apps/` / `packages/` | `AGENTS.md` + mandatory start files only | focused build/lint/test |
+| Browser-facing UI or runtime change | add Playwright-based inspection workflow from `AGENTS.md` | visible browser pass + screenshots |
+| External source processing / extraction / citation | `docs/content-safety.md` | source attribution and verification |
+| New service, infra, or stack decision | `docs/scaffolding-checkpoint.md` | explicit decision check against defaults |
+| Adding a new game module | `docs/new-game-checklist.md` | package/build integration checks |
+| Memory search or scoped code search details | `docs/behaviors-reference.md` | evidence from targeted search |
+| Knowledge-base write rules or lower-frequency process rules | `docs/behaviors-extended.md` | consistency with memory SSOT |
+| Continuing or revisiting a subsystem with prior design work | relevant `docs/superpowers/specs/*` and `plans/*` | compare with current code + handoff |
 
 ---
 
-*Project Party uses Claude Pro: Sonnet (primary), Haiku (lightweight), Codex GPT-5.4/GPT-5.4-mini (fallback).* 
+## Repo Defaults
+
+### Use local inspection first
+
+Prefer:
+- local code inspection,
+- current repo docs,
+- local verification,
+
+before inventing process or relying on stale assumptions.
+
+### Use docs only when relevant
+
+Do not bulk-load `/docs`.
+
+If a task is straightforward and current code plus mandatory context are enough, stay there.
+
+### Verification follows task surface
+
+- code logic change -> focused checks
+- UI/runtime change -> browser pass
+- doc/process change -> consistency review of affected docs
+
+---
+
+## Not Part of This File
+
+This file is **not** for:
+- model cost decisions,
+- multi-agent delegation,
+- token-limit handoff between different agents.
+
+Those older concerns are no longer active for this repo.

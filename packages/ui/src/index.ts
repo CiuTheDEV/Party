@@ -8,6 +8,9 @@ export { GameIcon } from './GameIcon/GameIcon'
 export { GameSetupTemplate } from './GameSetupTemplate/GameSetupTemplate'
 export { PremiumModal } from './PremiumModal/PremiumModal'
 export { AlertDialog } from './AlertDialog/AlertDialog'
+export { ControlHintBadge } from './ControlHintBadge/ControlHintBadge'
+export { DevicePairingModal } from './DevicePairingModal'
+export { RuntimeSettingsModal } from './RuntimeSettingsModal'
 export { WordPoolManagerModal } from './WordPoolManagerModal/WordPoolManagerModal'
 export { SettingsPanelShell } from './SettingsPanelShell/SettingsPanelShell'
 export { SettingsPanelFooter } from './SettingsPanelFooter/SettingsPanelFooter'
@@ -16,6 +19,8 @@ export { SettingsStatusPill } from './SettingsStatusPill/SettingsStatusPill'
 export { SettingsPlaceholderCard } from './SettingsPlaceholderCard/SettingsPlaceholderCard'
 export { SettingsListHeader } from './SettingsListHeader/SettingsListHeader'
 export { SettingsDetailHero } from './SettingsDetailHero/SettingsDetailHero'
+export { ControlsSettingsOverlay } from './ControlsSettingsOverlay/ControlsSettingsOverlay'
+export { useControlsSettingsOverlay } from './ControlsSettingsOverlay/useControlsSettingsOverlay'
 export { DiscreteSlider } from './DiscreteSlider/DiscreteSlider'
 export { SwitchField } from './SwitchField/SwitchField'
 export { SegmentedChoice } from './SegmentedChoice/SegmentedChoice'
@@ -66,6 +71,27 @@ export type {
 } from './host-navigation/host-navigation-types'
 export type { SettingsPanelTabItem } from './SettingsPanelTabs/SettingsPanelTabs'
 export type { SegmentedChoiceOption } from './SegmentedChoice/SegmentedChoice'
+export type {
+  ControlsSettingsOverlayAction,
+  ControlsSettingsOverlayBinding,
+  ControlsSettingsOverlayBindingApi,
+  ControlsSettingsOverlayBindingSlot,
+  ControlsSettingsOverlayCategory,
+  ControlsSettingsOverlayCommonProps,
+  ControlsSettingsOverlayConnectedGamepad,
+  ControlsSettingsOverlayDevice,
+  ControlsSettingsOverlayFooterFocusId,
+  ControlsSettingsOverlayFocusArea,
+  ControlsSettingsOverlayGamepadDebugState,
+  ControlsSettingsOverlayGamepadProfile,
+  ControlsSettingsOverlayGamepadSnapshot,
+  ControlsSettingsOverlayHelpers,
+  ControlsSettingsOverlayInputDevice,
+  ControlsSettingsOverlayMenuControlsApi,
+  ControlsSettingsOverlayNavigation,
+  ControlsSettingsOverlayProps,
+  ControlsSettingsOverlayStyles,
+} from './ControlsSettingsOverlay/types'
 export type {
   PartyAvatarAsset,
   PartyAvatarCategory,

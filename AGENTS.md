@@ -1,6 +1,6 @@
-# Project Party - Agent Operating Rules
+# Project Party - Codex Operating Rules
 
-Keep this file short, practical, and safe for all agents.
+Keep this file short, practical, and safe for this repo.
 
 ---
 
@@ -48,6 +48,15 @@ Read these before making changes:
 
 Use `PROJECT_CONTEXT.md` as the source of truth for current architecture and current phase.
 If this file and `PROJECT_CONTEXT.md` ever disagree, follow `PROJECT_CONTEXT.md`.
+
+### On-demand docs
+
+Everything under `docs/` is on-demand by default unless:
+- this file explicitly requires it,
+- the current task directly needs it,
+- or the user asks for it.
+
+Do not load the whole `docs/` tree at session start.
 
 ---
 
@@ -188,6 +197,24 @@ When a meaningful session ends:
 4. Update `memory/MEMORY.md` or `memory/patterns.md` if a reusable lesson was learned
 5. Commit only when the owner asked for it or the task explicitly includes it
 
+## On-demand Loading Index
+
+| Scenario | Load file |
+|----------|-----------|
+| Repo doc hierarchy / Codex workflow | `Read docs/agents.md` |
+| Repo playbook routing by task type | `Read docs/task-routing.md` |
+| Repo behavior contract beyond `AGENTS.md` | `Read rules/behaviors.md` |
+| Save discipline / session continuity edge cases | `Read rules/memory-flush.md` |
+| Skill trigger policy / auto-trigger rules | `Read rules/skill-triggers.md` |
+| AI content safety / source attribution / extraction | `Read docs/content-safety.md` |
+| Search / memory / scoped lookup details | `Read docs/behaviors-reference.md` |
+| Lower-frequency workflow rules / knowledge-base handling | `Read docs/behaviors-extended.md` |
+| New service / infra / stack decision | `Read docs/scaffolding-checkpoint.md` |
+| New game module scaffold | `Read docs/new-game-checklist.md` |
+| Original monorepo bootstrap assumptions | `Read docs/project-setup.md` |
+| Continuing a subsystem with prior design history | `Read the relevant file in docs/superpowers/specs/ and/or docs/superpowers/plans/` |
+| Cross-day goals | `Read memory/goals.md` if present |
+
 Handoff format:
 
 ```md
@@ -203,4 +230,4 @@ Handoff format:
 
 ---
 
-*Last updated: 2026-04-19*
+*Last updated: 2026-04-20*

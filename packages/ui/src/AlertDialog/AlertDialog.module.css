@@ -98,7 +98,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 0;
   width: 100%;
   min-height: 44px;
   padding: 0 16px;
@@ -118,42 +118,6 @@
 .actionLabel {
   display: inline-flex;
   align-items: center;
-}
-
-.actionHint {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 22px;
-  max-width: 0;
-  padding: 0;
-  margin-left: 0;
-  border-radius: 999px;
-  background: rgba(8, 8, 8, 0.22);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  font-size: 10px;
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  line-height: 1;
-  color: currentColor;
-  opacity: 0;
-  transform: translateY(2px);
-  overflow: hidden;
-  white-space: nowrap;
-  transition:
-    opacity 0.16s ease,
-    transform 0.16s ease,
-    max-width 0.16s ease,
-    padding 0.16s ease,
-    margin-left 0.16s ease;
-}
-
-.actionFocused .actionHint {
-  max-width: 72px;
-  padding: 0 8px;
-  margin-left: 2px;
-  opacity: 1;
-  transform: translateY(0);
 }
 
 .actionSecondary {

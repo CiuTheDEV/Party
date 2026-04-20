@@ -1,0 +1,241 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: var(--modal-backdrop-bg);
+  backdrop-filter: blur(var(--modal-backdrop-blur));
+}
+
+.modal {
+  width: min(600px, 100%);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--modal-surface-border);
+  border-radius: var(--modal-surface-radius);
+  background: var(--modal-surface-bg);
+  box-shadow: var(--modal-surface-shadow-lg);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid var(--modal-divider);
+}
+
+.headerCopy {
+  display: grid;
+  gap: 6px;
+}
+
+.eyebrow {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--modal-eyebrow);
+}
+
+.title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--modal-action-secondary-border);
+  border-radius: 12px;
+  background: var(--modal-action-secondary-bg);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.iconButton:hover {
+  border-color: var(--modal-action-secondary-hover-border);
+  background: var(--modal-action-secondary-hover-bg);
+  color: var(--color-text);
+}
+
+.iconButton:focus-visible {
+  outline: 2px solid var(--color-focus-outline);
+  outline-offset: 2px;
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px 24px;
+}
+
+.qrRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.qrBox {
+  flex-shrink: 0;
+  padding: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  overflow: hidden;
+  background: #17171c;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.roleLabel {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--modal-eyebrow);
+}
+
+.description {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--modal-copy);
+}
+
+.statusSection {
+  display: grid;
+  gap: 8px;
+}
+
+.warning {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #fde68a;
+}
+
+.codeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 18px;
+  border: 1px solid var(--modal-section-border);
+  border-radius: 18px;
+  background: var(--modal-section-bg);
+}
+
+.codeLabel {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.64);
+}
+
+.codeButton {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-align: right;
+}
+
+.codeButton:hover .codeValue,
+.codeButton:focus-visible .codeValue {
+  color: color-mix(in srgb, var(--game-color-primary) 72%, white);
+}
+
+.codeButton:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--game-color-primary) 70%, white);
+  outline-offset: 6px;
+  border-radius: 10px;
+}
+
+.codeValue {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  color: var(--color-text);
+}
+
+.codeHint {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.footer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 24px 20px;
+  border-top: 1px solid var(--modal-divider);
+}
+
+@media (max-width: 767px) {
+  .overlay {
+    padding: 12px;
+  }
+
+  .modal {
+    border-radius: 22px;
+  }
+
+  .header,
+  .body,
+  .footer {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .header,
+  .qrRow,
+  .codeRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actions {
+    justify-content: flex-end;
+  }
+
+  .codeButton {
+    align-items: flex-start;
+    text-align: left;
+  }
+}

@@ -39,7 +39,7 @@ Self-check:
 ## Execution Plan Mode (complex tasks)
 
 ```text
-User requirement -> Claude outputs execution plan -> User approves -> Claude executes -> Report
+User requirement -> Codex outputs execution plan -> User approves -> Codex executes -> Report
 ```
 
 **Execution plan template**:

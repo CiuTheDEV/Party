@@ -107,3 +107,13 @@
 **Solution:** Keep a small legacy-to-current key map in the bindings loader and copy old saved values into the new keys before merging with defaults.
 
 **Why:** Without an explicit migration step, the UI and runtime may look correct in a fresh session but existing users silently lose custom bindings or appear to revert to defaults after the rename.
+
+---
+
+## Repo docs should be layered into mandatory, on-demand, and active historical reference
+
+**Scenario:** The repo keeps growing process docs, rules, specs, and plans, and not all of them should be loaded at session start.
+
+**Solution:** Keep `AGENTS.md` plus `PROJECT_CONTEXT.md` and `memory/*` as the mandatory startup layer, treat `/docs` and `/rules` as on-demand by default, and treat `docs/superpowers/specs/*` and `docs/superpowers/plans/*` as active historical references that should be loaded when continuing or modifying an area with prior design history.
+
+**Why:** This keeps startup context small without losing important implementation history. `docs/superpowers` are not dead archives in this repo; they are living references for follow-up work.

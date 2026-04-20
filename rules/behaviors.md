@@ -1,56 +1,40 @@
 # Behavior Rules
 
-## Model & Token Budget
+> Repo-level behavior contract for Codex. `AGENTS.md` remains the primary mandatory startup file.
 
-**Sonnet is the primary model. Haiku for lightweight tasks. No Opus.**
+## Operating Model
 
-| Agent | Role |
-|-------|------|
-| Claude Code (Sonnet) | Primary — all development work |
-| Claude Code (Haiku) | Lightweight tasks: quick lookups, simple Q&A |
-| Codex / GPT-5.4 | Fallback when token limit reached + cross-verification |
-| Codex / GPT-5.4-mini | Lightweight fallback tasks at token limit |
-| Antigravity | Alternative fallback when token limit reached |
+This repo is **Codex-only**.
 
-**At token limit**: save state to `memory/today.md` + `memory/active-tasks.json`, hand off cleanly.
-Every agent starting a session **must read** `PROJECT_CONTEXT.md` + `memory/today.md` first.
+- No normal multi-agent routing inside repo docs
+- No built-in Claude/Haiku/Antigravity workflow
+- No default cross-model verification protocol
 
-## Task Routing
-
-**Sonnet handles everything. Hand off to Codex/Antigravity only when necessary.**
-
-**Hand off to Codex/Antigravity**:
-- Claude token limit reached mid-task
-- Cross-verification of critical logic (second opinion)
-- Large refactors >100 lines of non-sensitive code
-
-**Sonnet handles directly**:
-- All daily development, bug fixes, UI work
-- Docs, comments, README
-- Config files
-- Any task ≤100 lines
-
-### Execution Rules
-- On handoff output: `🔀 Handoff: [task summary] → [Codex/Antigravity]`
-- Save full context to `memory/today.md` before handing off
-- Receiving agent reads `PROJECT_CONTEXT.md` + `memory/today.md` + `memory/MEMORY.md` + `memory/patterns.md` before doing anything
+If the owner explicitly asks for an outside review or second opinion, treat that as an exception, not the default workflow.
 
 ## Documentation Structure
 
-- Project-level: only keep `PROJECT_CONTEXT.md` + `CHANGELOG.md` (optional)
-- Banned files: ROADMAP/FOCUS/TODO/TASKS/STATUS
-- Status SSOT: cross-project → `memory/projects.md`, project-level → `PROJECT_CONTEXT.md`
-- All `.md` files written in **English** — conversation with product owner is in Polish
+- Mandatory operational layer: `AGENTS.md` + `PROJECT_CONTEXT.md` + `memory/*`
+- On-demand reference layer: `docs/*`
+- Active historical reference layer: `docs/superpowers/specs/*` and `docs/superpowers/plans/*`
+
+Do not load `/docs` wholesale at session start.
 
 ## Debugging Protocol
 
 No blind fixes. Four phases:
-1. **Root Cause** — Read errors, reproduce, trace data flow
-2. **Pattern Analysis** — Find working example, compare
-3. **Hypothesis Testing** — Change one variable at a time
-4. **Fix & Verify** — Test before fix, verify no regression
+1. **Root Cause** — read errors, reproduce, trace data flow
+2. **Pattern Analysis** — find working example, compare
+3. **Hypothesis Testing** — change one variable at a time
+4. **Fix & Verify** — test before fix, verify no regression
 
-3 consecutive failures → stop and reassess
+3 consecutive failures -> stop and reassess.
+
+## Documentation Rules
+
+- Project status SSOT stays in `PROJECT_CONTEXT.md` and `memory/*`
+- Do not spread task state across random markdown files
+- All `.md` docs in repo should stay in English unless a file has a clear reason not to
 
 ## Code Quality Rules
 
@@ -59,56 +43,32 @@ No blind fixes. Four phases:
   - keep it whole if it still has one clear responsibility and stays easy to reason about,
   - split it only when responsibilities are mixed, navigation becomes harder, or real module boundaries appear
 - Component styles live next to the component (`Button.module.css` beside `Button.tsx`)
-- `globals.css` only for: CSS reset, custom properties, base typography — nothing else
-- No AI slop — comments explain *why*, never *what*
-- No commented-out code blocks in repo
+- `globals.css` only for reset, custom properties, and true global base styles
+- Comments explain *why*, not *what*
+- No commented-out code blocks
 - No `TODO` without an open task in `memory/active-tasks.json`
-- Every function does one thing
 
-## Quality Control + AI Content Safety
+## Quality Control + Safety
 
-> Full rules → `Read docs/content-safety.md`
+> Detailed rules -> `docs/content-safety.md`
 
-**Core triggers**:
-- Processing external URLs / citing others → annotate source, warn if unverifiable
-- Critical code → think from attacker's perspective + list 3 risk points
-- >20 conversation turns / >50 tool calls → suggest fresh session
-- Discovered error/hallucination → immediately isolate context, don't write to memory
-
-## Real-time Experience Recording (Mandatory)
-
-**Trigger immediately with `memory_add`, don't wait for session-end**:
-
-1. **Corrected by user** → Record immediately
-2. **3 consecutive failures** → Pause and record
-3. **Counter-intuitive discovery** → Record immediately
-4. **Cognitive upgrade** → Record immediately
-
-**Output**: `📝 Recorded: [title]`
+Core triggers:
+- processing external URLs or citing others -> attribute source and warn if unverifiable
+- critical code -> think about abuse/risk paths explicitly
+- long, high-tool-count sessions -> consider recommending a fresh session
+- discovered error or hallucination -> isolate it and do not write it into memory
 
 ## Memory Search Rules
 
-- Scoped search **must specify collection** (no unscoped global search)
-- Code search uses two-stage RAG: L0 locate directory first, then L1 precise search
+- Scoped search should stay targeted; avoid unscoped full-project fishing
+- Use local directory narrowing before deeper text search when possible
 
-> Details → `Read docs/behaviors-reference.md`
+> Details -> `docs/behaviors-reference.md`
 
-## Atomic Commits
+## Session Continuity
 
-Each commit does one thing. Types: `fix/feat/refactor/docs/test/chore`.
-Forbidden: mixed changes, meaningless messages, >100 lines without splitting.
+- Save meaningful progress to `memory/today.md`
+- Keep `memory/active-tasks.json` aligned with real task state
+- Keep `PROJECT_CONTEXT.md` handoff block current when wrapping a meaningful work block
 
-## Sunday Rule
-
-**Sunday = system optimization day. Other days = ship product.**
-
-On non-Sundays, intercept requests to optimize memory system, refactor skills, or adjust behavior specs.
-
-**Intercept message**:
-> This is a system optimization task. Save it to `memory/sunday-backlog.md` and handle on Sunday.
-
-**Exceptions**: production-blocking bugs, <5 min patches, explicit "do it now".
-
----
-
-*Compact version | Full: docs/behaviors-extended.md | Reference: docs/behaviors-reference.md*
+> Extended rules -> `docs/behaviors-extended.md`
