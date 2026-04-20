@@ -70,6 +70,13 @@ Do not load the whole `docs/` tree at session start.
 - Do **not** reorder imports, rename symbols, or reformat unrelated code just because it looks cleaner.
 - Prefer patch-style edits over full-file replacement.
 
+### KISS and DRY
+
+- Prefer the simplest solution that solves the real problem.
+- Do not build abstractions before the second real use case exists.
+- Reuse existing shared structure when it genuinely fits.
+- Do not force things into shared layers just to avoid a small amount of duplication.
+
 ### Encoding / mojibake safety
 
 - Treat files with Polish UI copy as UTF-8-sensitive.
@@ -211,6 +218,11 @@ When a meaningful session ends:
 | Lower-frequency workflow rules / knowledge-base handling | `Read docs/behaviors-extended.md` |
 | New service / infra / stack decision | `Read docs/scaffolding-checkpoint.md` |
 | New game module scaffold | `Read docs/new-game-checklist.md` |
+| New game module ownership / file shape / reuse expectations | `Read docs/game-module-template.md` |
+| Runtime ownership / shared-vs-local runtime decisions | `Read docs/runtime-map.md` |
+| Shared extraction decision for `@party/ui` | `Read docs/shared-extraction-checklist.md` |
+| Internal module readiness / maturity discussion | `Read docs/module-maturity.md` |
+| File splitting / refactor / clean-code decision | `Read docs/code-organization.md` |
 | Original monorepo bootstrap assumptions | `Read docs/project-setup.md` |
 | Continuing a subsystem with prior design history | `Read the relevant file in docs/superpowers/specs/ and/or docs/superpowers/plans/` |
 | Cross-day goals | `Read memory/goals.md` if present |

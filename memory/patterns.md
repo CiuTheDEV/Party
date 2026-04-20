@@ -117,3 +117,13 @@
 **Solution:** Keep `AGENTS.md` plus `PROJECT_CONTEXT.md` and `memory/*` as the mandatory startup layer, treat `/docs` and `/rules` as on-demand by default, and treat `docs/superpowers/specs/*` and `docs/superpowers/plans/*` as active historical references that should be loaded when continuing or modifying an area with prior design history.
 
 **Why:** This keeps startup context small without losing important implementation history. `docs/superpowers` are not dead archives in this repo; they are living references for follow-up work.
+
+---
+
+## Session wrap-up should include a documentation sync pass
+
+**Scenario:** The repo relies on docs like `ui-map`, `runtime-map`, templates, and checklists as active working references, not passive archives.
+
+**Solution:** Treat session wrap-up as `today.md + tasks + handoff + documentation sync`. After meaningful code or workflow changes, explicitly check whether shared inventory, runtime ownership, module template, extraction rules, code-organization rules, or routing docs became stale, and update them in the same session.
+
+**Why:** In an agent-first repo, stale documentation is not a cosmetic issue. It directly degrades future decision quality. The docs should move with the code, not a week later.

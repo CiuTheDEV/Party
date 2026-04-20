@@ -19,6 +19,13 @@ If the owner explicitly asks for an outside review or second opinion, treat that
 - Active historical reference layer: `docs/superpowers/specs/*` and `docs/superpowers/plans/*`
 
 Do not load `/docs` wholesale at session start.
+Prefer the focused playbooks when relevant:
+- `docs/ui-map.md`
+- `docs/runtime-map.md`
+- `docs/game-module-template.md`
+- `docs/shared-extraction-checklist.md`
+- `docs/module-maturity.md`
+- `docs/code-organization.md`
 
 ## Debugging Protocol
 
@@ -38,6 +45,8 @@ No blind fixes. Four phases:
 
 ## Code Quality Rules
 
+- KISS: prefer the simplest solution that solves the real problem
+- DRY: reuse existing structure when it is truly shared, but do not force premature abstraction
 - **300 lines is a review threshold, not an automatic split rule**
 - If a file grows past ~300 lines, review cohesion first:
   - keep it whole if it still has one clear responsibility and stays easy to reason about,

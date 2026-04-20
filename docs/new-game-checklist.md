@@ -6,6 +6,12 @@ Reference implementation: `packages/games/charades/` (live) and `packages/games/
 
 CSS rules are in `packages/game-sdk/README.md` under "CSS Contract for Game Modules".
 
+Before starting, also read:
+- `docs/game-module-template.md`
+- `docs/ui-map.md`
+- `docs/runtime-map.md` if the new game will have real runtime flow
+- `docs/module-maturity.md`
+
 ---
 
 ## Step 1 — Content
@@ -47,6 +53,8 @@ Create `packages/games/[game]/` with:
 - `package.json` — name: `@party/[game]`, with dependencies on `@party/game-sdk` and `@party/ui`
 - `tsconfig.json` — extends root tsconfig
 - `src/index.ts` — main export file
+
+Use `docs/game-module-template.md` as the baseline ownership and file-shape reference.
 
 Register in:
 - `turbo.json` — add workspace
@@ -140,6 +148,8 @@ Create `packages/games/[game]/src/menu/`:
 - `[Game]SettingsOverlay.module.css` — game colors via `var()` and `color-mix()`
 - `menu-view.ts`, `menu-controls.ts`, `useMenuControls.ts` — copied and renamed from Charades
 
+Before copying any local shell-like UI from another game, check `docs/ui-map.md` to confirm the pattern does not already exist in `@party/ui`.
+
 ---
 
 ## Step 7 — Navigation profiles
@@ -152,6 +162,8 @@ Create `packages/games/[game]/src/navigation/`:
 - `[game]-setup-navigation-profile.ts`
 
 Each profile must define `screenId`, `getEntryTarget(context)`, and `resolveAction(...)`. See `packages/game-sdk/README.md` under "Host Navigation Adoption" for full requirements.
+
+If the game will have real runtime host flow, also follow `docs/runtime-map.md` so engine-level infra stays shared and game command semantics stay local.
 
 ---
 
@@ -201,6 +213,8 @@ grep -r "rgba(" packages/games/[game]/src --include="*.css"
 ```
 
 Inspect every match. Any `rgba()` with hardcoded game color values is a violation. Neutral shadows like `rgba(0, 0, 0, 0.4)` are fine.
+
+Check module maturity with `docs/module-maturity.md` before calling the module ready for broader use.
 
 ---
 

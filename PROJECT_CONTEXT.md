@@ -113,6 +113,10 @@ This means:
 - games keep flexibility in section content and order,
 - hub does not hardcode per-game setup structure.
 
+For the current shared UI inventory and the practical ownership map of `@party/ui` vs game modules, see `docs/ui-map.md`.
+For runtime ownership and shared-vs-local runtime rules, see `docs/runtime-map.md`.
+For new game module scaffolding and maturity expectations, see `docs/game-module-template.md` and `docs/module-maturity.md`.
+
 ---
 
 ## Key Decisions
@@ -140,10 +144,10 @@ This means:
 ---
 
 <!-- handoff:start -->
-- Last: 2026-04-20 23:19 by Codex
-- Task: Session wrap-up after Codex-only docs/rules cleanup and Charades presenter word overflow fix.
-- Did: Reworked repo docs/rules around a true Codex-only model with a real on-demand loading index, clarified `docs/superpowers` as active historical reference, and fixed Charades presenter reveal-word sizing with a dedicated regression check to stop wide words overflowing on narrow mobile screens.
-- Next: Re-test the Charades presenter on a stable live/local runtime stack so the reveal screen can be verified in browser, then continue the remaining Charades cleanup pass and the blocked Codenames pool-manager browser validation.
+- Last: 2026-04-20 23:52 by Codex
+- Task: Build out the repo's agent-first documentation layer and make session wrap-up keep docs synced with code.
+- Did: Added the new working playbooks (`docs/README.md`, `ui-map`, `runtime-map`, `game-module-template`, `module-maturity`, `shared-extraction-checklist`, `code-organization`), wired them into `AGENTS.md`/routing docs, recorded KISS+DRY as repo guardrails, and upgraded the `session-end` skill so wrap-up now includes an explicit documentation sync pass.
+- Next: Re-test the Charades presenter on a stable live/local runtime stack, then continue the remaining Charades cleanup pass and the blocked Codenames pool-manager browser validation using the new repo playbooks as the default decision layer.
 - Blocker: Honest presenter browser verification is still limited by the current local runtime stack; on the static `:3001` flow the presenter did not advance from `waiting` after pairing.
 <!-- handoff:end -->
 

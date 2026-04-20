@@ -74,6 +74,8 @@ When resuming work after interruption:
 
 ## `/docs` Map
 
+For a quick folder-level index, see `docs/README.md`.
+
 | File | Use when | Role |
 |------|----------|------|
 | `docs/agents.md` | repo workflow / doc hierarchy | Codex-specific reference guide |
@@ -81,6 +83,11 @@ When resuming work after interruption:
 | `docs/content-safety.md` | external sources, extraction, attribution | safety + quality rules |
 | `docs/scaffolding-checkpoint.md` | new service or stack choice | infra decision gate |
 | `docs/new-game-checklist.md` | adding a new game module | implementation checklist |
+| `docs/game-module-template.md` | deciding what a new game module must own and reuse | module boundary template |
+| `docs/runtime-map.md` | runtime ownership and shared-vs-local runtime decisions | runtime ownership map |
+| `docs/shared-extraction-checklist.md` | deciding whether something belongs in `@party/ui` | shared extraction gate |
+| `docs/module-maturity.md` | discussing module readiness more precisely than `live` / `coming-soon` | internal maturity guide |
+| `docs/code-organization.md` | deciding whether to split, refactor, or keep code local | code organization playbook |
 | `docs/project-setup.md` | checking original bootstrap assumptions | historical setup reference |
 | `docs/behaviors-reference.md` | memory/code search details | reference rules |
 | `docs/behaviors-extended.md` | knowledge-base and lower-frequency process rules | extended rules |

@@ -1,5 +1,13 @@
 # Today - 2026-04-20
 
+### S73 (23:52~) [Repo docs/workflow] Agent-first documentation guardrails
+
+- Dodano repo-level playbooki: `docs/README.md`, `docs/ui-map.md`, `docs/runtime-map.md`, `docs/game-module-template.md`, `docs/module-maturity.md`, `docs/shared-extraction-checklist.md` i `docs/code-organization.md`.
+- Podpieto nowe dokumenty do `AGENTS.md`, `docs/agents.md`, `docs/task-routing.md`, `docs/new-game-checklist.md`, `rules/behaviors.md` oraz `PROJECT_CONTEXT.md`, tak aby byly realnie odkrywalne i uzywane podczas pracy.
+- Zapisano jawne zasady `KISS` i `DRY` jako repo-level guardrails oraz doprecyzowano local-first bias dla runtime i shared extraction.
+- Rozszerzono skill `session-end`, aby wymagac dokumentacyjnego sync passu po sesji i pilnowac, zeby docs nie zostawaly tydzien za kodem.
+- Experience recorded: yes
+
 ### S72 (23:19~) [Kalambury] Presenter reveal word overflow fix
 
 - Naprawiono overflow pojedynczych haseł na urządzeniu prezentera w Kalamburach przez bardziej konserwatywną heurystykę skalowania w `PresenterPhaseReveal`.
