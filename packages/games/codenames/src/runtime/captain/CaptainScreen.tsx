@@ -124,15 +124,15 @@ export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }:
               </div>
               {shouldExitAfterHostDisconnect ? (
                 <>
-                  <p className={styles.waitingTitle}>Host opuscil pokoj</p>
-                  <p className={styles.waitingCopy}>Wracam do menu glownego...</p>
+                  <p className={styles.waitingTitle}>Host opuścił pokój</p>
+                  <p className={styles.waitingCopy}>Wracam do menu głównego...</p>
                 </>
               ) : (
                 <>
                   <p className={styles.waitingTitle}>Czekam na start gry...</p>
-                  <p className={styles.waitingCopy}>Host musi uruchomic gre na TV</p>
+                  <p className={styles.waitingCopy}>Host musi uruchomić grę na TV</p>
                   <button type="button" className={styles.changeRoleButton} onClick={onChangeRole}>
-                    Zmien role
+                    Zmień rolę
                   </button>
                 </>
               )}
@@ -199,7 +199,7 @@ export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }:
                     <AvatarAsset avatar={redTeam.avatar} size={14} />
                   </div>
                   <strong className={styles.countBadgeValue}>{boardMeta.redRemaining}</strong>
-                  <span className={styles.countBadgeLabel}>pozostalo</span>
+                  <span className={styles.countBadgeLabel}>pozostało</span>
                 </div>
 
                 <div className={styles.countBadge} data-team="blue">
@@ -207,7 +207,7 @@ export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }:
                     <AvatarAsset avatar={blueTeam.avatar} size={14} />
                   </div>
                   <strong className={styles.countBadgeValue}>{boardMeta.blueRemaining}</strong>
-                  <span className={styles.countBadgeLabel}>pozostalo</span>
+                  <span className={styles.countBadgeLabel}>pozostało</span>
                 </div>
               </div>
             </footer>
@@ -216,18 +216,18 @@ export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }:
               <div className={styles.connectionOverlay} role="dialog" aria-modal="true" aria-label="Wstrzymano gre">
                 <div className={styles.connectionModal}>
                   <span className={styles.connectionEyebrow}>Gra wstrzymana</span>
-                  <h2 className={styles.connectionTitle}>Czekam na oba urzadzenia kapitanow</h2>
-                  <p className={styles.connectionCopy}>Polaczenie wroci automatycznie, gdy drugi kapitan polaczy sie ponownie.</p>
+                  <h2 className={styles.connectionTitle}>Czekam na oba urządzenia kapitanów</h2>
+                  <p className={styles.connectionCopy}>Połączenie wróci automatycznie, gdy drugi kapitan połączy się ponownie.</p>
                 </div>
               </div>
             ) : null}
 
             {shouldExitAfterHostDisconnect ? (
-              <div className={styles.connectionOverlay} role="dialog" aria-modal="true" aria-label="Host opuscil pokoj">
+              <div className={styles.connectionOverlay} role="dialog" aria-modal="true" aria-label="Host opuścił pokój">
                 <div className={styles.connectionModal}>
-                  <span className={styles.connectionEyebrow}>Pokoj zamkniety</span>
-                  <h2 className={styles.connectionTitle}>Host opuscil pokoj</h2>
-                  <p className={styles.connectionCopy}>Wracam do menu glownego.</p>
+                  <span className={styles.connectionEyebrow}>Pokój zamknięty</span>
+                  <h2 className={styles.connectionTitle}>Host opuścił pokój</h2>
+                  <p className={styles.connectionCopy}>Wracam do menu głównego.</p>
                 </div>
               </div>
             ) : null}
@@ -259,16 +259,16 @@ export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }:
         open={isBrowserExitAlertOpen}
         variant="danger"
         eyebrow="Gra w toku"
-        title="Wrocic do menu?"
-        description="Biezaca rozgrywka zostanie przerwana i utracisz aktualny postep."
+        title="Wrócić do menu?"
+        description="Bieżąca rozgrywka zostanie przerwana i utracisz aktualny postęp."
         actions={[
           {
-            label: 'Zostan w grze',
+            label: 'Zostań w grze',
             onClick: () => setIsBrowserExitAlertOpen(false),
             variant: 'secondary',
           },
           {
-            label: 'Tak, wroc do menu',
+            label: 'Tak, wróć do menu',
             onClick: () => router.push('/games/codenames'),
             variant: 'danger',
             fullWidth: true,

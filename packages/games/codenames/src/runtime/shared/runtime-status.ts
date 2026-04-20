@@ -63,9 +63,9 @@ export function getCaptainRuntimeStatus({
 }: CaptainRuntimeStatusParams): RuntimeStatus | null {
   if (!hostConnected && phase !== 'waiting') {
     return {
-      eyebrow: 'Pokoj zamkniety',
-      title: 'Host opuscil pokoj.',
-      description: 'Za chwile nastapi powrot do menu.',
+      eyebrow: 'Pokój zamknięty',
+      title: 'Host opuścił pokój.',
+      description: 'Za chwilę nastąpi powrót do menu.',
       tone: 'danger',
     }
   }
@@ -76,11 +76,11 @@ export function getCaptainRuntimeStatus({
     const isFirstRound = roundWinsRed === 0 && roundWinsBlue === 0
 
     return {
-      eyebrow: isFirstRound ? 'Gotowosc kapitanow' : 'Przekaz urzadzenie',
-      title: isFirstRound ? 'Potwierdz gotowosc kapitana.' : 'Potwierdz gotowosc nowego kapitana.',
+      eyebrow: isFirstRound ? 'Gotowość kapitanów' : 'Przekaż urządzenie',
+      title: isFirstRound ? 'Potwierdź gotowość kapitana.' : 'Potwierdź gotowość nowego kapitana.',
       description: isFirstRound
-        ? 'Klucz planszy odblokuje sie dopiero, gdy oboje kapitanowie klikna Gotowy.'
-        : 'Przekaz telefon nowemu kapitanowi. Klucz planszy odblokuje sie dopiero, gdy oboje kapitanowie klikna Gotowy.',
+        ? 'Klucz planszy odblokuje się dopiero, gdy oboje kapitanowie klikną Gotowy.'
+        : 'Przekaż telefon nowemu kapitanowi. Klucz planszy odblokuje się dopiero, gdy oboje kapitanowie klikną Gotowy.',
       tone: 'warning',
     }
   }
@@ -88,8 +88,8 @@ export function getCaptainRuntimeStatus({
   if (disconnectedCaptainLabel && (phase === 'playing' || phase === 'assassin-reveal')) {
     return {
       eyebrow: 'Gra wstrzymana',
-      title: `${disconnectedCaptainLabel} rozlaczyl sie.`,
-      description: 'Plansza wznowi sie automatycznie po ponownym polaczeniu.',
+      title: `${disconnectedCaptainLabel} rozłączył się.`,
+      description: 'Plansza wznowi się automatycznie po ponownym połączeniu.',
       tone: 'warning',
     }
   }
@@ -97,8 +97,8 @@ export function getCaptainRuntimeStatus({
   if (phase === 'assassin-reveal' && assassinTeam === null) {
     return {
       eyebrow: 'Uwaga',
-      title: 'Ktos trafil zabojce.',
-      description: 'Czekam na decyzje hosta, kto odkryl karte.',
+      title: 'Ktoś trafił zabójcę.',
+      description: 'Czekam na decyzję hosta, kto odkrył kartę.',
       tone: 'danger',
     }
   }
@@ -106,8 +106,8 @@ export function getCaptainRuntimeStatus({
   if (phase === 'ended' && assassinTeam) {
     return {
       eyebrow: 'Koniec rundy',
-      title: `${getTeamLabel(assassinTeam)} trafili zabojce.`,
-      description: 'Host przygotowuje kolejna plansze.',
+      title: `${getTeamLabel(assassinTeam)} trafili zabójcę.`,
+      description: 'Host przygotowuje kolejną planszę.',
       tone: 'danger',
     }
   }
@@ -115,8 +115,8 @@ export function getCaptainRuntimeStatus({
   if (phase === 'ended') {
     return {
       eyebrow: 'Koniec rundy',
-      title: 'Runda zostala zakonczona.',
-      description: 'Host przygotowuje kolejna plansze.',
+      title: 'Runda została zakończona.',
+      description: 'Host przygotowuje kolejną planszę.',
       tone: 'warning',
     }
   }
@@ -147,7 +147,7 @@ export function getHostRuntimeStatus({
 
     return {
       eyebrow: 'Oczekiwanie',
-      title: 'Czekam na gotowosc kapitanow.',
+      title: 'Czekam na gotowość kapitanów.',
       description: `Gotowy: ${readyTeams.join(', ') || 'nikt'}. Czeka: ${waitingTeams.join(', ') || 'nikt'}.`,
       tone: 'warning',
     }
@@ -156,8 +156,8 @@ export function getHostRuntimeStatus({
   if (disconnectedCaptainLabel && (phase === 'playing' || phase === 'assassin-reveal' || phase === 'waiting')) {
     return {
       eyebrow: 'Gra wstrzymana',
-      title: `${disconnectedCaptainLabel} jest rozlaczony.`,
-      description: 'Parowanie pozostaje otwarte, dopoki oba urzadzenia nie wroca.',
+      title: `${disconnectedCaptainLabel} jest rozłączony.`,
+      description: 'Parowanie pozostaje otwarte, dopóki oba urządzenia nie wrócą.',
       tone: 'warning',
     }
   }
@@ -165,8 +165,8 @@ export function getHostRuntimeStatus({
   if (phase === 'ended' && assassinTeam) {
     return {
       eyebrow: 'Koniec rundy',
-      title: `${getTeamLabel(assassinTeam)} trafili zabojce.`,
-      description: 'Mozesz przygotowac kolejna plansze albo zakonczyc mecz.',
+      title: `${getTeamLabel(assassinTeam)} trafili zabójcę.`,
+      description: 'Możesz przygotować kolejną planszę albo zakończyć mecz.',
       tone: 'danger',
     }
   }
@@ -174,8 +174,8 @@ export function getHostRuntimeStatus({
   if (phase === 'ended') {
     return {
       eyebrow: 'Koniec rundy',
-      title: 'Runda zostala zakonczona.',
-      description: 'Wybierz kolejna plansze albo przejdz dalej do podsumowania.',
+      title: 'Runda została zakończona.',
+      description: 'Wybierz kolejną planszę albo przejdź dalej do podsumowania.',
       tone: 'warning',
     }
   }

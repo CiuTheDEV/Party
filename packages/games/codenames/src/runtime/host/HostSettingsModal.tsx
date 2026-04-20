@@ -69,9 +69,9 @@ export function HostSettingsModal({
         {isExitConfirmOpen ? (
           <>
             <span className={styles.eyebrow}>Potwierdzenie</span>
-            <h2 className={styles.title}>Na pewno wrocic do menu?</h2>
+            <h2 className={styles.title}>Na pewno wrócić do menu?</h2>
             <p className={styles.confirmCopy}>
-              Biezaca rozgrywka zostanie przerwana. Uzyj tej opcji tylko wtedy, gdy naprawde chcesz opuscic mecz.
+              Bieżąca rozgrywka zostanie przerwana. Użyj tej opcji tylko wtedy, gdy naprawdę chcesz opuścić mecz.
             </p>
             <div className={styles.actions}>
               <button
@@ -83,7 +83,7 @@ export function HostSettingsModal({
                 }
                 onClick={onCancelExitConfirm}
               >
-                Zostan w grze
+                Zostań w grze
               </button>
               <button
                 type="button"
@@ -94,7 +94,7 @@ export function HostSettingsModal({
                 }
                 onClick={onExitToMenu}
               >
-                Tak, wroc do menu
+                Tak, wróć do menu
               </button>
             </div>
           </>
@@ -105,7 +105,7 @@ export function HostSettingsModal({
 
             <div className={styles.toggleGrid}>
               <ToggleCard
-                label="Dzwiek"
+                label="Dźwięk"
                 description="Przygotowane pod efekty audio w trakcie rozgrywki."
                 enabled={soundEnabled}
                 focused={focusedTarget === 'sound'}
@@ -113,7 +113,7 @@ export function HostSettingsModal({
               />
               <ToggleCard
                 label="Animacje"
-                description="Wylacza ruch i skraca przyszle animacje w interfejsie."
+                description="Wyłącza ruch i skraca przyszłe animacje w interfejsie."
                 enabled={animationsEnabled}
                 focused={focusedTarget === 'animations'}
                 onToggle={onToggleAnimations}
@@ -126,7 +126,7 @@ export function HostSettingsModal({
                 className={focusedTarget === 'exit' ? `${styles.secondaryButton} ${styles.controlFocused}` : styles.secondaryButton}
                 onClick={onOpenExitConfirm}
               >
-                Powrot do menu
+                Powrót do menu
               </button>
               {canStartGame ? (
                 <button
@@ -134,7 +134,7 @@ export function HostSettingsModal({
                   className={focusedTarget === 'continue' ? `${styles.primaryButton} ${styles.controlFocused}` : styles.primaryButton}
                   onClick={onStartGame}
                 >
-                  Rozpocznij gre
+                  Rozpocznij grę
                 </button>
               ) : (
                 <button

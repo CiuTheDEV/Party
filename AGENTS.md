@@ -135,6 +135,7 @@ If verification cannot be run, say so clearly.
 - Prefer `context7` for current framework and library docs when available.
 - Prefer GitHub tooling for repo, PR, and issue context when available.
 - Do not rely on stale model memory for changing APIs.
+- On Windows, prefer running shell commands through `pwsh` (PowerShell 7.6+) instead of Windows PowerShell 5.1, especially when reading or verifying UTF-8-sensitive Polish text.
 - Prefer local Playwright verification (`npm run test:e2e`, `npm run test:e2e:live`) for browser flows in this project.
 - For UI/runtime changes, treat Playwright plus screenshots as the default inspection workflow.
 - Avoid `playwright` MCP by default unless the task specifically needs MCP-only browser automation.

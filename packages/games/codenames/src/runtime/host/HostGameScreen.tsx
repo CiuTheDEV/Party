@@ -371,7 +371,7 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin }: HostG
         open={Boolean(startBlockedReason)}
         variant="warning"
         eyebrow="Pula hasel"
-        title="Brak swiezych hasel na nowa plansze"
+            title="Brak świeżych haseł na nową planszę"
         description={startBlockedReason ?? ''}
         actions={[
           {
@@ -411,8 +411,8 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin }: HostG
         open={isBrowserExitAlertOpen}
         variant="danger"
         eyebrow="Gra w toku"
-        title="Wrocic do menu?"
-        description="Biezaca rozgrywka zostanie przerwana i utracisz aktualny postep."
+        title="Wrócić do menu?"
+        description="Bieżąca rozgrywka zostanie przerwana i utracisz aktualny postęp."
         actions={[
           {
             label: 'Zostan w grze',

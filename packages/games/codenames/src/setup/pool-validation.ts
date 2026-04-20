@@ -78,7 +78,7 @@ export function appendPoolValidationError(params: {
   const nextErrors = [...params.errors]
 
   if (params.summary.poolKey && params.summary.remaining < (params.minWordsRequired ?? CODENAMES_BOARD_WORD_COUNT)) {
-    nextErrors.push('Aktywna pula ma mniej niz 25 swiezych hasel. Zresetuj pule przed startem gry.')
+    nextErrors.push('Aktywna pula ma mniej niż 25 świeżych haseł. Zresetuj pulę przed startem gry.')
   }
 
   return nextErrors

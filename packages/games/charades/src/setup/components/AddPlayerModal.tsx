@@ -49,7 +49,7 @@ export function AddPlayerModal({ onAdd, onClose, existingPlayers }: Props) {
           <div className={styles.headerCopy}>
             <span className={styles.eyebrow}>Nowy gracz</span>
             <h2 className={styles.title}>Dodaj gracza</h2>
-            <p className={styles.description}>Ustaw nazwe, avatar i plec, zeby dolaczyc nowa osobe do rundy.</p>
+            <p className={styles.description}>Ustaw nazwę, awatar i płeć, żeby dołączyć nową osobę do rundy.</p>
           </div>
           <div className={styles.previewChip}>
             <UserRound size={16} />
@@ -87,12 +87,12 @@ export function AddPlayerModal({ onAdd, onClose, existingPlayers }: Props) {
                 autoFocus
               />
               <p className={styles.inputHint}>
-                {nameTaken ? 'Ta nazwa jest juz zajeta.' : nameTooShort ? 'Minimum 3 znaki.' : ' '}
+                {nameTaken ? 'Ta nazwa jest już zajęta.' : nameTooShort ? 'Minimum 3 znaki.' : ' '}
               </p>
             </div>
 
             <div className={styles.fieldCard}>
-              <span className={styles.label}>Plec</span>
+              <span className={styles.label}>Płeć</span>
               <div className={styles.genderRow}>
                 <button
                   type="button"
@@ -119,10 +119,10 @@ export function AddPlayerModal({ onAdd, onClose, existingPlayers }: Props) {
           <div className={styles.right}>
             <div className={styles.avatarPanel}>
               <div className={styles.avatarPanelHeader}>
-                <span className={styles.label}>Wybierz avatar</span>
+                <span className={styles.label}>Wybierz awatar</span>
                 <span className={styles.avatarPanelMeta}>
                   <Sparkles size={14} />
-                  Niedostepne sa zajete
+                  Niedostępne są zajęte
                 </span>
               </div>
 

@@ -45,7 +45,7 @@ export function validateCodenamesSetup(state: CodenamesSetupState): GameSetupVal
   const errors: string[] = []
 
   if (Object.keys(state.selectedCategories).length < 1) {
-    errors.push('Wybierz przynajmniej jedna kategorie.')
+    errors.push('Wybierz przynajmniej jedną kategorię.')
   }
 
   if (!state.captainRedConnected || !state.captainBlueConnected) {

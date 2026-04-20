@@ -15,6 +15,16 @@
 
 ## Entries
 
+### 2026-04-20 - Hostowy Windows PowerShell 5.1 może fałszywie wyglądać jak zepsuty UTF-8, mimo że pliki są poprawne
+
+**Symptom:** Odczyt tych samych plików z polską treścią wyglądał różnie zależnie od narzędzia: `Get-Content` w hostowym Windows PowerShell 5.1 pokazywał klasyczne ciągi mojibake, podczas gdy Node i `pwsh` 7.6 czytały ten sam plik poprawnie.
+
+**Root cause:** Problem nie był w bajtach pliku, tylko w warstwie shell/renderingu hostowego PowerShell 5.1 w tym środowisku Codex na Windows. To dawało fałszywy sygnał mojibake i mogło prowokować niepotrzebne „naprawy” encodingu.
+
+**Fix:** Do pracy shellowej na Windows w tym repo preferuj `pwsh` 7.6+ zamiast hostowego `powershell` 5.1. Gdy pojawia się podejrzenie UTF-8, weryfikuj plik surowym odczytem UTF-8 w `pwsh` lub Node przed jakąkolwiek edycją.
+
+**How to prevent it:** Traktuj hostowy PowerShell 5.1 jako potencjalnie niewiarygodny dla polskich znaków. Najpierw potwierdź problem drugim odczytem (`pwsh`, Node, albo decoder UTF-8 z `fatal`) i dopiero potem oceniaj, czy plik jest naprawdę uszkodzony.
+
 ### 2026-04-19 - Parallel Playwright install can fetch the wrong browser build
 
 **Symptom:** `npm run test:e2e` and headed Playwright runs failed right after a "clean reinstall", even though `npx playwright install chromium` had just completed successfully.

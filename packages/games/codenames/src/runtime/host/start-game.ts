@@ -18,7 +18,7 @@ export function prepareCodenamesGameStart(params: {
   if (freshWords.length < CODENAMES_BOARD_WORD_COUNT) {
     return {
       ok: false as const,
-      reason: 'Aktywna pula ma mniej niz 25 swiezych hasel. Zresetuj pule przed kolejna plansza.',
+      reason: 'Aktywna pula ma mniej niż 25 świeżych haseł. Zresetuj pulę przed kolejną planszą.',
     }
   }
 

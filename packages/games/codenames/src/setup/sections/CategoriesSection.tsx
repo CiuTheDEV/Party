@@ -23,8 +23,8 @@ export function CategoriesSection({
   const summaryText = selectedLabels.length > 0 ? `Wybrane: ${selectedLabels.join(', ')}` : 'Wybrane: brak'
   const poolSummaryText =
     helpers.poolSummary.total > 0
-      ? `Pozostalo ${helpers.poolSummary.remaining}/${helpers.poolSummary.total} swiezych hasel`
-      : 'Wybierz kategorie, aby zbudowac pule hasel'
+      ? `Pozostało ${helpers.poolSummary.remaining}/${helpers.poolSummary.total} świeżych haseł`
+      : 'Wybierz kategorie, aby zbudować pulę haseł'
 
   const categoryRows = useMemo(
     () =>
@@ -32,7 +32,7 @@ export function CategoriesSection({
         .filter((summary) => summary.isSelected)
         .map((summary) => ({
           name: summary.name,
-          pills: [`${summary.remaining}/${summary.total} swiezych hasel`],
+          pills: [`${summary.remaining}/${summary.total} świeżych haseł`],
           actionLabel: 'Resetuj',
           onAction: () => helpers.resetCategoryPoolHistory(summary.categoryId),
         })),
@@ -107,20 +107,20 @@ export function CategoriesSection({
         onClose={() => setIsPoolManagerOpen(false)}
         title={'Zarz\u0105dzaj pul\u0105 unikalnych hase\u0142'}
         description={
-          'Tutaj sprawdzisz stan aktywnej puli i recznie wyczyscisz historie zuzytych plansz dla aktywnego wyboru kategorii.'
+          'Tutaj sprawdzisz stan aktywnej puli i ręcznie wyczyścisz historię zużytych plansz dla aktywnego wyboru kategorii.'
         }
         summaryTitle="Aktywna pula"
-        summaryDescription={'Aktywna pula dla biezacego wyboru kategorii ma teraz tyle swiezych hasel:'}
+        summaryDescription={'Aktywna pula dla bieżącego wyboru kategorii ma teraz tyle świeżych haseł:'}
         summaryValue={poolSummaryText}
         summaryActionLabel="Resetuj aktywne"
         onSummaryAction={helpers.resetActivePoolHistory}
         rowsTitle="Kategorie"
-        rowsDescription="Aktywna pula buduje plansze tylko z aktualnie zaznaczonych kategorii. Kazda kategorie mozesz zresetowac osobno."
+        rowsDescription="Aktywna pula buduje plansze tylko z aktualnie zaznaczonych kategorii. Każdą kategorię możesz zresetować osobno."
         rows={categoryRows}
         theme="game"
         footer={
           helpers.poolSummary.isExhausted ? (
-            <p className={styles.poolWarning}>Za malo swiezych hasel na nowa plansze. Zresetuj potrzebne kategorie.</p>
+            <p className={styles.poolWarning}>Za mało świeżych haseł na nową planszę. Zresetuj potrzebne kategorie.</p>
           ) : null
         }
       />

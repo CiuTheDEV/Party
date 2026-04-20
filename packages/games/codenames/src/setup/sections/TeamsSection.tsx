@@ -87,7 +87,7 @@ function TeamCard({ team, label, color, onChange }: TeamCardProps) {
           {pickingAvatar ? (
             <div className={styles.avatarPopup}>
               <div className={styles.avatarPopupHeader}>
-                <span className={styles.avatarPopupTitle}>Wybierz avatar</span>
+                    <span className={styles.avatarPopupTitle}>Wybierz awatar</span>
                 <button type="button" className={styles.avatarPopupClose} onClick={() => setPickingAvatar(false)}>
                   <X size={16} strokeWidth={2.5} />
                 </button>

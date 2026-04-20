@@ -1,5 +1,32 @@
 # Today - 2026-04-18
 
+### S67 (2026-04-19) [Tajniacy/Kalambury] Pass po copy quality
+
+- Zrobiono osobny pass po stringach UI w Tajniakach i Kalamburach pod brakujace polskie znaki i oczywiste literowki, po wczesniejszym potwierdzeniu, ze UTF-8 jest poprawny.
+- Poprawiono ewidentne problemy copy w ekranie wyboru kapitana, runtime statusach i modalach Tajniakow, ustawieniach obu gier, sekcji kategorii/puli oraz formularzu dodawania gracza w Kalamburach.
+- Po poprawkach odpalono ponowny skan kontrolny; nie zostaly oczywiste ASCII-only bledy w dotknietych plikach, a ostatnie trafienie bylo falszywym alarmem na poprawnym slowie `Potwierdzenie`.
+- Experience recorded: no
+
+### S66 (2026-04-19) [Tajniacy/Kalambury] Pelny pass UTF-8
+
+- Przeskanowano 237 plikow tekstowych powiazanych z Tajniakami i Kalamburami: `content`, `packages/games`, `packages/partykit` oraz powiazane pliki w `apps/hub`.
+- Sprawdzono jednoczesnie poprawnosc bajtow UTF-8 oraz brak klasycznych markerow mojibake i znaku zastepczego Unicode.
+- Wynik: brak wykrytych uszkodzen UTF-8 i brak mojibake w skanowanych plikach obu gier.
+- Experience recorded: no
+
+### S65 (2026-04-19) [Repo/Agents] Prefer `pwsh` 7.6 for shell work
+
+- Dodano do `AGENTS.md` jawną regułę, żeby na Windows preferować `pwsh` (PowerShell 7.6+) zamiast Windows PowerShell 5.1.
+- Reguła jest szczególnie skierowana pod odczyt i weryfikację UTF-8-sensitive polskich treści, gdzie `pwsh` renderuje poprawnie, a `5.1` potrafi pokazać mojibake.
+- Experience recorded: yes
+
+### S64 (2026-04-19) [Tajniacy] Rozbudowa bazy haseł do 100
+
+- Rozszerzono bazę słów Tajniaków w `content/codenames/`: `standard` z 30 do 100 haseł i `plus18` z 30 do 100 haseł.
+- Zmieniono wyłącznie listy treści, bez ruszania logiki setupu, walidacji ani runtime.
+- Zweryfikowano zapis UTF-8 po edycji oraz liczność i unikalność: 200 haseł łącznie, bez duplikatów między kategoriami.
+- Experience recorded: no
+
 ### S63 (16:21~) [Repo/Tooling] Playwright clean reinstall + cleanup pass
 
 - Zrobiono czystą reinstalację Playwrighta: usunięto stare artefakty i browser cache, zainstalowano `@playwright/test` od nowa oraz pobrano świeży Chromium pod właściwy build.

@@ -141,11 +141,10 @@ This means:
 ---
 
 <!-- handoff:start -->
-- Last: 2026-04-19 18:13 by Codex
-- Task: Add persistent non-repeating words to Tajniacy with manual pool reset and board-start blocking below 25 fresh words, then refactor pool management UI to reuse the Charades modal pattern and support per-category resets.
-- Did: Added host-local `localStorage` word-history helpers for Codenames, setup-side pool summary/validation/reset wiring, runtime guarded board start with history persistence, and focused checks for word history, pool validation, and guarded board generation. Extracted a shared `WordPoolManagerModal` in `@party/ui`, switched Charades pool management to that shared component, and replaced the bespoke Codenames pool panel with the same modal flow. Refined Codenames history from combined-pool tracking to per-category tracking so the modal can reset individual categories independently while active-pool totals still aggregate correctly across the current selection. Verified `build` in `@party/ui`, `build` in `@party/charades`, plus `test:word-history`, `test:pool-validation`, `test:start-game`, `test:start-policy`, `test:setup-storage`, and `build` in `@party/codenames`.
-- Next: Run a deliberate browser verification pass for the Tajniacy setup and pool-manager UX once the existing setup-opening automation issue is understood, then polish remaining modal copy/layout issues found there.
-- Note: Attempted visible-browser e2e verification hit an existing Codenames problem where Playwright clicks `Zagraj teraz` but the setup dialog does not appear; this also breaks the pre-existing `codenames keeps the draft and opens captain pairing` test, so browser verification is currently blocked separately from the new pool logic.
-- Blocker: Browser verification for Tajniacy setup is blocked by the existing e2e/setup-opening failure described above.
+- Last: 2026-04-19 19:31 by Codex
+- Task: Run a wording-quality pass across Tajniacy and Kalambury UI copy after the UTF-8 check.
+- Did: Reviewed Tajniacy and Kalambury strings for missing Polish diacritics and obvious wording errors, then patched the clear UI-facing issues in captain routing, runtime status/modals, setup copy, avatar selection, and both games' settings-overlay labels/descriptions. Re-ran a focused scan afterward; no obvious ASCII-only Polish copy issues remain in the touched files, and the last scan hit was only a false positive on the correct word `Potwierdzenie`.
+- Next: If more copy work is needed later, focus on style consistency (for example `awatar` vs `avatar`, `rail` naming, and any intentional English controller labels) rather than encoding or diacritic repair.
+- Blocker: None.
 <!-- handoff:end -->
 

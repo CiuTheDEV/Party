@@ -63,10 +63,10 @@ function CaptainTeamSelect({
   const redTaken = roomState.captainRedConnected
   const blueTaken = roomState.captainBlueConnected
   const statusCopy = !hasSyncedRoomState
-    ? 'Sprawdzam dostepnosc druzyn...'
+    ? 'Sprawdzam dostępność drużyn...'
     : redTaken && blueTaken
-      ? 'Obie druzyny maja juz kapitanow.'
-      : 'Wybierz wolna druzyne i przejmij klucz planszy.'
+      ? 'Obie drużyny mają już kapitanów.'
+      : 'Wybierz wolną drużynę i przejmij klucz planszy.'
 
   return (
     <div className={styles.teamSelect}>
@@ -74,10 +74,10 @@ function CaptainTeamSelect({
       <div className={styles.teamSelectShell}>
         <div className={styles.teamSelectHeader}>
           <span className={styles.teamSelectEyebrow}>Tajniacy</span>
-          <h1 className={styles.teamSelectTitle}>Wybierz druzyne</h1>
+          <h1 className={styles.teamSelectTitle}>Wybierz drużynę</h1>
           <p className={styles.teamSelectDesc}>{statusCopy}</p>
           <div className={styles.roomBadge}>
-            <span className={styles.roomBadgeLabel}>Pokoj</span>
+            <span className={styles.roomBadgeLabel}>Pokój</span>
             <strong className={styles.roomBadgeValue}>{roomId.toUpperCase()}</strong>
           </div>
         </div>
@@ -100,10 +100,10 @@ function CaptainTeamSelect({
               </div>
             </div>
             <span className={styles.teamBtnDesc}>
-              {redTaken ? `Druzyna ${redTeam.name} ma juz swojego kapitana.` : `Przejmij klucz odpowiedzi druzyny ${redTeam.name}.`}
+              {redTaken ? `Drużyna ${redTeam.name} ma już swojego kapitana.` : `Przejmij klucz odpowiedzi drużyny ${redTeam.name}.`}
             </span>
             <span className={`${styles.teamBtnState} ${redTaken ? styles.teamBtnStateTaken : styles.teamBtnStateOpen}`}>
-              {redTaken ? 'Zajete' : 'Wolne'}
+              {redTaken ? 'Zajęte' : 'Wolne'}
             </span>
           </button>
 
@@ -124,17 +124,17 @@ function CaptainTeamSelect({
               </div>
             </div>
             <span className={styles.teamBtnDesc}>
-              {blueTaken ? `Druzyna ${blueTeam.name} ma juz swojego kapitana.` : `Przejmij klucz odpowiedzi druzyny ${blueTeam.name}.`}
+              {blueTaken ? `Drużyna ${blueTeam.name} ma już swojego kapitana.` : `Przejmij klucz odpowiedzi drużyny ${blueTeam.name}.`}
             </span>
             <span className={`${styles.teamBtnState} ${blueTaken ? styles.teamBtnStateTaken : styles.teamBtnStateOpen}`}>
-              {blueTaken ? 'Zajete' : 'Wolne'}
+              {blueTaken ? 'Zajęte' : 'Wolne'}
             </span>
           </button>
         </div>
 
         <div className={styles.teamSelectFooter}>
           <span className={styles.footerDot} data-team="red" aria-hidden="true" />
-          <span className={styles.footerText}>Po wyborze zobaczysz plansze kapitana tylko dla swojej druzyny.</span>
+          <span className={styles.footerText}>Po wyborze zobaczysz planszę kapitana tylko dla swojej drużyny.</span>
           <span className={styles.footerDot} data-team="blue" aria-hidden="true" />
         </div>
       </div>
