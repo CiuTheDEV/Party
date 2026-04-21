@@ -144,10 +144,10 @@ For new game module scaffolding and maturity expectations, see `docs/game-module
 ---
 
 <!-- handoff:start -->
-- Last: 2026-04-20 23:52 by Codex
-- Task: Build out the repo's agent-first documentation layer and make session wrap-up keep docs synced with code.
-- Did: Added the new working playbooks (`docs/README.md`, `ui-map`, `runtime-map`, `game-module-template`, `module-maturity`, `shared-extraction-checklist`, `code-organization`), wired them into `AGENTS.md`/routing docs, recorded KISS+DRY as repo guardrails, and upgraded the `session-end` skill so wrap-up now includes an explicit documentation sync pass.
-- Next: Re-test the Charades presenter on a stable live/local runtime stack, then continue the remaining Charades cleanup pass and the blocked Codenames pool-manager browser validation using the new repo playbooks as the default decision layer.
-- Blocker: Honest presenter browser verification is still limited by the current local runtime stack; on the static `:3001` flow the presenter did not advance from `waiting` after pairing.
+- Last: 2026-04-21 13:30 by Codex
+- Task: Broad Charades polish pass across menu/setup/runtime/results, including 16-player support and round-summary ranking fixes.
+- Did: Expanded Charades setup/menu to 16 players, rebuilt avatar/category flows, reworked round-order intro for larger groups, hardened verdict/timeout behavior, added skip for long round-order intros, polished summary/results UI, and introduced total-guess-time as a shared tiebreaker for runtime and final results.
+- Next: Run a visible browser pass for the Charades end-of-round flow (`timer -> verdict -> round summary -> results`), then continue the remaining cleanup pass in runtime/results without widening scope.
+- Blocker: The latest tie-breaker and time-badge pass has package-level build verification, but not yet a fresh live browser smoke test in this session.
 <!-- handoff:end -->
 

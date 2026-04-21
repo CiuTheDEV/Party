@@ -13,6 +13,10 @@ export function Podium({ players }: Props) {
       return b.score - a.score
     }
 
+    if ((a.totalGuessTimeSeconds ?? 0) !== (b.totalGuessTimeSeconds ?? 0)) {
+      return (a.totalGuessTimeSeconds ?? 0) - (b.totalGuessTimeSeconds ?? 0)
+    }
+
     return a.name.localeCompare(b.name, 'pl')
   })
 
@@ -108,7 +112,11 @@ function buildPlacementGroups(players: CharadesResultPlayer[]): PlacementGroup[]
   for (const player of players) {
     const previousGroup = groups[groups.length - 1]
 
-    if (!previousGroup || previousGroup.score !== player.score) {
+    if (
+      !previousGroup ||
+      previousGroup.score !== player.score ||
+      (previousGroup.players[0]?.totalGuessTimeSeconds ?? 0) !== (player.totalGuessTimeSeconds ?? 0)
+    ) {
       groups.push({
         rank: groups.length + 1,
         score: player.score,

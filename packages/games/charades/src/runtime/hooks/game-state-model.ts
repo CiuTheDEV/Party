@@ -2,6 +2,9 @@ import type { CharadesCategoryDifficulty, CharadesGameSettings, CharadesPlayerDr
 
 export type Player = CharadesPlayerDraft & {
   score: number
+  totalGuessTimeSeconds: number
+  lastCorrectGuessSeconds: number | null
+  lastScoredRound: number | null
 }
 
 export type GameSettings = CharadesGameSettings
@@ -13,6 +16,8 @@ export type GamePhase =
   | 'timer-running'
   | 'round-summary'
   | 'verdict'
+
+export type VerdictReason = 'timeout' | 'manual-stop' | null
 
 export type GameState = {
   phase: GamePhase
@@ -29,6 +34,7 @@ export type GameState = {
   currentWord: string
   currentCategory: string
   currentDifficulty: CharadesCategoryDifficulty | ''
+  verdictReason: VerdictReason
   isDeviceConnected: boolean
   isRoomConnected: boolean
 }
@@ -38,7 +44,13 @@ export const REVEAL_BUFFER_SECONDS = 10
 export function createInitialGameState(players: Player[], settings: GameSettings): GameState {
   return {
     phase: 'round-order',
-    players: players.map((player) => ({ ...player, score: 0 })),
+    players: players.map((player) => ({
+      ...player,
+      score: 0,
+      totalGuessTimeSeconds: 0,
+      lastCorrectGuessSeconds: null,
+      lastScoredRound: null,
+    })),
     remainingWordChangesByPlayer: players.map(() => settings.wordChange.changesPerPlayer),
     rejectedPromptKeysThisTurn: [],
     order: [],
@@ -51,6 +63,7 @@ export function createInitialGameState(players: Player[], settings: GameSettings
     currentWord: '',
     currentCategory: '',
     currentDifficulty: '',
+    verdictReason: null,
     isDeviceConnected: false,
     isRoomConnected: true,
   }

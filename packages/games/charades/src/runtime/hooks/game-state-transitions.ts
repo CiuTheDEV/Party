@@ -27,6 +27,7 @@ export function buildRoundStartState(current: GameState, settings: GameSettings)
     isRoundOrderRevealing: true,
     currentOrderIdx: 0,
     ...CLEARED_WORD,
+    verdictReason: null,
     bufferRemaining: REVEAL_BUFFER_SECONDS,
     timerRemaining: settings.timerSeconds,
   }
@@ -40,6 +41,7 @@ export function buildRoundOrderFinishedState(current: GameState, settings: GameS
     isRoundOrderRevealing: false,
     currentOrderIdx: 0,
     ...CLEARED_WORD,
+    verdictReason: null,
     bufferRemaining: REVEAL_BUFFER_SECONDS,
     timerRemaining: settings.timerSeconds,
   }
@@ -56,6 +58,7 @@ export function buildPreparedTurnState(
     currentWord: preparedTurn.word,
     currentCategory: preparedTurn.category,
     currentDifficulty: preparedTurn.difficulty,
+    verdictReason: null,
     timerRemaining: settings.timerSeconds,
     bufferRemaining: REVEAL_BUFFER_SECONDS,
   }
@@ -67,6 +70,7 @@ export function buildStoppedRoundState(current: GameState): GameState {
     phase: 'verdict',
     rejectedPromptKeysThisTurn: [],
     timerRemaining: Math.max(current.timerRemaining, 0),
+    verdictReason: 'manual-stop',
   }
 }
 
@@ -84,10 +88,19 @@ export function buildVerdictState(
   settings: GameSettings,
   correct: boolean,
   guessedPlayerIdx?: number,
+  guessElapsedSeconds?: number,
 ): VerdictTransitionResult {
   const winnerIdx = correct ? guessedPlayerIdx : undefined
   const updatedPlayers = current.players.map((player, index) =>
-    index === winnerIdx ? { ...player, score: player.score + 1 } : player,
+    index === winnerIdx
+      ? {
+          ...player,
+          score: player.score + 1,
+          totalGuessTimeSeconds: player.totalGuessTimeSeconds + (guessElapsedSeconds ?? 0),
+          lastCorrectGuessSeconds: guessElapsedSeconds ?? null,
+          lastScoredRound: current.currentRound,
+        }
+      : player,
   )
 
   const isLastInRound = current.currentOrderIdx === current.order.length - 1
@@ -110,6 +123,7 @@ export function buildVerdictState(
         rejectedPromptKeysThisTurn: [],
         currentOrderIdx: current.currentOrderIdx + 1,
         ...CLEARED_WORD,
+        verdictReason: null,
         bufferRemaining: REVEAL_BUFFER_SECONDS,
         timerRemaining: settings.timerSeconds,
       },
@@ -127,6 +141,7 @@ export function buildVerdictState(
         isRoundOrderRevealing: false,
         currentOrderIdx: 0,
         ...CLEARED_WORD,
+        verdictReason: null,
         bufferRemaining: REVEAL_BUFFER_SECONDS,
         timerRemaining: settings.timerSeconds,
       },
@@ -142,6 +157,7 @@ export function buildVerdictState(
       rejectedPromptKeysThisTurn: [],
       currentRound: current.currentRound + 1,
       ...CLEARED_WORD,
+      verdictReason: null,
       bufferRemaining: 0,
     },
   }
@@ -157,6 +173,7 @@ export function buildRoundSummaryFinishedState(current: GameState, settings: Gam
     currentOrderIdx: 0,
     currentRound: current.currentRound + 1,
     ...CLEARED_WORD,
+    verdictReason: null,
     bufferRemaining: REVEAL_BUFFER_SECONDS,
     timerRemaining: settings.timerSeconds,
   }

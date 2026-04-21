@@ -17,8 +17,7 @@ export function CategoriesSection({
   updateState,
   helpers,
 }: GameSetupSectionComponentProps<CharadesSetupState, CharadesSetupHelpers>) {
-  const accessibleCategories = helpers.categories.filter((category) => helpers.hasCategoryAccess(category.id))
-  const prompts = buildPromptPool(accessibleCategories, state.selectedCategories)
+  const prompts = buildPromptPool(helpers.categories, state.selectedCategories)
   const usedPromptKeys = new Set(readCharadesWordHistory()?.usedPrompts ?? [])
   const remaining = getRemainingUniqueWordCount(prompts, usedPromptKeys)
   const total = getTotalUniqueWordCount(prompts)
@@ -30,8 +29,6 @@ export function CategoriesSection({
       <CategoryPicker
         categories={helpers.categories}
         selected={state.selectedCategories}
-        hasCategoryAccess={helpers.hasCategoryAccess}
-        redeemActivationCode={helpers.redeemActivationCode}
         onChange={(selectedCategories) => updateState((current) => ({ ...current, selectedCategories }))}
       />
 

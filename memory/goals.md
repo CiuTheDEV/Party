@@ -1,15 +1,15 @@
 # Goals & Focus
 
-*Last updated: 2026-04-08*
+*Last updated: 2026-04-21*
 
 ---
 
 ## This Week
 
-1. Stabilize Charades after the shared UI extraction
-2. Run a real browser smoke test across setup, host, presenter, and results
-3. Fix the highest-risk runtime and reconnect issues before pushing further
-4. Move Phase 4 deploy work back onto the critical path
+1. Re-test Charades presenter flow on a stable local/live stack after the reveal-word sizing fix
+2. Unblock and run the visible browser validation pass for the Codenames pool-manager/setup flow
+3. Close the remaining Charades runtime browser pass after the new verdict/summary/results polish, then continue cleanup without widening scope beyond real pain points
+4. Keep the new agent-first docs/playbooks synced with code while they are still fresh
 
 ## Charades - MVP hardening
 
@@ -37,9 +37,9 @@
 
 ### Menu and settings polish
 - [ ] Finish Charades host-side menu/settings/runtime controller polish
-  Scope: remaining runtime pause/verdict feel issues, final manual validation after simplifying gameplay bindings to `Potwierdz`, and any last keyboard/controller edge cases
+  Scope: final visible validation after the latest runtime/summary/results polish, plus any last keyboard/controller edge cases
 
-## Shared UI follow-up
+## Shared UI and Repo Workflow
 
 ### Done
 - [x] Shared shell in `@party/ui`
@@ -47,8 +47,10 @@
 - [x] Shared runtime top bar
 - [x] Shared avatar layer
 - [x] Shared settings modal primitives
+- [x] Agent-first repo playbooks for shared UI, runtime ownership, module template, maturity, extraction, and code organization
 
 ### Next
+- [ ] Use the new playbooks to police future shared extraction and new-game work instead of letting the repo drift back into copy-paste and implicit rules
 - [ ] Decide whether to extract more shared runtime/setup primitives now or pause extraction and return to deploy hardening
 
 ## This Month
@@ -63,7 +65,8 @@
 
 ## This Quarter
 
-- Working deployed Charades prototype
+- Working deployed Charades prototype with honest browser/runtime validation
 - Real-time multiplayer with room codes
 - Architecture validated on at least one more game module
+- Agent-first repo workflow that stays aligned with code instead of lagging behind it
 - Optional accounts via Clerk after multiplayer base is stable

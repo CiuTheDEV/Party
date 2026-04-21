@@ -29,6 +29,7 @@ import {
   updateRuntimeControllerWakeGuard,
   wakeRuntimeInput,
 } from '../runtime/play/runtime-input-state'
+import { ExitToMenuAlert } from '../shared/ExitToMenuAlert'
 import {
   getNextResultsActionTarget,
   resolveResultsAction,
@@ -41,10 +42,22 @@ type Props = GameResultsProps & {
 
 export function CharadesResults({ players, onPlayAgain, onBackToMenu }: Props) {
   const [selectedAction, setSelectedAction] = useState<ResultsActionTarget>('again')
+  const [isExitConfirmOpen, setIsExitConfirmOpen] = useState(false)
+  const [exitConfirmFocusTarget, setExitConfirmFocusTarget] = useState<'stay' | 'exit'>('stay')
   const [inputState, setInputState] = useState(() => createRuntimeInputState())
   const [controlBindings, setControlBindings] = useState<Record<string, string>>({})
   const [activeInputDevice, setActiveInputDevice] = useState<'keyboard' | 'controller'>('keyboard')
   const [controllerProfile, setControllerProfile] = useState<GamepadProfile>('generic')
+
+  const openExitConfirm = () => {
+    setExitConfirmFocusTarget('stay')
+    setIsExitConfirmOpen(true)
+  }
+
+  const closeExitConfirm = () => {
+    setExitConfirmFocusTarget('stay')
+    setIsExitConfirmOpen(false)
+  }
 
   useEffect(() => {
     setControlBindings(loadPersistedBindings())
@@ -104,18 +117,46 @@ export function CharadesResults({ players, onPlayAgain, onBackToMenu }: Props) {
         return
       }
 
+      if (isExitConfirmOpen) {
+        if (action === 'left' || action === 'up') {
+          setExitConfirmFocusTarget('exit')
+          return
+        }
+
+        if (action === 'right' || action === 'down') {
+          setExitConfirmFocusTarget('stay')
+          return
+        }
+
+        if (action === 'confirm') {
+          if (exitConfirmFocusTarget === 'exit') {
+            onBackToMenu()
+            return
+          }
+
+          closeExitConfirm()
+          return
+        }
+
+        if (action === 'back' || action === 'menu') {
+          closeExitConfirm()
+        }
+
+        return
+      }
+
       if (action === 'confirm') {
         if (selectedAction === 'again') {
           onPlayAgain()
           return
         }
 
-        onBackToMenu()
+        openExitConfirm()
         return
       }
 
       if (action === 'back' || action === 'menu') {
-        onBackToMenu()
+        openExitConfirm()
         return
       }
 
@@ -124,7 +165,7 @@ export function CharadesResults({ players, onPlayAgain, onBackToMenu }: Props) {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [controlBindings, inputState, onBackToMenu, onPlayAgain, selectedAction])
+  }, [closeExitConfirm, controlBindings, exitConfirmFocusTarget, inputState, isExitConfirmOpen, onBackToMenu, onPlayAgain, selectedAction])
 
   useEffect(() => {
     let frameId = 0
@@ -177,18 +218,48 @@ export function CharadesResults({ players, onPlayAgain, onBackToMenu }: Props) {
         return
       }
 
+      if (isExitConfirmOpen) {
+        if (action === 'left' || action === 'up') {
+          setExitConfirmFocusTarget('exit')
+          frameId = window.requestAnimationFrame(tick)
+          return
+        }
+
+        if (action === 'right' || action === 'down') {
+          setExitConfirmFocusTarget('stay')
+          frameId = window.requestAnimationFrame(tick)
+          return
+        }
+
+        if (action === 'confirm') {
+          if (exitConfirmFocusTarget === 'exit') {
+            onBackToMenu()
+          } else {
+            closeExitConfirm()
+          }
+          frameId = window.requestAnimationFrame(tick)
+          return
+        }
+
+        if (action === 'back' || action === 'menu') {
+          closeExitConfirm()
+          frameId = window.requestAnimationFrame(tick)
+          return
+        }
+      }
+
       if (action === 'confirm') {
         if (selectedAction === 'again') {
           onPlayAgain()
         } else {
-          onBackToMenu()
+          openExitConfirm()
         }
         frameId = window.requestAnimationFrame(tick)
         return
       }
 
       if (action === 'back' || action === 'menu') {
-        onBackToMenu()
+        openExitConfirm()
         frameId = window.requestAnimationFrame(tick)
         return
       }
@@ -199,7 +270,7 @@ export function CharadesResults({ players, onPlayAgain, onBackToMenu }: Props) {
 
     frameId = window.requestAnimationFrame(tick)
     return () => window.cancelAnimationFrame(frameId)
-  }, [controlBindings, controllerProfile, inputState, onBackToMenu, onPlayAgain, selectedAction])
+  }, [closeExitConfirm, controlBindings, controllerProfile, exitConfirmFocusTarget, inputState, isExitConfirmOpen, onBackToMenu, onPlayAgain, selectedAction])
 
   const isFocusVisible = inputState.isAwake
   const confirmHintLabel = (() => {
@@ -242,12 +313,25 @@ export function CharadesResults({ players, onPlayAgain, onBackToMenu }: Props) {
             styles.menuBtn,
             isFocusVisible && selectedAction === 'menu' ? styles.controlFocused : '',
           ].filter(Boolean).join(' ')}
-          onClick={onBackToMenu}
+          onClick={openExitConfirm}
         >
           <span>Wróć do menu</span>
           <ActionHint label={isFocusVisible && selectedAction === 'menu' ? confirmHintLabel : null} muted />
         </button>
       </div>
+
+      {isExitConfirmOpen ? (
+        <ExitToMenuAlert
+          copy="Opuścisz ekran wyników i wrócisz do menu gry."
+          focusedTarget={exitConfirmFocusTarget}
+          isFocusVisible={isFocusVisible}
+          onStay={closeExitConfirm}
+          onExit={onBackToMenu}
+          actionHints={{
+            confirm: confirmHintLabel,
+          }}
+        />
+      ) : null}
     </main>
   )
 }

@@ -15,18 +15,22 @@ type PlayBottomBarProps = {
   roomConnectionState: 'connected' | 'reconnecting' | 'error'
   isDeviceConnected: boolean
   isRoundOrderRevealing: boolean
+  canSkipRoundOrder: boolean
   roundOrderCountdown: number | null
   onStartRound: () => void
+  onSkipRoundOrder: () => void
   onContinueRoundSummary: () => void
   onExitToMenu: () => void
   onStopRound: () => void
   onCorrectVerdict: () => void
   onIncorrectVerdict: () => void
   verdictFocusedTarget?: 'correct' | 'incorrect'
+  isCorrectVerdictBlocked?: boolean
+  roundSummaryFocusedTarget?: 'menu' | 'continue'
   isFocusVisible?: boolean
   actionHints?: {
     confirm?: string | null
-    menu?: string | null
+    rail?: string | null
   }
 }
 
@@ -36,14 +40,18 @@ export function PlayBottomBar({
   roomConnectionState,
   isDeviceConnected,
   isRoundOrderRevealing,
+  canSkipRoundOrder,
   roundOrderCountdown,
   onStartRound,
+  onSkipRoundOrder,
   onContinueRoundSummary,
   onExitToMenu,
   onStopRound,
   onCorrectVerdict,
   onIncorrectVerdict,
   verdictFocusedTarget = 'correct',
+  isCorrectVerdictBlocked = false,
+  roundSummaryFocusedTarget = 'continue',
   isFocusVisible = false,
   actionHints,
 }: PlayBottomBarProps) {
@@ -68,10 +76,23 @@ export function PlayBottomBar({
 
       {phase === 'round-order' && isRoundOrderRevealing &&
         (roundOrderCountdown === null ? (
-          <p className={styles.infoTextWithSpinner}>
-            <span className={styles.spinner} aria-hidden="true" />
-            <span>Losowanie...</span>
-          </p>
+          canSkipRoundOrder ? (
+            <div className={styles.roundOrderActions}>
+              <p className={styles.infoTextWithSpinner}>
+                <span className={styles.spinner} aria-hidden="true" />
+                <span>Losowanie...</span>
+              </p>
+              <button className={styles.stopButton} onClick={onSkipRoundOrder}>
+                <span>Pomiń animację</span>
+                <ActionHint label={actionHints?.rail} muted />
+              </button>
+            </div>
+          ) : (
+            <p className={styles.infoTextWithSpinner}>
+              <span className={styles.spinner} aria-hidden="true" />
+              <span>Losowanie...</span>
+            </p>
+          )
         ) : (
           <p className={styles.infoText}>Przechodzimy dalej za {roundOrderCountdown} s</p>
         ))}
@@ -97,13 +118,30 @@ export function PlayBottomBar({
 
       {phase === 'round-summary' && (
         <div className={styles.verdictActions}>
-          <button className={styles.stopButton} onClick={onExitToMenu}>
+          <button
+            className={[
+              styles.stopButton,
+              isFocusVisible && roundSummaryFocusedTarget === 'menu' ? styles.controlFocused : '',
+            ].filter(Boolean).join(' ')}
+            onClick={onExitToMenu}
+          >
             <span>Powrót do menu</span>
-            <ActionHint label={actionHints?.menu} muted />
+            <ActionHint
+              label={isFocusVisible && roundSummaryFocusedTarget === 'menu' ? actionHints?.confirm : null}
+              muted
+            />
           </button>
-          <button className={styles.primaryButton} onClick={onContinueRoundSummary}>
+          <button
+            className={[
+              styles.primaryButton,
+              isFocusVisible && roundSummaryFocusedTarget === 'continue' ? styles.controlFocused : '',
+            ].filter(Boolean).join(' ')}
+            onClick={onContinueRoundSummary}
+          >
             <span>Następna runda</span>
-            <ActionHint label={actionHints?.confirm} />
+            <ActionHint
+              label={isFocusVisible && roundSummaryFocusedTarget === 'continue' ? actionHints?.confirm : null}
+            />
           </button>
         </div>
       )}
@@ -114,11 +152,19 @@ export function PlayBottomBar({
             className={[
               styles.successButton,
               isFocusVisible && verdictFocusedTarget === 'correct' ? styles.controlFocused : '',
+              isCorrectVerdictBlocked ? styles.controlDisabled : '',
             ].filter(Boolean).join(' ')}
             onClick={onCorrectVerdict}
+            disabled={isCorrectVerdictBlocked}
           >
             <span>Zgadnięto</span>
-            <ActionHint label={isFocusVisible && verdictFocusedTarget === 'correct' ? actionHints?.confirm : null} />
+            <ActionHint
+              label={
+                !isCorrectVerdictBlocked && isFocusVisible && verdictFocusedTarget === 'correct'
+                  ? actionHints?.confirm
+                  : null
+              }
+            />
           </button>
           <button
             className={[

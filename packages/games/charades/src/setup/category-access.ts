@@ -4,24 +4,24 @@ import type { CharadesSelectedCategories } from './state'
 export const CHARADES_CATEGORY_UNLOCK_ENTITLEMENT = 'charades_category_pack'
 export const CHARADES_BASE_CATEGORY_ID = 'classic'
 
-export function isCharadesCategoryUnlocked(categoryId: string, entitlements: string[]) {
-  return categoryId === CHARADES_BASE_CATEGORY_ID || entitlements.includes(CHARADES_CATEGORY_UNLOCK_ENTITLEMENT)
+export function isCharadesCategoryUnlocked(_categoryId: string, _entitlements: string[]) {
+  return true
 }
 
 export function getCharadesAccessibleCategories(
   categories: CharadesWordCategory[],
-  entitlements: string[],
+  _entitlements: string[],
 ) {
-  return categories.filter((category) => isCharadesCategoryUnlocked(category.id, entitlements))
+  return categories
 }
 
 export function sanitizeCharadesSelectedCategories(
   selected: CharadesSelectedCategories,
   categories: CharadesWordCategory[],
-  entitlements: string[],
+  _entitlements: string[],
 ) {
-  const accessibleIds = new Set(getCharadesAccessibleCategories(categories, entitlements).map((category) => category.id))
-  const entries = Object.entries(selected).filter(([categoryId]) => accessibleIds.has(categoryId))
+  const categoryIds = new Set(categories.map((category) => category.id))
+  const entries = Object.entries(selected).filter(([categoryId]) => categoryIds.has(categoryId))
 
   if (entries.length === Object.keys(selected).length) {
     return selected

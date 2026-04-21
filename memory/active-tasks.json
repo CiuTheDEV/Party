@@ -23,11 +23,11 @@
                       "id":  "T001",
                       "title":  "Charades code cleanup pass",
                       "status":  "active",
-                      "context":  "Navigation dead code cleared in S31: removed `predefined-menu-controls.ts`, `getNextMenuModeFocus`, dead state in `CharadesMenuContent`, duplicate `isTypingTarget`. Remaining cleanup: dead presenter/runtime leftovers after recent refactors, and oversized files in results/playboard.",
-                      "next_action":  "Remove dead presenter/runtime leftovers next, then split the remaining oversized Charades files only where responsibilities are still mixed.",
+                      "context":  "Navigation dead code was cleared earlier, and the latest session delivered a broad Charades polish pass: menu/setup now support 16 players, runtime round-order was rebuilt for larger groups, verdict/timeout flow was hardened, summary/results ranking got tie-aware ordering with a total-guess-time tiebreaker, and summary/results UI was reworked for larger player counts. Remaining cleanup is now narrower: dead presenter/runtime leftovers after the recent feature work, oversized runtime/results files, and an honest browser validation pass for the end-of-round flow after the ranking/time UI changes.",
+                      "next_action":  "Run a visible browser pass for Charades `timer -> verdict -> round summary -> results`, then remove dead presenter/runtime leftovers and split only the still-mixed oversized runtime/results files.",
                       "blocker":  "",
                       "created":  "2026-03-27",
-                      "updated":  "2026-04-08"
+                      "updated":  "2026-04-21"
                   },
                   {
                       "id":  "T002",

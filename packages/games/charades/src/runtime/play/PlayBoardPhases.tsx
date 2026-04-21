@@ -13,6 +13,7 @@ import { ActionHint } from './ActionHint'
 import styles from './PlayBoard.module.css'
 import { PresenterCard } from './PlayBoardCards'
 import type { PlayerSummary, RankedPlayer } from './playboard-types'
+import { formatGuessTime } from '../../shared/guess-time'
 
 type SharedPhaseProps = {
   presenter: PlayerSummary | undefined
@@ -23,10 +24,13 @@ type TimerRunningViewProps = SharedPhaseProps & {
   currentWord: string
   currentCategory: string
   settings: CharadesGameSettings
+  animationsEnabled?: boolean
 }
 
 type VerdictViewProps = SharedPhaseProps & {
   currentWord: string
+  isTimedOutVerdict?: boolean
+  elapsedGuessSeconds?: number
   isVerdictWordVisible: boolean
   onToggleWordVisibility: () => void
   revealHintLabel?: string | null
@@ -52,6 +56,7 @@ type PrepareViewProps = SharedPhaseProps & {
 
 type BufferViewProps = SharedPhaseProps & {
   bufferRemaining: number
+  animationsEnabled?: boolean
 }
 
 function shouldAutoscaleWord(word: string) {
@@ -165,16 +170,19 @@ export function TimerRunningView({
   currentWord,
   currentCategory,
   settings,
+  animationsEnabled = true,
 }: TimerRunningViewProps) {
   const wordCount = currentWord.trim().split(/\s+/).filter(Boolean).length
   const activeHintsCount = Number(settings.hints.showCategory) + Number(settings.hints.showWordCount)
   const showHints = settings.hints.enabled && activeHintsCount > 0
   const motionTier = getTimerMotionTier(timerRemaining, settings.timerSeconds)
   const reducedMotion = useCharadesReducedMotion()
+  const canPulseCountdown = animationsEnabled
   const rootRef = useRef<HTMLElement | null>(null)
   const presenterPaneRef = useRef<HTMLDivElement | null>(null)
   const heroRef = useRef<HTMLDivElement | null>(null)
   const hintsRef = useRef<HTMLDivElement | null>(null)
+  const timerWrapRef = useRef<HTMLDivElement | null>(null)
   const timerRef = useRef<HTMLDivElement | null>(null)
 
   useLayoutEffect(() => {
@@ -188,60 +196,134 @@ export function TimerRunningView({
   }, [reducedMotion])
 
   useEffect(() => {
-    if (reducedMotion || !timerRef.current || !heroRef.current) {
+    if (!canPulseCountdown || motionTier === 'normal' || !timerRef.current) {
       return
     }
 
     const timerScale =
       motionTier === 'critical'
-        ? charadesMotionProfile.countdown.pulseScale + 0.06
+        ? charadesMotionProfile.countdown.pulseScale + charadesMotionProfile.countdown.criticalPulseScaleBoost + 0.04
         : motionTier === 'warning'
-          ? charadesMotionProfile.countdown.pulseScale
+          ? charadesMotionProfile.countdown.pulseScale + 0.05
           : 1.06
-    const heroScale = motionTier === 'critical' ? 1.028 : motionTier === 'warning' ? 1.018 : 1.008
+    const timerRecoilScale = motionTier === 'critical' ? 0.9 : motionTier === 'warning' ? 0.94 : 1
     const timerGlow =
       motionTier === 'critical'
-        ? `drop-shadow(0 0 34px rgba(248, 113, 113, ${charadesMotionProfile.countdown.criticalGlow})) brightness(1.22)`
+        ? `drop-shadow(0 0 46px rgba(248, 113, 113, ${charadesMotionProfile.countdown.criticalGlow})) brightness(1.32)`
         : motionTier === 'warning'
-          ? `drop-shadow(0 0 24px rgba(251, 191, 36, ${charadesMotionProfile.countdown.warningGlow})) brightness(1.12)`
+          ? `drop-shadow(0 0 30px rgba(251, 191, 36, ${charadesMotionProfile.countdown.warningGlow})) brightness(1.18)`
           : 'drop-shadow(0 0 14px rgba(255, 255, 255, 0.16)) brightness(1.05)'
-    const heroGlow =
+    const heroFrameBorderColor =
+      motionTier === 'critical' ? 'rgba(248, 113, 113, 0.52)' : 'rgba(251, 191, 36, 0.38)'
+    const heroFrameShadow =
       motionTier === 'critical'
-        ? 'drop-shadow(0 0 18px rgba(248, 113, 113, 0.22))'
-        : motionTier === 'warning'
-          ? 'drop-shadow(0 0 12px rgba(251, 191, 36, 0.16))'
-          : 'drop-shadow(0 0 6px rgba(255, 255, 255, 0.07))'
-
+        ? 'inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 24px 42px rgba(0, 0, 0, 0.16), 0 0 0 2px rgba(248, 113, 113, 0.34), 0 0 34px rgba(248, 113, 113, 0.2)'
+        : 'inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 24px 42px rgba(0, 0, 0, 0.16), 0 0 0 2px rgba(251, 191, 36, 0.24), 0 0 24px rgba(251, 191, 36, 0.14)'
     gsap.killTweensOf([timerRef.current, heroRef.current])
-    gsap.fromTo(
-      timerRef.current,
-      {
-        scale: timerScale,
+    const pulseTimeline = gsap.timeline()
+
+    if (motionTier === 'critical') {
+      pulseTimeline.set(timerRef.current, {
+        scale: 1,
+        y: 0,
         filter: timerGlow,
-      },
-      {
+      })
+      pulseTimeline.to(timerRef.current, {
+        scale: timerScale + 0.03,
+        y: -12,
+        duration: 0.06,
+        ease: 'power2.out',
+      })
+      pulseTimeline.to(timerRef.current, {
+        scale: timerRecoilScale,
+        y: 4,
+        duration: 0.08,
+        ease: 'power2.in',
+      })
+      pulseTimeline.to(timerRef.current, {
+        scale: 1.1,
+        y: -5,
+        duration: 0.06,
+        ease: 'power2.out',
+      })
+      pulseTimeline.to(timerRef.current, {
         scale: 1,
+        y: 0,
         filter: 'none',
-        duration: motionTier === 'critical' ? 0.34 : charadesMotionProfile.countdown.pulseDuration,
-        ease: motionTier === 'critical' ? 'back.out(1.85)' : 'power3.out',
+        duration: 0.16,
+        ease: 'back.out(2.1)',
         clearProps: 'filter,transform',
-      },
-    )
-    gsap.fromTo(
-      heroRef.current,
-      {
-        scale: heroScale,
-        filter: heroGlow,
-      },
-      {
+      })
+    } else {
+      pulseTimeline.set(timerRef.current, {
+        scale: timerScale,
+        y: -8,
+        filter: timerGlow,
+      })
+      pulseTimeline.to(timerRef.current, {
+        scale: timerRecoilScale,
+        y: 3,
+        duration: 0.11,
+        ease: 'power2.in',
+      })
+      pulseTimeline.to(timerRef.current, {
         scale: 1,
+        y: 0,
         filter: 'none',
-        duration: motionTier === 'critical' ? 0.28 : 0.22,
-        ease: 'power3.out',
+        duration: Math.max(0.14, charadesMotionProfile.countdown.pulseDuration - 0.04),
+        ease: 'back.out(1.95)',
         clearProps: 'filter,transform',
-      },
-    )
-  }, [reducedMotion, settings.timerSeconds, timerRemaining])
+      })
+    }
+
+    if (heroRef.current) {
+      if (motionTier === 'critical') {
+        pulseTimeline.set(
+          heroRef.current,
+          {
+            borderColor: heroFrameBorderColor,
+            boxShadow: heroFrameShadow,
+          },
+          '<'
+        )
+        pulseTimeline.to(heroRef.current, {
+          boxShadow:
+            'inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 24px 42px rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(248, 113, 113, 0.18), 0 0 18px rgba(248, 113, 113, 0.12)',
+          duration: 0.1,
+          ease: 'power2.in',
+        })
+        pulseTimeline.to(heroRef.current, {
+          boxShadow:
+            'inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 24px 42px rgba(0, 0, 0, 0.16), 0 0 0 2px rgba(248, 113, 113, 0.28), 0 0 26px rgba(248, 113, 113, 0.16)',
+          duration: 0.08,
+          ease: 'power2.out',
+        })
+        pulseTimeline.to(heroRef.current, {
+          borderColor: 'rgba(248, 113, 113, 0.24)',
+          boxShadow: 'none',
+          duration: 0.16,
+          ease: 'power2.out',
+          clearProps: 'boxShadow',
+        })
+      } else {
+        pulseTimeline.set(
+          heroRef.current,
+          {
+            borderColor: heroFrameBorderColor,
+            boxShadow: heroFrameShadow,
+          },
+          '<'
+        )
+        pulseTimeline.to(heroRef.current, {
+          borderColor: 'rgba(251, 191, 36, 0.2)',
+          boxShadow: 'none',
+          duration: 0.16,
+          ease: 'power2.out',
+          clearProps: 'boxShadow',
+        })
+      }
+    }
+  }, [canPulseCountdown, settings.timerSeconds, timerRemaining])
 
   return (
     <main ref={rootRef} className={styles.board}>
@@ -255,8 +337,10 @@ export function TimerRunningView({
             <span className={styles.eyebrow}>Prezentuj!</span>
             <div ref={heroRef} className={styles.timerHero} data-motion-tier={motionTier}>
               <h1 className={styles.timerTitle}>Czas do końca prezentowania</h1>
-              <div ref={timerRef} className={styles.timer} data-motion-tier={motionTier}>
-                {timerRemaining}
+              <div ref={timerWrapRef} className={styles.timerPulseStage}>
+                <div ref={timerRef} className={styles.timer} data-motion-tier={motionTier}>
+                  {timerRemaining}
+                </div>
               </div>
             </div>
             {showHints ? (
@@ -285,6 +369,8 @@ export function TimerRunningView({
 export function VerdictView({
   presenter,
   currentWord,
+  isTimedOutVerdict = false,
+  elapsedGuessSeconds = 0,
   isVerdictWordVisible,
   onToggleWordVisibility,
   revealHintLabel,
@@ -428,7 +514,12 @@ export function VerdictView({
           <div className={styles.verdictContent}>
             <span className={styles.eyebrow}>Werdykt</span>
             <div ref={heroRef} className={styles.verdictHero}>
-              <h1 className={styles.verdictTitle}>Czy hasło zostało odgadnięte?</h1>
+              <h1 className={styles.verdictTitle}>
+                {isTimedOutVerdict ? 'Czas dobiegł końca' : 'Czy hasło zostało odgadnięte?'}
+              </h1>
+              {!isTimedOutVerdict && elapsedGuessSeconds > 0 ? (
+                <div className={styles.verdictGuessTimeBadge}>{formatGuessTime(elapsedGuessSeconds)} od startu tury</div>
+              ) : null}
               {currentWord ? (
                 <>
                   <button
@@ -459,7 +550,11 @@ export function VerdictView({
             </div>
             <div ref={noteRef} className={styles.verdictNote}>
               <span className={styles.verdictNoteLabel}>Decyzja hosta</span>
-              <p className={styles.verdictNoteText}>Wybierz w dolnym pasku, czy prezentowane hasło zostało odgadnięte.</p>
+              <p className={styles.verdictNoteText}>
+                {isTimedOutVerdict
+                  ? 'Czas na prezentowanie minął. Tę turę możesz zakończyć już tylko jako nieodgadniętą.'
+                  : 'Wybierz w dolnym pasku, czy prezentowane hasło zostało odgadnięte.'}
+              </p>
             </div>
           </div>
         </div>
@@ -471,38 +566,111 @@ export function VerdictView({
 export function RoundSummaryView({
   currentRound,
   totalRounds,
-  leaders,
-  topScore,
+  leaders: _leaders,
+  topScore: _topScore,
   rankedPlayers,
 }: RoundSummaryViewProps) {
+  const reducedMotion = useCharadesReducedMotion()
+  const podiumPlayers = rankedPlayers.filter((player) => (player.score ?? 0) > 0 && player.rank <= 3)
+  const podiumPlayerNames = new Set(podiumPlayers.map((player) => player.name))
+  const remainingPlayers = rankedPlayers.filter((player) => !podiumPlayerNames.has(player.name))
+  const remainingListRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    const list = remainingListRef.current
+    if (!list) {
+      return
+    }
+
+    list.scrollTop = 0
+    gsap.killTweensOf(list)
+
+    if (reducedMotion || remainingPlayers.length === 0) {
+      return
+    }
+
+    const travel = list.scrollHeight - list.clientHeight
+    if (travel <= 12) {
+      return
+    }
+
+    const timeline = gsap.timeline({ repeat: -1, repeatDelay: 0.9, yoyo: true })
+    timeline.to(list, {
+      scrollTop: travel,
+      duration: Math.max(7, travel / 38),
+      ease: 'sine.inOut',
+      delay: 0.6,
+    })
+
+    return () => {
+      timeline.kill()
+      gsap.killTweensOf(list)
+    }
+  }, [reducedMotion, remainingPlayers.length])
+
   return (
     <main className={styles.board}>
       <section className={styles.stage}>
         <div className={styles.summaryScreen}>
-          <span className={styles.eyebrow}>Podsumowanie rundy</span>
           <div className={styles.summaryHero}>
             <h1 className={styles.summaryTitle}>
               Podsumowanie rundy {currentRound}/{totalRounds}
             </h1>
-            <p className={styles.summaryLead}>
-              {leaders.length > 0
-                ? `Aktualni liderzy: ${leaders.join(', ')} (${topScore})`
-                : 'Po tej rundzie nadal nie ma zdobytych punktów.'}
-            </p>
           </div>
 
-          <div className={styles.summaryRanking}>
-            {rankedPlayers.map((player) => (
-              <div key={player.name} className={styles.summaryRow} data-rank={player.rank}>
-                <span className={styles.summaryRank}>#{player.rank}</span>
-                <AvatarAsset avatar={player.avatar} className={styles.summaryAvatar} />
-                <span className={styles.summaryName} data-gender={player.gender}>
-                  {player.name}
-                </span>
-                <span className={styles.summaryScore}>{player.score ?? 0}</span>
+          {podiumPlayers.length > 0 ? (
+            <div className={styles.summaryTopRanking}>
+              {podiumPlayers.map((player) => {
+                const isTie = podiumPlayers.filter((candidate) => candidate.rank === player.rank).length > 1
+                const roundGuessTime =
+                  player.lastScoredRound === currentRound ? player.lastCorrectGuessSeconds ?? null : null
+
+                return (
+                  <div key={player.name} className={styles.summaryTopPlayer} data-rank={player.rank}>
+                    <div className={styles.summaryTopBadge}>
+                      <span className={styles.summaryTopBadgeRank}>#{player.rank}</span>
+                      <span className={styles.summaryTopBadgeLabel}>{isTie ? 'Remis' : 'Top'}</span>
+                    </div>
+                    <AvatarAsset avatar={player.avatar} className={styles.summaryTopAvatar} />
+                    <span className={styles.summaryTopName} data-gender={player.gender}>
+                      {player.name}
+                    </span>
+                    <div className={styles.summaryScoreStack}>
+                      <span className={styles.summaryTopScore}>{player.score ?? 0}</span>
+                      {roundGuessTime ? (
+                        <span className={styles.summaryTimeBadge}>{formatGuessTime(roundGuessTime)}</span>
+                      ) : null}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ) : null}
+
+          {remainingPlayers.length > 0 ? (
+            <div className={styles.summaryRestPanel}>
+              <div className={styles.summaryRestHeader}>
+                <span className={styles.summaryRestLabel}>Pozostali gracze</span>
               </div>
-            ))}
-          </div>
+              <div ref={remainingListRef} className={styles.summaryRestRanking}>
+                {remainingPlayers.map((player) => (
+                  <div key={player.name} className={styles.summaryRow} data-rank={player.rank}>
+                    <span className={styles.summaryRank}>#{player.rank}</span>
+                    <AvatarAsset avatar={player.avatar} className={styles.summaryAvatar} />
+                    <span className={styles.summaryName} data-gender={player.gender}>
+                      {player.name}
+                    </span>
+                    <div className={styles.summaryScoreStack}>
+                      <span className={styles.summaryScore}>{player.score ?? 0}</span>
+                      {player.lastScoredRound === currentRound && player.lastCorrectGuessSeconds ? (
+                        <span className={styles.summaryTimeBadge}>{formatGuessTime(player.lastCorrectGuessSeconds)}</span>
+                      ) : null}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : null}
         </div>
       </section>
     </main>
@@ -610,9 +778,10 @@ export function PrepareView({
   )
 }
 
-export function BufferView({ presenter, bufferRemaining }: BufferViewProps) {
+export function BufferView({ presenter, bufferRemaining, animationsEnabled = true }: BufferViewProps) {
   const motionTier = getTimerMotionTier(bufferRemaining, 10)
   const reducedMotion = useCharadesReducedMotion()
+  const canPulseCountdown = animationsEnabled
   const rootRef = useRef<HTMLElement | null>(null)
   const presenterPaneRef = useRef<HTMLDivElement | null>(null)
   const heroRef = useRef<HTMLDivElement | null>(null)
@@ -631,54 +800,134 @@ export function BufferView({ presenter, bufferRemaining }: BufferViewProps) {
   }, [reducedMotion])
 
   useEffect(() => {
-    if (reducedMotion || !timerRef.current) {
+    if (!canPulseCountdown || motionTier === 'normal' || !timerRef.current) {
       return
     }
 
     const timerScale =
       motionTier === 'critical'
-        ? charadesMotionProfile.countdown.pulseScale + 0.05
+        ? charadesMotionProfile.countdown.pulseScale + charadesMotionProfile.countdown.criticalPulseScaleBoost + 0.04
         : motionTier === 'warning'
-          ? charadesMotionProfile.countdown.pulseScale
+          ? charadesMotionProfile.countdown.pulseScale + 0.05
           : 1.06
+    const timerRecoilScale = motionTier === 'critical' ? 0.9 : motionTier === 'warning' ? 0.94 : 1
     const timerGlow =
       motionTier === 'critical'
-        ? `drop-shadow(0 0 34px rgba(248, 113, 113, ${charadesMotionProfile.countdown.criticalGlow})) brightness(1.2)`
+        ? `drop-shadow(0 0 46px rgba(248, 113, 113, ${charadesMotionProfile.countdown.criticalGlow})) brightness(1.3)`
         : motionTier === 'warning'
-          ? `drop-shadow(0 0 24px rgba(251, 191, 36, ${charadesMotionProfile.countdown.warningGlow})) brightness(1.1)`
+          ? `drop-shadow(0 0 30px rgba(251, 191, 36, ${charadesMotionProfile.countdown.warningGlow})) brightness(1.16)`
           : 'drop-shadow(0 0 14px rgba(255, 255, 255, 0.15)) brightness(1.05)'
+    const heroFrameBorderColor =
+      motionTier === 'critical' ? 'rgba(248, 113, 113, 0.5)' : 'rgba(251, 191, 36, 0.36)'
+    const heroFrameShadow =
+      motionTier === 'critical'
+        ? 'inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 24px 42px rgba(0, 0, 0, 0.16), 0 0 0 2px rgba(248, 113, 113, 0.3), 0 0 30px rgba(248, 113, 113, 0.18)'
+        : 'inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 24px 42px rgba(0, 0, 0, 0.16), 0 0 0 2px rgba(251, 191, 36, 0.22), 0 0 20px rgba(251, 191, 36, 0.12)'
 
-    gsap.killTweensOf([timerRef.current, timerWrapRef.current])
-    gsap.fromTo(
-      timerRef.current,
-      {
-        scale: timerScale,
-        filter: timerGlow,
-      },
-      {
+    gsap.killTweensOf([timerRef.current, heroRef.current])
+    const pulseTimeline = gsap.timeline()
+    if (motionTier === 'critical') {
+      pulseTimeline.set(timerRef.current, {
         scale: 1,
+        y: 0,
+        filter: timerGlow,
+      })
+      pulseTimeline.to(timerRef.current, {
+        scale: timerScale + 0.02,
+        y: -10,
+        duration: 0.06,
+        ease: 'power2.out',
+      })
+      pulseTimeline.to(timerRef.current, {
+        scale: timerRecoilScale,
+        y: 3,
+        duration: 0.08,
+        ease: 'power2.in',
+      })
+      pulseTimeline.to(timerRef.current, {
+        scale: 1.08,
+        y: -4,
+        duration: 0.06,
+        ease: 'power2.out',
+      })
+      pulseTimeline.to(timerRef.current, {
+        scale: 1,
+        y: 0,
         filter: 'none',
-        duration: motionTier === 'critical' ? 0.32 : charadesMotionProfile.countdown.pulseDuration,
-        ease: motionTier === 'critical' ? 'back.out(1.8)' : 'power3.out',
+        duration: 0.16,
+        ease: 'back.out(2.1)',
         clearProps: 'filter,transform',
-      },
-    )
-
-    if (timerWrapRef.current) {
-      gsap.fromTo(
-        timerWrapRef.current,
-        {
-          scale: motionTier === 'critical' ? 1.028 : motionTier === 'warning' ? 1.016 : 1.008,
-        },
-        {
-          scale: 1,
-          duration: motionTier === 'critical' ? 0.26 : 0.2,
-          ease: 'power3.out',
-          clearProps: 'transform',
-        },
-      )
+      })
+    } else {
+      pulseTimeline.set(timerRef.current, {
+        scale: timerScale,
+        y: -8,
+        filter: timerGlow,
+      })
+      pulseTimeline.to(timerRef.current, {
+        scale: timerRecoilScale,
+        y: 3,
+        duration: 0.11,
+        ease: 'power2.in',
+      })
+      pulseTimeline.to(timerRef.current, {
+        scale: 1,
+        y: 0,
+        filter: 'none',
+        duration: Math.max(0.14, charadesMotionProfile.countdown.pulseDuration - 0.04),
+        ease: 'back.out(1.95)',
+        clearProps: 'filter,transform',
+      })
     }
-  }, [bufferRemaining, reducedMotion])
+
+    if (heroRef.current) {
+      if (motionTier === 'critical') {
+        pulseTimeline.set(
+          heroRef.current,
+          {
+            borderColor: heroFrameBorderColor,
+            boxShadow: heroFrameShadow,
+          },
+          '<'
+        )
+        pulseTimeline.to(heroRef.current, {
+          boxShadow:
+            'inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 24px 42px rgba(0, 0, 0, 0.16), 0 0 0 1px rgba(248, 113, 113, 0.16), 0 0 16px rgba(248, 113, 113, 0.1)',
+          duration: 0.1,
+          ease: 'power2.in',
+        })
+        pulseTimeline.to(heroRef.current, {
+          boxShadow:
+            'inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 24px 42px rgba(0, 0, 0, 0.16), 0 0 0 2px rgba(248, 113, 113, 0.24), 0 0 22px rgba(248, 113, 113, 0.14)',
+          duration: 0.08,
+          ease: 'power2.out',
+        })
+        pulseTimeline.to(heroRef.current, {
+          borderColor: 'rgba(248, 113, 113, 0.24)',
+          boxShadow: 'none',
+          duration: 0.16,
+          ease: 'power2.out',
+          clearProps: 'boxShadow',
+        })
+      } else {
+        pulseTimeline.set(
+          heroRef.current,
+          {
+            borderColor: heroFrameBorderColor,
+            boxShadow: heroFrameShadow,
+          },
+          '<'
+        )
+        pulseTimeline.to(heroRef.current, {
+          borderColor: 'rgba(251, 191, 36, 0.2)',
+          boxShadow: 'none',
+          duration: 0.16,
+          ease: 'power2.out',
+          clearProps: 'boxShadow',
+        })
+      }
+    }
+  }, [bufferRemaining, canPulseCountdown])
 
   return (
     <main ref={rootRef} className={styles.board}>
@@ -692,9 +941,11 @@ export function BufferView({ presenter, bufferRemaining }: BufferViewProps) {
             <span className={styles.eyebrow}>Zapamiętaj hasło</span>
             <div ref={heroRef} className={styles.bufferHero} data-motion-tier={motionTier}>
               <h1 className={styles.bufferTitle}>Prezenter zapoznaje się z hasłem</h1>
-              <div ref={timerWrapRef} className={styles.bufferTimerWrap} data-motion-tier={motionTier}>
-                <div ref={timerRef} className={styles.timer} data-motion-tier={motionTier}>
-                  {bufferRemaining}
+              <div className={styles.bufferTimerWrap}>
+                <div ref={timerWrapRef} className={styles.timerPulseStage}>
+                  <div ref={timerRef} className={styles.timer} data-motion-tier={motionTier}>
+                    {bufferRemaining}
+                  </div>
                 </div>
                 <span className={styles.bufferTimerLabel}>sekund do startu tury</span>
               </div>

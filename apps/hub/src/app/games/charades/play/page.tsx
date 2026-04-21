@@ -131,6 +131,7 @@ function PlayScreen({ config }: { config: Config }) {
           isRoomConnected={state.isRoomConnected}
           roomConnectionState={roomConnectionState}
           isRoundOrderRevealing={state.isRoundOrderRevealing}
+          isCorrectVerdictBlocked={state.verdictReason === 'timeout'}
           onFinishRoundOrder={finishRoundOrder}
           onFinishRoundSummary={finishRoundSummary}
           onGiveVerdict={giveVerdict}

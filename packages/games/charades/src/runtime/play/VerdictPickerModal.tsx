@@ -44,7 +44,6 @@ export function VerdictPickerModal({
   const overlayRef = useRef<HTMLDivElement | null>(null)
   const cardRef = useRef<HTMLDivElement | null>(null)
   const listRef = useRef<HTMLDivElement | null>(null)
-  const hintRowRef = useRef<HTMLDivElement | null>(null)
   const actionsRef = useRef<HTMLDivElement | null>(null)
   const cancelButtonRef = useRef<HTMLButtonElement | null>(null)
   const confirmButtonRef = useRef<HTMLButtonElement | null>(null)
@@ -111,7 +110,7 @@ export function VerdictPickerModal({
       }
 
       timeline.fromTo(
-        [hintRowRef.current, actionsRef.current].filter(Boolean),
+        [actionsRef.current].filter(Boolean),
         {
           autoAlpha: 0,
           y: 8,
@@ -133,7 +132,7 @@ export function VerdictPickerModal({
   }, [players, reducedMotion])
 
   useEffect(() => {
-    if (reducedMotion || !listRef.current || !actionsRef.current || !hintRowRef.current) {
+    if (reducedMotion || !listRef.current || !actionsRef.current) {
       return
     }
 
@@ -142,7 +141,7 @@ export function VerdictPickerModal({
       .filter(Boolean) as HTMLButtonElement[]
     const actionNodes = [cancelButtonRef.current, confirmButtonRef.current].filter(Boolean) as HTMLButtonElement[]
 
-    gsap.killTweensOf([...playerNodes, ...actionNodes, listRef.current, hintRowRef.current, actionsRef.current])
+    gsap.killTweensOf([...playerNodes, ...actionNodes, listRef.current, actionsRef.current])
 
     if (selectionStage === 'actions') {
       gsap.to(playerNodes, {
@@ -169,15 +168,17 @@ export function VerdictPickerModal({
         },
       )
       gsap.fromTo(
-        hintRowRef.current,
+        actionsRef.current,
         {
-          y: 8,
+          y: 12,
           autoAlpha: 0.72,
+          scale: 0.985,
         },
         {
           y: 0,
           autoAlpha: 1,
-          duration: 0.18,
+          scale: 1,
+          duration: 0.2,
           ease: 'power2.out',
           clearProps: 'transform,opacity',
         },
@@ -202,7 +203,7 @@ export function VerdictPickerModal({
           autoAlpha: 1,
           duration: 0.18,
           ease: 'power2.out',
-          clearProps: 'transform,opacity',
+            clearProps: 'transform,opacity',
         },
       )
     }
@@ -275,17 +276,6 @@ export function VerdictPickerModal({
               </button>
             )
           })}
-        </div>
-        <div ref={hintRowRef} className={styles.modalHintRow} data-stage={selectionStage}>
-          {selectionStage === 'players' ? (
-            <span className={styles.modalHintText}>
-              <ActionHint label={actionHints?.previous} muted /> / <ActionHint label={actionHints?.next} muted /> wybor gracza
-            </span>
-          ) : (
-            <span className={styles.modalHintText}>
-              <ActionHint label={actionHints?.cancel} muted /> wraca do wyboru gracza
-            </span>
-          )}
         </div>
         <div ref={actionsRef} className={styles.modalActions} data-stage={selectionStage}>
           <button

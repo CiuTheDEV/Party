@@ -1,8 +1,8 @@
 'use client'
 
 import { AlertDialog, WordPoolManagerModal, type WordPoolManagerRow } from '@party/ui'
-import { Check, CheckCheck, ChevronDown, Dices, Eraser, LibraryBig, LockKeyhole } from 'lucide-react'
-import { type FormEvent, useEffect, useMemo, useState } from 'react'
+import { Check, CheckCheck, ChevronDown, Dices, Eraser, LibraryBig } from 'lucide-react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   getRemainingUniqueWordCount,
   getTotalUniqueWordCount,
@@ -21,8 +21,6 @@ type Props = {
   categories: CharadesWordCategory[]
   selected: CharadesSelectedCategories
   onChange: (selected: CharadesSelectedCategories) => void
-  hasCategoryAccess: (categoryId: string) => boolean
-  redeemActivationCode: (code: string) => Promise<void>
 }
 
 type PoolStats = {
@@ -39,18 +37,11 @@ export function CategoryPicker({
   categories,
   selected,
   onChange,
-  hasCategoryAccess,
-  redeemActivationCode,
 }: Props) {
   const [open, setOpen] = useState(false)
   const [isPoolManagerOpen, setIsPoolManagerOpen] = useState(false)
   const [historyVersion, setHistoryVersion] = useState(0)
   const [poolResetTarget, setPoolResetTarget] = useState<PoolResetTarget | null>(null)
-  const [lockedCategory, setLockedCategory] = useState<CharadesWordCategory | null>(null)
-  const [activationCode, setActivationCode] = useState('')
-  const [activationError, setActivationError] = useState<string | null>(null)
-  const [activationSuccess, setActivationSuccess] = useState<string | null>(null)
-  const [isRedeeming, setIsRedeeming] = useState(false)
 
   const usedPromptKeys = useMemo(
     () => new Set(readCharadesWordHistory()?.usedPrompts ?? []),
@@ -111,11 +102,9 @@ export function CategoryPicker({
   }
 
   function selectAll() {
-    const availableCategories = categories.filter((category) => hasCategoryAccess(category.id))
-
     onChange(
       Object.fromEntries(
-        availableCategories.map((category) => [category.id, ['easy', 'hard'] satisfies CharadesCategoryDifficulty[]]),
+        categories.map((category) => [category.id, ['easy', 'hard'] satisfies CharadesCategoryDifficulty[]]),
       ),
     )
   }
@@ -125,15 +114,13 @@ export function CategoryPicker({
   }
 
   function selectRandom() {
-    const availableCategories = categories.filter((category) => hasCategoryAccess(category.id))
-
-    if (availableCategories.length === 0) {
+    if (categories.length === 0) {
       onChange({})
       return
     }
 
-    const shuffled = [...availableCategories].sort(() => Math.random() - 0.5)
-    const count = Math.max(1, Math.min(availableCategories.length, 4))
+    const shuffled = [...categories].sort(() => Math.random() - 0.5)
+    const count = Math.max(1, Math.min(categories.length, 4))
     const picked = shuffled.slice(0, count)
 
     onChange(
@@ -153,38 +140,6 @@ export function CategoryPicker({
 
   function handleResetCategoryPoolHistory(categoryName: string) {
     setPoolResetTarget({ type: 'category', categoryName })
-  }
-
-  function openActivationDialog(category: CharadesWordCategory) {
-    setLockedCategory(category)
-    setActivationCode('')
-    setActivationError(null)
-    setActivationSuccess(null)
-  }
-
-  async function handleActivationSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-
-    if (!lockedCategory) {
-      return
-    }
-
-    setActivationError(null)
-    setActivationSuccess(null)
-    setIsRedeeming(true)
-
-    try {
-      await redeemActivationCode(activationCode)
-      setActivationSuccess('Kod zaakceptowany. Kategoria została odblokowana.')
-      setActivationCode('')
-      setTimeout(() => {
-        setLockedCategory(null)
-      }, 350)
-    } catch (error) {
-      setActivationError(error instanceof Error ? error.message : 'Nie udało się aktywować kodu.')
-    } finally {
-      setIsRedeeming(false)
-    }
   }
 
   function confirmPoolHistoryReset() {
@@ -212,24 +167,23 @@ export function CategoryPicker({
   }
 
   const selectedLabels = categories
-    .filter((category) => hasCategoryAccess(category.id) && (selected[category.id] ?? []).length > 0)
+    .filter((category) => (selected[category.id] ?? []).length > 0)
     .map((category) => category.name)
 
   const summaryText = selectedLabels.length > 0 ? `Wybrane: ${selectedLabels.join(', ')}` : 'Wybrane: brak'
 
   const activePoolStats = useMemo(() => {
-    const prompts = buildPromptPool(categories.filter((category) => hasCategoryAccess(category.id)), selected)
+    const prompts = buildPromptPool(categories, selected)
 
     return {
       remaining: getRemainingUniqueWordCount(prompts, usedPromptKeys),
       total: getTotalUniqueWordCount(prompts),
     }
-  }, [categories, hasCategoryAccess, selected, usedPromptKeys])
+  }, [categories, selected, usedPromptKeys])
 
   const categoryResetRows = useMemo<WordPoolManagerRow[]>(
     () =>
       categories
-        .filter((category) => hasCategoryAccess(category.id))
         .map((category) => {
           const easyStats = getWordStats(category, 'easy')
           const hardStats = getWordStats(category, 'hard')
@@ -241,7 +195,7 @@ export function CategoryPicker({
             onAction: () => handleResetCategoryPoolHistory(category.name),
           }
         }),
-    [categories, hasCategoryAccess, historyVersion],
+    [categories, historyVersion],
   )
 
   return (
@@ -292,12 +246,9 @@ export function CategoryPicker({
 
           <div className={styles.grid}>
             {categories.map((category) => {
-              const isLocked = !hasCategoryAccess(category.id)
               const mode = getModeForCategory(category.id)
               const cardClass =
-                isLocked
-                  ? styles.cardLocked
-                  : mode === 'both'
+                mode === 'both'
                   ? styles.cardMixed
                   : mode === 'easy'
                     ? styles.cardEasy
@@ -308,17 +259,16 @@ export function CategoryPicker({
               return (
                 <div
                   key={category.id}
-                  className={`${styles.card} ${cardClass} ${isLocked ? styles.cardLocked : mode ? styles.cardSelected : styles.cardUnselected}`}
-                  aria-disabled={isLocked}
-                  role={!isLocked && mode ? 'button' : undefined}
-                  tabIndex={!isLocked && mode ? 0 : undefined}
+                  className={`${styles.card} ${cardClass} ${mode ? styles.cardSelected : styles.cardUnselected}`}
+                  role={mode ? 'button' : undefined}
+                  tabIndex={mode ? 0 : undefined}
                   onClick={() => {
-                    if (!isLocked && mode) {
+                    if (mode) {
                       setCategoryMode(category.id, null)
                     }
                   }}
                   onKeyDown={(event) => {
-                    if (isLocked || !mode) {
+                    if (!mode) {
                       return
                     }
 
@@ -330,21 +280,7 @@ export function CategoryPicker({
                 >
                   <div className={styles.cardHeader}>
                     <span className={styles.name}>{category.name}</span>
-                    {isLocked ? (
-                      <button
-                        type="button"
-                        className={styles.lockBadgeButton}
-                        aria-label={`Otwórz kod aktywacyjny dla kategorii ${category.name}`}
-                        onClick={(event) => {
-                          event.stopPropagation()
-                          openActivationDialog(category)
-                        }}
-                      >
-                        <span className={styles.lockBadge}>
-                          <LockKeyhole size={14} />
-                        </span>
-                      </button>
-                    ) : mode ? (
+                    {mode ? (
                       <span className={styles.selectedBadge}>
                         <Check size={14} />
                       </span>
@@ -353,13 +289,10 @@ export function CategoryPicker({
                     )}
                   </div>
 
-                  {isLocked ? (
-                    <span className={styles.lockedTag}>Zablokowana</span>
-                  ) : (
-                    <div className={styles.segmentedControl}>
-                      <button
-                        type="button"
-                        className={`${styles.segmentButton} ${mode === 'easy' ? styles.segmentActive : ''}`}
+                  <div className={styles.segmentedControl}>
+                    <button
+                      type="button"
+                      className={`${styles.segmentButton} ${mode === 'easy' ? styles.segmentActive : ''}`}
                       onClick={(event) => {
                         event.stopPropagation()
                         setCategoryMode(category.id, 'easy')
@@ -384,11 +317,10 @@ export function CategoryPicker({
                         event.stopPropagation()
                         setCategoryMode(category.id, 'both')
                       }}
-                      >
-                        Oba
-                      </button>
-                    </div>
-                  )}
+                    >
+                      Oba
+                    </button>
+                  </div>
                 </div>
               )
             })}
@@ -420,71 +352,6 @@ export function CategoryPicker({
         rowsDescription={'Reset kategorii czy\u015bci jej histori\u0119 dla wszystkich graczy w tej sesji.'}
         rows={categoryResetRows}
       />
-
-      {lockedCategory ? (
-        <div className={styles.modalOverlay} role="presentation" onClick={() => setLockedCategory(null)}>
-          <div
-            className={styles.modal}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="charades-activation-dialog-title"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className={styles.modalHeader}>
-              <div className={styles.modalHeading}>
-                <h3 id="charades-activation-dialog-title" className={styles.modalTitle}>
-                  {lockedCategory.name}
-                </h3>
-                <p className={styles.modalDescription}>
-                  Ta kategoria jest zablokowana. Wpisz kod aktywacyjny, aby ją odblokować.
-                </p>
-              </div>
-              <button
-                type="button"
-                className={styles.modalClose}
-                aria-label="Zamknij okno aktywacji"
-                onClick={() => setLockedCategory(null)}
-              >
-                Zamknij
-              </button>
-            </div>
-
-            <form className={styles.unlockForm} onSubmit={handleActivationSubmit}>
-              <label className={styles.unlockField}>
-                <span className={styles.unlockLabel}>Kod aktywacyjny</span>
-                <input
-                  className={styles.unlockInput}
-                  value={activationCode}
-                  onChange={(event) => setActivationCode(event.target.value)}
-                  autoComplete="off"
-                  placeholder="KALAMBURY-START"
-                  required
-                />
-              </label>
-
-              <p className={styles.unlockNote}>
-                Po odblokowaniu kategoria zniknie z listy zamkniętych i stanie się dostępna od razu.
-              </p>
-
-              {activationError ? <p className={styles.unlockError}>{activationError}</p> : null}
-              {activationSuccess ? <p className={styles.unlockSuccess}>{activationSuccess}</p> : null}
-
-              <div className={styles.unlockActions}>
-                <button
-                  type="button"
-                  className={styles.unlockSecondaryButton}
-                  onClick={() => setLockedCategory(null)}
-                >
-                  Anuluj
-                </button>
-                <button type="submit" className={styles.unlockPrimaryButton} disabled={isRedeeming}>
-                  {isRedeeming ? 'Aktywuję...' : 'Odblokuj'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      ) : null}
 
       <AlertDialog
         open={poolResetTarget !== null}

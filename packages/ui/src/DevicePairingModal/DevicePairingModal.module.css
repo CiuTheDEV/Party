@@ -152,6 +152,10 @@
   background: var(--modal-section-bg);
 }
 
+.codeRowWide {
+  align-items: flex-start;
+}
+
 .codeLabel {
   font-size: 13px;
   font-weight: 700;
@@ -165,6 +169,7 @@
   flex-direction: column;
   align-items: flex-end;
   gap: 4px;
+  min-width: 0;
   padding: 0;
   border: none;
   background: transparent;
@@ -189,6 +194,14 @@
   font-weight: 900;
   letter-spacing: 0.14em;
   color: var(--color-text);
+}
+
+.codeValueLong {
+  max-width: 100%;
+  font-size: 15px;
+  line-height: 1.45;
+  letter-spacing: normal;
+  word-break: break-all;
 }
 
 .codeHint {

@@ -44,6 +44,11 @@ Append to `memory/today.md`:
 - [Experience recorded: yes/no]
 ```
 
+Rule:
+- treat `memory/today.md` as the rolling log for the current week
+- do not compress or prune the current week during ordinary session wrap-up
+- at the week boundary, compress the finished week and move it to `memory/archive/`
+
 ### 3. Update goals.md + projects.md
 
 - Completed goals → remove (today.md has the record)

@@ -38,17 +38,21 @@ export function PairingPanel({ roomId, isConnected, onDisconnect }: Props) {
     return () => window.clearTimeout(timeoutId)
   }, [copyState])
 
-  const sessionCode = roomId.toUpperCase()
   const showLocalhostWarning = presenterUrl !== '' && isLocalPresenterOrigin(presenterUrl)
   const copyHint =
     copyState === 'success'
       ? 'Skopiowano'
       : copyState === 'error'
         ? 'Nie udalo sie skopiowac'
-        : 'Kliknij, aby skopiowac'
-  const handleCopySessionCode = async () => {
+        : 'Kliknij, aby skopiowac link'
+  const handleCopyPresenterLink = async () => {
+    if (!presenterUrl) {
+      setCopyState('error')
+      return
+    }
+
     try {
-      await navigator.clipboard.writeText(sessionCode)
+      await navigator.clipboard.writeText(presenterUrl)
       setCopyState('success')
     } catch {
       setCopyState('error')
@@ -110,9 +114,12 @@ export function PairingPanel({ roomId, isConnected, onDisconnect }: Props) {
               </>
             ) : null
           }
-          sessionCode={sessionCode}
+          copyLabel="Kod sesji"
+          displayValue={roomId.toUpperCase()}
+          copyValue={presenterUrl}
           copyHint={copyHint}
-          onCopy={handleCopySessionCode}
+          onCopy={handleCopyPresenterLink}
+          copyAriaLabel="Kopiuj link prezentera"
           onOpenExternal={() => {
             if (!presenterUrl) return
             window.open(presenterUrl, '_blank', 'noopener,noreferrer')

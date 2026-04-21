@@ -7,6 +7,9 @@ export {
   sanitizeCharadesSelectedCategories,
 } from './category-access'
 
+export const CHARADES_MIN_PLAYERS = 2
+export const CHARADES_MAX_PLAYERS = 16
+
 export type CharadesPlayerDraft = {
   name: string
   avatar: CharadesAvatarId
@@ -78,8 +81,12 @@ export function createInitialCharadesSetupState(): CharadesSetupState {
 export function validateCharadesSetup(state: CharadesSetupState): GameSetupValidation {
   const errors: string[] = []
 
-  if (state.players.length < 2) {
-    errors.push('Dodaj co najmniej 2 graczy.')
+  if (state.players.length < CHARADES_MIN_PLAYERS) {
+    errors.push(`Dodaj co najmniej ${CHARADES_MIN_PLAYERS} graczy.`)
+  }
+
+  if (state.players.length > CHARADES_MAX_PLAYERS) {
+    errors.push(`Kalambury obsługują maksymalnie ${CHARADES_MAX_PLAYERS} graczy.`)
   }
 
   if (Object.keys(state.selectedCategories).length < 1) {

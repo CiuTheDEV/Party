@@ -1,34 +1,43 @@
 'use client'
 
-import { AvatarAsset, getPartyAvatarCategories, getPartyAvatarsByCategory } from '@party/ui'
+import { AvatarAsset, getPartyAvatarById, getPartyAvatarCategories, getPartyAvatarsByCategory } from '@party/ui'
 import { Sparkles, UserRound, Venus, Mars } from 'lucide-react'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import type { PartyAvatarCategory } from '@party/ui'
 import type { CharadesPlayerDraft } from '../state'
 import styles from './AddPlayerModal.module.css'
 
 type Props = {
-  onAdd: (player: CharadesPlayerDraft) => void
+  onSubmit: (player: CharadesPlayerDraft) => void
   onClose: () => void
   existingPlayers: CharadesPlayerDraft[]
+  player?: CharadesPlayerDraft | null
+  playerIndex?: number | null
 }
 
-const AVATAR_CATEGORIES = getPartyAvatarCategories()
+const AVATAR_CATEGORIES = getPartyAvatarCategories().filter((category) => category.id !== 'other')
 
-export function AddPlayerModal({ onAdd, onClose, existingPlayers }: Props) {
-  const [name, setName] = useState('')
-  const [avatar, setAvatar] = useState<string | null>(null)
-  const [gender, setGender] = useState<CharadesPlayerDraft['gender']>('none')
-  const [category, setCategory] = useState<PartyAvatarCategory>('people')
+export function AddPlayerModal({ onSubmit, onClose, existingPlayers, player = null, playerIndex = null }: Props) {
+  const isEditing = player !== null
+  const [name, setName] = useState(player?.name ?? '')
+  const [avatar, setAvatar] = useState<string | null>(player?.avatar ?? null)
+  const [gender, setGender] = useState<CharadesPlayerDraft['gender']>(player?.gender ?? 'none')
+  const [category, setCategory] = useState<PartyAvatarCategory>(() =>
+    player ? getPartyAvatarById(player.avatar).category : 'people',
+  )
   const [attempted, setAttempted] = useState(false)
   const avatars = getPartyAvatarsByCategory(category)
+  const comparablePlayers = useMemo(
+    () => existingPlayers.filter((_, index) => index !== playerIndex),
+    [existingPlayers, playerIndex],
+  )
 
   const nameTooShort = name.trim().length > 0 && name.trim().length < 3
   const nameTaken =
     name.trim().length >= 3 &&
-    existingPlayers.some((player) => player.name.toLowerCase() === name.trim().toLowerCase())
+    comparablePlayers.some((player) => player.name.toLowerCase() === name.trim().toLowerCase())
   const nameValid = name.trim().length >= 3 && !nameTaken
-  const avatarValid = avatar !== null && !existingPlayers.some((player) => player.avatar === avatar)
+  const avatarValid = avatar !== null && !comparablePlayers.some((player) => player.avatar === avatar)
   const genderValid = gender !== 'none'
   const canSubmit = nameValid && avatarValid && genderValid
 
@@ -38,7 +47,7 @@ export function AddPlayerModal({ onAdd, onClose, existingPlayers }: Props) {
       return
     }
 
-    onAdd({ name: name.trim(), avatar, gender })
+    onSubmit({ name: name.trim(), avatar, gender })
     onClose()
   }
 
@@ -47,13 +56,17 @@ export function AddPlayerModal({ onAdd, onClose, existingPlayers }: Props) {
       <div className={styles.modal}>
         <div className={styles.header}>
           <div className={styles.headerCopy}>
-            <span className={styles.eyebrow}>Nowy gracz</span>
-            <h2 className={styles.title}>Dodaj gracza</h2>
-            <p className={styles.description}>Ustaw nazwę, awatar i płeć, żeby dołączyć nową osobę do rundy.</p>
+            <span className={styles.eyebrow}>{isEditing ? 'Edycja gracza' : 'Nowy gracz'}</span>
+            <h2 className={styles.title}>{isEditing ? 'Edytuj gracza' : 'Dodaj gracza'}</h2>
+            <p className={styles.description}>
+              {isEditing
+                ? 'Zmień nazwę, awatar albo płeć zapisanej osoby.'
+                : 'Ustaw nazwę, awatar i płeć, żeby dołączyć nową osobę do rundy.'}
+            </p>
           </div>
           <div className={styles.previewChip}>
             <UserRound size={16} />
-            <span>{existingPlayers.length + 1}. slot</span>
+            <span>Gracz {(playerIndex ?? existingPlayers.length) + 1}</span>
           </div>
         </div>
 
@@ -80,7 +93,7 @@ export function AddPlayerModal({ onAdd, onClose, existingPlayers }: Props) {
                 id="charades-player-name"
                 className={`${styles.input} ${attempted && !nameValid ? styles.fieldError : ''}`}
                 type="text"
-                placeholder="Np. Ola"
+                placeholder="Wpisz nazwę gracza"
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 maxLength={20}
@@ -141,7 +154,7 @@ export function AddPlayerModal({ onAdd, onClose, existingPlayers }: Props) {
 
               <div className={styles.avatarGrid}>
                 {avatars.map((currentAvatar) => {
-                  const taken = existingPlayers.some((player) => player.avatar === currentAvatar.id)
+                  const taken = comparablePlayers.some((player) => player.avatar === currentAvatar.id)
 
                   return (
                     <button
@@ -176,7 +189,7 @@ export function AddPlayerModal({ onAdd, onClose, existingPlayers }: Props) {
             disabled={!canSubmit}
             onClick={handleSubmit}
           >
-            Gotowe
+            {isEditing ? 'Zapisz zmiany' : 'Gotowe'}
           </button>
         </div>
       </div>

@@ -1,5 +1,22 @@
 # Today - 2026-04-20
 
+### S75 (13:30~) [Kalambury] 16-player visual polish + ranking tie-breaker
+
+- Dopięto szeroki pass UI dla Kalamburów: menu/setup pod 16 graczy, cleanup kategorii avatarów, modal dodawania/edycji gracza, runtime top bar bez logowania, nowy flow losowania kolejności `4x4`, skip animacji dla `9+`, poprawki verdictów, timeoutów i wyników rund.
+- Podsumowanie rundy dostało nowy poziomy pas liderów, auto-scroll dla dalszych miejsc oraz poprawione liczenie remisów; ranking i wyniki końcowe sortują się teraz po `punkty -> łączny czas poprawnych odgadnięć -> alfabet`.
+- Przy poprawnym werdykcie zapisuje się czas od startu timera prezentowania, verdict pokazuje badge czasu, a podsumowanie rundy pokazuje małe badge'e czasu tylko przy graczach, którzy punktowali w bieżącej rundzie.
+- Weryfikacja przechodziła pakietowo przez całą sesję: wielokrotne `npm run build --workspace @party/charades`; część browser passów była robiona wcześniej, ale ostatni tie-breaker/time badge pass nie dostał jeszcze świeżego live smoke testu.
+- Next: zrobić widoczny browser pass końcówki flow `timer -> verdict -> round summary -> results`, a potem wrócić do cleanupu dużych plików runtime/results bez dalszego rozszerzania scope.
+- Experience recorded: yes
+
+### S74 (23:59~) [Memory] Working-set cleanup without losing history
+
+- Przejrzano warstwę `memory/*` pod kątem puchnięcia i ustalono, że `today.md` zostaje tygodniowym rolling logiem zamiast codziennej mikro-kompresji.
+- `MEMORY.md` dostał szybki indeks tematyczny i zasadę `quick scan first`, żeby przy starcie sesji nie trzeba było czytać całego pliku liniowo.
+- `goals.md` zsynchronizowano do obecnego stanu repo, a `memory/archive/README.md` ustawia jawną ścieżkę tygodniowej kompresji bez utraty historii.
+- `AGENTS.md` i skill `session-end` doprecyzowują teraz, że `today.md` kompresujemy dopiero na granicy tygodnia, nie w środku aktywnego tygodnia pracy.
+- Experience recorded: yes
+
 ### S73 (23:52~) [Repo docs/workflow] Agent-first documentation guardrails
 
 - Dodano repo-level playbooki: `docs/README.md`, `docs/ui-map.md`, `docs/runtime-map.md`, `docs/game-module-template.md`, `docs/module-maturity.md`, `docs/shared-extraction-checklist.md` i `docs/code-organization.md`.

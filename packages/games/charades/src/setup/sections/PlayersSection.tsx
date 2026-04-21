@@ -4,7 +4,7 @@ import { getPartyAvatarsByCategory } from '@party/ui'
 import { useState } from 'react'
 import type { GameSetupSectionComponentProps } from '@party/game-sdk'
 import type { CharadesSetupHelpers } from '../helpers'
-import type { CharadesSetupState } from '../state'
+import { CHARADES_MAX_PLAYERS, CHARADES_MIN_PLAYERS, type CharadesSetupState } from '../state'
 import { AddPlayerModal } from '../components/AddPlayerModal'
 import { PlayerGrid } from '../components/PlayerGrid'
 import styles from './PlayersSection.module.css'
@@ -18,10 +18,11 @@ const TEST_AVATARS = [
 
 export function PlayersSection({ state, updateState }: GameSetupSectionComponentProps<CharadesSetupState, CharadesSetupHelpers>) {
   const [showAddPlayer, setShowAddPlayer] = useState(false)
+  const [editingPlayerIndex, setEditingPlayerIndex] = useState<number | null>(null)
 
   function addRandomPlayer() {
     updateState((current) => {
-      if (current.players.length >= 12) {
+      if (current.players.length >= CHARADES_MAX_PLAYERS) {
         return current
       }
 
@@ -49,28 +50,49 @@ export function PlayersSection({ state, updateState }: GameSetupSectionComponent
               type="button"
               className={styles.testAddButton}
               onClick={addRandomPlayer}
-              disabled={state.players.length >= 12}
+              disabled={state.players.length >= CHARADES_MAX_PLAYERS}
             >
               Szybki test
             </button>
-            <span className={styles.sectionCount}>{state.players.length}/12</span>
+            <span className={styles.sectionCount}>
+              {state.players.length}/{CHARADES_MAX_PLAYERS}
+            </span>
           </div>
         </div>
 
         <PlayerGrid
           players={state.players}
           onRemove={(index) => updateState((current) => ({ ...current, players: current.players.filter((_, i) => i !== index) }))}
+          onEdit={(index) => setEditingPlayerIndex(index)}
           onAdd={() => setShowAddPlayer(true)}
         />
 
-        {state.players.length < 2 ? <p className={styles.hint}>Dodaj co najmniej 2 graczy, żeby rozpocząć rozgrywkę.</p> : null}
+        {state.players.length < CHARADES_MIN_PLAYERS ? (
+          <p className={styles.hint}>Dodaj co najmniej {CHARADES_MIN_PLAYERS} graczy, żeby rozpocząć rozgrywkę.</p>
+        ) : null}
       </section>
 
-      {showAddPlayer ? (
+      {showAddPlayer || editingPlayerIndex !== null ? (
         <AddPlayerModal
           existingPlayers={state.players}
-          onClose={() => setShowAddPlayer(false)}
-          onAdd={(player) => updateState((current) => ({ ...current, players: [...current.players, player] }))}
+          player={editingPlayerIndex !== null ? state.players[editingPlayerIndex] ?? null : null}
+          playerIndex={editingPlayerIndex}
+          onClose={() => {
+            setShowAddPlayer(false)
+            setEditingPlayerIndex(null)
+          }}
+          onSubmit={(player) =>
+            updateState((current) => {
+              if (editingPlayerIndex === null) {
+                return { ...current, players: [...current.players, player] }
+              }
+
+              return {
+                ...current,
+                players: current.players.map((currentPlayer, index) => (index === editingPlayerIndex ? player : currentPlayer)),
+              }
+            })
+          }
         />
       ) : null}
     </>

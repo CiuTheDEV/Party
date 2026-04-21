@@ -12,6 +12,7 @@
 
 .modal {
   width: min(920px, 100%);
+  max-height: min(860px, calc(100vh - 48px));
   background:
     radial-gradient(circle at top left, rgba(124, 58, 237, 0.12), transparent 34%),
     linear-gradient(180deg, rgba(22, 22, 27, 0.98), rgba(16, 16, 20, 0.98));
@@ -81,8 +82,9 @@
   grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
   gap: 22px;
   padding: 24px 28px;
-  min-height: 520px;
+  min-height: 0;
   align-items: stretch;
+  overflow: hidden;
 }
 
 .left,
@@ -108,6 +110,7 @@
 .avatarPanel {
   flex: 1;
   min-height: 0;
+  overflow: hidden;
 }
 
 .fieldHeader,
@@ -270,6 +273,7 @@
   align-content: start;
   overflow-y: auto;
   padding-right: 4px;
+  overscroll-behavior: contain;
 }
 
 .avatarBtn {

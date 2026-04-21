@@ -127,3 +127,23 @@
 **Solution:** Treat session wrap-up as `today.md + tasks + handoff + documentation sync`. After meaningful code or workflow changes, explicitly check whether shared inventory, runtime ownership, module template, extraction rules, code-organization rules, or routing docs became stale, and update them in the same session.
 
 **Why:** In an agent-first repo, stale documentation is not a cosmetic issue. It directly degrades future decision quality. The docs should move with the code, not a week later.
+
+---
+
+## Memory working set should optimize for scan speed, not aggressive pruning
+
+**Scenario:** `today.md`, `MEMORY.md`, and the rest of `memory/*` start growing, and there is pressure to compress them too early.
+
+**Solution:** Keep `today.md` as the rolling log for the current week, add topic indexes or navigation aids to heavyweight files like `MEMORY.md`, and archive/compress at clear boundaries instead of pruning active working context in the middle of the week.
+
+**Why:** Fast resume matters more than small file size. In an agent-first repo, the working memory layer should stay quick to scan without throwing away useful history.
+
+---
+
+## Tie-aware ranking should carry previous ordering keys explicitly
+
+**Scenario:** A scoreboard needs competition-style places (`1, 1, 1, 4`) and later adds a secondary tiebreaker such as total guess time.
+
+**Solution:** Sort first by the full ordered key set, then compute `rank` with explicit rolling state such as `previousScore`, `previousTieBreaker`, and `previousRank` instead of trying to recover rank from the previous array item inside the same `.map()`.
+
+**Why:** Reading a partially-built `rank` from the previous list item is brittle and breaks on longer tie sequences. Carrying the previous ordering keys explicitly keeps ties and secondary tiebreakers consistent across runtime and results screens.

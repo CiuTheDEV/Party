@@ -27,16 +27,27 @@ export type HostControlPhase =
 
 export type RuntimeSettingsFocusTarget = 'sound' | 'animations' | 'exit' | 'continue'
 export type RuntimeSettingsExitConfirmFocusTarget = 'stay' | 'exit'
+export type RuntimeExitConfirmFocusTarget = 'stay' | 'exit'
+export type RuntimeIncorrectVerdictConfirmFocusTarget = 'stay' | 'confirm'
+export type RuntimeRoundSummaryFocusTarget = 'menu' | 'continue'
 export type RuntimeVerdictFocusTarget = 'correct' | 'incorrect'
 export type RuntimeVerdictPickerStage = 'players' | 'actions'
 export type RuntimeVerdictPickerActionTarget = 'cancel' | 'confirm'
 export type HostControlsContext = {
   phase: HostControlPhase
   isRoundOrderRevealing: boolean
+  isRoundOrderCountdownActive: boolean
+  canSkipRoundOrder: boolean
   isSettingsOpen: boolean
   isSettingsExitConfirmOpen: boolean
+  isExitConfirmOpen: boolean
+  isIncorrectVerdictConfirmOpen: boolean
+  isCorrectVerdictBlocked: boolean
   settingsFocusTarget?: RuntimeSettingsFocusTarget
   settingsExitConfirmFocusTarget?: RuntimeSettingsExitConfirmFocusTarget
+  exitConfirmFocusTarget?: RuntimeExitConfirmFocusTarget
+  incorrectVerdictConfirmFocusTarget?: RuntimeIncorrectVerdictConfirmFocusTarget
+  roundSummaryFocusTarget?: RuntimeRoundSummaryFocusTarget
   verdictFocusTarget?: RuntimeVerdictFocusTarget
   isVerdictPickerOpen: boolean
   verdictPickerStage?: RuntimeVerdictPickerStage
@@ -55,12 +66,20 @@ export type HostControlCommand =
   | { type: 'open-settings-exit-confirm' }
   | { type: 'cancel-settings-exit-confirm' }
   | { type: 'set-settings-exit-confirm-focus'; target: RuntimeSettingsExitConfirmFocusTarget }
+  | { type: 'open-exit-confirm' }
+  | { type: 'close-exit-confirm' }
+  | { type: 'set-exit-confirm-focus'; target: RuntimeExitConfirmFocusTarget }
+  | { type: 'open-incorrect-verdict-confirm' }
+  | { type: 'close-incorrect-verdict-confirm' }
+  | { type: 'set-incorrect-verdict-confirm-focus'; target: RuntimeIncorrectVerdictConfirmFocusTarget }
   | { type: 'toggle-settings-sound' }
   | { type: 'toggle-settings-animations' }
   | { type: 'exit-to-menu' }
   | { type: 'start-round-order' }
+  | { type: 'skip-round-order' }
   | { type: 'stop-round' }
   | { type: 'continue-round-summary' }
+  | { type: 'set-round-summary-focus'; target: RuntimeRoundSummaryFocusTarget }
   | { type: 'open-verdict-picker' }
   | { type: 'close-verdict-picker' }
   | { type: 'set-verdict-focus'; target: RuntimeVerdictFocusTarget }
@@ -176,6 +195,14 @@ export function resolveHostControlCommand(
     return resolveSettingsCommand(context, action)
   }
 
+  if (context.isExitConfirmOpen) {
+    return resolveExitConfirmCommand(context, action)
+  }
+
+  if (context.isIncorrectVerdictConfirmOpen) {
+    return resolveIncorrectVerdictConfirmCommand(context, action)
+  }
+
   if (context.isReconnectBlocking) {
     return null
   }
@@ -191,6 +218,15 @@ export function resolveHostControlCommand(
   if (context.phase === 'round-order') {
     if (!context.isRoundOrderRevealing && action === 'confirm') {
       return { type: 'start-round-order' }
+    }
+
+    if (
+      context.isRoundOrderRevealing &&
+      !context.isRoundOrderCountdownActive &&
+      context.canSkipRoundOrder &&
+      action === 'rail'
+    ) {
+      return { type: 'skip-round-order' }
     }
 
     return null
@@ -213,12 +249,26 @@ export function resolveHostControlCommand(
   }
 
   if (context.phase === 'round-summary') {
+    const roundSummaryFocusTarget = context.roundSummaryFocusTarget ?? 'continue'
+
+    if (action === 'left') {
+      return roundSummaryFocusTarget === 'menu' ? null : { type: 'set-round-summary-focus', target: 'menu' }
+    }
+
+    if (action === 'right') {
+      return roundSummaryFocusTarget === 'continue'
+        ? null
+        : { type: 'set-round-summary-focus', target: 'continue' }
+    }
+
     if (action === 'confirm') {
-      return { type: 'continue-round-summary' }
+      return roundSummaryFocusTarget === 'menu'
+        ? { type: 'open-exit-confirm' }
+        : { type: 'continue-round-summary' }
     }
 
     if (action === 'back') {
-      return { type: 'exit-to-menu' }
+      return { type: 'open-exit-confirm' }
     }
 
     return null
@@ -232,7 +282,9 @@ export function resolveHostControlCommand(
     }
 
     if (action === 'left') {
-      return verdictFocusTarget === 'correct' ? null : { type: 'set-verdict-focus', target: 'correct' }
+      return verdictFocusTarget === 'correct' || context.isCorrectVerdictBlocked
+        ? null
+        : { type: 'set-verdict-focus', target: 'correct' }
     }
 
     if (action === 'right') {
@@ -240,12 +292,76 @@ export function resolveHostControlCommand(
     }
 
     if (action === 'confirm' && verdictFocusTarget === 'correct') {
-      return context.guessedPlayerIndexes.length > 0 ? { type: 'open-verdict-picker' } : null
+      return context.isCorrectVerdictBlocked || context.guessedPlayerIndexes.length === 0
+        ? null
+        : { type: 'open-verdict-picker' }
     }
 
     if (action === 'confirm' && verdictFocusTarget === 'incorrect') {
-      return { type: 'give-incorrect-verdict' }
+      return { type: 'open-incorrect-verdict-confirm' }
     }
+  }
+
+  return null
+}
+
+function resolveIncorrectVerdictConfirmCommand(
+  context: HostControlsContext,
+  action: HostControlAction,
+): HostControlCommand | null {
+  const incorrectVerdictConfirmFocusTarget = context.incorrectVerdictConfirmFocusTarget ?? 'stay'
+
+  if (action === 'left' || action === 'up') {
+    return incorrectVerdictConfirmFocusTarget === 'confirm'
+      ? null
+      : { type: 'set-incorrect-verdict-confirm-focus', target: 'confirm' }
+  }
+
+  if (action === 'right' || action === 'down') {
+    return incorrectVerdictConfirmFocusTarget === 'stay'
+      ? null
+      : { type: 'set-incorrect-verdict-confirm-focus', target: 'stay' }
+  }
+
+  if (action === 'confirm') {
+    return incorrectVerdictConfirmFocusTarget === 'confirm'
+      ? { type: 'give-incorrect-verdict' }
+      : { type: 'close-incorrect-verdict-confirm' }
+  }
+
+  if (action === 'back' || action === 'menu') {
+    return { type: 'close-incorrect-verdict-confirm' }
+  }
+
+  return null
+}
+
+function resolveExitConfirmCommand(
+  context: HostControlsContext,
+  action: HostControlAction,
+): HostControlCommand | null {
+  const exitConfirmFocusTarget = context.exitConfirmFocusTarget ?? 'stay'
+
+  if (action === 'left' || action === 'up') {
+    return exitConfirmFocusTarget === 'exit'
+      ? null
+      : { type: 'set-exit-confirm-focus', target: 'exit' }
+  }
+
+  if (action === 'right' || action === 'down') {
+    return exitConfirmFocusTarget === 'stay'
+      ? null
+      : { type: 'set-exit-confirm-focus', target: 'stay' }
+  }
+
+  if (action === 'confirm') {
+    return exitConfirmFocusTarget === 'exit'
+      ? { type: 'exit-to-menu' }
+      : { type: 'close-exit-confirm' }
+  }
+
+  if (action === 'back' || action === 'menu') {
+    return { type: 'close-exit-confirm' }
   }
 
   return null

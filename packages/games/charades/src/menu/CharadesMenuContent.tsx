@@ -100,27 +100,27 @@ export function CharadesMenuContent({
           </div>
           <div className={styles.modeBody}>
             <p className={styles.modeDesc}>
-              Każdy gracz prezentuje hasło po kolei. Gra toczy się do wybranej liczby rund. Potrzebujesz drugiego
-              urządzenia dla prezentera.
+              Każdy gracz wchodzi na scenę po kolei i pokazuje hasło swojej drużynie. Ustawiasz liczbę rund,
+              wybierasz kategorie i grasz z jednym telefonem dla aktualnego prezentera.
             </p>
             <ul className={styles.details}>
               <li>
                 <span className={styles.iconPlayers}>
                   <Users size={18} aria-hidden="true" />
                 </span>
-                2-8 graczy
+                2-16 graczy
               </li>
               <li>
                 <span className={styles.iconPhone}>
                   <Smartphone size={18} aria-hidden="true" />
                 </span>
-                Jedno urządzenie dla prezentera (telefon)
+                Jeden telefon krąży między prezenterami
               </li>
               <li>
                 <span className={styles.iconTarget}>
                   <Target size={18} aria-hidden="true" />
                 </span>
-                Wybierasz kategorie słów i liczbę rund
+                Wybierasz kategorie słów i tempo rozgrywki
               </li>
             </ul>
           </div>

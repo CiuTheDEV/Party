@@ -11,6 +11,61 @@
 - Format: date, symptom, root cause, fix, prevention
 - Never delete entries - they represent real pain already paid for
 
+## Quick Scan First
+
+Do not read this file linearly every time unless the current task really needs it.
+
+Use this order:
+1. Scan the topic index below.
+2. Open the entries that match the current task surface.
+3. Fall back to a full read only when the task is broad or the root cause is still unclear.
+
+## Topic Index
+
+### Local dev / verification environment
+
+- `2026-04-20 - localhost i 127.0.0.1 nie są równoważne dla lokalnego HMR huba`
+- `2026-04-20 - dev-hub-dev.mjs może być zablokowany przez obcy błąd typów poza aktualnym taskiem`
+- `2026-04-20 - Hostowy Windows PowerShell 5.1 może fałszywie wyglądać jak zepsuty UTF-8, mimo że pliki są poprawne`
+- `2026-04-19 - Parallel Playwright install can fetch the wrong browser build`
+
+### UI / layout / runtime presentation
+
+- `2026-04-19 - Button-based board cards can silently drop the runtime font`
+- `2026-04-01 - Autoscale is a fallback, not the default display mode`
+- `2026-03-23 - Open the design reference before touching UI tokens`
+- `2026-04-12 - DevTools mobile emulation can hide real-phone presenter viewport bugs`
+
+### Multiplayer / runtime state / persistence
+
+- `2026-04-19 - Per-category pool reset requires per-category history, not combined selection keys`
+- `2026-03-30 - Persistent game history must be written only after host-side validation`
+- `2026-04-11 - DeviceListener WebSocket reconnect loop caused by unstable callback refs`
+- `2026-04-11 - DeviceListener localStorage check does not work cross-device`
+
+### Deploy / Cloudflare / production path
+
+- `2026-04-18 - Cloudflare Pages push does not deploy PartyKit server changes`
+- `2026-04-12 - Cloudflare Pages Git deploys need root-level build config and root-level Functions shims`
+- `2026-04-12 - PBKDF2 iteration cost must fit Pages Functions CPU budget`
+- `2026-04-11 - Cloudflare Pages Workers (new UI) does not expose env vars to build`
+- `2026-04-11 - CF Pages project created via Workers UI gets unpredictable subdomain`
+- `2026-04-11 - Turbo build required for CF Pages to resolve workspace package types`
+
+### Repo / architecture / module boundaries
+
+- `2026-03-22 - emitDeclarationOnly breaks runtime imports in Next.js`
+- `2026-03-26 - Duplicating game ownership between the hub and the module creates drift`
+- `2026-03-31 - Stale worktree metadata can look like huge local diffs in the IDE`
+
+### Framework / app runtime gotchas
+
+- `2026-03-22 - Clerk crashes the dev server with a placeholder key`
+- `2026-03-22 - Hydration mismatch from typeof window !== 'undefined' in Next.js`
+- `2026-03-22 - CSS imports from workspace packages work in Next.js without extra config`
+- `2026-03-22 - Next.js 16 rewrites tsconfig.json on first run`
+- `2026-03-26 - VS Code warnings can come from multiple independent sources at once`
+
 ---
 
 ## Entries

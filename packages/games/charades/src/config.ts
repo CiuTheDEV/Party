@@ -1,4 +1,5 @@
 import type { GameConfig } from '@party/game-sdk'
+import { CHARADES_MAX_PLAYERS, CHARADES_MIN_PLAYERS } from './setup/state'
 
 export const config: GameConfig = {
   id: 'charades',
@@ -6,8 +7,8 @@ export const config: GameConfig = {
   description: 'Pokazuj hasła bez słów, tylko gestem i mimiką.',
   icon: '\uD83C\uDFAD',
   status: 'live',
-  minPlayers: 2,
-  maxPlayers: 8,
+  minPlayers: CHARADES_MIN_PLAYERS,
+  maxPlayers: CHARADES_MAX_PLAYERS,
   isPremium: false,
   color: '#7c3aed',
   href: '/games/charades',

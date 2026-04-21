@@ -5,6 +5,9 @@ export type PlayerSummary = {
   avatar: string
   gender: 'on' | 'ona' | 'none'
   score?: number
+  totalGuessTimeSeconds?: number
+  lastCorrectGuessSeconds?: number | null
+  lastScoredRound?: number | null
 }
 
 export type Phase =
@@ -30,7 +33,9 @@ export type PlayBoardProps = {
   bufferRemaining?: number
   currentRound: number
   totalRounds: number
+  isCorrectVerdictBlocked?: boolean
   animationsEnabled?: boolean
+  externalSkipRoundOrderSignal?: number
   externalToggleScoreRailSignal?: number
   externalToggleVerdictWordSignal?: number
   actionHintLabels?: {

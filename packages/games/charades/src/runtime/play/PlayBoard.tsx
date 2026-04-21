@@ -1,5 +1,5 @@
 import { AvatarAsset } from '@party/ui'
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { gsap } from 'gsap'
 import styles from './PlayBoard.module.css'
 import { CardBack, SettledCard } from './PlayBoardCards'
@@ -11,7 +11,6 @@ import {
   VerdictView,
 } from './PlayBoardPhases'
 import {
-  getCenterDeckCardStyle,
   getCornerDeckCardStyle,
   getRankedPlayers,
   getScoreKey,
@@ -37,13 +36,14 @@ export function PlayBoard({
   bufferRemaining = 0,
   currentRound,
   totalRounds,
+  isCorrectVerdictBlocked = false,
   animationsEnabled = true,
+  externalSkipRoundOrderSignal = 0,
   externalToggleScoreRailSignal = 0,
   externalToggleVerdictWordSignal = 0,
   actionHintLabels,
 }: PlayBoardProps) {
   const totalCards = order.length > 0 ? order.length : players.length
-  const [centerCount, setCenterCount] = useState(totalCards)
   const [cornerCount, setCornerCount] = useState(0)
   const [settledCount, setSettledCount] = useState(0)
   const [landedSlotIndex, setLandedSlotIndex] = useState<number | null>(null)
@@ -51,24 +51,43 @@ export function PlayBoard({
   const [flyCardFace, setFlyCardFace] = useState<'back' | 'front'>('back')
   const [flyCardPlayer, setFlyCardPlayer] = useState<PlayerSummary | null>(null)
   const [flyCardOrderIndex, setFlyCardOrderIndex] = useState<number | null>(null)
+  const [activeDealIndex, setActiveDealIndex] = useState<number | null>(null)
   const [positionsReady, setPositionsReady] = useState(false)
+  const [isRoundOrderSequenceComplete, setIsRoundOrderSequenceComplete] = useState(false)
   const [isVerdictWordVisible, setIsVerdictWordVisible] = useState(false)
   const timelineRef = useRef<gsap.core.Timeline | null>(null)
   const revealAreaRef = useRef<HTMLDivElement | null>(null)
-  const centerAnchorRef = useRef<HTMLDivElement | null>(null)
   const cornerAnchorRef = useRef<HTMLDivElement | null>(null)
   const flyCardRef = useRef<HTMLDivElement | null>(null)
   const flyCardInnerRef = useRef<HTMLDivElement | null>(null)
   const slotRefs = useRef<(HTMLDivElement | null)[]>([])
   const lastScoreRailToggleSignalRef = useRef(externalToggleScoreRailSignal)
   const lastVerdictWordToggleSignalRef = useRef(externalToggleVerdictWordSignal)
+  const lastSkipRoundOrderSignalRef = useRef(externalSkipRoundOrderSignal)
+  const hasRoundOrderSettledNotifiedRef = useRef(false)
   const settledPlayers = order.slice(0, settledCount)
+  const roundOrderSlotCount = Math.max(order.length, totalCards)
+  const orderColumns = Math.min(4, Math.max(roundOrderSlotCount, 1))
+  const orderRows = Math.max(1, Math.ceil(roundOrderSlotCount / orderColumns))
+  const roundOrderStyle = useMemo(
+    () =>
+      ({
+        '--order-columns': orderColumns,
+        '--order-rows': orderRows,
+        '--round-order-dock-width': `${orderRows >= 4 ? 152 : 168}px`,
+        '--round-order-dock-height': `${orderRows >= 4 ? 186 : 214}px`,
+        '--round-order-dock-offset': orderRows >= 4 ? '20px' : '28px',
+        '--round-order-dock-scale': 1,
+      }) as CSSProperties,
+    [orderColumns, orderRows],
+  )
   const rankedPlayers = useMemo<RankedPlayer[]>(
     () => getRankedPlayers(players),
     [players]
   )
   const topScore = rankedPlayers[0]?.score ?? 0
   const leaders = rankedPlayers.filter((player) => (player.score ?? 0) === topScore).map((player) => player.name)
+  const currentTurnElapsedSeconds = Math.max(0, settings.timerSeconds - Math.max(timerRemaining, 0))
   const {
     displayedScoredPlayers,
     isScoreRailExpanded,
@@ -84,7 +103,6 @@ export function PlayBoard({
     if (phase !== 'round-order') {
       timelineRef.current?.kill()
       timelineRef.current = null
-      setCenterCount(totalCards)
       setCornerCount(0)
       setSettledCount(0)
       setLandedSlotIndex(null)
@@ -92,27 +110,32 @@ export function PlayBoard({
       setFlyCardFace('back')
       setFlyCardPlayer(null)
       setFlyCardOrderIndex(null)
+      setActiveDealIndex(null)
       setPositionsReady(false)
+      setIsRoundOrderSequenceComplete(false)
+      hasRoundOrderSettledNotifiedRef.current = false
       return
     }
 
     if (!isRoundOrderRevealing) {
       timelineRef.current?.kill()
       timelineRef.current = null
-      setCenterCount(totalCards)
-      setCornerCount(0)
+      setCornerCount(totalCards)
       setSettledCount(0)
       setLandedSlotIndex(null)
       setShowFlyCard(false)
       setFlyCardFace('back')
       setFlyCardPlayer(null)
       setFlyCardOrderIndex(null)
+      setActiveDealIndex(null)
+      setPositionsReady(false)
+      setIsRoundOrderSequenceComplete(false)
+      hasRoundOrderSettledNotifiedRef.current = false
       return
     }
     if (!animationsEnabled) {
       timelineRef.current?.kill()
       timelineRef.current = null
-      setCenterCount(0)
       setCornerCount(0)
       setSettledCount(order.length)
       setLandedSlotIndex(null)
@@ -120,27 +143,46 @@ export function PlayBoard({
       setFlyCardFace('back')
       setFlyCardPlayer(null)
       setFlyCardOrderIndex(null)
+      setActiveDealIndex(null)
       setPositionsReady(true)
+      setIsRoundOrderSequenceComplete(true)
+      hasRoundOrderSettledNotifiedRef.current = false
       return
     }
+
+    setCornerCount(totalCards)
+    setSettledCount(0)
+    setLandedSlotIndex(null)
+    setShowFlyCard(false)
+    setFlyCardFace('back')
+    setFlyCardPlayer(null)
+    setFlyCardOrderIndex(null)
+    setActiveDealIndex(null)
+    setPositionsReady(false)
+    setIsRoundOrderSequenceComplete(false)
+    hasRoundOrderSettledNotifiedRef.current = false
   }, [animationsEnabled, order.length, phase, isRoundOrderRevealing, totalCards])
 
   useLayoutEffect(() => {
-    if (phase !== 'round-order' || !isRoundOrderRevealing || order.length === 0 || !animationsEnabled) {
+    if (
+      phase !== 'round-order' ||
+      !isRoundOrderRevealing ||
+      order.length === 0 ||
+      !animationsEnabled ||
+      isRoundOrderSequenceComplete
+    ) {
       return
     }
 
     const revealArea = revealAreaRef.current
-    const centerAnchor = centerAnchorRef.current
     const cornerAnchor = cornerAnchorRef.current
 
-    if (!revealArea || !centerAnchor || !cornerAnchor) {
+    if (!revealArea || !cornerAnchor) {
       return
     }
 
     const measure = () => {
       const revealRect = revealArea.getBoundingClientRect()
-      const centerRect = centerAnchor.getBoundingClientRect()
       const cornerRect = cornerAnchor.getBoundingClientRect()
 
       const hasSlots = order.every((_, index) => slotRefs.current[index])
@@ -149,7 +191,6 @@ export function PlayBoard({
         return
       }
 
-      const center = toLocalPoint(centerRect, revealRect)
       const corner = toLocalPoint(cornerRect, revealRect)
       const slots = order.map((_, index) => {
         const slot = slotRefs.current[index]
@@ -166,7 +207,6 @@ export function PlayBoard({
 
       timelineRef.current?.kill()
       timelineRef.current = buildRoundOrderTimeline({
-        center,
         corner,
         slots: slots as CardPoint[],
       })
@@ -181,7 +221,7 @@ export function PlayBoard({
       timelineRef.current?.kill()
       timelineRef.current = null
     }
-  }, [animationsEnabled, phase, isRoundOrderRevealing, order, currentOrderIdx])
+  }, [animationsEnabled, isRoundOrderSequenceComplete, phase, isRoundOrderRevealing, order])
 
   useEffect(() => {
     if (phase !== 'verdict') {
@@ -214,23 +254,130 @@ export function PlayBoard({
   }, [externalToggleVerdictWordSignal, phase])
 
   useEffect(() => {
+    if (externalSkipRoundOrderSignal === lastSkipRoundOrderSignalRef.current) {
+      return
+    }
+
+    lastSkipRoundOrderSignalRef.current = externalSkipRoundOrderSignal
+
+    if (phase !== 'round-order' || !isRoundOrderRevealing || order.length === 0 || isRoundOrderSequenceComplete) {
+      return
+    }
+
+    timelineRef.current?.kill()
+    const currentDealIndex = activeDealIndex
+    const flyCard = flyCardRef.current
+    const flyCardInner = flyCardInnerRef.current
+    const revealArea = revealAreaRef.current
+    const activeSlot = currentDealIndex === null ? null : slotRefs.current[currentDealIndex]
+
+    if (!showFlyCard || currentDealIndex === null || !flyCard || !flyCardInner || !revealArea || !activeSlot) {
+      timelineRef.current = null
+      setCornerCount(0)
+      setSettledCount(order.length)
+      setLandedSlotIndex(null)
+      setShowFlyCard(false)
+      setFlyCardFace('back')
+      setFlyCardPlayer(null)
+      setFlyCardOrderIndex(null)
+      setActiveDealIndex(null)
+      setPositionsReady(true)
+      setIsRoundOrderSequenceComplete(true)
+      return
+    }
+
+    const revealRect = revealArea.getBoundingClientRect()
+    const slotPoint = toLocalPoint(activeSlot.getBoundingClientRect(), revealRect)
+    const skipTimeline = gsap.timeline({
+      onComplete: () => {
+        setShowFlyCard(false)
+        setFlyCardFace('back')
+        setFlyCardPlayer(null)
+        setFlyCardOrderIndex(null)
+        setActiveDealIndex(null)
+        setSettledCount(order.length)
+        setCornerCount(0)
+        setPositionsReady(true)
+        setIsRoundOrderSequenceComplete(true)
+        window.setTimeout(() => {
+          setLandedSlotIndex((current) => (current === currentDealIndex ? null : current))
+        }, 90)
+      },
+    })
+
+    timelineRef.current = skipTimeline
+    gsap.killTweensOf(flyCard)
+    gsap.killTweensOf(flyCardInner)
+
+    skipTimeline.to(flyCard, {
+      x: slotPoint.x,
+      y: slotPoint.y,
+      rotation: 0,
+      scale: 1,
+      duration: 0.18,
+      ease: 'power2.out',
+    })
+
+    if (flyCardFace === 'back') {
+      skipTimeline.to(
+        flyCardInner,
+        {
+          rotateY: 180,
+          duration: 0.18,
+          ease: 'power2.inOut',
+        },
+        '<'
+      )
+
+      skipTimeline.add(() => {
+        setFlyCardFace('front')
+      }, '<+0.09')
+    }
+
+    skipTimeline.to(
+      flyCard,
+      {
+        opacity: 0,
+        duration: 0.03,
+        ease: 'none',
+      },
+      '>'
+    )
+
+    skipTimeline.add(() => {
+      gsap.set(flyCard, { opacity: 1 })
+      setLandedSlotIndex(currentDealIndex)
+    })
+  }, [
+    activeDealIndex,
+    externalSkipRoundOrderSignal,
+    flyCardFace,
+    isRoundOrderRevealing,
+    isRoundOrderSequenceComplete,
+    order.length,
+    phase,
+    showFlyCard,
+  ])
+
+  useEffect(() => {
     if (
       phase === 'round-order' &&
       isRoundOrderRevealing &&
       positionsReady &&
       order.length > 0 &&
-      settledCount === order.length
+      settledCount === order.length &&
+      !showFlyCard &&
+      !hasRoundOrderSettledNotifiedRef.current
     ) {
+      hasRoundOrderSettledNotifiedRef.current = true
       onRoundOrderSettled()
     }
-  }, [phase, isRoundOrderRevealing, positionsReady, settledCount, order.length, onRoundOrderSettled])
+  }, [phase, isRoundOrderRevealing, positionsReady, settledCount, order.length, onRoundOrderSettled, showFlyCard])
 
   function buildRoundOrderTimeline({
-    center,
     corner,
     slots,
   }: {
-    center: CardPoint
     corner: CardPoint
     slots: CardPoint[]
   }) {
@@ -245,8 +392,8 @@ export function PlayBoard({
     const timeline = gsap.timeline()
 
     gsap.set(flyCard, {
-      x: center.x,
-      y: center.y,
+      x: corner.x,
+      y: corner.y,
       rotation: 0,
       scale: 1,
       opacity: 0,
@@ -257,47 +404,6 @@ export function PlayBoard({
       transformStyle: 'preserve-3d',
     })
 
-    for (let index = 0; index < totalCards; index += 1) {
-      timeline.add(() => {
-        setShowFlyCard(true)
-        setFlyCardFace('back')
-        setFlyCardPlayer(null)
-        setFlyCardOrderIndex(null)
-        setCenterCount(totalCards - index)
-        setCornerCount(index)
-        gsap.set(flyCard, {
-          x: center.x,
-          y: center.y,
-          rotation: profile.collect.startRotation,
-          scale: profile.collect.startScale,
-          opacity: 1,
-        })
-        gsap.set(flyCardInner, { rotateY: 0 })
-      })
-
-      timeline.to(
-        flyCard,
-        {
-          x: corner.x,
-          y: corner.y,
-          rotation: profile.collect.endRotation,
-          scale: profile.collect.endScale,
-          duration: profile.collect.duration,
-          ease: profile.collect.ease,
-        },
-        '>'
-      )
-
-      timeline.add(() => {
-        setShowFlyCard(false)
-        setFlyCardOrderIndex(null)
-        setCenterCount(totalCards - index - 1)
-        setCornerCount(index + 1)
-      })
-
-      timeline.to({}, { duration: profile.collect.pauseAfterMs / 1000 })
-    }
-
     for (let index = 0; index < order.length; index += 1) {
       const player = order[index]
       const slot = slots[index]
@@ -307,11 +413,12 @@ export function PlayBoard({
         setFlyCardFace('back')
         setFlyCardPlayer(player)
         setFlyCardOrderIndex(index + 1)
+        setActiveDealIndex(index)
         setCornerCount(getCornerDeckCountDuringDeal(totalCards, index))
         gsap.set(flyCard, {
           x: corner.x,
           y: corner.y,
-          rotation: profile.deal.startRotation,
+          rotation: profile.deal.startRotation + Math.min(index, 5) * 0.35,
           scale: profile.deal.startScale,
           opacity: 1,
         })
@@ -322,11 +429,11 @@ export function PlayBoard({
         flyCard,
         {
           x: slot.x,
-          y: slot.y + profile.deal.glideYOffset,
-          rotation: profile.deal.glideRotation,
-          scale: profile.deal.glideScale,
-          duration: profile.deal.glideDuration,
-          ease: profile.deal.glideEase,
+          y: slot.y + profile.deal.approachYOffset,
+          rotation: profile.deal.approachRotation,
+          scale: profile.deal.approachScale,
+          duration: profile.deal.approachDuration,
+          ease: profile.deal.approachEase,
         },
         '>'
       )
@@ -375,12 +482,11 @@ export function PlayBoard({
         setFlyCardFace('back')
         setFlyCardPlayer(null)
         setFlyCardOrderIndex(null)
+        setActiveDealIndex(null)
         setCornerCount(getCornerDeckCountDuringDeal(totalCards, index))
         gsap.set(flyCard, { opacity: 1 })
-        window.requestAnimationFrame(() => {
-          setLandedSlotIndex(index)
-          setSettledCount(index + 1)
-        })
+        setLandedSlotIndex(index)
+        setSettledCount(index + 1)
       })
 
       timeline.to({}, { duration: profile.deal.landedHoldDuration })
@@ -392,106 +498,86 @@ export function PlayBoard({
       timeline.to({}, { duration: profile.deal.pauseAfterMs / 1000 })
     }
 
+    timeline.add(() => {
+      setLandedSlotIndex(null)
+      setShowFlyCard(false)
+      setCornerCount(0)
+      setActiveDealIndex(null)
+      setIsRoundOrderSequenceComplete(true)
+    })
+
     return timeline
   }
 
   if (phase === 'round-order') {
     return (
       <main className={styles.board}>
-        <section className={styles.stage}>
-          {!isRoundOrderRevealing ? (
-            <div className={styles.deckArea} aria-label="Zakryte karty graczy">
-              <div className={styles.centerDeck}>
-                <div ref={centerAnchorRef} className={styles.centerAnchor} aria-hidden="true" />
-                {Array.from({ length: totalCards }).map((_, index) => (
+        <section className={`${styles.stage} ${styles.stageRoundOrder}`} style={roundOrderStyle}>
+          <div ref={revealAreaRef} className={styles.revealArea}>
+            <div className={styles.orderList}>
+              {Array.from({ length: roundOrderSlotCount }).map((_, index) => (
+                <div
+                  key={`slot-${index}`}
+                  ref={(node) => {
+                    slotRefs.current[index] = node
+                  }}
+                  className={`${styles.orderSlot} ${landedSlotIndex === index ? styles.orderSlotActive : ''}`}
+                >
+                  {index < settledCount ? (
+                    <SettledCard
+                      player={settledPlayers[index]}
+                      index={index}
+                      isActive={landedSlotIndex === index}
+                    />
+                  ) : (
+                    <div className={styles.orderCardPending}>
+                      <div className={styles.orderPlaceholder}>
+                        <span className={styles.orderPlaceholderIndex}>{index + 1}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            <div className={styles.cornerDeckShell} aria-hidden="true">
+              <div className={styles.cornerDeck}>
+                <div ref={cornerAnchorRef} className={styles.cornerAnchor} />
+                {Array.from({ length: isRoundOrderRevealing ? cornerCount : totalCards }).map((_, index, items) => (
                   <div
-                    key={`center-${index}`}
-                    className={`${styles.deckCard} ${styles.centerDeckCard}`}
-                    style={getCenterDeckCardStyle(index)}
+                    key={`corner-${index}`}
+                    className={`${styles.deckCard} ${styles.cornerDeckCard}`}
+                    style={getCornerDeckCardStyle(index, items.length)}
                   >
                     <CardBack branded />
                   </div>
                 ))}
               </div>
             </div>
-          ) : (
-            <div ref={revealAreaRef} className={styles.revealArea}>
-              <div className={styles.centerDeckShell} aria-hidden="true">
-                <div className={styles.centerDeck}>
-                  <div ref={centerAnchorRef} className={styles.centerAnchor} />
-                  {Array.from({ length: centerCount }).map((_, index) => (
-                    <div
-                      key={`collect-center-${index}`}
-                      className={`${styles.deckCard} ${styles.centerDeckCard}`}
-                      style={getCenterDeckCardStyle(index)}
-                    >
-                      <CardBack branded />
-                    </div>
-                  ))}
+
+            <div
+              ref={flyCardRef}
+              className={`${styles.flyCard} ${showFlyCard ? styles.flyCardVisible : ''}`}
+              aria-hidden="true"
+            >
+              <div ref={flyCardInnerRef} className={styles.orderCardInner}>
+                <div className={styles.orderCardBack}>
+                  <CardBack branded />
                 </div>
-              </div>
-
-              <div className={styles.orderList}>
-                {order.map((player, index) => (
-                  <div
-                    key={`${player.name}-${index}`}
-                    ref={(node) => {
-                      slotRefs.current[index] = node
-                    }}
-                    className={styles.orderSlot}
-                  >
-                    {index < settledCount ? (
-                      <SettledCard
-                        player={settledPlayers[index]}
-                        index={index}
-                        isActive={landedSlotIndex === index}
-                      />
-                    ) : (
-                      <div className={styles.orderCardPending} />
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              <div className={styles.cornerDeckShell} aria-hidden="true">
-                <div className={styles.cornerDeck}>
-                  <div ref={cornerAnchorRef} className={styles.cornerAnchor} />
-                  {Array.from({ length: cornerCount }).map((_, index, items) => (
-                    <div
-                      key={`corner-${index}`}
-                      className={`${styles.deckCard} ${styles.cornerDeckCard}`}
-                      style={getCornerDeckCardStyle(index, items.length)}
-                    >
-                      <CardBack branded />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div
-                ref={flyCardRef}
-                className={`${styles.flyCard} ${showFlyCard ? styles.flyCardVisible : ''}`}
-                aria-hidden="true"
-              >
-                <div ref={flyCardInnerRef} className={styles.orderCardInner}>
-                  <div className={styles.orderCardBack}>
-                    <CardBack branded />
-                  </div>
-                  <div className={styles.orderCardFront}>
-                    {flyCardFace === 'front' && flyCardPlayer ? (
-                      <>
-                        <span className={styles.orderIndex}>{flyCardOrderIndex ?? ''}</span>
-                        <AvatarAsset avatar={flyCardPlayer.avatar} className={styles.orderAvatar} />
-                        <span className={styles.namePill} data-gender={flyCardPlayer.gender}>
-                          {flyCardPlayer.name}
-                        </span>
-                      </>
-                    ) : null}
-                  </div>
+                <div className={styles.orderCardFront}>
+                  {flyCardFace === 'front' && flyCardPlayer ? (
+                    <>
+                      <span className={styles.orderIndex}>{flyCardOrderIndex ?? ''}</span>
+                      <AvatarAsset avatar={flyCardPlayer.avatar} className={styles.orderAvatar} />
+                      <span className={styles.namePill} data-gender={flyCardPlayer.gender}>
+                        {flyCardPlayer.name}
+                      </span>
+                    </>
+                  ) : null}
                 </div>
               </div>
             </div>
-          )}
+          </div>
         </section>
       </main>
     )
@@ -505,6 +591,7 @@ export function PlayBoard({
         currentWord={currentWord}
         currentCategory={currentCategory}
         settings={settings}
+        animationsEnabled={animationsEnabled}
       />
     )
   }
@@ -514,6 +601,8 @@ export function PlayBoard({
         <VerdictView
           presenter={presenter}
           currentWord={currentWord}
+          isTimedOutVerdict={isCorrectVerdictBlocked}
+          elapsedGuessSeconds={currentTurnElapsedSeconds}
           isVerdictWordVisible={isVerdictWordVisible}
           onToggleWordVisibility={() => setIsVerdictWordVisible((current) => !current)}
           revealHintLabel={actionHintLabels?.rail}
@@ -548,5 +637,5 @@ export function PlayBoard({
     )
   }
 
-  return <BufferView presenter={presenter} bufferRemaining={bufferRemaining} />
+  return <BufferView presenter={presenter} bufferRemaining={bufferRemaining} animationsEnabled={animationsEnabled} />
 }

@@ -211,7 +211,10 @@ export function useGameState(
     send({ type: 'TURN_END', turnId: currentTurnIdRef.current, reason: 'verdict' })
 
     setState((current) => {
-      const result = buildVerdictState(current, settings, correct, guessedPlayerIdx)
+      const guessElapsedSeconds = correct
+        ? Math.max(1, settings.timerSeconds - Math.max(current.timerRemaining, 0))
+        : undefined
+      const result = buildVerdictState(current, settings, correct, guessedPlayerIdx, guessElapsedSeconds)
 
       if (result.betweenTurns) {
         send({

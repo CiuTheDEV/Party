@@ -46,6 +46,9 @@ Read these before making changes:
 4. `memory/MEMORY.md` if present
 5. `memory/patterns.md` if present
 
+`memory/today.md` is the rolling log for the current week.
+Do not prematurely compress it during the week; compress/archive it at the week boundary instead.
+
 Use `PROJECT_CONTEXT.md` as the source of truth for current architecture and current phase.
 If this file and `PROJECT_CONTEXT.md` ever disagree, follow `PROJECT_CONTEXT.md`.
 

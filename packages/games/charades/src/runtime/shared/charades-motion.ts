@@ -18,8 +18,16 @@ export const charadesMotionProfile = {
   countdown: {
     pulseDuration: 0.3,
     pulseScale: 1.1,
+    criticalPulseDuration: 0.22,
+    criticalPulseScaleBoost: 0.12,
     warningGlow: 0.28,
-    criticalGlow: 0.46,
+    criticalGlow: 0.58,
+    criticalWindowRatio: 0.18,
+    criticalWindowMinSeconds: 4,
+    criticalWindowMaxSeconds: 8,
+    warningWindowRatio: 0.3,
+    warningWindowMinSeconds: 6,
+    warningWindowMaxSeconds: 12,
   },
   verdict: {
     duration: 0.28,
@@ -82,8 +90,27 @@ export function useCharadesReducedMotion() {
 
 export function getTimerMotionTier(remaining: number, duration: number): TimerMotionTier {
   const safeDuration = Math.max(duration, 1)
-  const criticalThreshold = Math.min(3, safeDuration)
-  const warningThreshold = Math.max(6, Math.ceil(safeDuration * 0.18))
+  const criticalThreshold = Math.min(
+    safeDuration,
+    Math.max(
+      charadesMotionProfile.countdown.criticalWindowMinSeconds,
+      Math.min(
+        charadesMotionProfile.countdown.criticalWindowMaxSeconds,
+        Math.ceil(safeDuration * charadesMotionProfile.countdown.criticalWindowRatio),
+      ),
+    ),
+  )
+  const warningThreshold = Math.min(
+    safeDuration,
+    Math.max(
+      criticalThreshold + 2,
+      charadesMotionProfile.countdown.warningWindowMinSeconds,
+      Math.min(
+        charadesMotionProfile.countdown.warningWindowMaxSeconds,
+        Math.ceil(safeDuration * charadesMotionProfile.countdown.warningWindowRatio),
+      ),
+    ),
+  )
 
   if (remaining <= criticalThreshold) {
     return 'critical'

@@ -14,9 +14,12 @@ export type DevicePairingModalProps = {
   description: string
   warning?: ReactNode
   statusSection?: ReactNode
-  sessionCode: string
+  copyLabel?: string
+  displayValue?: string
+  copyValue: string
   copyHint: string
   onCopy: () => void
+  copyAriaLabel?: string
   onOpenExternal?: () => void
   onClose: () => void
   footer?: ReactNode
@@ -30,15 +33,20 @@ export function DevicePairingModal({
   description,
   warning,
   statusSection,
-  sessionCode,
+  copyLabel = 'Kod sesji',
+  displayValue,
+  copyValue,
   copyHint,
   onCopy,
+  copyAriaLabel = 'Kopiuj kod sesji',
   onOpenExternal,
   onClose,
   footer,
 }: DevicePairingModalProps) {
   const titleId = useId()
   const closeButtonRef = useRef<HTMLButtonElement>(null)
+  const renderedValue = displayValue ?? copyValue
+  const isLongCopyValue = renderedValue.includes('://') || renderedValue.length > 20
 
   useEffect(() => {
     closeButtonRef.current?.focus()
@@ -102,10 +110,10 @@ export function DevicePairingModal({
             </div>
           </div>
 
-          <div className={styles.codeRow}>
-            <span className={styles.codeLabel}>Kod sesji</span>
-            <button type="button" className={styles.codeButton} onClick={onCopy} aria-label="Kopiuj kod sesji">
-              <span className={styles.codeValue}>{sessionCode}</span>
+          <div className={`${styles.codeRow} ${isLongCopyValue ? styles.codeRowWide : ''}`}>
+            <span className={styles.codeLabel}>{copyLabel}</span>
+            <button type="button" className={styles.codeButton} onClick={onCopy} aria-label={copyAriaLabel}>
+              <span className={`${styles.codeValue} ${isLongCopyValue ? styles.codeValueLong : ''}`}>{renderedValue}</span>
               <span className={styles.codeHint}>{copyHint}</span>
             </button>
           </div>

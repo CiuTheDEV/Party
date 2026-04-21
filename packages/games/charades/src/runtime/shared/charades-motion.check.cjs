@@ -30,8 +30,11 @@ run('defines a compact game-show motion profile', () => {
 
 run('escalates timer pressure from normal to warning to critical', () => {
   assert.equal(getTimerMotionTier(18, 60), 'normal')
-  assert.equal(getTimerMotionTier(6, 60), 'warning')
-  assert.equal(getTimerMotionTier(3, 60), 'critical')
+  assert.equal(getTimerMotionTier(12, 60), 'warning')
+  assert.equal(getTimerMotionTier(8, 60), 'critical')
+  assert.equal(getTimerMotionTier(9, 30), 'warning')
+  assert.equal(getTimerMotionTier(6, 30), 'critical')
+  assert.equal(getTimerMotionTier(4, 10), 'critical')
 })
 
 run('treats reduced motion as an explicit opt-out', () => {

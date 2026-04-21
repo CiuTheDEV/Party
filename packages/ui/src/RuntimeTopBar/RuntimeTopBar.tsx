@@ -4,13 +4,11 @@ import styles from './RuntimeTopBar.module.css'
 type RuntimeTopBarProps = {
   gameName: string
   onOpenSettings?: () => void
-  authLabel?: string
 }
 
 export function RuntimeTopBar({
   gameName,
   onOpenSettings,
-  authLabel = 'Zaloguj się',
 }: RuntimeTopBarProps) {
   return (
     <header className={styles.bar}>
@@ -26,9 +24,6 @@ export function RuntimeTopBar({
             <Settings size={18} aria-hidden="true" />
           </button>
         ) : null}
-        <button type="button" className={styles.loginButton} aria-label={authLabel}>
-          <span className={styles.loginText}>{authLabel}</span>
-        </button>
       </div>
     </header>
   )

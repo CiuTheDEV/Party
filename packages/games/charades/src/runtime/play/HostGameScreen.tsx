@@ -9,8 +9,14 @@ import { ReconnectPresenterModal } from './ReconnectPresenterModal'
 import { RoomConnectionModal } from './RoomConnectionModal'
 import { PlaySettingsModal } from './PlaySettingsModal'
 import { VerdictPickerModal } from './VerdictPickerModal'
+import { IncorrectVerdictAlert } from './IncorrectVerdictAlert'
+import { ExitToMenuAlert } from '../../shared/ExitToMenuAlert'
 import { getVisibleActionHintLabel } from './action-hint-visibility'
-import { getHostControlActionLabel, type HostControlCommand, type HostControlDevice } from './host-controls'
+import {
+  getHostControlActionLabel,
+  type HostControlCommand,
+  type HostControlDevice,
+} from './host-controls'
 import { createRuntimeInputState, sleepRuntimeInput } from './runtime-input-state'
 import { useHostControls } from './useHostControls'
 import type { Phase, PlayerSummary } from './playboard-types'
@@ -46,6 +52,7 @@ type HostGameScreenProps = {
   isDeviceConnected: boolean
   isRoomConnected: boolean
   isRoundOrderRevealing: boolean
+  isCorrectVerdictBlocked: boolean
   onFinishRoundOrder: () => void
   onFinishRoundSummary: () => void
   onStartRound: () => void
@@ -59,10 +66,15 @@ type HostGameScreenProps = {
 export function HostGameScreen(props: HostGameScreenProps) {
   const [isVerdictPickerOpen, setIsVerdictPickerOpen] = useState(false)
   const [verdictFocusTarget, setVerdictFocusTarget] = useState<'correct' | 'incorrect'>('correct')
+  const [roundSummaryFocusTarget, setRoundSummaryFocusTarget] = useState<'menu' | 'continue'>('continue')
   const [verdictPickerStage, setVerdictPickerStage] = useState<'players' | 'actions'>('players')
   const [verdictPickerActionTarget, setVerdictPickerActionTarget] = useState<'cancel' | 'confirm'>('confirm')
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isSettingsExitConfirmOpen, setIsSettingsExitConfirmOpen] = useState(false)
+  const [isExitConfirmOpen, setIsExitConfirmOpen] = useState(false)
+  const [exitConfirmFocusTarget, setExitConfirmFocusTarget] = useState<'stay' | 'exit'>('stay')
+  const [isIncorrectVerdictConfirmOpen, setIsIncorrectVerdictConfirmOpen] = useState(false)
+  const [incorrectVerdictConfirmFocusTarget, setIncorrectVerdictConfirmFocusTarget] = useState<'stay' | 'confirm'>('stay')
   const [settingsFocusTarget, setSettingsFocusTarget] = useState<'sound' | 'animations' | 'exit' | 'continue'>('sound')
   const [settingsExitConfirmFocusTarget, setSettingsExitConfirmFocusTarget] = useState<'stay' | 'exit'>('stay')
   const [soundEnabled, setSoundEnabled] = useState(true)
@@ -70,6 +82,7 @@ export function HostGameScreen(props: HostGameScreenProps) {
   const [selectedGuessedPlayerIdx, setSelectedGuessedPlayerIdx] = useState<number | null>(null)
   const [scoreRailToggleSignal, setScoreRailToggleSignal] = useState(0)
   const [verdictWordToggleSignal, setVerdictWordToggleSignal] = useState(0)
+  const [skipRoundOrderSignal, setSkipRoundOrderSignal] = useState(0)
   const [activeInputDevice, setActiveInputDevice] = useState<HostControlDevice>('keyboard')
   const [controllerProfile, setControllerProfile] = useState<GamepadProfile>('generic')
   const [controlBindings, setControlBindings] = useState<Record<string, string>>({})
@@ -84,7 +97,12 @@ export function HostGameScreen(props: HostGameScreenProps) {
       ? 'error'
       : 'reconnecting'
     : null
-  const isPauseOverlayOpen = isSettingsOpen || isPresenterReconnectRequired || isRoomReconnectRequired
+  const isPauseOverlayOpen =
+    isSettingsOpen ||
+    isExitConfirmOpen ||
+    isIncorrectVerdictConfirmOpen ||
+    isPresenterReconnectRequired ||
+    isRoomReconnectRequired
   const { roundOrderCountdown, startRoundOrderCountdown } = useRoundOrderCountdown({
     shouldRun: props.phase === 'round-order' && props.isRoundOrderRevealing,
     isPaused: isPauseOverlayOpen,
@@ -97,6 +115,7 @@ export function HostGameScreen(props: HostGameScreenProps) {
         .filter((player): player is PlayerSummary => Boolean(player)),
     [props.order, props.players]
   )
+  const canSkipRoundOrder = orderedPlayers.length >= 9
 
   useEffect(() => {
     const preferences = readCharadesPlayPreferences()
@@ -145,6 +164,23 @@ export function HostGameScreen(props: HostGameScreenProps) {
       setVerdictFocusTarget('correct')
       setVerdictPickerStage('players')
       setVerdictPickerActionTarget('confirm')
+      setIncorrectVerdictConfirmFocusTarget('stay')
+      setIsIncorrectVerdictConfirmOpen(false)
+    }
+  }, [props.phase])
+
+  useEffect(() => {
+    if (props.phase === 'verdict' && props.isCorrectVerdictBlocked) {
+      setVerdictFocusTarget('incorrect')
+      setIsVerdictPickerOpen(false)
+      setVerdictPickerStage('players')
+      setVerdictPickerActionTarget('confirm')
+    }
+  }, [props.isCorrectVerdictBlocked, props.phase])
+
+  useEffect(() => {
+    if (props.phase !== 'round-summary') {
+      setRoundSummaryFocusTarget('continue')
     }
   }, [props.phase])
 
@@ -155,6 +191,26 @@ export function HostGameScreen(props: HostGameScreenProps) {
       setSettingsExitConfirmFocusTarget('stay')
     }
   }, [isSettingsOpen])
+
+  const openExitConfirm = useCallback(() => {
+    setExitConfirmFocusTarget('stay')
+    setIsExitConfirmOpen(true)
+  }, [])
+
+  const closeExitConfirm = useCallback(() => {
+    setExitConfirmFocusTarget('stay')
+    setIsExitConfirmOpen(false)
+  }, [])
+
+  const openIncorrectVerdictConfirm = useCallback(() => {
+    setIncorrectVerdictConfirmFocusTarget('stay')
+    setIsIncorrectVerdictConfirmOpen(true)
+  }, [])
+
+  const closeIncorrectVerdictConfirm = useCallback(() => {
+    setIncorrectVerdictConfirmFocusTarget('stay')
+    setIsIncorrectVerdictConfirmOpen(false)
+  }, [])
 
   useEffect(() => {
     if (isPauseOverlayOpen) {
@@ -179,6 +235,14 @@ export function HostGameScreen(props: HostGameScreenProps) {
   const handleRoundOrderSettled = useCallback(() => {
     startRoundOrderCountdown()
   }, [startRoundOrderCountdown])
+
+  const handleSkipRoundOrder = useCallback(() => {
+    if (props.phase !== 'round-order' || !props.isRoundOrderRevealing || roundOrderCountdown !== null || !canSkipRoundOrder) {
+      return
+    }
+
+    setSkipRoundOrderSignal((current) => current + 1)
+  }, [canSkipRoundOrder, props.isRoundOrderRevealing, props.phase, roundOrderCountdown])
 
   const toggleSound = useCallback(() => {
     setSoundEnabled((current) => {
@@ -242,17 +306,41 @@ export function HostGameScreen(props: HostGameScreenProps) {
         case 'toggle-settings-animations':
           toggleAnimations()
           return
+        case 'open-exit-confirm':
+          openExitConfirm()
+          return
+        case 'close-exit-confirm':
+          closeExitConfirm()
+          return
+        case 'set-exit-confirm-focus':
+          setExitConfirmFocusTarget(command.target)
+          return
+        case 'open-incorrect-verdict-confirm':
+          openIncorrectVerdictConfirm()
+          return
+        case 'close-incorrect-verdict-confirm':
+          closeIncorrectVerdictConfirm()
+          return
+        case 'set-incorrect-verdict-confirm-focus':
+          setIncorrectVerdictConfirmFocusTarget(command.target)
+          return
         case 'exit-to-menu':
           props.onExitToMenu()
           return
         case 'start-round-order':
           props.onStartRound()
           return
+        case 'skip-round-order':
+          handleSkipRoundOrder()
+          return
         case 'stop-round':
           props.onStopRound()
           return
         case 'continue-round-summary':
           props.onFinishRoundSummary()
+          return
+        case 'set-round-summary-focus':
+          setRoundSummaryFocusTarget(command.target)
           return
         case 'open-verdict-picker':
           setSelectedGuessedPlayerIdx((current) => current ?? guessedPlayerIndexes[0] ?? null)
@@ -287,6 +375,7 @@ export function HostGameScreen(props: HostGameScreenProps) {
           }
           return
         case 'give-incorrect-verdict':
+          closeIncorrectVerdictConfirm()
           props.onGiveVerdict(false)
           return
         case 'toggle-score-rail':
@@ -297,17 +386,34 @@ export function HostGameScreen(props: HostGameScreenProps) {
           return
       }
     },
-    [guessedPlayerIndexes, props, selectedGuessedPlayerIdx],
+    [
+      closeExitConfirm,
+      closeIncorrectVerdictConfirm,
+      guessedPlayerIndexes,
+      handleSkipRoundOrder,
+      openExitConfirm,
+      openIncorrectVerdictConfirm,
+      props,
+      selectedGuessedPlayerIdx,
+    ],
   )
 
   useHostControls({
     context: {
       phase: props.phase,
       isRoundOrderRevealing: props.isRoundOrderRevealing,
+      isRoundOrderCountdownActive: roundOrderCountdown !== null,
+      canSkipRoundOrder,
       isSettingsOpen,
       isSettingsExitConfirmOpen,
+      isExitConfirmOpen,
+      isIncorrectVerdictConfirmOpen,
+      isCorrectVerdictBlocked: props.isCorrectVerdictBlocked,
       settingsFocusTarget,
       settingsExitConfirmFocusTarget,
+      exitConfirmFocusTarget,
+      incorrectVerdictConfirmFocusTarget,
+      roundSummaryFocusTarget,
       verdictFocusTarget,
       isVerdictPickerOpen,
       verdictPickerStage,
@@ -364,6 +470,8 @@ export function HostGameScreen(props: HostGameScreenProps) {
         bufferRemaining={props.bufferRemaining}
         currentRound={props.currentRound}
         totalRounds={props.totalRounds}
+        isCorrectVerdictBlocked={props.isCorrectVerdictBlocked}
+        externalSkipRoundOrderSignal={skipRoundOrderSignal}
         externalToggleScoreRailSignal={scoreRailToggleSignal}
         externalToggleVerdictWordSignal={verdictWordToggleSignal}
         actionHintLabels={{
@@ -376,24 +484,38 @@ export function HostGameScreen(props: HostGameScreenProps) {
         roomConnectionState={props.roomConnectionState}
         isDeviceConnected={props.isDeviceConnected}
         isRoundOrderRevealing={props.isRoundOrderRevealing}
+        canSkipRoundOrder={canSkipRoundOrder}
         phase={props.phase}
         roundOrderCountdown={roundOrderCountdown}
         onContinueRoundSummary={props.onFinishRoundSummary}
+        roundSummaryFocusedTarget={roundSummaryFocusTarget}
         onCorrectVerdict={() => {
+          if (props.isCorrectVerdictBlocked) {
+            return
+          }
           setSelectedGuessedPlayerIdx(guessedPlayerIndexes[0] ?? null)
           setVerdictPickerStage('players')
           setVerdictPickerActionTarget('confirm')
           setIsVerdictPickerOpen(true)
         }}
-        onExitToMenu={props.onExitToMenu}
-        onIncorrectVerdict={() => props.onGiveVerdict(false)}
+        onExitToMenu={openExitConfirm}
+        onIncorrectVerdict={() => {
+          if (props.isCorrectVerdictBlocked) {
+            props.onGiveVerdict(false)
+            return
+          }
+
+          openIncorrectVerdictConfirm()
+        }}
         verdictFocusedTarget={verdictFocusTarget}
+        isCorrectVerdictBlocked={props.isCorrectVerdictBlocked}
         isFocusVisible={runtimeInputState.isAwake}
         onStartRound={props.onStartRound}
+        onSkipRoundOrder={handleSkipRoundOrder}
         onStopRound={props.onStopRound}
         actionHints={{
           confirm: getActionHint('confirm'),
-          menu: getActionHint('menu'),
+          rail: getActionHint('rail'),
         }}
       />
 
@@ -460,14 +582,42 @@ export function HostGameScreen(props: HostGameScreenProps) {
       {isPresenterReconnectRequired ? (
         <ReconnectPresenterModal
           roomId={props.roomId}
-          onBackToMenu={props.onExitToMenu}
+          onBackToMenu={openExitConfirm}
         />
       ) : null}
 
       {roomConnectionModalState ? (
         <RoomConnectionModal
           connectionState={roomConnectionModalState}
-          onBackToMenu={props.onExitToMenu}
+          onBackToMenu={openExitConfirm}
+        />
+      ) : null}
+
+      {isExitConfirmOpen ? (
+        <ExitToMenuAlert
+          copy="Bieżąca rozgrywka zostanie przerwana. Użyj tej opcji tylko wtedy, gdy naprawdę chcesz opuścić mecz."
+          focusedTarget={exitConfirmFocusTarget}
+          isFocusVisible={runtimeInputState.isAwake}
+          onStay={closeExitConfirm}
+          onExit={props.onExitToMenu}
+          actionHints={{
+            confirm: getActionHint('confirm'),
+          }}
+        />
+      ) : null}
+
+      {isIncorrectVerdictConfirmOpen ? (
+        <IncorrectVerdictAlert
+          focusedTarget={incorrectVerdictConfirmFocusTarget}
+          isFocusVisible={runtimeInputState.isAwake}
+          onStay={closeIncorrectVerdictConfirm}
+          onConfirm={() => {
+            closeIncorrectVerdictConfirm()
+            props.onGiveVerdict(false)
+          }}
+          actionHints={{
+            confirm: getActionHint('confirm'),
+          }}
         />
       ) : null}
     </div>

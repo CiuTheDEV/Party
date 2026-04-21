@@ -44,6 +44,7 @@ export function usePhaseTimers({ setState, send, timerSeconds, currentTurnIdRef,
       phase: 'timer-running',
       bufferRemaining: 0,
       timerRemaining: remaining,
+      verdictReason: null,
     }))
 
     phaseTimerRef.current = setInterval(() => {
@@ -55,7 +56,7 @@ export function usePhaseTimers({ setState, send, timerSeconds, currentTurnIdRef,
 
       if (nextRemaining <= 0) {
         clearPhaseTimer()
-        setState((current) => ({ ...current, phase: 'verdict' }))
+        setState((current) => ({ ...current, phase: 'verdict', verdictReason: 'timeout' }))
         send({ type: 'TURN_END', turnId: currentTurnIdRef.current, reason: 'timeout' })
       }
     }, 1000)
@@ -79,6 +80,7 @@ export function usePhaseTimers({ setState, send, timerSeconds, currentTurnIdRef,
       ...current,
       phase: 'reveal-buffer',
       bufferRemaining: remaining,
+      verdictReason: null,
     }))
 
     phaseTimerRef.current = setInterval(() => {
