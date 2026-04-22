@@ -70,8 +70,13 @@ export function CaptainPairingModal({
     window.open(captainUrl, '_blank', 'noopener,noreferrer')
   }
   const handleCopySessionCode = async () => {
+    if (!captainUrl) {
+      setCopyState('error')
+      return
+    }
+
     try {
-      await navigator.clipboard.writeText(sessionCode)
+      await navigator.clipboard.writeText(captainUrl)
       setCopyState('success')
     } catch {
       setCopyState('error')
@@ -82,7 +87,7 @@ export function CaptainPairingModal({
       ? 'Skopiowano'
       : copyState === 'error'
         ? 'Nie udalo sie skopiowac'
-        : 'Kliknij, aby skopiowac'
+        : 'Kliknij, aby skopiowac link'
 
   return (
     <DevicePairingModal
@@ -124,9 +129,12 @@ export function CaptainPairingModal({
           <p className={styles.connectionSummary}>{pairingSummary}</p>
         </>
       }
-      sessionCode={sessionCode}
+      copyLabel="Kod sesji"
+      displayValue={sessionCode}
+      copyValue={captainUrl}
       copyHint={copyHint}
       onCopy={handleCopySessionCode}
+      copyAriaLabel="Kopiuj link kapitana"
       onOpenExternal={handleOpenInNewTab}
       onClose={onClose ?? (() => {})}
       footer={
