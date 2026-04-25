@@ -76,21 +76,19 @@
 }
 
 .cardBack {
-  background:
-    radial-gradient(circle at 18% 18%, rgba(255, 90, 79, 0.12), transparent 30%),
-    radial-gradient(circle at 82% 82%, rgba(74, 167, 255, 0.12), transparent 30%),
-    radial-gradient(circle at 50% 24%, rgba(255, 255, 255, 0.1), transparent 28%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 42%),
-    linear-gradient(145deg, #1d1d20 0%, #111113 100%);
+  padding: 0;
+  border: none;
+  background-color: #111113;
+  background-image: url('../shared/assets/codenames-card-back-landscape.png');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  box-shadow: 0 14px 26px rgba(0, 0, 0, 0.3);
   transform: rotateY(180deg);
 }
 
 .cardBack::before {
-  content: '';
-  position: absolute;
-  inset: clamp(8px, 1vw, 12px);
-  border-radius: clamp(9px, 1vw, 14px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  content: none;
 }
 
 .cardFront {
@@ -106,7 +104,7 @@
 }
 
 .card[data-color='neutral'] .cardFront {
-  background: linear-gradient(180deg, #38383d 0%, #2f2f34 100%);
+  background: linear-gradient(180deg, #505057 0%, #424249 100%);
 }
 
 .card[data-color='assassin'] .cardFront {
@@ -153,6 +151,12 @@
 
   .word {
     font-size: clamp(0.82rem, 2.8vw, 1.28rem);
+  }
+}
+
+@media (orientation: portrait) {
+  .cardBack {
+    background-image: url('../shared/assets/codenames-card-back-portrait.png');
   }
 }
 

@@ -157,3 +157,13 @@
 **Solution:** Sort first by the full ordered key set, then compute `rank` with explicit rolling state such as `previousScore`, `previousTieBreaker`, and `previousRank` instead of trying to recover rank from the previous array item inside the same `.map()`.
 
 **Why:** Reading a partially-built `rank` from the previous list item is brittle and breaks on longer tie sequences. Carrying the previous ordering keys explicitly keeps ties and secondary tiebreakers consistent across runtime and results screens.
+
+---
+
+## Device-slot ownership must be enforced by PartyKit, not only by setup UI
+
+**Scenario:** A host UI already shows that one phone or captain device is connected, but a second device can still try to join the same authority slot by opening the pairing link directly.
+
+**Solution:** Treat the device role as server-owned authority state. Reject a second connection in PartyKit when a slot is already claimed and send an explicit rejection event such as `PRESENTER_SLOT_TAKEN` back to the joining device.
+
+**Why:** UI-only guards are easy to bypass through stale tabs, copied pairing links, or reconnect races. The slot must be protected at the room-authority layer so the first connected device stays authoritative and the second device gets a clear, user-facing reason instead of silently hijacking the role.

@@ -287,6 +287,7 @@ export function reduceIncomingEvent(
     hostConnectionId: resolvedHostConnectionId,
     captainRedConnectionId: current.captainRedConnectionId,
     captainBlueConnectionId: current.captainBlueConnectionId,
+    syncRoomState: event.type === 'MATCH_RESET',
   }
 }
 

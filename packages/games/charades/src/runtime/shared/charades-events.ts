@@ -34,6 +34,7 @@ export type HostEvent =
   | { type: 'TURN_END'; turnId: string; reason: 'timeout' | 'verdict' | 'manual-stop' }
   | { type: 'BETWEEN_TURNS'; nextPresenterName: string; nextPresenterAvatar: string }
   | { type: 'PRESENTER_DISCONNECTED' }
+  | { type: 'PRESENTER_SLOT_TAKEN' }
   | { type: 'GAME_END' }
   | { type: 'DEVICES_DISCONNECTED' }
   | { type: 'SESSION_CODE_CHANGED'; nextRoomId: string }

@@ -144,10 +144,10 @@ For new game module scaffolding and maturity expectations, see `docs/game-module
 ---
 
 <!-- handoff:start -->
-- Last: 2026-04-25 15:10 by Codex
-- Task: Hardening pairing flow in Tajniacy and Kalambury so host setup and pairing modal survive device join/remounts.
-- Did: Audited both pairing lifecycles end-to-end, identified the shared race between local overlay state and delayed URL sync, moved setup/pairing UI ownership to page level in both games, added URL-backed `?setup=1` + `?pairing=1` state updated synchronously in open/close handlers, and converted both pairing panels to controlled modals. Verified with green builds for `@party/charades`, `@party/codenames`, and `@party/hub`, plus live browser passes for host + device join in both games. Saved artifact: `output/playwright/codenames-pairing-retained.png`.
-- Next: Continue only if a new pairing bug appears in a narrower surface, for example disconnect/session-code-change edge cases during an already connected room. The base host-drop/modal-drop bug is now reproduced, explained, and fixed.
-- Blocker: No active blocker on the pairing flicker/drop flow after the current browser verification.
+- Last: 2026-04-25 19:25 by Codex
+- Task: Final party-polish pass for Tajniacy and Kalambury: pairing/device edge cases, Codenames runtime polish, and card-back assets.
+- Did: Finished the remaining narrow device-flow fixes in both games: confirm alerts for session-code changes and disconnects, distinct mobile messaging for `SESSION_CODE_CHANGED` vs `DEVICES_DISCONNECTED`, persistent pairing controls, and authority-side rejection of a second presenter in Charades with `PRESENTER_SLOT_TAKEN`. On Codenames, added a denser non-scrolling host status rail, win-screen polish, assassin-count settings separation, portrait/landscape card-back assets wired into host/captain grids, and restored `MATCH_RESET` room-state sync so replay starts from `0:0`. Also recovered a corrupted `packages/partykit/codenames/server.ts` after it contained `\x00` bytes and revalidated the PartyKit compile path.
+- Next: Stay in narrow polish/debug mode only. New work should target concrete UX/runtime reports, not another broad pairing refactor, unless a fresh root-cause investigation proves a new cross-cutting bug.
+- Blocker: No active blocker. Current builds and PartyKit authority checks are green after the final reset-sync fix.
 <!-- handoff:end -->
 

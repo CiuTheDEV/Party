@@ -30,6 +30,7 @@ type AuthorityState = {
 
 type IncomingEventResult = AuthorityState & {
   accepted: boolean
+  directReply?: CharadesEvent | { type: 'ROOM_STATE'; state: RoomState }
 }
 
 function buildResetRoomState(presenterConnected: boolean): RoomState {
@@ -100,6 +101,9 @@ export default class CharadesServer implements Party.Server {
     this.presenterConnectionId = next.presenterConnectionId
 
     if (!next.accepted) {
+      if (next.directReply) {
+        sender.send(JSON.stringify(next.directReply))
+      }
       return
     }
 
@@ -129,6 +133,14 @@ export default class CharadesServer implements Party.Server {
 
 export function reduceIncomingEvent(current: AuthorityState, senderId: string, event: CharadesEvent): IncomingEventResult {
   if (event.type === 'DEVICE_CONNECTED') {
+    if (current.presenterConnectionId && current.presenterConnectionId !== senderId) {
+      return {
+        ...current,
+        accepted: false,
+        directReply: { type: 'PRESENTER_SLOT_TAKEN' },
+      }
+    }
+
     return {
       accepted: true,
       state: applyEvent(current.state, event),
@@ -278,6 +290,8 @@ export function applyEvent(state: RoomState, event: CharadesEvent): RoomState {
         revealRemaining: 0,
         revealDuration: 0,
       }
+    case 'PRESENTER_SLOT_TAKEN':
+      return state
     case 'GAME_END':
       return {
         ...state,

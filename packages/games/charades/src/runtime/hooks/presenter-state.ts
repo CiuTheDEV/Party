@@ -145,6 +145,11 @@ export function applyPresenterHostEvent(state: PresenterViewState, event: HostEv
       })
     case 'PRESENTER_DISCONNECTED':
       return state
+    case 'PRESENTER_SLOT_TAKEN':
+      return {
+        ...INITIAL_PRESENTER_STATE,
+        phase: 'slot-taken',
+      }
     case 'GAME_END':
       return clearLiveEventTurnFields(state, {
         phase: 'ended',

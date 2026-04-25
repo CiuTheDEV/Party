@@ -86,6 +86,18 @@ run('accepts presenter events only from the active presenter connection', () => 
   assert.equal(validReveal.accepted, true)
 })
 
+run('rejects a second presenter connection when one presenter is already paired', () => {
+  const connected = connectPresenter()
+
+  const hijackAttempt = serverModule.reduceIncomingEvent(connected, 'presenter-2', {
+    type: 'DEVICE_CONNECTED',
+  })
+
+  assert.equal(hijackAttempt.accepted, false)
+  assert.equal(hijackAttempt.presenterConnectionId, 'presenter-1')
+  assert.deepEqual(hijackAttempt.directReply, { type: 'PRESENTER_SLOT_TAKEN' })
+})
+
 run('releases host authority when the host connection closes', () => {
   assert.equal(typeof serverModule.handleConnectionClosed, 'function')
 

@@ -4,6 +4,7 @@ export type PresenterPhase =
   | 'waiting'
   | 'round-order'
   | 'host-left'
+  | 'slot-taken'
   | 'devices-disconnected'
   | 'session-code-changed'
   | 'your-turn'

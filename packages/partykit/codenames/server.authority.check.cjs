@@ -253,6 +253,12 @@ run('resets the whole match after match reset', () => {
   assert.equal(server.state.roundWinsBlue, 0)
   assert.equal(server.state.winner, null)
   assert.equal(server.state.assassinTeam, null)
+  assert.equal(room.broadcasts.length, 9)
+  assert.equal(JSON.parse(room.broadcasts[7].message).type, 'MATCH_RESET')
+  assert.deepEqual(JSON.parse(room.broadcasts[8].message), {
+    type: 'ROOM_STATE',
+    state: server.state,
+  })
 })
 
 run('broadcasts host disconnected when host closes', () => {

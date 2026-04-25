@@ -88,6 +88,14 @@ export function PresenterScreen({ state, connectionState, onRevealWord, onChange
             />
           )}
 
+          {state.phase === 'slot-taken' && (
+            <MessagePanel
+              accent="Urządzenie zajęte"
+              title="Prezenter jest już połączony na innym telefonie"
+              body="Ten kod sesji ma już aktywne urządzenie prezentera. Rozłącz poprzedni telefon albo zmień kod sesji na ekranie hosta."
+            />
+          )}
+
           {state.phase === 'devices-disconnected' && (
             <MessagePanel
               accent="Urządzenie rozłączone"
@@ -172,6 +180,10 @@ function getStagePhase(phase: PresenterViewState['phase']) {
   }
 
   if (phase === 'host-left') {
+    return 'ended'
+  }
+
+  if (phase === 'slot-taken') {
     return 'ended'
   }
 
@@ -281,6 +293,12 @@ const PRESENTER_PHASE_CHROME: Record<
     presenterLabel: 'Stan telefonu',
     phaseSummary: 'Host zakończył tę rozgrywkę i wrócił do menu.',
     presenterName: () => 'Odłączony od gry',
+  },
+  'slot-taken': {
+    phaseLabel: 'Urządzenie zajęte',
+    presenterLabel: 'Stan telefonu',
+    phaseSummary: 'Ten kod sesji ma już aktywnego prezentera na innym telefonie.',
+    presenterName: () => 'Brak dostępu do tej sesji',
   },
   'devices-disconnected': {
     phaseLabel: 'Urządzenie rozłączone',

@@ -2,10 +2,8 @@
 
 import { AvatarAsset } from '@party/ui'
 import { useRef } from 'react'
-import { CodenamesCardBackMark } from '../shared/codenames-card-back'
 import type { Card } from '../shared/codenames-events'
 import { useRoundBoardRevealAnimation } from '../shared/useRoundBoardRevealAnimation'
-import cardBackStyles from '../shared/CodenamesCardBackMark.module.css'
 import styles from './CaptainGrid.module.css'
 
 type CaptainGridProps = {
@@ -40,21 +38,7 @@ export function CaptainGrid({ cards, startingTeam = null, isLocked = false, isCo
             data-round-card
           >
             <span className={styles.cardInner} data-round-card-inner>
-              <span className={`${styles.cardFace} ${styles.cardBack}`} aria-hidden="true">
-                <CodenamesCardBackMark
-                  rootClassName={cardBackStyles.root}
-                  compactClassName={cardBackStyles.compact}
-                  surfaceClassName={cardBackStyles.surface}
-                  gridClassName={cardBackStyles.grid}
-                  topMetaClassName={cardBackStyles.topMeta}
-                  bottomMetaClassName={cardBackStyles.bottomMeta}
-                  centerClassName={cardBackStyles.center}
-                  badgeClassName={cardBackStyles.badge}
-                  emojiClassName={cardBackStyles.emoji}
-                  labelClassName={cardBackStyles.label}
-                  density="compact"
-                />
-              </span>
+              <span className={`${styles.cardFace} ${styles.cardBack}`} aria-hidden="true" />
               <span className={`${styles.cardFace} ${styles.cardFront}`}>
                 <span className={`${styles.word} ${card.revealed ? styles.strikethrough : ''}`}>{card.word}</span>
                 {card.color === 'assassin' ? (

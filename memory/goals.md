@@ -8,6 +8,7 @@
 
 1. Re-test Charades presenter flow on a stable local/live stack after the reveal-word sizing fix
 2. Keep pairing/device flows stable in both Tajniacy and Kalambury after the new URL-backed setup/modal hardening
+   Current scope: session-code/disconnect messaging, second-device rejection, and any remaining narrow reconnect edge cases
 3. Close the remaining Charades runtime cleanup after the new verdict/summary/results polish, then continue without widening scope beyond real pain points
 4. Keep the new agent-first docs/playbooks synced with code while they are still fresh
 

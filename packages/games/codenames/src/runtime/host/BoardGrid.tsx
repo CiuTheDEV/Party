@@ -1,10 +1,8 @@
 'use client'
 
 import { useRef } from 'react'
-import { CodenamesCardBackMark } from '../shared/codenames-card-back'
 import type { Card } from '../shared/codenames-events'
 import { useRoundBoardRevealAnimation } from '../shared/useRoundBoardRevealAnimation'
-import cardBackStyles from '../shared/CodenamesCardBackMark.module.css'
 import styles from './BoardGrid.module.css'
 
 type BoardGridProps = {
@@ -57,23 +55,9 @@ export function BoardGrid({
             disabled={card.revealed || isLocked || isConcealed}
           >
             <span className={styles.cardInner} data-round-card-inner>
-              <span className={`${styles.cardFace} ${styles.cardBack}`} aria-hidden="true">
-                <CodenamesCardBackMark
-                  rootClassName={cardBackStyles.root}
-                  compactClassName={cardBackStyles.compact}
-                  surfaceClassName={cardBackStyles.surface}
-                  gridClassName={cardBackStyles.grid}
-                  topMetaClassName={cardBackStyles.topMeta}
-                  bottomMetaClassName={cardBackStyles.bottomMeta}
-                  centerClassName={cardBackStyles.center}
-                  badgeClassName={cardBackStyles.badge}
-                  emojiClassName={cardBackStyles.emoji}
-                  labelClassName={cardBackStyles.label}
-                  density="compact"
-                />
-              </span>
-                <span className={`${styles.cardFace} ${styles.cardFront}`}>
-                  <span className={styles.cardWord}>{card.word}</span>
+              <span className={`${styles.cardFace} ${styles.cardBack}`} aria-hidden="true" />
+              <span className={`${styles.cardFace} ${styles.cardFront}`}>
+                <span className={styles.cardWord}>{card.word}</span>
                 {!card.revealed && selectedActionLabel ? (
                   <span className={styles.cardActionBadge} aria-hidden="true">
                     <span className={styles.cardActionBadgeLabel}>{selectedActionLabel}</span>

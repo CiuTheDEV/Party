@@ -23,9 +23,9 @@
 - setup shell is shared, gameplay remains custom per game.
 
 **Current implementation truth**:
-- `charades` owns config, menu, setup, results, and its runtime hooks/components; the latest pass also closed the mixed-verdict browser flow and presenter pairing reset path, so follow-up work is now cleanup-sized rather than feature-sized,
+- `charades` owns config, menu, setup, results, and its runtime hooks/components; the latest pass also closed the mixed-verdict browser flow, presenter pairing reset path, and second-presenter slot takeover, so follow-up work is now cleanup-sized rather than feature-sized,
 - charades now has presenter word change, weighted reroll logic, browser-side word history, prompt-pool management/reset UI, low-pool start warning, and a custom avatar asset system,
-- `codenames` now has live menu/setup/runtime polish work, persistent non-repeating word history with shared pool-manager UI and per-category resets, captain/host reconnect hardening, a fixed avatar picker, and URL-backed setup/pairing state that keeps host setup and pairing modal stable during captain join flows,
+- `codenames` now has live menu/setup/runtime polish work, persistent non-repeating word history with shared pool-manager UI and per-category resets, captain/host reconnect hardening, a fixed avatar picker, URL-backed setup/pairing state that keeps host setup and pairing modal stable during captain join flows, a denser host status rail, and dedicated portrait/landscape card-back assets in runtime,
 - the next product milestone is still deploy/runtime validation hardening before moving deeper into Phase 6 work.
 
 **Stack**: Next.js + Turborepo + Cloudflare Pages + Partykit + D1 + Clerk later + Stripe stub

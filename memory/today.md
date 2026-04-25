@@ -1,5 +1,16 @@
 # Today - 2026-04-20
 
+### S91 (18:55~) [Tajniacy/Kalambury] Device-flow hardening + Codenames runtime polish
+
+- Domknięto szeroki pass po realnych zgłoszeniach z domówki zamiast pojedynczych kosmetyk: Tajniacy dostały nowy runtime rail bez desktopowego scrolla, lepszy ekran wygranej, lżejszy blur overlay po rundzie, osobny slot ustawień zabójców i rewers kart jako prawdziwe assety w wariantach `portrait` / `landscape`.
+- W obu grach dopięto pairing edge cases: host może zmieniać kod sesji i rozłączać urządzenia z confirm alertem, urządzenia mobilne dostają osobne komunikaty dla `zmiana kodu` vs `rozłączenie`, a URL-backed `?setup=1&pairing=1` utrzymuje setup i modal podczas dołączania telefonów.
+- W Kalamburach authority po stronie PartyKit blokuje już przejęcie aktywnego slotu prezentera przez drugie urządzenie; drugi telefon dostaje jawny event `PRESENTER_SLOT_TAKEN` i dedykowany ekran zamiast wejścia do gry.
+- W Tajniakach domknięto też regresję `MATCH_RESET`: authority test oczekuje i dostaje dodatkowy broadcast `ROOM_STATE`, więc `Zagraj ponownie` zaczyna nowy mecz od `0:0`, a nie od „kolejnej rundy”.
+- Na koniec naprawiono incydent z uszkodzonym `packages/partykit/codenames/server.ts`, który zaczął zawierać bajty `\\x00`; plik został przywrócony do poprawnego tekstowego stanu i ponownie zweryfikowany przez kompilację PartyKit.
+- Weryfikacja przechodzi: `npm run build --workspace @party/charades`, `npm run build --workspace @party/codenames`, `npm run build --workspace @party/hub`, `npm run test:authority --workspace @party/partykit`, `npm run test:authority:codenames --workspace @party/partykit`.
+- Next: wrócić już tylko do nowych, wąskich UX/runtime zgłoszeń zamiast kolejnych szerokich patchy pairing flow.
+- Experience recorded: yes
+
 ### S88 (2026-04-25) [Tajniacy] Host setup flicker investigation around captain link flow
 
 - Po fixie avatar pickera zrobiono wąski pass pod zgłoszony runtime/UI bug: wejście w link kapitana z modalu parowania potrafi na chwilę wybić hosta z setupu do menu głównego.

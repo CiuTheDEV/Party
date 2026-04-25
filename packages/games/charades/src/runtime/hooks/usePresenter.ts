@@ -21,6 +21,7 @@ export function usePresenter(roomId: string) {
   }, [])
 
   const hasSyncedStateRef = useRef(false)
+  const slotTakenRef = useRef(false)
   const [state, setState] = useState<PresenterViewState>(INITIAL_PRESENTER_STATE)
   const [connectionState, setConnectionState] = useState<PresenterConnectionState>('connecting')
 
@@ -48,12 +49,21 @@ export function usePresenter(roomId: string) {
     },
     onMessage(event) {
       const msg = JSON.parse(event.data) as HostEvent | RoomStateMessage
+
+      if (slotTakenRef.current && msg.type !== 'PRESENTER_SLOT_TAKEN') {
+        return
+      }
+
       hasSyncedStateRef.current = true
       setConnectionState('connected')
 
       if (msg.type === 'ROOM_STATE') {
         setState(mapRoomStateToPresenterView(msg.state))
         return
+      }
+
+      if (msg.type === 'PRESENTER_SLOT_TAKEN') {
+        slotTakenRef.current = true
       }
 
       handleHostEvent(msg as HostEvent)
@@ -65,6 +75,10 @@ export function usePresenter(roomId: string) {
     onClose() {
       writeHeartbeat(false)
       setConnectionState((current) => {
+        if (slotTakenRef.current) {
+          return 'connected'
+        }
+
         if (current === 'error') {
           return current
         }
