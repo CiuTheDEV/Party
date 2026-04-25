@@ -20,24 +20,14 @@
                 },
     "tasks":  [
                   {
-                      "id":  "T001",
-                      "title":  "Charades code cleanup pass",
-                      "status":  "active",
-                      "context":  "Navigation dead code was cleared earlier, and the latest session delivered a broad Charades polish pass: menu/setup now support 16 players, runtime round-order was rebuilt for larger groups, verdict/timeout flow was hardened, summary/results ranking got tie-aware ordering with a total-guess-time tiebreaker, and summary/results UI was reworked for larger player counts. Remaining cleanup is now narrower: dead presenter/runtime leftovers after the recent feature work, oversized runtime/results files, and an honest browser validation pass for the end-of-round flow after the ranking/time UI changes.",
-                      "next_action":  "Run a visible browser pass for Charades `timer -> verdict -> round summary -> results`, then remove dead presenter/runtime leftovers and split only the still-mixed oversized runtime/results files.",
-                      "blocker":  "",
-                      "created":  "2026-03-27",
-                      "updated":  "2026-04-21"
-                  },
-                  {
                       "id":  "T002",
                       "title":  "Codenames pool manager polish and browser validation",
                       "status":  "blocked",
-                      "context":  "Persistent non-repeating words are implemented for Tajniacy with per-category history, active-pool blocking below 25 fresh words, shared pool-manager modal reuse, and per-category resets from the setup modal. Code-level checks and package builds pass. The remaining work is UX polish in the modal/setup flow and a deliberate browser verification pass for the exhausted-pool flow.",
-                      "next_action":  "Run a visible browser pass on the Tajniacy setup modal and pool manager, then polish remaining copy/layout issues discovered there.",
-                      "blocker":  "Existing Tajniacy e2e/setup-opening issue: after clicking `Zagraj teraz`, Playwright does not reliably see the setup dialog, which blocks stable browser verification in the current automated flow.",
+                      "context":  "Persistent non-repeating words are implemented for Tajniacy with per-category history, active-pool blocking below 25 fresh words, shared pool-manager modal reuse, and per-category resets from the setup modal. Code-level checks and package builds pass. The setup flow was further hardened with `?setup=1` persistence and a client-side pre-paint restore path, but the user still reports a host-side flicker to the menu when the captain link is opened from the pairing modal. A local browser pass on `http://localhost:3000` did not reproduce that flicker, so stable browser validation for the pool-manager/setup flow is still blocked by an unresolved reproduction gap around setup remounting.",
+                      "next_action":  "Add focused dev instrumentation around Tajniacy host setup state (`showSetup`, remount, focus/visibility, URL updates`) during the captain-link flow, then repeat the visible browser pass and continue pool-manager UX polish once the flicker is explained.",
+                      "blocker":  "The reported Tajniacy setup flicker around `otwórz w nowej karcie` / captain-link entry still does not reproduce reliably in local browser automation, which blocks trustworthy end-to-end validation of the setup modal and pool-manager flow.",
                       "created":  "2026-04-19",
-                      "updated":  "2026-04-19"
+                      "updated":  "2026-04-25"
                   }
               ]
 }

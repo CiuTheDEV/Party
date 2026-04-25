@@ -1,16 +1,14 @@
 import type { ComponentType } from 'react'
 import type { GameWordCategory } from '@party/game-sdk'
 import type { CodenamesTeam } from './state'
+import type { PartialCaptainConnectionState } from './captain-connection-state'
 
 export type CodenamesWordCategory = GameWordCategory
 
 export type CaptainListenerProps = {
   roomId: string
   teams: [CodenamesTeam, CodenamesTeam]
-  onRedConnect: () => void
-  onRedDisconnect: () => void
-  onBlueConnect: () => void
-  onBlueDisconnect: () => void
+  onConnectionStateChange: (state: PartialCaptainConnectionState) => void
 }
 
 export type CodenamesSetupHelpers = {

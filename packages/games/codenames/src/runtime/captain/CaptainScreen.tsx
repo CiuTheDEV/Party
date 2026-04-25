@@ -26,7 +26,7 @@ type CaptainScreenProps = {
 
 export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }: CaptainScreenProps) {
   const router = useRouter()
-  const { roomState, hasSyncedRoomState, hostDisconnected, isRoundIntroVisible, markReady } = useCaptainGame({ roomId, team })
+  const { roomState, hasSyncedRoomState, hostDisconnected, sessionInvalidated, isRoundIntroVisible, markReady } = useCaptainGame({ roomId, team })
   const [isBrowserExitAlertOpen, setIsBrowserExitAlertOpen] = useState(false)
   const screenMode = getCaptainScreenMode(roomState)
   const boardMeta = getCaptainBoardMeta(roomState)
@@ -46,10 +46,9 @@ export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }:
     !hostDisconnected &&
     (roomState.phase === 'playing' || roomState.phase === 'assassin-reveal') &&
     (!roomState.captainRedConnected || !roomState.captainBlueConnected)
-  const shouldExitAfterHostDisconnect =
+  const shouldExitAfterSessionInvalidation =
     hasSyncedRoomState &&
-    hostDisconnected &&
-    roomState.phase !== 'waiting'
+    sessionInvalidated
   const runtimeStatus = getCaptainRuntimeStatus({
     phase: roomState.phase,
     hostConnected: roomState.hostConnected,
@@ -65,7 +64,7 @@ export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }:
   })
 
   useEffect(() => {
-    if (!shouldExitAfterHostDisconnect) {
+    if (!shouldExitAfterSessionInvalidation) {
       return
     }
 
@@ -74,7 +73,7 @@ export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }:
     }, 1200)
 
     return () => window.clearTimeout(timeoutId)
-  }, [router, shouldExitAfterHostDisconnect])
+  }, [router, shouldExitAfterSessionInvalidation])
 
   useEffect(() => {
     if (!shouldWarnBeforeUnload(roomState.phase)) {
@@ -122,9 +121,9 @@ export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }:
               <div className={styles.loader} data-team={team} aria-hidden="true">
                 <span />
               </div>
-              {shouldExitAfterHostDisconnect ? (
+              {shouldExitAfterSessionInvalidation ? (
                 <>
-                  <p className={styles.waitingTitle}>Host opuścił pokój</p>
+                  <p className={styles.waitingTitle}>Poprzednia sesja została zakończona</p>
                   <p className={styles.waitingCopy}>Wracam do menu głównego...</p>
                 </>
               ) : (
@@ -222,17 +221,17 @@ export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }:
               </div>
             ) : null}
 
-            {shouldExitAfterHostDisconnect ? (
-              <div className={styles.connectionOverlay} role="dialog" aria-modal="true" aria-label="Host opuścił pokój">
+            {shouldExitAfterSessionInvalidation ? (
+              <div className={styles.connectionOverlay} role="dialog" aria-modal="true" aria-label="Poprzednia sesja została zakończona">
                 <div className={styles.connectionModal}>
-                  <span className={styles.connectionEyebrow}>Pokój zamknięty</span>
-                  <h2 className={styles.connectionTitle}>Host opuścił pokój</h2>
-                  <p className={styles.connectionCopy}>Wracam do menu głównego.</p>
+                  <span className={styles.connectionEyebrow}>Sesja zakończona</span>
+                  <h2 className={styles.connectionTitle}>Poprzednia sesja nie jest już aktywna</h2>
+                  <p className={styles.connectionCopy}>Jeśli host uruchomił nowy pokój, dołącz do niego ponownie z nowym kodem.</p>
                 </div>
               </div>
             ) : null}
 
-            {!isReconnectRequired && !shouldExitAfterHostDisconnect && runtimeStatus ? (
+            {!isReconnectRequired && !shouldExitAfterSessionInvalidation && runtimeStatus ? (
               <div className={styles.connectionOverlay} role="dialog" aria-modal="true" aria-label={runtimeStatus.title}>
                 <div className={styles.connectionModal}>
                   <span className={styles.connectionEyebrow}>{runtimeStatus.eyebrow}</span>

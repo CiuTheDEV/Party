@@ -14,7 +14,6 @@ import {
   CODENAMES_BINDINGS_STORAGE_KEY,
   CODENAMES_BINDINGS_UPDATED_EVENT,
   formatControllerLabelForProfile,
-  getBindingValue,
   loadPersistedBindings,
   type GamepadProfile,
 } from '../../menu/codenames-controls-bindings'
@@ -34,19 +33,26 @@ import { RuntimeStatusRail } from './RuntimeStatusRail'
 import styles from './HostGameScreen.module.css'
 
 type CodenamesTeam = { name: string; avatar: string }
+type CodenamesCategoryBalance = {
+  leftCategoryId: string
+  rightCategoryId: string
+  leftSharePercent: number
+}
 
 type HostGameScreenProps = {
   categories: Array<{ id: string; words: string[] }>
   roomId: string
   teams: [CodenamesTeam, CodenamesTeam]
   roundsToWin: number
+  categoryBalance: CodenamesCategoryBalance | null
 }
 
-export function HostGameScreen({ roomId, categories, teams, roundsToWin }: HostGameScreenProps) {
+export function HostGameScreen({ roomId, categories, teams, roundsToWin, categoryBalance }: HostGameScreenProps) {
   const router = useRouter()
   const {
     roomState,
     hasSyncedRoomState,
+    resetCount,
     revealCard,
     setAssassinTeam,
     resetGame,
@@ -56,7 +62,7 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin }: HostG
     startBlockedReason,
     clearStartBlockedReason,
     resetPoolAndRetryStart,
-  } = useHostGame({ roomId, categories, teams })
+  } = useHostGame({ roomId, categories, teams, categoryBalance })
   const [showEntryIntro, setShowEntryIntro] = useState(true)
   const [soundEnabled, setSoundEnabled] = useState(true)
   const [animationsEnabled, setAnimationsEnabled] = useState(true)
@@ -66,6 +72,7 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin }: HostG
   const [activeInputDevice, setActiveInputDevice] = useState<'keyboard' | 'controller'>('keyboard')
   const [controllerProfile, setControllerProfile] = useState<GamepadProfile>('generic')
   const [controlBindings, setControlBindings] = useState(() => loadPersistedBindings())
+  const [pendingExitResetCount, setPendingExitResetCount] = useState<number | null>(null)
   const openModalRef = useRef<(target: HostNavigationFocusSnapshot) => void>(() => undefined)
   const closeModalRef = useRef<() => void>(() => undefined)
 
@@ -142,6 +149,24 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin }: HostG
     }
   }, [roomState.phase])
 
+  const exitToMenu = useCallback(() => {
+    setPendingExitResetCount(resetCount)
+    resetGame({ autoRestart: false })
+  }, [resetCount, resetGame])
+
+  useEffect(() => {
+    if (pendingExitResetCount === null) {
+      return
+    }
+
+    if (resetCount <= pendingExitResetCount) {
+      return
+    }
+
+    setPendingExitResetCount(null)
+    router.push('/games/codenames')
+  }, [pendingExitResetCount, resetCount, router])
+
   const handleHostControlCommand = useCallback(
     (command: HostControlCommand) => {
       switch (command.type) {
@@ -187,11 +212,11 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin }: HostG
           resetPoolAndRetryStart()
           return
         case 'exit-to-menu':
-          router.push('/games/codenames')
+          exitToMenu()
           return
       }
     },
-    [clearStartBlockedReason, resetGame, resetPoolAndRetryStart, revealCard, router, setAssassinTeam, startGame],
+    [clearStartBlockedReason, exitToMenu, resetGame, resetPoolAndRetryStart, revealCard, setAssassinTeam, startGame],
   )
 
   const runtimeControls = useHostControls({
@@ -355,7 +380,7 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin }: HostG
             })
             restartMatch()
           }}
-          onExitToMenu={() => router.push('/games/codenames')}
+          onExitToMenu={exitToMenu}
         />
       )
     }
@@ -621,7 +646,7 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin }: HostG
             }
             onCancelExitConfirm={() => runtimeControls.closeModal()}
             onContinue={() => runtimeControls.closeModal()}
-            onExitToMenu={() => router.push('/games/codenames')}
+            onExitToMenu={exitToMenu}
           />
         ) : null}
       </div>
@@ -713,7 +738,7 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin }: HostG
             {
               label: 'Tak, wroc do menu',
               hintLabel: visibleControlLabel('confirm'),
-              onClick: () => router.push('/games/codenames'),
+              onClick: exitToMenu,
               variant: 'danger',
               fullWidth: true,
             },

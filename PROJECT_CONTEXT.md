@@ -144,10 +144,10 @@ For new game module scaffolding and maturity expectations, see `docs/game-module
 ---
 
 <!-- handoff:start -->
-- Last: 2026-04-21 13:30 by Codex
-- Task: Broad Charades polish pass across menu/setup/runtime/results, including 16-player support and round-summary ranking fixes.
-- Did: Expanded Charades setup/menu to 16 players, rebuilt avatar/category flows, reworked round-order intro for larger groups, hardened verdict/timeout behavior, added skip for long round-order intros, polished summary/results UI, and introduced total-guess-time as a shared tiebreaker for runtime and final results.
-- Next: Run a visible browser pass for the Charades end-of-round flow (`timer -> verdict -> round summary -> results`), then continue the remaining cleanup pass in runtime/results without widening scope.
-- Blocker: The latest tie-breaker and time-badge pass has package-level build verification, but not yet a fresh live browser smoke test in this session.
+- Last: 2026-04-25 13:35 by Codex
+- Task: Harden Tajniacy host setup around the captain-link pairing flow and close the reported menu flicker if reproducible.
+- Did: Kept the previously fixed avatar picker in place, then hardened the setup-open path for Tajniacy by persisting modal state in `?setup=1`, removing a duplicate `window.open()` from the pairing action, and restoring setup before paint through `apps/hub/src/app/games/codenames/CodenamesMenuPageClient.tsx`. Local browser passes on `http://localhost:3000` did not reproduce the user's reported host flicker to the main menu during `otwórz w nowej karcie` and `/captain/...` entry, but package and hub builds passed after the hardening changes.
+- Next: Add narrow dev instrumentation around Tajniacy host setup state (`showSetup`, remount, focus/visibility, URL changes`) during the captain-link flow, then rerun the visible browser pass and only patch further once the true trigger is captured.
+- Blocker: Reported flicker around the captain-link flow still lacks a reliable local reproduction, so the bug is not closed despite the setup-state hardening.
 <!-- handoff:end -->
 

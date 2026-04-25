@@ -167,8 +167,9 @@ export function useGameState(
 
   const startRound = useCallback(() => {
     clearPhaseTimer()
+    send({ type: 'ROUND_ORDER_START' })
     setState((current) => buildRoundStartState(current, settings))
-  }, [clearPhaseTimer, settings])
+  }, [clearPhaseTimer, send, settings])
 
   const finishRoundOrder = useCallback(() => {
     setState((current) => buildRoundOrderFinishedState(current, settings))
@@ -235,8 +236,14 @@ export function useGameState(
   const isGameOver = state.currentRound > state.totalRounds
 
   const finishRoundSummary = useCallback(() => {
+    send({ type: 'ROUND_ORDER_START' })
     setState((current) => buildRoundSummaryFinishedState(current, settings))
-  }, [settings])
+  }, [send, settings])
+
+  const resetGame = useCallback(() => {
+    clearPhaseTimer()
+    send({ type: 'GAME_RESET' })
+  }, [clearPhaseTimer, send])
 
   return {
     state,
@@ -245,6 +252,7 @@ export function useGameState(
     finishRoundSummary,
     giveVerdict,
     stopRoundEarly,
+    resetGame,
     pausePhaseTimer,
     resumePhaseTimer,
     isGameOver,

@@ -1,91 +1,137 @@
 #:schema https://developers.openai.com/codex/config-schema.json
 
-# Repo-scoped Codex config for Windows-native app usage
-# Playwright-first, minimal friction, full access for trusted repositories only.
+################################################################################
+# PROJECT CONFIG — Project Party
+# Komentarze są po polsku, instrukcje robocze są po angielsku.
+# Lokalizacja docelowa: C:\Users\Mateo\Desktop\Party\.codex\config.toml
+################################################################################
 
-#model = "gpt-5.4"
+# model = "gpt-5.4"
 model_provider = "openai"
+review_model = "gpt-5.4"
+
+personality = "pragmatic"
 service_tier = "fast"
 
-#model_reasoning_effort = "high"
+# model_reasoning_effort = "high"
 plan_mode_reasoning_effort = "high"
-model_reasoning_summary = "none"
+model_reasoning_summary = "concise"
 model_verbosity = "medium"
-hide_agent_reasoning = true
 
-# Safer than live browsing by default; switch in-app when you specifically need live fetches.
-web_search = "cached"
-
-# Keep more MCP / Playwright logs in context before truncation.
-tool_output_token_limit = 12000
-
-# Full-access mode: no sandbox boundary, no approval prompts.
-# Use only in a trusted repo.
+# Tryb maksymalnie płynny: używaj tylko w zaufanym repo i na branchu, który łatwo cofnąć.
 approval_policy = "never"
 sandbox_mode = "danger-full-access"
 
-personality = "pragmatic"
-allow_login_shell = true
-mcp_oauth_credentials_store = "keyring"
+# Większy limit na logi z buildów, testów i Playwrighta.
+tool_output_token_limit = 16000
 
-developer_instructions = """
-Always respond in Polish unless the user explicitly asks for another language.
-Be concise, pragmatic, and action-oriented.
-For code edits, prefer minimal targeted diffs instead of rewriting entire files.
-Preserve file structure, line endings, and encoding.
-Assume UTF-8 by default, but verify actual bytes or repository conventions before declaring encoding corruption.
-Do not claim mojibake unless it is confirmed from bytes, tool output, or repository conventions.
-Avoid unnecessary reformatting, mass rewrites, and line-ending churn.
-On Windows, prefer Windows-native commands and do not assume WSL.
-For Playwright work, favor small reproducible steps and keep logs concise.
-Before risky changes, briefly state the plan. After changes, summarize exactly what changed and what still needs verification.
-"""
+# Repo ma własne AGENTS.md i memory; nie ucinaj ich zbyt wcześnie.
+project_doc_max_bytes = 98304
+project_root_markers = [".git"]
 
+# Domyślnie trzymaj web search w cache i przy oficjalnych źródłach OpenAI.
+web_search = "cached"
+
+# Nie zapisuj zbędnej historii w repo-specific flow.
 [history]
 persistence = "none"
 
-[agents]
-max_threads = 1
-max_depth = 1
+# Ta sekcja działa głównie dla workspace-write; przy danger-full-access dostęp jest szeroki.
+[sandbox_workspace_write]
+writable_roots = []
+network_access = false
+exclude_tmpdir_env_var = false
+exclude_slash_tmp = false
 
+# Windows sandbox; jeśli nie działa, zmień na "unelevated".
+[windows]
+sandbox = "elevated"
+sandbox_private_desktop = true
+
+# Środowisko pod UTF-8, Node i kolorowe logi.
 [shell_environment_policy]
 inherit = "all"
+ignore_default_excludes = false
 experimental_use_profile = true
 
 [shell_environment_policy.set]
 PYTHONUTF8 = "1"
 PYTHONIOENCODING = "utf-8"
+FORCE_COLOR = "1"
 
-[windows]
-sandbox = "elevated"
-sandbox_private_desktop = true
-
+# Narzędzia: trzymaj research przy oficjalnych źródłach OpenAI.
 [tools]
 view_image = true
+web_search = { context_size = "medium", allowed_domains = ["developers.openai.com", "openai.com"] }
 
+# Włącz subagent workflow.
 [features]
 multi_agent = true
+fast_mode = true
+shell_snapshot = true
 prevent_idle_sleep = true
 
+################################################################################
+# MCP — oficjalne dokumenty OpenAI
+################################################################################
+
+[mcp_servers.openaiDeveloperDocs]
+url = "https://developers.openai.com/mcp"
+startup_timeout_sec = 30
+tool_timeout_sec = 120
+
+################################################################################
+# MCP — Playwright browser verification
+################################################################################
+
 [mcp_servers.playwright]
-enabled = true
-required = false
 command = "npx"
-args = ["-y", "@playwright/mcp@0.0.70"]
+args = ["-y", "@playwright/mcp"]
 startup_timeout_sec = 60
 tool_timeout_sec = 300
 
-[mcp_servers.context7]
-enabled = true
-required = false
-url = "https://mcp.context7.com/mcp"
-startup_timeout_sec = 20
-tool_timeout_sec = 120
+################################################################################
+# Instrukcje projektu — po angielsku zgodnie z prośbą
+################################################################################
 
-[mcp_servers.github]
-enabled = false
-required = false
-url = "https://api.githubcopilot.com/mcp/"
-bearer_token_env_var = "GITHUB_MCP_PAT"
-startup_timeout_sec = 20
-tool_timeout_sec = 120
+developer_instructions = """
+You are working in the Project Party repository on Windows 10.
+
+Always respect AGENTS.md, PROJECT_CONTEXT.md, memory/today.md, and memory/active-tasks.json before making changes.
+Do not infer repository architecture from memory when current repo documentation exists.
+
+Repository ownership:
+- apps/hub owns the platform shell, routing, registry, session bootstrap, and glue code.
+- packages/ui owns reusable shell, setup, modal, and host-navigation primitives.
+- packages/game-sdk owns shared contracts and module interfaces.
+- packages/games/<game> owns game menu, setup, results, runtime, navigation profile, and game-local behavior.
+- packages/partykit owns realtime authority and server-side game state.
+
+Work rules:
+- Prefer small, targeted diffs.
+- Do not perform broad rewrites.
+- Do not reformat unrelated code.
+- Do not commit unless explicitly asked.
+- Preserve Polish text, diacritics, and UTF-8.
+- If encoding looks suspicious, inspect bytes or use pwsh/Node; do not trust Windows PowerShell 5.1 output blindly.
+- For UI/runtime changes, close the loop with the smallest meaningful build, focused check, or Playwright pass.
+- If full verification is blocked by the environment, report the exact command, exact error, and nearest meaningful alternative.
+
+Typical verification commands:
+- npm run build
+- npm run lint
+- npm run test:e2e
+- npm run test:e2e:live
+- npm run verify:encoding
+- npm run build --workspace @party/hub
+- npm run build --workspace @party/ui
+- npm run build --workspace @party/charades
+- npm run build --workspace @party/codenames
+- npm run test:authority:codenames --workspace @party/partykit
+
+Before editing, select the smallest verification path that matches the change.
+After editing, report:
+1. What changed.
+2. How it was verified.
+3. What could not be verified.
+"""

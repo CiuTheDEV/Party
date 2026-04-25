@@ -4,6 +4,7 @@ import type { GameSetupSectionComponentProps } from '@party/game-sdk'
 import { WordPoolManagerModal } from '@party/ui'
 import { ChevronDown, LibraryBig } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { resolveBoardSplit } from '../category-balance'
 import type { CodenamesSetupHelpers } from '../helpers'
 import type { CodenamesSetupState } from '../state'
 import styles from './CategoriesSection.module.css'
@@ -38,6 +39,23 @@ export function CategoriesSection({
         })),
     [helpers.categoryPoolSummaries, helpers.resetCategoryPoolHistory],
   )
+
+  const balancedCategories = helpers.categories.filter((category) => state.selectedCategories[category.id])
+  const activeBalancedPair = balancedCategories.length === 2 ? balancedCategories : null
+  const activeCategoryBalance =
+    activeBalancedPair &&
+    state.categoryBalance?.leftCategoryId === activeBalancedPair[0]?.id &&
+    state.categoryBalance?.rightCategoryId === activeBalancedPair[1]?.id
+      ? state.categoryBalance
+      : null
+  const leftSharePercent = activeCategoryBalance?.leftSharePercent ?? 50
+  const boardSplit = activeBalancedPair
+    ? resolveBoardSplit({
+        leftCategoryId: activeBalancedPair[0].id,
+        rightCategoryId: activeBalancedPair[1].id,
+        leftSharePercent,
+      })
+    : null
 
   function toggle(id: string) {
     updateState((current) => {
@@ -95,6 +113,50 @@ export function CategoriesSection({
               )
             })}
           </div>
+
+          {activeBalancedPair && boardSplit ? (
+            <div className={styles.balanceCard}>
+              <div className={styles.balanceHeader}>
+                <span className={styles.balanceLabel}>Balans planszy</span>
+                <strong className={styles.balanceSummary}>
+                  {`Plansza: ${boardSplit.leftCount} ${activeBalancedPair[0].name} / ${boardSplit.rightCount} ${activeBalancedPair[1].name}`}
+                </strong>
+              </div>
+
+              <div className={styles.balanceScaleLabels}>
+                <span className={styles.balanceScaleLabel}>
+                  <span className={styles.balanceCategoryName}>{activeBalancedPair[0].name}</span>
+                  <span className={styles.balancePercent}>{leftSharePercent}%</span>
+                </span>
+                <span className={styles.balanceScaleLabel}>
+                  <span className={styles.balanceCategoryName}>{activeBalancedPair[1].name}</span>
+                  <span className={styles.balancePercent}>{100 - leftSharePercent}%</span>
+                </span>
+              </div>
+
+              <input
+                type="range"
+                min={0}
+                max={100}
+                step={10}
+                value={leftSharePercent}
+                className={styles.balanceSlider}
+                aria-label={`Balans kategorii: ${activeBalancedPair[0].name} i ${activeBalancedPair[1].name}`}
+                onChange={(event) => {
+                  const nextLeftSharePercent = Number(event.target.value)
+
+                  updateState((current) => ({
+                    ...current,
+                    categoryBalance: {
+                      leftCategoryId: activeBalancedPair[0].id,
+                      rightCategoryId: activeBalancedPair[1].id,
+                      leftSharePercent: nextLeftSharePercent,
+                    },
+                  }))
+                }}
+              />
+            </div>
+          ) : null}
 
           <button type="button" className={styles.managementStrip} onClick={() => setIsPoolManagerOpen(true)}>
             {'Zarz\u0105dzaj pul\u0105 unikalnych hase\u0142'}

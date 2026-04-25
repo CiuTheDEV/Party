@@ -1,5 +1,7 @@
 import type { GameSetupValidation } from '@party/game-sdk'
 
+export const CODENAMES_CATEGORY_IDS = ['standard', 'plus18'] as const
+
 export type CodenamesTeam = {
   name: string
   avatar: string
@@ -9,11 +11,18 @@ export type CodenamesGameSettings = {
   rounds: number
 }
 
+export type CodenamesCategoryBalance = {
+  leftCategoryId: string
+  rightCategoryId: string
+  leftSharePercent: number
+}
+
 export type CodenamesSetupState = {
   roomId: string
   teams: [CodenamesTeam, CodenamesTeam]
   selectedCategories: Record<string, true>
   settings: CodenamesGameSettings
+  categoryBalance: CodenamesCategoryBalance | null
   captainRedConnected: boolean
   captainBlueConnected: boolean
 }
@@ -36,6 +45,7 @@ export function createInitialCodenamesSetupState(): CodenamesSetupState {
     ],
     selectedCategories: { standard: true },
     settings: { rounds: 3 },
+    categoryBalance: null,
     captainRedConnected: false,
     captainBlueConnected: false,
   }
@@ -43,8 +53,12 @@ export function createInitialCodenamesSetupState(): CodenamesSetupState {
 
 export function validateCodenamesSetup(state: CodenamesSetupState): GameSetupValidation {
   const errors: string[] = []
+  const knownCategoryIds = new Set<string>(CODENAMES_CATEGORY_IDS)
+  const selectedCategoryIds = Object.keys(state.selectedCategories).filter((categoryId) =>
+    knownCategoryIds.has(categoryId),
+  )
 
-  if (Object.keys(state.selectedCategories).length < 1) {
+  if (selectedCategoryIds.length < 1) {
     errors.push('Wybierz przynajmniej jedną kategorię.')
   }
 

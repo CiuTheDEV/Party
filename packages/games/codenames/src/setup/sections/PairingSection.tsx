@@ -8,24 +8,12 @@ import { CaptainPairingPanel } from '../components/CaptainPairingPanel'
 type Props = GameSetupSectionComponentProps<CodenamesSetupState, CodenamesSetupHelpers>
 
 export function PairingSection({ state, updateState, helpers }: Props) {
-  const CaptainListenerComponent = helpers.CaptainListener
-
   return (
-    <>
-      <CaptainListenerComponent
-        roomId={state.roomId}
-        teams={state.teams}
-        onRedConnect={() => updateState((s) => ({ ...s, captainRedConnected: true }))}
-        onRedDisconnect={() => updateState((s) => ({ ...s, captainRedConnected: false }))}
-        onBlueConnect={() => updateState((s) => ({ ...s, captainBlueConnected: true }))}
-        onBlueDisconnect={() => updateState((s) => ({ ...s, captainBlueConnected: false }))}
-      />
-      <CaptainPairingPanel
-        roomId={state.roomId}
-        teams={state.teams}
-        captainRedConnected={state.captainRedConnected}
-        captainBlueConnected={state.captainBlueConnected}
-      />
-    </>
+    <CaptainPairingPanel
+      roomId={state.roomId}
+      teams={state.teams}
+      captainRedConnected={state.captainRedConnected}
+      captainBlueConnected={state.captainBlueConnected}
+    />
   )
 }

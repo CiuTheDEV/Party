@@ -5,6 +5,8 @@ import {
   getFreshWordsForPool,
   type StoredCodenamesWordHistory,
 } from '../runtime/shared/codenames-word-history'
+import { resolveBoardSplit } from './category-balance'
+import type { CodenamesCategoryBalance } from './state'
 
 export type CodenamesPoolSummary = {
   poolKey: string
@@ -68,6 +70,43 @@ export function getCodenamesCategoryPoolSummaries(params: {
       isSelected: Boolean(params.selectedCategories[category.id]),
     } satisfies CodenamesCategoryPoolSummary
   })
+}
+
+export function getCodenamesBalancedPoolError(params: {
+  categorySummaries: CodenamesCategoryPoolSummary[]
+  selectedCategories: Record<string, true>
+  categoryBalance: CodenamesCategoryBalance | null
+}) {
+  if (!params.categoryBalance) {
+    return null
+  }
+
+  const selectedCategoryIds = Object.keys(params.selectedCategories)
+  if (selectedCategoryIds.length !== 2) {
+    return null
+  }
+
+  const { leftCount, rightCount } = resolveBoardSplit(params.categoryBalance)
+  const leftSummary = params.categorySummaries.find(
+    (summary) => summary.categoryId === params.categoryBalance?.leftCategoryId,
+  )
+  const rightSummary = params.categorySummaries.find(
+    (summary) => summary.categoryId === params.categoryBalance?.rightCategoryId,
+  )
+
+  if (!leftSummary || !rightSummary) {
+    return null
+  }
+
+  if (leftSummary.remaining < leftCount) {
+    return `Kategoria ${leftSummary.name} nie ma wystarczającej liczby świeżych haseł dla tego balansu planszy.`
+  }
+
+  if (rightSummary.remaining < rightCount) {
+    return `Kategoria ${rightSummary.name} nie ma wystarczającej liczby świeżych haseł dla tego balansu planszy.`
+  }
+
+  return null
 }
 
 export function appendPoolValidationError(params: {

@@ -11,12 +11,6 @@ import styles from './TeamsSection.module.css'
 const TEAM_COLORS = ['#dc2626', '#2563eb'] as const
 const TEAM_LABELS = ['Drużyna Czerwonych', 'Drużyna Niebieskich'] as const
 
-const ALL_AVATARS = [
-  ...getPartyAvatarsByCategory('people'),
-  ...getPartyAvatarsByCategory('animals'),
-  ...getPartyAvatarsByCategory('other'),
-].map((avatar) => avatar.id)
-
 const AVATAR_CATEGORIES = getPartyAvatarCategories()
 
 type AvatarCategoryId = (typeof AVATAR_CATEGORIES)[number]['id']
@@ -122,9 +116,7 @@ function TeamCard({ team, label, color, onChange }: TeamCardProps) {
                     aria-label={avatar.label}
                     title={avatar.label}
                   >
-                    <span className={styles.avatarOptionFrame}>
-                      <AvatarAsset avatar={avatar.id} size={42} />
-                    </span>
+                    <AvatarAsset avatar={avatar.id} className={styles.avatarOptionAsset} />
                   </button>
                 ))}
               </div>

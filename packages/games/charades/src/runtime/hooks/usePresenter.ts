@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import usePartySocket from 'partysocket/react'
 import type { PresenterConnectionState, PresenterViewState } from '../presenter/types'
-import type { HostEvent, PresenterEvent, RoomState, RoomStateMessage } from '../shared/charades-events'
+import type { HostEvent, PresenterEvent, RoomStateMessage } from '../shared/charades-events'
 import { getPartykitHost } from '../shared/charades-runtime'
 import {
   clearPresenterSession,
@@ -9,25 +9,7 @@ import {
   readPresenterSession,
   writePresenterSession,
 } from '../shared/charades-storage'
-
-const INITIAL_PRESENTER_STATE: PresenterViewState = {
-  phase: 'waiting',
-  currentTurnId: '',
-  word: '',
-  category: '',
-  difficulty: '',
-  canChangeWord: false,
-  remainingWordChanges: 0,
-  presenterName: '',
-  timerRemaining: 0,
-  timerDuration: 0,
-  revealRemaining: 0,
-  revealDuration: 0,
-  nextPresenterName: '',
-  nextPresenterAvatar: '',
-  nextStep: 'next-presenter',
-  turnEndReason: 'none',
-}
+import { INITIAL_PRESENTER_STATE, applyPresenterHostEvent, mapRoomStateToPresenterView } from './presenter-state'
 
 export function usePresenter(roomId: string) {
   const sessionId = useMemo(() => {
@@ -112,109 +94,7 @@ export function usePresenter(roomId: string) {
   }, [connectionState, roomId, sessionId, writeHeartbeat])
 
   function handleHostEvent(event: HostEvent) {
-    switch (event.type) {
-      case 'TURN_START':
-        setState((s) => ({
-          ...s,
-          phase: 'your-turn',
-          currentTurnId: event.turnId,
-          word: event.word,
-          category: event.category,
-          difficulty: event.difficulty,
-          canChangeWord: event.canChangeWord,
-          remainingWordChanges: event.remainingWordChanges,
-          presenterName: event.presenterName,
-          timerRemaining: event.timerSeconds,
-          timerDuration: event.timerSeconds,
-          revealRemaining: 0,
-          revealDuration: 0,
-          nextPresenterName: event.nextPresenterName,
-          nextPresenterAvatar: event.nextPresenterAvatar,
-          nextStep: event.nextStep,
-          turnEndReason: 'none',
-        }))
-        break
-      case 'REVEAL_BUFFER_START':
-      case 'REVEAL_BUFFER_TICK':
-        setState((s) => {
-          if (event.turnId !== s.currentTurnId) return s
-          return {
-            ...s,
-            phase: 'reveal-buffer',
-            revealRemaining: event.remaining,
-            revealDuration: s.revealDuration || event.remaining,
-          }
-        })
-        break
-      case 'REVEAL_BUFFER_END':
-        setState((s) => {
-          if (event.turnId !== s.currentTurnId) return s
-          return { ...s, phase: 'timer-running', revealRemaining: 0 }
-        })
-        break
-      case 'WORD_CHANGED':
-        setState((s) => {
-          if (event.turnId !== s.currentTurnId) return s
-          return {
-            ...s,
-            word: event.word,
-            category: event.category,
-            difficulty: event.difficulty,
-            remainingWordChanges: event.remainingWordChanges,
-          }
-        })
-        break
-      case 'TIMER_TICK':
-        setState((s) => {
-          if (event.turnId !== s.currentTurnId) return s
-          return { ...s, phase: 'timer-running', timerRemaining: event.remaining }
-        })
-        break
-      case 'TURN_END':
-        setState((s) => {
-          if (event.turnId !== s.currentTurnId) return s
-          return {
-            ...s,
-            phase: 'awaiting-verdict',
-            word: '',
-            difficulty: '',
-            canChangeWord: false,
-            remainingWordChanges: 0,
-            revealRemaining: 0,
-            turnEndReason: event.reason,
-          }
-        })
-        break
-      case 'BETWEEN_TURNS':
-        setState((s) => ({
-          ...s,
-          phase: 'between',
-          nextPresenterName: event.nextPresenterName,
-          nextPresenterAvatar: event.nextPresenterAvatar,
-          word: '',
-          difficulty: '',
-          canChangeWord: false,
-          remainingWordChanges: 0,
-          revealRemaining: 0,
-          turnEndReason: 'none',
-        }))
-        break
-      case 'GAME_END':
-        setState((s) => ({
-          ...s,
-          phase: 'ended',
-          word: '',
-          difficulty: '',
-          canChangeWord: false,
-          remainingWordChanges: 0,
-          revealRemaining: 0,
-          turnEndReason: 'none',
-        }))
-        break
-      case 'GAME_RESET':
-        setState(INITIAL_PRESENTER_STATE)
-        break
-    }
+    setState((current) => applyPresenterHostEvent(current, event))
   }
 
   const revealWord = useCallback(() => {
@@ -260,61 +140,5 @@ export function usePresenter(roomId: string) {
     hasSyncedState: hasSyncedStateRef.current,
     revealWord,
     changeWord,
-  }
-}
-
-function mapRoomStateToPresenterView(roomState: RoomState): PresenterViewState {
-  switch (roomState.presenterPhase) {
-    case 'your-turn':
-    case 'reveal-buffer':
-    case 'timer-running':
-    case 'awaiting-verdict':
-    case 'timeout':
-      return {
-        phase: roomState.presenterPhase === 'timeout' ? 'awaiting-verdict' : roomState.presenterPhase,
-        currentTurnId: roomState.currentTurnId,
-        word: roomState.currentWord,
-        category: roomState.currentCategory,
-        difficulty: roomState.currentDifficulty,
-        canChangeWord: roomState.canChangeWord,
-        remainingWordChanges: roomState.remainingWordChanges,
-        presenterName: roomState.currentPresenter,
-        timerRemaining: roomState.timerRemaining,
-        timerDuration: roomState.timerDuration,
-        revealRemaining: roomState.revealRemaining,
-        revealDuration: roomState.revealDuration,
-        nextPresenterName: roomState.nextPresenterName,
-        nextPresenterAvatar: roomState.nextPresenterAvatar,
-        nextStep: roomState.nextStep,
-        turnEndReason: roomState.turnEndReason,
-      }
-    case 'between':
-      return {
-        ...INITIAL_PRESENTER_STATE,
-        phase: 'between',
-        currentTurnId: roomState.currentTurnId,
-        presenterName: roomState.currentPresenter,
-        difficulty: roomState.currentDifficulty,
-        canChangeWord: roomState.canChangeWord,
-        remainingWordChanges: roomState.remainingWordChanges,
-        nextPresenterName: roomState.nextPresenterName,
-        nextPresenterAvatar: roomState.nextPresenterAvatar,
-        nextStep: roomState.nextStep,
-        turnEndReason: roomState.turnEndReason,
-      }
-    case 'ended':
-      return {
-        ...INITIAL_PRESENTER_STATE,
-        phase: 'ended',
-        currentTurnId: roomState.currentTurnId,
-        presenterName: roomState.currentPresenter,
-        difficulty: roomState.currentDifficulty,
-        canChangeWord: roomState.canChangeWord,
-        remainingWordChanges: roomState.remainingWordChanges,
-        turnEndReason: roomState.turnEndReason,
-      }
-    case 'waiting':
-    default:
-      return INITIAL_PRESENTER_STATE
   }
 }

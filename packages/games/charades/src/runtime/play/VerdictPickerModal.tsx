@@ -49,6 +49,10 @@ export function VerdictPickerModal({
   const confirmButtonRef = useRef<HTMLButtonElement | null>(null)
   const playerOptionRefs = useRef<Record<number, HTMLButtonElement | null>>({})
 
+  const activatePlayer = (playerIdx: number) => {
+    onSelectPlayer(playerIdx)
+  }
+
   useLayoutEffect(() => {
     if (reducedMotion) {
       return
@@ -167,22 +171,6 @@ export function VerdictPickerModal({
           clearProps: 'transform,opacity',
         },
       )
-      gsap.fromTo(
-        actionsRef.current,
-        {
-          y: 12,
-          autoAlpha: 0.72,
-          scale: 0.985,
-        },
-        {
-          y: 0,
-          autoAlpha: 1,
-          scale: 1,
-          duration: 0.2,
-          ease: 'power2.out',
-          clearProps: 'transform,opacity',
-        },
-      )
     } else {
       gsap.to(playerNodes, {
         scale: 1,
@@ -203,7 +191,7 @@ export function VerdictPickerModal({
           autoAlpha: 1,
           duration: 0.18,
           ease: 'power2.out',
-            clearProps: 'transform,opacity',
+          clearProps: 'transform,opacity',
         },
       )
     }
@@ -244,12 +232,32 @@ export function VerdictPickerModal({
     )
   }, [actionTarget, isFocusVisible, reducedMotion, selectedPlayerIdx, selectionStage])
 
+  useEffect(() => {
+    if (selectionStage !== 'actions' || !isFocusVisible) {
+      return
+    }
+
+    const activeButton = actionTarget === 'confirm' ? confirmButtonRef.current : cancelButtonRef.current
+    if (!activeButton) {
+      return
+    }
+
+    activeButton.scrollIntoView({ block: 'nearest', inline: 'nearest' })
+    activeButton.focus({ preventScroll: true })
+  }, [actionTarget, isFocusVisible, selectionStage])
+
   return (
     <div ref={overlayRef} className={styles.modalOverlay} role="dialog" aria-modal="true" aria-label="Wybierz gracza">
       <div ref={cardRef} className={styles.modalCard} data-stage={selectionStage}>
-        <span className={styles.modalEyebrow}>Zgadnieto</span>
-        <h2 className={styles.modalTitle}>Ktory gracz odgadl haslo?</h2>
-        <div ref={listRef} className={styles.modalList} data-density={density} data-stage={selectionStage}>
+        <span className={styles.modalEyebrow}>Zgadnięto</span>
+        <h2 className={styles.modalTitle}>Który gracz odgadł hasło?</h2>
+        <div
+          ref={listRef}
+          className={styles.modalList}
+          data-density={density}
+          data-player-count={players.length}
+          data-stage={selectionStage}
+        >
           {players.map((player) => {
             const isSelected = selectedPlayerIdx === player.index
             const isFocusedPlayer = isSelected && isFocusVisible && selectionStage === 'players'
@@ -267,7 +275,9 @@ export function VerdictPickerModal({
                   isFocusedPlayer ? styles.controlFocused : '',
                 ].filter(Boolean).join(' ')}
                 data-stage={selectionStage}
-                onClick={() => onSelectPlayer(player.index)}
+                onClick={() => {
+                  activatePlayer(player.index)
+                }}
               >
                 <AvatarAsset avatar={player.avatar} className={styles.playerAvatar} />
                 <span className={styles.playerName} data-gender={player.gender}>
@@ -287,9 +297,9 @@ export function VerdictPickerModal({
             ].filter(Boolean).join(' ')}
             onClick={onCancel}
           >
-            <span>Wroc</span>
+            <span>Wróć</span>
             <ActionHint
-              label={isFocusVisible && selectionStage === 'actions' && actionTarget === 'cancel' ? actionHints?.confirm : null}
+              label={isFocusVisible && selectionStage === 'actions' && actionTarget === 'cancel' ? actionHints?.cancel : null}
               muted
             />
           </button>

@@ -471,6 +471,30 @@ run('maps runtime verdict actions through primary and directional choice', () =>
       },
       'confirm',
     ),
+    { type: 'open-incorrect-verdict-confirm' },
+  )
+
+  assert.deepEqual(
+    hostControlsModule.resolveHostControlCommand(
+      {
+        phase: 'verdict',
+        isRoundOrderRevealing: false,
+        isSettingsOpen: false,
+        isSettingsExitConfirmOpen: false,
+        isIncorrectVerdictConfirmOpen: true,
+        verdictFocusTarget: 'incorrect',
+        isVerdictPickerOpen: false,
+        incorrectVerdictConfirmFocusTarget: 'confirm',
+        verdictPickerStage: 'players',
+        verdictPickerActionTarget: 'confirm',
+        selectedGuessedPlayerIdx: null,
+        guessedPlayerIndexes: [1, 3, 4],
+        isReconnectBlocking: false,
+        canToggleScoreRail: false,
+        isVerdictWordVisible: false,
+      },
+      'confirm',
+    ),
     { type: 'give-incorrect-verdict' },
   )
 

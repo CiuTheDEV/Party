@@ -32,6 +32,46 @@ type IncomingEventResult = AuthorityState & {
   accepted: boolean
 }
 
+function buildResetRoomState(presenterConnected: boolean): RoomState {
+  return {
+    ...initialState,
+    presenterConnected,
+    presenterPhase: 'host-left',
+  }
+}
+
+function buildRoundOrderRoomState(state: RoomState): RoomState {
+  return {
+    ...state,
+    phase: 'waiting',
+    presenterPhase: 'round-order',
+    currentTurnId: '',
+    currentWord: '',
+    currentCategory: '',
+    currentDifficulty: '',
+    canChangeWord: false,
+    remainingWordChanges: 0,
+    currentPresenter: '',
+    timerRemaining: 0,
+    timerDuration: 0,
+    revealRemaining: 0,
+    revealDuration: 0,
+    nextPresenterName: '',
+    nextPresenterAvatar: '',
+    nextStep: 'next-presenter',
+    turnEndReason: 'none',
+  }
+}
+
+function buildResetIncomingResult(current: AuthorityState, resolvedHostConnectionId: string): IncomingEventResult {
+  return {
+    accepted: true,
+    state: buildResetRoomState(current.presenterConnectionId !== null),
+    hostConnectionId: resolvedHostConnectionId,
+    presenterConnectionId: current.presenterConnectionId,
+  }
+}
+
 export default class CharadesServer implements Party.Server {
   state: RoomState = { ...initialState }
   hostConnectionId: string | null = null
@@ -122,6 +162,10 @@ export function reduceIncomingEvent(current: AuthorityState, senderId: string, e
     }
   }
 
+  if (event.type === 'GAME_RESET') {
+    return buildResetIncomingResult(current, resolvedHostConnectionId)
+  }
+
   return {
     accepted: true,
     state: applyEvent(current.state, event),
@@ -152,6 +196,8 @@ function isPresenterEvent(event: CharadesEvent) {
 
 export function applyEvent(state: RoomState, event: CharadesEvent): RoomState {
   switch (event.type) {
+    case 'ROUND_ORDER_START':
+      return buildRoundOrderRoomState(state)
     case 'TURN_START':
       return {
         ...state,
@@ -246,7 +292,7 @@ export function applyEvent(state: RoomState, event: CharadesEvent): RoomState {
         revealDuration: 0,
       }
     case 'GAME_RESET':
-      return { ...initialState }
+      return buildResetRoomState(state.presenterConnected)
     default:
       return state
   }

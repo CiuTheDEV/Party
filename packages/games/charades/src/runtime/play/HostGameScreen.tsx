@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { RuntimeTopBar } from '@party/ui'
 import type { CharadesGameSettings } from '../../setup/state'
 import { PlayBoard } from './PlayBoard'
@@ -14,17 +14,15 @@ import { ExitToMenuAlert } from '../../shared/ExitToMenuAlert'
 import { getVisibleActionHintLabel } from './action-hint-visibility'
 import {
   getHostControlActionLabel,
-  type HostControlCommand,
   type HostControlDevice,
 } from './host-controls'
 import { createRuntimeInputState, sleepRuntimeInput } from './runtime-input-state'
 import { useHostControls } from './useHostControls'
 import type { Phase, PlayerSummary } from './playboard-types'
 import { useRoundOrderCountdown } from './useRoundOrderCountdown'
-import {
-  readCharadesPlayPreferences,
-  writeCharadesPlayPreferences,
-} from '../shared/charades-play-preferences'
+import { useHostVerdictFlow } from './useHostVerdictFlow'
+import { useHostRuntimeUiState } from './useHostRuntimeUiState'
+import { useHostRuntimeCommands } from './useHostRuntimeCommands'
 import {
   CHARADES_BINDINGS_STORAGE_KEY,
   CHARADES_BINDINGS_UPDATED_EVENT,
@@ -64,22 +62,6 @@ type HostGameScreenProps = {
 }
 
 export function HostGameScreen(props: HostGameScreenProps) {
-  const [isVerdictPickerOpen, setIsVerdictPickerOpen] = useState(false)
-  const [verdictFocusTarget, setVerdictFocusTarget] = useState<'correct' | 'incorrect'>('correct')
-  const [roundSummaryFocusTarget, setRoundSummaryFocusTarget] = useState<'menu' | 'continue'>('continue')
-  const [verdictPickerStage, setVerdictPickerStage] = useState<'players' | 'actions'>('players')
-  const [verdictPickerActionTarget, setVerdictPickerActionTarget] = useState<'cancel' | 'confirm'>('confirm')
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false)
-  const [isSettingsExitConfirmOpen, setIsSettingsExitConfirmOpen] = useState(false)
-  const [isExitConfirmOpen, setIsExitConfirmOpen] = useState(false)
-  const [exitConfirmFocusTarget, setExitConfirmFocusTarget] = useState<'stay' | 'exit'>('stay')
-  const [isIncorrectVerdictConfirmOpen, setIsIncorrectVerdictConfirmOpen] = useState(false)
-  const [incorrectVerdictConfirmFocusTarget, setIncorrectVerdictConfirmFocusTarget] = useState<'stay' | 'confirm'>('stay')
-  const [settingsFocusTarget, setSettingsFocusTarget] = useState<'sound' | 'animations' | 'exit' | 'continue'>('sound')
-  const [settingsExitConfirmFocusTarget, setSettingsExitConfirmFocusTarget] = useState<'stay' | 'exit'>('stay')
-  const [soundEnabled, setSoundEnabled] = useState(true)
-  const [animationsEnabled, setAnimationsEnabled] = useState(true)
-  const [selectedGuessedPlayerIdx, setSelectedGuessedPlayerIdx] = useState<number | null>(null)
   const [scoreRailToggleSignal, setScoreRailToggleSignal] = useState(0)
   const [verdictWordToggleSignal, setVerdictWordToggleSignal] = useState(0)
   const [skipRoundOrderSignal, setSkipRoundOrderSignal] = useState(0)
@@ -87,7 +69,38 @@ export function HostGameScreen(props: HostGameScreenProps) {
   const [controllerProfile, setControllerProfile] = useState<GamepadProfile>('generic')
   const [controlBindings, setControlBindings] = useState<Record<string, string>>({})
   const [runtimeInputState, setRuntimeInputState] = useState(() => createRuntimeInputState())
-  const wasSettingsOpenRef = useRef(false)
+  const {
+    closeIncorrectVerdictConfirm,
+    closeVerdictPicker,
+    confirmVerdictPlayer,
+    guessedPlayerIndexes,
+    guessedPlayers,
+    handleIncorrectVerdict,
+    incorrectVerdictConfirmFocusTarget,
+    isIncorrectVerdictConfirmOpen,
+    isVerdictPickerOpen,
+    openIncorrectVerdictConfirm,
+    openVerdictPicker,
+    roundSummaryFocusTarget,
+    selectedGuessedPlayerIdx,
+    selectVerdictPlayer,
+    setIncorrectVerdictConfirmFocusTarget,
+    setRoundSummaryFocusTarget,
+    setSelectedGuessedPlayerIdx,
+    setVerdictFocusTarget,
+    setVerdictPickerActionTarget,
+    setVerdictPickerStage,
+    verdictFocusTarget,
+    verdictPickerActionTarget,
+    verdictPickerStage,
+  } = useHostVerdictFlow({
+    phase: props.phase,
+    players: props.players,
+    order: props.order,
+    currentOrderIdx: props.currentOrderIdx,
+    isCorrectVerdictBlocked: props.isCorrectVerdictBlocked,
+    onGiveVerdict: props.onGiveVerdict,
+  })
   const isPresenterReconnectRequired =
     !props.isDeviceConnected &&
     (props.phase === 'prepare' || props.phase === 'reveal-buffer' || props.phase === 'timer-running')
@@ -97,15 +110,17 @@ export function HostGameScreen(props: HostGameScreenProps) {
       ? 'error'
       : 'reconnecting'
     : null
-  const isPauseOverlayOpen =
-    isSettingsOpen ||
-    isExitConfirmOpen ||
-    isIncorrectVerdictConfirmOpen ||
-    isPresenterReconnectRequired ||
-    isRoomReconnectRequired
+  const ui = useHostRuntimeUiState({
+    isPresenterReconnectRequired,
+    isRoomReconnectRequired,
+    isIncorrectVerdictConfirmOpen,
+    isVerdictPickerOpen,
+    onPauseGame: props.onPauseGame,
+    onResumeGame: props.onResumeGame,
+  })
   const { roundOrderCountdown, startRoundOrderCountdown } = useRoundOrderCountdown({
     shouldRun: props.phase === 'round-order' && props.isRoundOrderRevealing,
-    isPaused: isPauseOverlayOpen,
+    isPaused: ui.isPauseOverlayOpen,
     onFinished: props.onFinishRoundOrder,
   })
   const orderedPlayers = useMemo(
@@ -116,12 +131,6 @@ export function HostGameScreen(props: HostGameScreenProps) {
     [props.order, props.players]
   )
   const canSkipRoundOrder = orderedPlayers.length >= 9
-
-  useEffect(() => {
-    const preferences = readCharadesPlayPreferences()
-    setSoundEnabled(preferences.soundEnabled)
-    setAnimationsEnabled(preferences.animationsEnabled)
-  }, [])
 
   useEffect(() => {
     setControlBindings(loadPersistedBindings())
@@ -157,81 +166,6 @@ export function HostGameScreen(props: HostGameScreenProps) {
     return () => window.removeEventListener('pointerdown', handlePointerDown)
   }, [])
 
-  useEffect(() => {
-    if (props.phase !== 'verdict') {
-      setIsVerdictPickerOpen(false)
-      setSelectedGuessedPlayerIdx(null)
-      setVerdictFocusTarget('correct')
-      setVerdictPickerStage('players')
-      setVerdictPickerActionTarget('confirm')
-      setIncorrectVerdictConfirmFocusTarget('stay')
-      setIsIncorrectVerdictConfirmOpen(false)
-    }
-  }, [props.phase])
-
-  useEffect(() => {
-    if (props.phase === 'verdict' && props.isCorrectVerdictBlocked) {
-      setVerdictFocusTarget('incorrect')
-      setIsVerdictPickerOpen(false)
-      setVerdictPickerStage('players')
-      setVerdictPickerActionTarget('confirm')
-    }
-  }, [props.isCorrectVerdictBlocked, props.phase])
-
-  useEffect(() => {
-    if (props.phase !== 'round-summary') {
-      setRoundSummaryFocusTarget('continue')
-    }
-  }, [props.phase])
-
-  useEffect(() => {
-    if (!isSettingsOpen) {
-      setIsSettingsExitConfirmOpen(false)
-      setSettingsFocusTarget('sound')
-      setSettingsExitConfirmFocusTarget('stay')
-    }
-  }, [isSettingsOpen])
-
-  const openExitConfirm = useCallback(() => {
-    setExitConfirmFocusTarget('stay')
-    setIsExitConfirmOpen(true)
-  }, [])
-
-  const closeExitConfirm = useCallback(() => {
-    setExitConfirmFocusTarget('stay')
-    setIsExitConfirmOpen(false)
-  }, [])
-
-  const openIncorrectVerdictConfirm = useCallback(() => {
-    setIncorrectVerdictConfirmFocusTarget('stay')
-    setIsIncorrectVerdictConfirmOpen(true)
-  }, [])
-
-  const closeIncorrectVerdictConfirm = useCallback(() => {
-    setIncorrectVerdictConfirmFocusTarget('stay')
-    setIsIncorrectVerdictConfirmOpen(false)
-  }, [])
-
-  useEffect(() => {
-    if (isPauseOverlayOpen) {
-      wasSettingsOpenRef.current = true
-      props.onPauseGame()
-      return
-    }
-
-    if (wasSettingsOpenRef.current) {
-      wasSettingsOpenRef.current = false
-      props.onResumeGame()
-    }
-  }, [isPauseOverlayOpen, props.onPauseGame, props.onResumeGame])
-
-  const persistPreferences = useCallback((nextSoundEnabled: boolean, nextAnimationsEnabled: boolean) => {
-    writeCharadesPlayPreferences({
-      soundEnabled: nextSoundEnabled,
-      animationsEnabled: nextAnimationsEnabled,
-    })
-  }, [])
-
   const handleRoundOrderSettled = useCallback(() => {
     startRoundOrderCountdown()
   }, [startRoundOrderCountdown])
@@ -244,159 +178,58 @@ export function HostGameScreen(props: HostGameScreenProps) {
     setSkipRoundOrderSignal((current) => current + 1)
   }, [canSkipRoundOrder, props.isRoundOrderRevealing, props.phase, roundOrderCountdown])
 
-  const toggleSound = useCallback(() => {
-    setSoundEnabled((current) => {
-      const next = !current
-      persistPreferences(next, animationsEnabled)
-      return next
-    })
-  }, [animationsEnabled, persistPreferences])
-
-  const toggleAnimations = useCallback(() => {
-    setAnimationsEnabled((current) => {
-      const next = !current
-      persistPreferences(soundEnabled, next)
-      return next
-    })
-  }, [persistPreferences, soundEnabled])
-
-  const presenterIdx = props.order[props.currentOrderIdx]
-  const guessedPlayers = props.players
-    .map((player, index) => ({ ...player, index }))
-    .filter((player) => player.index !== presenterIdx)
-  const guessedPlayerIndexes = guessedPlayers.map((player) => player.index)
   const canToggleScoreRail = props.phase === 'prepare' && props.players.some((player) => (player.score ?? 0) > 0)
-
-  useEffect(() => {
-    if (!isVerdictPickerOpen || selectedGuessedPlayerIdx !== null) {
-      return
-    }
-
-    setSelectedGuessedPlayerIdx(guessedPlayerIndexes[0] ?? null)
-  }, [guessedPlayerIndexes, isVerdictPickerOpen, selectedGuessedPlayerIdx])
-
-  const handleHostControlCommand = useCallback(
-    (command: HostControlCommand) => {
-      switch (command.type) {
-        case 'open-settings':
-          setSettingsFocusTarget('sound')
-          setSettingsExitConfirmFocusTarget('stay')
-          setIsSettingsOpen(true)
-          return
-        case 'close-settings':
-          setIsSettingsExitConfirmOpen(false)
-          setIsSettingsOpen(false)
-          return
-        case 'set-settings-focus':
-          setSettingsFocusTarget(command.target)
-          return
-        case 'open-settings-exit-confirm':
-          setSettingsExitConfirmFocusTarget('stay')
-          setIsSettingsExitConfirmOpen(true)
-          return
-        case 'cancel-settings-exit-confirm':
-          setIsSettingsExitConfirmOpen(false)
-          return
-        case 'set-settings-exit-confirm-focus':
-          setSettingsExitConfirmFocusTarget(command.target)
-          return
-        case 'toggle-settings-sound':
-          toggleSound()
-          return
-        case 'toggle-settings-animations':
-          toggleAnimations()
-          return
-        case 'open-exit-confirm':
-          openExitConfirm()
-          return
-        case 'close-exit-confirm':
-          closeExitConfirm()
-          return
-        case 'set-exit-confirm-focus':
-          setExitConfirmFocusTarget(command.target)
-          return
-        case 'open-incorrect-verdict-confirm':
-          openIncorrectVerdictConfirm()
-          return
-        case 'close-incorrect-verdict-confirm':
-          closeIncorrectVerdictConfirm()
-          return
-        case 'set-incorrect-verdict-confirm-focus':
-          setIncorrectVerdictConfirmFocusTarget(command.target)
-          return
-        case 'exit-to-menu':
-          props.onExitToMenu()
-          return
-        case 'start-round-order':
-          props.onStartRound()
-          return
-        case 'skip-round-order':
-          handleSkipRoundOrder()
-          return
-        case 'stop-round':
-          props.onStopRound()
-          return
-        case 'continue-round-summary':
-          props.onFinishRoundSummary()
-          return
-        case 'set-round-summary-focus':
-          setRoundSummaryFocusTarget(command.target)
-          return
-        case 'open-verdict-picker':
-          setSelectedGuessedPlayerIdx((current) => current ?? guessedPlayerIndexes[0] ?? null)
-          setVerdictPickerStage('players')
-          setVerdictPickerActionTarget('confirm')
-          setIsVerdictPickerOpen(true)
-          return
-        case 'close-verdict-picker':
-          setVerdictPickerStage('players')
-          setVerdictPickerActionTarget('confirm')
-          setIsVerdictPickerOpen(false)
-          return
-        case 'set-verdict-focus':
-          setVerdictFocusTarget(command.target)
-          return
-        case 'select-verdict-player':
-          setSelectedGuessedPlayerIdx(command.playerIdx)
-          setVerdictPickerStage('players')
-          return
-        case 'set-verdict-picker-stage':
-          setVerdictPickerStage(command.stage)
-          if (command.stage === 'actions') {
-            setVerdictPickerActionTarget('confirm')
-          }
-          return
-        case 'set-verdict-picker-action-target':
-          setVerdictPickerActionTarget(command.target)
-          return
-        case 'confirm-verdict-player':
-          if (selectedGuessedPlayerIdx !== null) {
-            props.onGiveVerdict(true, selectedGuessedPlayerIdx)
-          }
-          return
-        case 'give-incorrect-verdict':
-          closeIncorrectVerdictConfirm()
-          props.onGiveVerdict(false)
-          return
-        case 'toggle-score-rail':
-          setScoreRailToggleSignal((current) => current + 1)
-          return
-        case 'toggle-verdict-word':
-          setVerdictWordToggleSignal((current) => current + 1)
-          return
-      }
+  const focusVerdictPlayer = useCallback(
+    (playerIdx: number) => {
+      setSelectedGuessedPlayerIdx(playerIdx)
+      setVerdictPickerStage('players')
     },
-    [
-      closeExitConfirm,
-      closeIncorrectVerdictConfirm,
-      guessedPlayerIndexes,
-      handleSkipRoundOrder,
-      openExitConfirm,
-      openIncorrectVerdictConfirm,
-      props,
-      selectedGuessedPlayerIdx,
-    ],
+    [setSelectedGuessedPlayerIdx, setVerdictPickerStage],
   )
+  const showVerdictPickerPlayers = useCallback(() => {
+    setVerdictPickerStage('players')
+  }, [setVerdictPickerStage])
+  const openVerdictPickerActions = useCallback(() => {
+    setVerdictPickerStage('actions')
+    setVerdictPickerActionTarget('confirm')
+  }, [setVerdictPickerActionTarget, setVerdictPickerStage])
+  const handleHostControlCommand = useHostRuntimeCommands({
+    onStartRound: props.onStartRound,
+    onStopRound: props.onStopRound,
+    onFinishRoundSummary: props.onFinishRoundSummary,
+    onExitToMenu: props.onExitToMenu,
+    onGiveIncorrectVerdict: () => props.onGiveVerdict(false),
+    onSkipRoundOrder: handleSkipRoundOrder,
+    onToggleScoreRail: () => setScoreRailToggleSignal((current) => current + 1),
+    onToggleVerdictWord: () => setVerdictWordToggleSignal((current) => current + 1),
+    ui: {
+      openSettings: ui.openSettings,
+      closeSettings: ui.closeSettings,
+      focusSettingsTarget: ui.setSettingsFocusTarget,
+      openSettingsExitConfirm: ui.openSettingsExitConfirm,
+      cancelSettingsExitConfirm: ui.cancelSettingsExitConfirm,
+      focusSettingsExitConfirmTarget: ui.setSettingsExitConfirmFocusTarget,
+      toggleSound: ui.toggleSound,
+      toggleAnimations: ui.toggleAnimations,
+      openExitConfirm: ui.openExitConfirm,
+      closeExitConfirm: ui.closeExitConfirm,
+      focusExitConfirmTarget: ui.setExitConfirmFocusTarget,
+    },
+    verdict: {
+      openVerdictPicker,
+      closeVerdictPicker,
+      openIncorrectVerdictConfirm,
+      closeIncorrectVerdictConfirm,
+      focusIncorrectVerdictConfirmTarget: setIncorrectVerdictConfirmFocusTarget,
+      focusRoundSummaryTarget: setRoundSummaryFocusTarget,
+      focusVerdictTarget: setVerdictFocusTarget,
+      focusVerdictPlayer,
+      showVerdictPickerPlayers,
+      openVerdictPickerActions,
+      focusVerdictPickerAction: setVerdictPickerActionTarget,
+      confirmVerdictPlayer,
+    },
+  })
 
   useHostControls({
     context: {
@@ -404,14 +237,14 @@ export function HostGameScreen(props: HostGameScreenProps) {
       isRoundOrderRevealing: props.isRoundOrderRevealing,
       isRoundOrderCountdownActive: roundOrderCountdown !== null,
       canSkipRoundOrder,
-      isSettingsOpen,
-      isSettingsExitConfirmOpen,
-      isExitConfirmOpen,
+      isSettingsOpen: ui.isSettingsOpen,
+      isSettingsExitConfirmOpen: ui.isSettingsExitConfirmOpen,
+      isExitConfirmOpen: ui.isExitConfirmOpen,
       isIncorrectVerdictConfirmOpen,
       isCorrectVerdictBlocked: props.isCorrectVerdictBlocked,
-      settingsFocusTarget,
-      settingsExitConfirmFocusTarget,
-      exitConfirmFocusTarget,
+      settingsFocusTarget: ui.settingsFocusTarget,
+      settingsExitConfirmFocusTarget: ui.settingsExitConfirmFocusTarget,
+      exitConfirmFocusTarget: ui.exitConfirmFocusTarget,
       incorrectVerdictConfirmFocusTarget,
       roundSummaryFocusTarget,
       verdictFocusTarget,
@@ -446,16 +279,11 @@ export function HostGameScreen(props: HostGameScreenProps) {
     <div className={styles.screen}>
       <RuntimeTopBar
         gameName="Kalambury"
-        onOpenSettings={() => {
-          setSettingsFocusTarget('sound')
-          setSettingsExitConfirmFocusTarget('stay')
-          setIsSettingsExitConfirmOpen(false)
-          setIsSettingsOpen(true)
-        }}
+        onOpenSettings={ui.openSettings}
       />
 
       <PlayBoard
-        animationsEnabled={animationsEnabled}
+        animationsEnabled={ui.animationsEnabled}
         currentOrderIdx={props.currentOrderIdx}
         order={orderedPlayers}
         phase={props.phase}
@@ -493,20 +321,10 @@ export function HostGameScreen(props: HostGameScreenProps) {
           if (props.isCorrectVerdictBlocked) {
             return
           }
-          setSelectedGuessedPlayerIdx(guessedPlayerIndexes[0] ?? null)
-          setVerdictPickerStage('players')
-          setVerdictPickerActionTarget('confirm')
-          setIsVerdictPickerOpen(true)
+          openVerdictPicker()
         }}
-        onExitToMenu={openExitConfirm}
-        onIncorrectVerdict={() => {
-          if (props.isCorrectVerdictBlocked) {
-            props.onGiveVerdict(false)
-            return
-          }
-
-          openIncorrectVerdictConfirm()
-        }}
+        onExitToMenu={ui.openExitConfirm}
+        onIncorrectVerdict={handleIncorrectVerdict}
         verdictFocusedTarget={verdictFocusTarget}
         isCorrectVerdictBlocked={props.isCorrectVerdictBlocked}
         isFocusVisible={runtimeInputState.isAwake}
@@ -526,21 +344,9 @@ export function HostGameScreen(props: HostGameScreenProps) {
           selectionStage={verdictPickerStage}
           actionTarget={verdictPickerActionTarget}
           isFocusVisible={runtimeInputState.isAwake}
-          onSelectPlayer={(playerIdx) => {
-            setSelectedGuessedPlayerIdx(playerIdx)
-            setVerdictPickerStage('players')
-          }}
-          onCancel={() => {
-            setVerdictPickerStage('players')
-            setVerdictPickerActionTarget('confirm')
-            setIsVerdictPickerOpen(false)
-          }}
-          onConfirm={() => {
-            if (selectedGuessedPlayerIdx === null) {
-              return
-            }
-            props.onGiveVerdict(true, selectedGuessedPlayerIdx)
-          }}
+          onSelectPlayer={selectVerdictPlayer}
+          onCancel={closeVerdictPicker}
+          onConfirm={confirmVerdictPlayer}
           actionHints={{
             confirm: getActionHint('confirm'),
             cancel: getActionHint('back'),
@@ -550,29 +356,20 @@ export function HostGameScreen(props: HostGameScreenProps) {
         />
       ) : null}
 
-      {isSettingsOpen ? (
+      {ui.isSettingsOpen ? (
         <PlaySettingsModal
-          soundEnabled={soundEnabled}
-          animationsEnabled={animationsEnabled}
-          isExitConfirmOpen={isSettingsExitConfirmOpen}
-          focusedTarget={settingsFocusTarget}
-          exitConfirmFocusedTarget={settingsExitConfirmFocusTarget}
+          soundEnabled={ui.soundEnabled}
+          animationsEnabled={ui.animationsEnabled}
+          isExitConfirmOpen={ui.isSettingsExitConfirmOpen}
+          focusedTarget={ui.settingsFocusTarget}
+          exitConfirmFocusedTarget={ui.settingsExitConfirmFocusTarget}
           isFocusVisible={runtimeInputState.isAwake}
-          onToggleSound={toggleSound}
-          onToggleAnimations={toggleAnimations}
-          onOpenExitConfirm={() => {
-            setSettingsExitConfirmFocusTarget('stay')
-            setIsSettingsExitConfirmOpen(true)
-          }}
-          onCancelExitConfirm={() => {
-            setSettingsExitConfirmFocusTarget('stay')
-            setIsSettingsExitConfirmOpen(false)
-          }}
+          onToggleSound={ui.toggleSound}
+          onToggleAnimations={ui.toggleAnimations}
+          onOpenExitConfirm={ui.openSettingsExitConfirm}
+          onCancelExitConfirm={ui.cancelSettingsExitConfirm}
           onExitToMenu={props.onExitToMenu}
-          onContinue={() => {
-            setIsSettingsExitConfirmOpen(false)
-            setIsSettingsOpen(false)
-          }}
+          onContinue={ui.closeSettings}
           actionHints={{
             confirm: getActionHint('confirm'),
           }}
@@ -582,23 +379,23 @@ export function HostGameScreen(props: HostGameScreenProps) {
       {isPresenterReconnectRequired ? (
         <ReconnectPresenterModal
           roomId={props.roomId}
-          onBackToMenu={openExitConfirm}
+          onBackToMenu={ui.openExitConfirm}
         />
       ) : null}
 
       {roomConnectionModalState ? (
         <RoomConnectionModal
           connectionState={roomConnectionModalState}
-          onBackToMenu={openExitConfirm}
+          onBackToMenu={ui.openExitConfirm}
         />
       ) : null}
 
-      {isExitConfirmOpen ? (
+      {ui.isExitConfirmOpen ? (
         <ExitToMenuAlert
           copy="Bieżąca rozgrywka zostanie przerwana. Użyj tej opcji tylko wtedy, gdy naprawdę chcesz opuścić mecz."
-          focusedTarget={exitConfirmFocusTarget}
+          focusedTarget={ui.exitConfirmFocusTarget}
           isFocusVisible={runtimeInputState.isAwake}
-          onStay={closeExitConfirm}
+          onStay={ui.closeExitConfirm}
           onExit={props.onExitToMenu}
           actionHints={{
             confirm: getActionHint('confirm'),

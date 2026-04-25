@@ -5,26 +5,18 @@ import PartySocket from 'partysocket'
 import { getPartykitHost } from '../shared/codenames-runtime'
 import type { HostEvent, IncomingMessage } from '../shared/codenames-events'
 import type { CodenamesTeam } from '../../setup/state'
+import { getCaptainConnectionState, type PartialCaptainConnectionState } from '../../setup/captain-connection-state'
 
 type Props = {
   roomId: string
   teams: [CodenamesTeam, CodenamesTeam]
-  onRedConnect: () => void
-  onRedDisconnect: () => void
-  onBlueConnect: () => void
-  onBlueDisconnect: () => void
+  onConnectionStateChange: (state: PartialCaptainConnectionState) => void
 }
 
-export default function CaptainListener({ roomId, teams, onRedConnect, onRedDisconnect, onBlueConnect, onBlueDisconnect }: Props) {
-  const onRedConnectRef = useRef(onRedConnect)
-  const onRedDisconnectRef = useRef(onRedDisconnect)
-  const onBlueConnectRef = useRef(onBlueConnect)
-  const onBlueDisconnectRef = useRef(onBlueDisconnect)
+export default function CaptainListener({ roomId, teams, onConnectionStateChange }: Props) {
+  const onConnectionStateChangeRef = useRef(onConnectionStateChange)
 
-  useEffect(() => { onRedConnectRef.current = onRedConnect }, [onRedConnect])
-  useEffect(() => { onRedDisconnectRef.current = onRedDisconnect }, [onRedDisconnect])
-  useEffect(() => { onBlueConnectRef.current = onBlueConnect }, [onBlueConnect])
-  useEffect(() => { onBlueDisconnectRef.current = onBlueDisconnect }, [onBlueDisconnect])
+  useEffect(() => { onConnectionStateChangeRef.current = onConnectionStateChange }, [onConnectionStateChange])
 
   useEffect(() => {
     if (!roomId) return
@@ -46,22 +38,25 @@ export default function CaptainListener({ roomId, teams, onRedConnect, onRedDisc
       const msg = JSON.parse(event.data) as IncomingMessage
 
       if (msg.type === 'ROOM_STATE') {
-        if (msg.state?.captainRedConnected) onRedConnectRef.current()
-        else onRedDisconnectRef.current()
-        if (msg.state?.captainBlueConnected) onBlueConnectRef.current()
-        else onBlueDisconnectRef.current()
+        onConnectionStateChangeRef.current(getCaptainConnectionState(msg.state))
         return
       }
 
       if (msg.type === 'CAPTAIN_CONNECTED') {
-        if (msg.team === 'red') onRedConnectRef.current()
-        else onBlueConnectRef.current()
+        onConnectionStateChangeRef.current(
+          msg.team === 'red'
+            ? { captainRedConnected: true }
+            : { captainBlueConnected: true },
+        )
         return
       }
 
       if (msg.type === 'CAPTAIN_DISCONNECTED') {
-        if (msg.team === 'red') onRedDisconnectRef.current()
-        else onBlueDisconnectRef.current()
+        onConnectionStateChangeRef.current(
+          msg.team === 'red'
+            ? { captainRedConnected: false }
+            : { captainBlueConnected: false },
+        )
       }
     })
 

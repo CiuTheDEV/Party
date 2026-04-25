@@ -21,6 +21,11 @@ const restored = moduleUnderTest.restoreCodenamesSetupState(
     ],
     selectedCategories: { standard: true, adult: true },
     settings: { rounds: 5 },
+    categoryBalance: {
+      leftCategoryId: 'standard',
+      rightCategoryId: 'plus18',
+      leftSharePercent: 60,
+    },
     captainRedConnected: true,
     captainBlueConnected: true,
   }),
@@ -30,8 +35,9 @@ assert.deepEqual(restored.teams, [
   { name: 'Alfa', avatar: 'star' },
   { name: 'Beta', avatar: 'moon' },
 ])
-assert.deepEqual(restored.selectedCategories, { standard: true, adult: true })
+assert.deepEqual(restored.selectedCategories, { standard: true })
 assert.deepEqual(restored.settings, { rounds: 5 })
+assert.equal(restored.categoryBalance, null)
 assert.equal(restored.roomId, 'ROOM1234')
 assert.equal(restored.captainRedConnected, false)
 assert.equal(restored.captainBlueConnected, false)
@@ -42,6 +48,7 @@ assert.equal(typeof fallback.roomId, 'string')
 assert.equal(fallback.roomId.length, 8)
 assert.deepEqual(fallback.selectedCategories, { standard: true })
 assert.deepEqual(fallback.settings, { rounds: 3 })
+assert.equal(fallback.categoryBalance, null)
 
 const serialized = moduleUnderTest.serializeCodenamesSetupState(restored)
 const roundtrip = JSON.parse(serialized)
@@ -50,5 +57,8 @@ assert.equal(roundtrip.roomId, 'ROOM1234')
 assert.deepEqual(roundtrip.teams, restored.teams)
 assert.deepEqual(roundtrip.selectedCategories, restored.selectedCategories)
 assert.deepEqual(roundtrip.settings, restored.settings)
+assert.deepEqual(roundtrip.categoryBalance, restored.categoryBalance)
+assert.equal(roundtrip.captainRedConnected, undefined)
+assert.equal(roundtrip.captainBlueConnected, undefined)
 
 console.log('Codenames setup storage helpers behave as expected.')

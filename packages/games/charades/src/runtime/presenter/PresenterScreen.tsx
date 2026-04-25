@@ -74,9 +74,25 @@ export function PresenterScreen({ state, connectionState, onRevealWord, onChange
         <section ref={stageRef} className={styles.stage} data-phase={stagePhase}>
           {state.phase === 'waiting' && (
             <MessagePanel
-              accent="Gotowe"
-              title="Telefon sparowany"
-              body="Host jeszcze nie rozpoczął pierwszej tury."
+              accent="Oczekiwanie"
+              title="Oczekiwanie na rozpoczęcie przez hosta"
+              body="Telefon jest sparowany. Zaczekaj, aż host zamknie setup i rozpocznie rundę."
+            />
+          )}
+
+          {state.phase === 'host-left' && (
+            <MessagePanel
+              accent="Menu główne"
+              title="Host wrócił do menu głównego"
+              body="Ta rozgrywka została zamknięta. Zaczekaj, aż host uruchomi nową grę albo sparuj telefon ponownie."
+            />
+          )}
+
+          {state.phase === 'round-order' && (
+            <MessagePanel
+              accent="Losowanie"
+              title="Losowana jest kolejność"
+              body="Host ustala teraz kolejność prezenterów. Zaczekaj, aż pojawi się informacja, kto przejmuje telefon."
             />
           )}
 
@@ -135,6 +151,14 @@ export function PresenterScreen({ state, connectionState, onRevealWord, onChange
 }
 
 function getStagePhase(phase: PresenterViewState['phase']) {
+  if (phase === 'round-order') {
+    return 'decision'
+  }
+
+  if (phase === 'host-left') {
+    return 'ended'
+  }
+
   if (phase === 'your-turn' || phase === 'reveal-buffer') {
     return 'prepare'
   }
@@ -219,8 +243,20 @@ const PRESENTER_PHASE_CHROME: Record<
   waiting: {
     phaseLabel: 'Oczekiwanie',
     presenterLabel: 'Stan telefonu',
-    phaseSummary: 'Czekaj na start pierwszej tury.',
+    phaseSummary: 'Czekaj, aż host rozpocznie rundę.',
     presenterName: () => 'Gotowy',
+  },
+  'round-order': {
+    phaseLabel: 'Losowanie',
+    presenterLabel: 'Stan telefonu',
+    phaseSummary: 'Host ustala teraz kolejność prezenterów.',
+    presenterName: () => 'Czekaj',
+  },
+  'host-left': {
+    phaseLabel: 'Menu główne',
+    presenterLabel: 'Stan telefonu',
+    phaseSummary: 'Host zakończył tę rozgrywkę i wrócił do menu.',
+    presenterName: () => 'Odłączony od gry',
   },
   'your-turn': {
     phaseLabel: 'Przygotowanie',

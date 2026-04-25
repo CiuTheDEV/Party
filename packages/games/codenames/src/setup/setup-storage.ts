@@ -1,6 +1,8 @@
 import {
   createInitialCodenamesSetupState,
   CODENAMES_DEFAULT_AVATARS,
+  CODENAMES_CATEGORY_IDS,
+  type CodenamesCategoryBalance,
   type CodenamesSetupState,
 } from './state'
 
@@ -16,6 +18,7 @@ type StoredSetupState = {
   teams?: unknown
   selectedCategories?: unknown
   settings?: unknown
+  categoryBalance?: unknown
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -36,8 +39,11 @@ function normalizeSelectedCategories(value: unknown, fallback: CodenamesSetupSta
     return fallback
   }
 
+  const knownCategoryIds = new Set<string>(CODENAMES_CATEGORY_IDS)
   const selectedCategories = Object.fromEntries(
-    Object.entries(value).filter((entry): entry is [string, true] => entry[1] === true),
+    Object.entries(value).filter(
+      (entry): entry is [string, true] => entry[1] === true && knownCategoryIds.has(entry[0]),
+    ),
   )
 
   return Object.keys(selectedCategories).length > 0 ? selectedCategories : fallback
@@ -49,6 +55,36 @@ function normalizeRounds(value: unknown, fallback: number) {
   }
 
   return Math.max(1, Math.round(value.rounds))
+}
+
+function normalizeCategoryBalance(
+  value: unknown,
+  selectedCategories: Record<string, true>,
+): CodenamesCategoryBalance | null {
+  if (!isRecord(value)) {
+    return null
+  }
+
+  const leftCategoryId = typeof value.leftCategoryId === 'string' ? value.leftCategoryId : ''
+  const rightCategoryId = typeof value.rightCategoryId === 'string' ? value.rightCategoryId : ''
+  const leftSharePercent =
+    typeof value.leftSharePercent === 'number' && Number.isFinite(value.leftSharePercent)
+      ? Math.round(value.leftSharePercent)
+      : 50
+
+  if (
+    !selectedCategories[leftCategoryId] ||
+    !selectedCategories[rightCategoryId] ||
+    leftCategoryId === rightCategoryId
+  ) {
+    return null
+  }
+
+  return {
+    leftCategoryId,
+    rightCategoryId,
+    leftSharePercent: Math.max(0, Math.min(100, leftSharePercent)),
+  }
 }
 
 export function restoreCodenamesSetupState(raw: string | null | undefined): CodenamesSetupState {
@@ -68,16 +104,19 @@ export function restoreCodenamesSetupState(raw: string | null | undefined): Code
         ]
       : fallback.teams
 
+    const selectedCategories = normalizeSelectedCategories(parsed.selectedCategories, fallback.selectedCategories)
+
     return {
       roomId:
         typeof parsed.roomId === 'string' && parsed.roomId.trim().length === 8
           ? parsed.roomId.trim().toUpperCase()
           : fallback.roomId,
       teams,
-      selectedCategories: normalizeSelectedCategories(parsed.selectedCategories, fallback.selectedCategories),
+      selectedCategories,
       settings: {
         rounds: normalizeRounds(parsed.settings, fallback.settings.rounds),
       },
+      categoryBalance: normalizeCategoryBalance(parsed.categoryBalance, selectedCategories),
       // Connection flags are runtime-only; restoring them would fake paired devices after reload.
       captainRedConnected: false,
       captainBlueConnected: false,
@@ -93,7 +132,6 @@ export function serializeCodenamesSetupState(state: CodenamesSetupState) {
     teams: state.teams,
     selectedCategories: state.selectedCategories,
     settings: state.settings,
-    captainRedConnected: state.captainRedConnected,
-    captainBlueConnected: state.captainBlueConnected,
+    categoryBalance: state.categoryBalance,
   })
 }

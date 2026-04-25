@@ -9,10 +9,16 @@ import { Suspense, useEffect, useState } from 'react'
 const spaceGrotesk = Space_Grotesk({ subsets: ['latin'] })
 
 type CodenamesTeam = { name: string; avatar: string }
+type CodenamesCategoryBalance = {
+  leftCategoryId: string
+  rightCategoryId: string
+  leftSharePercent: number
+}
 type CodenamesConfig = {
   selectedCategories: Record<string, true>
   teams?: [CodenamesTeam, CodenamesTeam]
   settings?: { rounds?: number }
+  categoryBalance?: CodenamesCategoryBalance | null
 }
 
 const DEFAULT_TEAMS: [CodenamesTeam, CodenamesTeam] = [
@@ -42,6 +48,7 @@ function readConfig() {
         categories: getConfiguredCategories(undefined),
         teams: DEFAULT_TEAMS,
         roundsToWin: 3,
+        categoryBalance: null,
       }
     }
 
@@ -51,12 +58,14 @@ function readConfig() {
       categories: getConfiguredCategories(config.selectedCategories),
       teams: config.teams ?? DEFAULT_TEAMS,
       roundsToWin: config.settings?.rounds ?? 3,
+      categoryBalance: config.categoryBalance ?? null,
     }
   } catch {
     return {
       categories: getConfiguredCategories(undefined),
       teams: DEFAULT_TEAMS,
       roundsToWin: 3,
+      categoryBalance: null,
     }
   }
 }
@@ -69,6 +78,7 @@ function PlayPageContent() {
     categories: Array<{ id: string; words: string[] }>
     teams: [CodenamesTeam, CodenamesTeam]
     roundsToWin: number
+    categoryBalance: CodenamesCategoryBalance | null
   } | null>(null)
 
   useEffect(() => {
@@ -92,6 +102,7 @@ function PlayPageContent() {
         categories={config.categories}
         teams={config.teams}
         roundsToWin={config.roundsToWin}
+        categoryBalance={config.categoryBalance}
       />
     </div>
   )

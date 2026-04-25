@@ -13,6 +13,12 @@ import { ROUND_INTRO_DURATION_MS } from '../shared/RoundIntroOverlay'
 import { prepareCodenamesGameStart } from './start-game'
 import { canStartWaitingGame, shouldAutoStartPendingRound } from './start-policy'
 
+type CodenamesCategoryBalance = {
+  leftCategoryId: string
+  rightCategoryId: string
+  leftSharePercent: number
+}
+
 const initialRoomState: RoomState = {
   phase: 'waiting',
   cards: [],
@@ -37,13 +43,15 @@ type UseHostGameParams = {
   categories: Array<{ id: string; words: string[] }>
   roomId: string
   teams: [{ name: string; avatar: string }, { name: string; avatar: string }]
+  categoryBalance: CodenamesCategoryBalance | null
 }
 
-export function useHostGame({ categories, roomId, teams }: UseHostGameParams) {
+export function useHostGame({ categories, roomId, teams, categoryBalance }: UseHostGameParams) {
   const [roomState, setRoomState] = useState<RoomState>(initialRoomState)
   const [hasSyncedRoomState, setHasSyncedRoomState] = useState(false)
   const [isRoundIntroVisible, setIsRoundIntroVisible] = useState(false)
   const [startBlockedReason, setStartBlockedReason] = useState<string | null>(null)
+  const [resetCount, setResetCount] = useState(0)
 
   const categoriesRef = useRef(categories)
   categoriesRef.current = categories
@@ -53,6 +61,8 @@ export function useHostGame({ categories, roomId, teams }: UseHostGameParams) {
   const initialStartTriggeredRef = useRef(false)
   const teamsRef = useRef(teams)
   teamsRef.current = teams
+  const categoryBalanceRef = useRef(categoryBalance)
+  categoryBalanceRef.current = categoryBalance
 
   const socket = usePartySocket({
     host: getPartykitHost(),
@@ -76,6 +86,10 @@ export function useHostGame({ categories, roomId, teams }: UseHostGameParams) {
         return
       }
 
+      if (msg.type === 'GAME_RESET') {
+        setResetCount((current) => current + 1)
+      }
+
       setRoomState((current) => applyEvent(current, msg))
     },
   })
@@ -94,7 +108,12 @@ export function useHostGame({ categories, roomId, teams }: UseHostGameParams) {
     }
 
     initialStartTriggeredRef.current = true
-    gameStartedRef.current = trySendGameStart(socket, categoriesRef.current, setStartBlockedReason)
+    gameStartedRef.current = trySendGameStart(
+      socket,
+      categoriesRef.current,
+      categoryBalanceRef.current,
+      setStartBlockedReason,
+    )
   }, [roomState, socket])
 
   useEffect(() => {
@@ -107,7 +126,12 @@ export function useHostGame({ categories, roomId, teams }: UseHostGameParams) {
     }
 
     pendingNewGameRef.current = false
-    gameStartedRef.current = trySendGameStart(socket, categoriesRef.current, setStartBlockedReason)
+    gameStartedRef.current = trySendGameStart(
+      socket,
+      categoriesRef.current,
+      categoryBalanceRef.current,
+      setStartBlockedReason,
+    )
   }, [roomState, socket])
 
   useEffect(() => {
@@ -151,12 +175,17 @@ export function useHostGame({ categories, roomId, teams }: UseHostGameParams) {
       return
     }
 
-    gameStartedRef.current = trySendGameStart(socket, categoriesRef.current, setStartBlockedReason)
+    gameStartedRef.current = trySendGameStart(
+      socket,
+      categoriesRef.current,
+      categoryBalanceRef.current,
+      setStartBlockedReason,
+    )
   }, [roomState, socket])
 
-  const resetGame = useCallback(() => {
+  const resetGame = useCallback((options?: { autoRestart?: boolean }) => {
     setStartBlockedReason(null)
-    pendingNewGameRef.current = true
+    pendingNewGameRef.current = options?.autoRestart ?? true
     gameStartedRef.current = false
     initialStartTriggeredRef.current = true
     const event = { type: 'GAME_RESET' as const }
@@ -194,12 +223,18 @@ export function useHostGame({ categories, roomId, teams }: UseHostGameParams) {
       return
     }
 
-    gameStartedRef.current = trySendGameStart(socket, categoriesRef.current, setStartBlockedReason)
+    gameStartedRef.current = trySendGameStart(
+      socket,
+      categoriesRef.current,
+      categoryBalanceRef.current,
+      setStartBlockedReason,
+    )
   }, [roomState, socket])
 
   return {
     roomState,
     hasSyncedRoomState,
+    resetCount,
     revealCard,
     setAssassinTeam,
     resetGame,
@@ -315,11 +350,13 @@ export function applyEvent(state: RoomState, msg: IncomingMessage): RoomState {
 function trySendGameStart(
   socket: { send: (data: string) => void },
   categories: Array<{ id: string; words: string[] }>,
+  categoryBalance: CodenamesCategoryBalance | null,
   setStartBlockedReason: (reason: string | null) => void,
 ) {
   const result = prepareCodenamesGameStart({
     categories,
     history: readCodenamesWordHistory(),
+    categoryBalance,
   })
 
   if (!result.ok) {

@@ -1,5 +1,138 @@
 # Today - 2026-04-20
 
+### S88 (2026-04-25) [Tajniacy] Host setup flicker investigation around captain link flow
+
+- Po fixie avatar pickera zrobiono wąski pass pod zgłoszony runtime/UI bug: wejście w link kapitana z modalu parowania potrafi na chwilę wybić hosta z setupu do menu głównego.
+- Hardening po stronie hosta obejmuje utrzymanie stanu setupu w URL `?setup=1`, usunięcie podwójnego `window.open()` w akcji otwierania linku oraz przeniesienie przywracania setupu przed paint przez osobny `CodenamesMenuPageClient`.
+- Lokalny browser pass na `http://localhost:3000` nie odtworzył błędu: host zostawał na `/games/codenames/?setup=1`, modal setupu pozostawał otwarty podczas `otwórz w nowej karcie` i wejścia na `/captain/...`.
+- Status po sesji jest uczciwie mieszany: kod został utwardzony, ale raportowany flicker nadal nie ma potwierdzonego root cause w lokalnym odtworzeniu, więc nie można go uznać za zamknięty.
+- Weryfikacja przechodzi: `npm run build --workspace @party/codenames` oraz `npm run build --workspace @party/hub`.
+- Next: dołożyć krótkie dev-logowanie zmian `showSetup`, remountu i focus/visibility hosta dokładnie wokół flow `modal parowania -> link kapitana`, żeby złapać realny trigger na maszynie użytkownika albo w bardziej wiernym local passie.
+- Experience recorded: no
+
+### S87 (2026-04-24) [Tajniacy] Avatar picker sync with Kalambury
+
+- Pierwszy fix był niepełny: niesłusznie usunięto zakładkę `Inne`, a sam bug renderu popupu nadal występował.
+- Root cause okazał się po stronie layoutu pickera w Tajniakach: ten konkretny popup źle renderował avatary w `CSS grid`, mimo poprawnych wymiarów DOM, i dawał pionowe „taśmy” emoji zamiast kafli.
+- Finalny fix przełączył listę avatarów na prosty `flex-wrap` z jawnym basisem 4 kolumn desktop / 3 kolumn mobile; dzięki temu popup znów renderuje poprawnie dla `Ludzie`, `Zwierzeta` i `Inne`.
+- Zakładka `Inne` została przywrócona; synchronizacja z Kalamburami została ograniczona do zachowania i wyglądu zakładek `Ludzie` / `Zwierzeta`, bez kasowania trzeciej kategorii.
+- Weryfikacja przechodzi: `npm run build --workspace @party/codenames`, `npm run build --workspace @party/hub`, plus lokalny browser pass ze screenshotami popupu przed i po fixie.
+- Experience recorded: no
+
+### S85 (2026-04-24) [Tajniacy] Host exit now returns captains to waiting before invalidating stale session
+
+- Naprawiono flow host-kapitan w Tajniakach tak, żeby zwykły powrót hosta do menu nie wyrzucał urządzenia kapitana od razu do menu głównego.
+- Host runtime przy wyjściu do menu wysyła teraz najpierw `GAME_RESET`, a dopiero potem nawiguje do `/games/codenames`, dzięki czemu kapitan wraca do stanu `waiting` z loaderem i copy `Czekam na start gry...`.
+- Hooki kapitana przestały traktować każdy `HOST_DISCONNECTED` jako natychmiastowy hard-exit; dostały grace window `5s` na powrót hosta do tego samego pokoju.
+- Jeśli host nie wróci do starego pokoju w tym oknie, ekran kapitana pokazuje komunikat o zakończeniu poprzedniej sesji i wraca do menu głównego, co przykrywa przypadek zmiany kodu sesji / porzucenia starego pokoju.
+- Przy okazji dopięto obsługę `HOST_SETUP_CONNECTED` po stronie hooków kapitana, żeby powrót hosta do setupu tego samego pokoju od razu kasował stan rozłączenia.
+- Po zgłoszeniu, że urządzenie nadal wraca do menu mimo tego samego kodu, zdebugowano prawdziwą przyczynę: `CaptainListener` w menu Tajniaków był montowany tylko wewnątrz otwartego setupu, więc po wyjściu hosta z `/play` i zamkniętym setupie pokój wyglądał dla kapitana jak porzucony.
+- Fix root cause: listener parowania został przeniesiony na poziom całej strony `/games/codenames` i pozostaje aktywny zawsze, gdy lokalny setup został odtworzony i istnieje `roomId`, niezależnie od tego, czy modal setupu jest otwarty.
+- Weryfikacja przechodzi: `npm run build --workspace @party/codenames`, `npm run test:authority:codenames --workspace @party/partykit`.
+- Dodatkowa weryfikacja po root-cause fixie też przechodzi: focused helper check dla aktywacji listenera oraz `npm run build --workspace @party/hub`.
+- Browser verify dla tego konkretnego flow nie został jeszcze odpalony w tej sesji.
+- Experience recorded: no
+
+### S86 (2026-04-24) [Tajniacy] Review follow-up for reset handoff and validation reuse
+
+- Domknięto trzy follow-upy z review Task 6 bez rozszerzania scope poza ownership wskazany w zadaniu.
+- Hostowy `exitToMenu()` nie opiera się już na arbitralnym timeoutcie: ekran wysyła `GAME_RESET`, czeka na świeżo zaobserwowany reset z pokoju i dopiero wtedy nawiguje z `/games/codenames/play` do menu, więc unmount nie ścina już eventu po drodze.
+- `useHostGame` przestał trzymać stare `categoryBalance` w domknięciach start/reset flow; balans czytany jest teraz z refa tak samo jak kategorie i teamy.
+- Strona `apps/hub/.../codenames/page.tsx` nie duplikuje już logiki walidacji zbalansowanej puli; korzysta z istniejącego helpera wyeksportowanego z `@party/codenames`.
+- Weryfikacja przechodzi: `npm run build --workspace @party/codenames`, `npm run build --workspace @party/hub`.
+- Browser verify tego konkretnego review follow-upu nie był odpalany.
+- Experience recorded: no
+
+### S84 (2026-04-24) [Kalambury] Runtime remediation executed and verified
+
+- Domknięto execution-ready plan z `docs/superpowers/plans/2026-04-23-charades-runtime-audit-remediation.md` zamiast kolejnego passu „na oko”: odchudzono `HostGameScreen`, ujednolicono presenter-state z PartyKit `GAME_RESET`, a `PlayBoardPhases` rozbito na lokalne widoki.
+- W trakcie passa naprawiono też dwa prawdziwe regresy testowe wokół aktualnego zachowania runtime: przestarzały `host-controls.check.cjs` dla ścieżki `Nie zgadnięto` oraz stale Playwright selektory po przywróceniu polskich znaków w copy prezentera i pickera werdyktu.
+- Finalna weryfikacja jest zielona: `npm run test:verdict-picker-layout --workspace @party/charades`, `npm run test:host-controls --workspace @party/charades`, `npm run test:authority --workspace @party/partykit`, `npm run build --workspace @party/charades`, `npm run build --workspace @party/hub`, `npx playwright test apps/hub/e2e/charades-runtime-flow.spec.ts --project=chromium`.
+- Browser spec przechodzi end-to-end dla obu scenariuszy: pełny mixed-verdict flow `4 players / 3 rounds` oraz zachowanie sparowania prezentera po wyjściu hosta do menu.
+- Task `T001` można zamknąć; dla Kalamburów nie został aktywny blocker po tym passie.
+- Experience recorded: no
+
+### S83 (2026-04-23) [Kalambury] Runtime remediation plan refreshed to match repo state
+
+- Przepisano `docs/superpowers/plans/2026-04-23-charades-runtime-audit-remediation.md` z wersji „od zera” na plan kontynuacyjny gotowy do wykonania od bieżącego stanu repo.
+- Plan oznacza teraz jawnie, co już jest domknięte (`verdict-picker-layout` guard, authority reset guard, zielony Playwright mixed-verdict flow, wydzielone `useHostVerdictFlow`) i usuwa martwe kroki, które kazałyby robić to samo drugi raz.
+- Remaining work został rozpisany wprost pod obecny kod: dokończenie splitu `HostGameScreen`, ujednolicenie stanu prezentera i `GAME_RESET`, rozbicie `PlayBoardPhases` na lokalne widoki oraz finalny sync `PROJECT_CONTEXT.md` / `memory/*`.
+- W planie poprawiono też lokalną ścieżkę browser verify na `http://localhost:3000`, zgodnie z aktualnym pitfallem HMR huba.
+- Experience recorded: no
+
+### S82 (2026-04-23) [Kalambury] Mixed-verdict browser flow closed + HostGameScreen verdict split
+
+- Domknięto realny browser blocker w `apps/hub/e2e/charades-runtime-flow.spec.ts`, ale nie przez dalsze „leczenie” runtime'u w ciemno, tylko przez poprawienie błędnych założeń testu względem prawdziwego flow rund.
+- Spec rozróżnia teraz przejście `prepare -> next presenter` od prawdziwego `round-summary -> Następna runda`, zamiast oczekiwać `Następna runda` po każdej turze.
+- Dodatkowo ustabilizowano multi-page Playwright flow dla hosta i prezentera: po interakcjach na telefonie test przywraca fokus hostowi przed czekaniem na `STOP`, a przy starcie nowej rundy trzyma aktywnego hosta aż round-order dojdzie do `prepare`. To usuwało headed-throttling po stronie aktywnego tab-a.
+- Weryfikacja browserowa jest zielona: `npx playwright test apps/hub/e2e/charades-runtime-flow.spec.ts --project=chromium` przechodzi dla obu scenariuszy (`4 players / 3 rounds` mixed verdict oraz presenter pairing po wyjściu hosta do menu).
+- Po zamknięciu browser blockera zrobiono pierwszy bezpieczny refactor `HostGameScreen`: verdict/round-summary flow został wydzielony do lokalnego `useHostVerdictFlow.ts`, zgodnie z `docs/code-organization.md`, bez rozbijania całego ekranu na puste wrappery.
+- Buildy po tym passie przechodzą: `npm run build --workspace @party/charades` i `npm run build --workspace @party/hub`.
+- Next: wyciągnąć drugą sensowną granicę z `HostGameScreen` (`host runtime controls`), a potem wrócić do tasków `usePresenter` / PartyKit reset flow z planu audytowego.
+- Experience recorded: no
+
+### S81 (2026-04-23) [Kalambury] Audit remediation paused mid mixed-verdict browser pass
+
+- Uruchomiono plan naprawczy z `docs/superpowers/plans/2026-04-23-charades-runtime-audit-remediation.md` w trybie subagent-driven i domknięto pierwszy check-first pass wokół modala poprawnego werdyktu.
+- Dodano focused guards: `packages/games/charades/src/runtime/play/verdict-picker-layout.check.cjs` oraz doprecyzowany authority regression pass w `packages/partykit/charades/server.authority.check.cjs`; oba przechodzą razem z `npm run test:verdict-picker-layout --workspace @party/charades` i `npm run test:authority --workspace @party/partykit`.
+- Dodano browserowy spec `apps/hub/e2e/charades-runtime-flow.spec.ts` z dwoma scenariuszami: pełny mixed-verdict flow `4 players / 3 rounds` oraz zachowanie sparowania urządzenia po powrocie hosta do menu.
+- Scenariusz pairing-retention jest zielony w Chromium; mixed-verdict flow nadal nie jest domknięty, ale failure point przesunął się dalej niż wcześniejszy blocker pickera.
+- W runtime naprawiono realny problem pointer events w pickerze poprawnego werdyktu: wybór gracza i akcje footerowe (`Wróć`, `Przyznaj punkt`) reagują teraz na primary `pointerdown`, a `click` został zostawiony jako fallback dla klawiatury.
+- Po tych poprawkach browser flow przechodzi przez dawny moment z zawieszonym modalem, ale nadal zatrzymuje się później: headed Playwright timeoutuje na oczekiwaniu na `Następna runda`, gdy host jest już po correct-verdict path.
+- Sesję zatrzymano celowo w tym miejscu bez dalszego grzebania w logice, żeby kontynuacja mogła wystartować dokładnie od śladu browser passa, a nie od ponownego odtwarzania całego kontekstu.
+- Experience recorded: no
+
+### S79 (2026-04-23) [Kalambury] Browser pass + host exit reset for presenter
+
+- Zrobiono uczciwy browser pass host + urządzenie prezentera na lokalnym stacku `localhost:3000` + PartyKit `localhost:1999`, z zasianym runtime configiem i dwoma kartami przeglądarki.
+- Pass najpierw odtworzył zgłoszony błąd: host wracał do menu Kalamburów, ale urządzenie prezentera zostawało na ekranie `Twoja kolej na scene`.
+- Przyczyna była po stronie host runtime, nie UI: wyjście do menu robiło `router.push('/games/charades')`, ale nie wysyłało `GAME_RESET` do pokoju.
+- Dodano jawny `resetGame()` w `useGameState` i spięto go z wyjściem hosta do menu w `apps/hub/src/app/games/charades/play/page.tsx`, także dla browserowego confirm alertu.
+- Powtórzony browser pass przeszedł: po `Ustawienia -> Powrót do menu -> Tak, wróć do menu` host wraca na `/games/charades/`, a telefon pokazuje `Host wrócił do menu głównego`.
+- Dopięto też zachowanie setupu po powrocie do menu: reset pokoju nie zrywa już sztucznie flagi `presenterConnected` na serwerze, jeśli websocket prezentera nadal żyje. W zweryfikowanym flow z zachowanym setupem i tym samym `roomId` host po wejściu z powrotem do setupu widzi `Połączono` zamiast ponownego parowania.
+- Artefakty browser passa zapisano w `output/playwright/charades-presenter-*.png`.
+- Weryfikacja przechodzi: `npm run build --workspace @party/charades`, `npm run build --workspace @party/hub`, plus lokalny Playwright browser pass.
+- Experience recorded: no
+
+### S80 (2026-04-23) [Kalambury] Full browser pass for 4 players / 3 rounds
+
+- Zrobiono długi browser pass na lokalnym stacku dla Kalamburów z 4 graczami i 3 rundami, prowadząc hosta i urządzenie prezentera przez pełny przebieg do wyników.
+- Uczciwie potwierdzono pełny flow `waiting -> round-order -> your-turn -> reveal-buffer -> timer -> verdict -> round-summary -> results` na wariancie wszystkich werdyktów `Nie zgadnięto`; pass doszedł do `Wyniki kalamburów`.
+- W trakcie passa wyszedł osobny blocker dla poprawnego werdyktu: modal `Który gracz odgadł hasło?` potrafi obciąć akcje na dole (`Przyznaj punkt`) przy desktopowym viewportcie hosta, więc poprawny werdykt nie dostał jeszcze pełnego zielonego end-to-end passa.
+- Dla tego modala zrobiono wąski CSS fix w `HostGameScreen.module.css` (mniejsze gapy i niższe karty dla density `grid-4`), ale nie wystarczył on jeszcze do pełnego domknięcia wariantu `Zgadnięto`.
+- Artefakty passa zapisano w `output/playwright/charades-all-incorrect-*.png` oraz wcześniejszych `charades-full-pass-*.png`.
+- Weryfikacja przechodzi: `npm run build --workspace @party/charades`, `npm run build --workspace @party/hub`, plus lokalny browser pass 4 players / 3 rounds do wyników dla ścieżki all-incorrect.
+- Next: zrobić osobny, wąski fix widoczności / dostępności akcji `Przyznaj punkt` w pickerze poprawnego werdyktu i powtórzyć pełny mixed-verdict pass.
+- Experience recorded: no
+
+### S76 (2026-04-23) [Kalambury] Verdict copy tighten-up
+
+- Zrobiono bardzo wąski pass copy dla ekranu werdyktu w Kalamburach, bez ruszania layoutu i logiki runtime.
+- Nagłówek skrócono z `Czy hasło zostało odgadnięte?` do `Hasło odgadnięte?`, a badge czasu zmieniono na czytelniejsze `Czas odpowiedzi: {czas}`.
+- Dla śladu decyzji zapisano mały spec w `docs/superpowers/specs/2026-04-23-charades-verdict-copy-design.md`.
+- Weryfikacja przechodzi: `npm run build --workspace @party/charades`.
+- Browser verify nie był odpalany w tym małym passie copy.
+- Experience recorded: no
+
+### S77 (2026-04-23) [Kalambury] Verdict reveal button weight pass
+
+- Zrobiono osobny, bardzo wąski pass wizualny dla przycisku `Pokaż hasło` na ekranie werdyktu hosta.
+- Ciężkie koło zostało odchudzone do lżejszego capsule buttona: mniejsza gęstość, delikatniejsza ramka, słabszy cień i subtelniejszy stan aktywny, bez zmiany zachowania ani położenia.
+- Dla śladu decyzji zapisano mikro-spec w `docs/superpowers/specs/2026-04-23-charades-verdict-button-weight-design.md`.
+- Weryfikacja przechodzi: `npm run build --workspace @party/charades`.
+- Browser verify nie był odpalany w tym małym passie wizualnym.
+- Experience recorded: no
+
+### S78 (2026-04-23) [Kalambury] Presenter status sync with host flow
+
+- Dopięto bardziej prawdziwy sync statusów telefonu prezentera względem hosta zamiast kolejnego passu po wyglądzie.
+- Telefon pokazuje teraz wyraźne `Oczekiwanie na rozpoczęcie przez hosta`, gdy urządzenie jest sparowane, ale host nie wystartował jeszcze rundy.
+- Dodano nowy event/stage `ROUND_ORDER_START`, żeby presenter dostał osobny stan `Losowana jest kolejność` podczas hostowego losowania kolejności zarówno na starcie gry, jak i po podsumowaniu rundy.
+- Zmiany objęły wspólne eventy runtime, hook hosta `useGameState`, hook prezentera `usePresenter`, presenter UI oraz PartyKit authority server dla Kalamburów.
+- Weryfikacja przechodzi: `npm run build --workspace @party/charades`, `npm run test:authority --workspace @party/partykit`.
+- Browser verify nie był jeszcze odpalany dla tego sync passu.
+- Experience recorded: no
+
 ### S75 (13:30~) [Kalambury] 16-player visual polish + ranking tie-breaker
 
 - Dopięto szeroki pass UI dla Kalamburów: menu/setup pod 16 graczy, cleanup kategorii avatarów, modal dodawania/edycji gracza, runtime top bar bez logowania, nowy flow losowania kolejności `4x4`, skip animacji dla `9+`, poprawki verdictów, timeoutów i wyników rund.

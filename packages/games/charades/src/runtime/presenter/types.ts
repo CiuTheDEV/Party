@@ -2,6 +2,8 @@ import type { PresenterNextStep, PresenterTurnEndReason, PresenterWordDifficulty
 
 export type PresenterPhase =
   | 'waiting'
+  | 'round-order'
+  | 'host-left'
   | 'your-turn'
   | 'reveal-buffer'
   | 'timer-running'

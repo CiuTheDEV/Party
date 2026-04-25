@@ -157,16 +157,16 @@ export function PresenterPhaseYourTurn({
       <section ref={cardRef} className={styles.readyCard}>
         <div className={styles.readyCardTop}>
           <div className={styles.metaBlock}>
-            <p className={styles.hiddenWordLabel}>Karta hasla</p>
+            <p className={styles.hiddenWordLabel}>Karta hasła</p>
           </div>
         </div>
         <div className={styles.readyHero}>
-          <h2 ref={titleRef} className={styles.readyTitle}>Twoja kolej na scene</h2>
+          <h2 ref={titleRef} className={styles.readyTitle}>Twoja kolej na scenę</h2>
           <span ref={iconRef} className={styles.hiddenWordIcon} aria-hidden="true">
             <Eye strokeWidth={2.2} />
           </span>
           <p ref={hintRef} className={styles.readyHint}>
-            Odkryj haslo, gdy bedziesz gotowy. Potem masz 10 sekund na zapoznanie lub zmiane hasla.
+            Odkryj hasło, gdy będziesz gotowy. Potem masz 10 sekund na zapoznanie lub zmianę hasła.
           </p>
         </div>
       </section>
@@ -178,7 +178,7 @@ export function PresenterPhaseYourTurn({
         onClick={handleRevealWord}
         disabled={!canReveal || isSubmitting}
       >
-        Odkryj haslo
+        Odkryj hasło
       </button>
     </div>
   )

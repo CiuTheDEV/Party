@@ -7,7 +7,7 @@
 ## This Week
 
 1. Re-test Charades presenter flow on a stable local/live stack after the reveal-word sizing fix
-2. Unblock and run the visible browser validation pass for the Codenames pool-manager/setup flow
+2. Explain and eliminate the Codenames host-setup flicker around the captain-link flow, then run the visible browser validation pass for the pool-manager/setup flow
 3. Close the remaining Charades runtime browser pass after the new verdict/summary/results polish, then continue cleanup without widening scope beyond real pain points
 4. Keep the new agent-first docs/playbooks synced with code while they are still fresh
 
@@ -38,6 +38,8 @@
 ### Menu and settings polish
 - [ ] Finish Charades host-side menu/settings/runtime controller polish
   Scope: final visible validation after the latest runtime/summary/results polish, plus any last keyboard/controller edge cases
+- [ ] Stabilize Codenames host setup around captain-link pairing
+  Scope: reproduce or instrument the reported flicker to menu on `otwórz w nowej karcie` / `/captain/...`, then re-run a visible browser validation pass for setup and pool-manager UX
 
 ## Shared UI and Repo Workflow
 

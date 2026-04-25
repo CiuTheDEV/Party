@@ -67,7 +67,6 @@ export function CaptainPairingModal({
   const handleOpenInNewTab = () => {
     if (!captainUrl) return
     window.open(captainUrl, '_blank', 'noopener,noreferrer')
-    window.open(captainUrl, '_blank', 'noopener,noreferrer')
   }
   const handleCopySessionCode = async () => {
     if (!captainUrl) {

@@ -183,6 +183,71 @@
   color: white;
 }
 
+.balanceCard {
+  margin-top: 16px;
+  padding: 16px 18px 18px;
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--game-color-primary) 24%, rgba(255, 255, 255, 0.08));
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--game-color-primary) 10%, transparent), rgba(255, 255, 255, 0.02)),
+    rgba(0, 0, 0, 0.18);
+}
+
+.balanceHeader {
+  display: grid;
+  gap: 6px;
+}
+
+.balanceLabel {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--game-color-primary) 70%, white);
+}
+
+.balanceSummary {
+  font-size: 15px;
+  line-height: 1.45;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+.balanceScaleLabels {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.balanceScaleLabel {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.balanceScaleLabel:last-child {
+  text-align: right;
+}
+
+.balanceCategoryName {
+  font-size: 13px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.balancePercent {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.balanceSlider {
+  width: 100%;
+  margin-top: 14px;
+  accent-color: var(--game-color-primary);
+}
+
 @media (max-width: 767px) {
   .header {
     padding: 16px;
@@ -211,5 +276,21 @@
   .managementStrip {
     min-height: 52px;
     font-size: 15px;
+  }
+
+  .balanceCard {
+    padding: 15px 16px 16px;
+  }
+
+  .balanceSummary {
+    font-size: 14px;
+  }
+
+  .balanceScaleLabels {
+    margin-top: 12px;
+  }
+
+  .balanceCategoryName {
+    font-size: 12px;
   }
 }

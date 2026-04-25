@@ -42,6 +42,7 @@ export const codenamesModule: GameModule<CodenamesSetupState, CodenamesSetupHelp
 
 export { config, createInitialCodenamesSetupState, validateCodenamesSetup }
 export { CodenamesMenuContent }
+export { shouldKeepCaptainListenerActive } from './menu/captain-listener-activation'
 export {
   CODENAMES_NAVIGATION_COMMANDS,
 } from './navigation/codenames-navigation-actions'
@@ -111,9 +112,11 @@ export type {
 export {
   CODENAMES_BOARD_WORD_COUNT,
   appendPoolValidationError,
+  getCodenamesBalancedPoolError,
   getCodenamesCategoryPoolSummaries,
   getCodenamesPoolSummary,
 } from './setup/pool-validation'
+export { getCaptainConnectionState } from './setup/captain-connection-state'
 
 export { HostGameScreen } from './runtime/host/HostGameScreen'
 export { prepareCodenamesGameStart } from './runtime/host/start-game'

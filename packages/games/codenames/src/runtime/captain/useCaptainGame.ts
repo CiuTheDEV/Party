@@ -26,6 +26,8 @@ const initialRoomState: RoomState = {
   blueTeam: { name: 'Niebiescy', avatar: 'moon' },
 }
 
+const HOST_RETURN_GRACE_MS = 5000
+
 type UseCaptainGameParams = {
   roomId: string
   team: 'red' | 'blue'
@@ -35,6 +37,7 @@ export function useCaptainGame({ roomId, team }: UseCaptainGameParams) {
   const [roomState, setRoomState] = useState<RoomState>(initialRoomState)
   const [hasSyncedRoomState, setHasSyncedRoomState] = useState(false)
   const [hostDisconnected, setHostDisconnected] = useState(false)
+  const [sessionInvalidated, setSessionInvalidated] = useState(false)
   const [isRoundIntroVisible, setIsRoundIntroVisible] = useState(false)
   const teamRef = useRef(team)
   const previousBoardUnlockedRef = useRef(false)
@@ -55,6 +58,9 @@ export function useCaptainGame({ roomId, team }: UseCaptainGameParams) {
           setHostDisconnected((currentDisconnected) => (nextState.hostConnected ? false : currentDisconnected))
           return nextState
         })
+        if (msg.state.hostConnected) {
+          setSessionInvalidated(false)
+        }
         setHasSyncedRoomState(true)
         return
       }
@@ -65,9 +71,10 @@ export function useCaptainGame({ roomId, team }: UseCaptainGameParams) {
         return
       }
 
-      if (msg.type === 'HOST_CONNECTED') {
+      if (msg.type === 'HOST_CONNECTED' || msg.type === 'HOST_SETUP_CONNECTED') {
         setRoomState((current) => applyServerEvent(current, msg))
         setHostDisconnected(false)
+        setSessionInvalidated(false)
         return
       }
 
@@ -95,11 +102,23 @@ export function useCaptainGame({ roomId, team }: UseCaptainGameParams) {
     }
   }, [roomState.boardUnlocked, roomState.phase])
 
+  useEffect(() => {
+    if (!hasSyncedRoomState || !hostDisconnected) {
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      setSessionInvalidated(true)
+    }, HOST_RETURN_GRACE_MS)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [hasSyncedRoomState, hostDisconnected, roomId])
+
   const markReady = useCallback(() => {
     socket.send(JSON.stringify({ type: 'CAPTAIN_READY', team: teamRef.current }))
   }, [socket])
 
-  return { roomState, hasSyncedRoomState, hostDisconnected, isRoundIntroVisible, markReady }
+  return { roomState, hasSyncedRoomState, hostDisconnected, sessionInvalidated, isRoundIntroVisible, markReady }
 }
 
 function applyServerEvent(state: RoomState, event: IncomingMessage): RoomState {
@@ -120,6 +139,7 @@ function applyServerEvent(state: RoomState, event: IncomingMessage): RoomState {
         boardUnlocked: false,
       }
     case 'HOST_CONNECTED':
+    case 'HOST_SETUP_CONNECTED':
       return { ...state, hostConnected: true, redTeam: event.redTeam, blueTeam: event.blueTeam }
     case 'CARD_REVEAL': {
       if (event.index < 0 || event.index > 24) return state

@@ -24,8 +24,9 @@
   width: min(1040px, 100%);
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr) auto;
-  gap: 18px;
+  gap: 14px;
   padding: 24px;
+  height: min(860px, calc(100dvh - 36px));
   max-height: min(860px, calc(100dvh - 36px));
   border-radius: 28px;
   background:
@@ -38,6 +39,7 @@
     0 30px 60px rgba(0, 0, 0, 0.32);
   transition: box-shadow 0.18s ease, border-color 0.18s ease, transform 0.18s ease;
   overflow: hidden;
+  min-height: 0;
 }
 
 .modalCard[data-stage='actions'] {
@@ -93,6 +95,11 @@
 
 .modalList[data-density='grid-4'] {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.modalList[data-density='grid-4'][data-player-count='3'] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .modalList[data-density='grid-9'] {
@@ -133,6 +140,14 @@
   gap: 10px;
   padding: 14px 12px;
   border-radius: 20px;
+}
+
+.modalList[data-density='grid-4'] .playerOption,
+.modalList[data-density='grid-4'] .playerOptionSelected {
+  min-height: 112px;
+  gap: 8px;
+  padding: 12px 10px;
+  border-radius: 18px;
 }
 
 .modalList[data-density='grid-12'] .playerOption,
@@ -186,6 +201,11 @@
   height: 62px;
 }
 
+.modalList[data-density='grid-4'] .playerAvatar {
+  width: 56px;
+  height: 56px;
+}
+
 .modalList[data-density='grid-12'] .playerAvatar {
   width: 54px;
   height: 54px;
@@ -216,6 +236,12 @@
   min-height: 34px;
   padding: 0 12px;
   font-size: 0.92rem;
+}
+
+.modalList[data-density='grid-4'] .playerName {
+  min-height: 32px;
+  padding: 0 10px;
+  font-size: 0.88rem;
 }
 
 .modalList[data-density='grid-12'] .playerName {
@@ -257,6 +283,9 @@
   justify-content: center;
   gap: 12px;
   padding-top: 4px;
+  padding-bottom: 2px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
   transition: transform 0.18s ease, opacity 0.18s ease;
 }
 
@@ -294,6 +323,7 @@
 @media (max-width: 900px) {
   .modalCard {
     width: min(760px, 100%);
+    height: min(820px, calc(100dvh - 28px));
     max-height: min(820px, calc(100dvh - 28px));
   }
 

@@ -7,6 +7,7 @@ export type PresenterTurnEndReason = 'timeout' | 'verdict' | 'manual-stop' | 'no
 export type PresenterWordDifficulty = 'easy' | 'hard' | ''
 
 export type HostEvent =
+  | { type: 'ROUND_ORDER_START' }
   | {
       type: 'TURN_START'
       turnId: string
@@ -50,6 +51,8 @@ export type RoomState = {
   phase: 'waiting' | 'turn' | 'between' | 'ended'
   presenterPhase:
     | 'waiting'
+    | 'round-order'
+    | 'host-left'
     | 'your-turn'
     | 'reveal-buffer'
     | 'timer-running'

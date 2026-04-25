@@ -155,9 +155,9 @@ If verification cannot be run, say so clearly.
 - Prefer GitHub tooling for repo, PR, and issue context when available.
 - Do not rely on stale model memory for changing APIs.
 - On Windows, prefer running shell commands through `pwsh` (PowerShell 7.6+) instead of Windows PowerShell 5.1, especially when reading or verifying UTF-8-sensitive Polish text.
-- Prefer local Playwright verification (`npm run test:e2e`, `npm run test:e2e:live`) for browser flows in this project.
-- For UI/runtime changes, treat Playwright plus screenshots as the default inspection workflow.
-- Avoid `playwright` MCP by default unless the task specifically needs MCP-only browser automation.
+- Prefer `playwright` MCP for browser verification, UI flow inspection, and quick reproduction/debugging in this project.
+- For UI/runtime changes, treat MCP Playwright plus screenshots as the default inspection workflow.
+- Use local Playwright verification (`npm run test:e2e`, `npm run test:e2e:live`) selectively for stable, repeatable, high-value regression coverage.
 
 ---
 
@@ -229,6 +229,17 @@ When a meaningful session ends:
 | Original monorepo bootstrap assumptions | `Read docs/project-setup.md` |
 | Continuing a subsystem with prior design history | `Read the relevant file in docs/superpowers/specs/ and/or docs/superpowers/plans/` |
 | Cross-day goals | `Read memory/goals.md` if present |
+
+## Agent model split
+
+| Agent | Model | Purpose |
+|---|---|---|
+| repo_explorer | gpt-5.4-mini | read-only repository mapping |
+| ui_polisher | gpt-5.4 | UI and responsive implementation |
+| runtime_debugger | gpt-5.4 | runtime, timers, reconnects, PartyKit |
+| playwright_verifier | gpt-5.4-mini | browser verification |
+| docs_memory_keeper | gpt-5.4-mini | docs and memory updates |
+| code_reviewer | gpt-5.4 | read-only review |
 
 Handoff format:
 

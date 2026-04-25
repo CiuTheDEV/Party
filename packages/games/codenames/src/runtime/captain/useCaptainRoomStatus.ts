@@ -57,7 +57,7 @@ export function useCaptainRoomStatus({ roomId }: UseCaptainRoomStatusParams) {
         return
       }
 
-      if (msg.type === 'HOST_CONNECTED') {
+      if (msg.type === 'HOST_CONNECTED' || msg.type === 'HOST_SETUP_CONNECTED') {
         setRoomState((current) => applyRoomStatusEvent(current, msg))
         setHostDisconnected(false)
         return
@@ -100,6 +100,7 @@ function applyRoomStatusEvent(state: RoomState, event: IncomingMessage): RoomSta
         boardUnlocked: false,
       }
     case 'HOST_CONNECTED':
+    case 'HOST_SETUP_CONNECTED':
       return { ...state, hostConnected: true, redTeam: event.redTeam, blueTeam: event.blueTeam }
     case 'CARD_REVEAL':
     case 'ASSASSIN_TEAM':

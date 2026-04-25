@@ -67,6 +67,7 @@ function PlayScreen({ config }: { config: Config }) {
     finishRoundSummary,
     giveVerdict,
     stopRoundEarly,
+    resetGame,
     pausePhaseTimer,
     resumePhaseTimer,
     isGameOver,
@@ -115,6 +116,11 @@ function PlayScreen({ config }: { config: Config }) {
   const presenterIdx = state.order[state.currentOrderIdx]
   const presenter = state.players[presenterIdx]
 
+  const handleExitToMenu = () => {
+    resetGame()
+    router.push('/games/charades')
+  }
+
   if (isGameOver) {
     return <div className={styles.screen} aria-hidden="true" />
   }
@@ -135,7 +141,7 @@ function PlayScreen({ config }: { config: Config }) {
           onFinishRoundOrder={finishRoundOrder}
           onFinishRoundSummary={finishRoundSummary}
           onGiveVerdict={giveVerdict}
-          onExitToMenu={() => router.push('/games/charades')}
+          onExitToMenu={handleExitToMenu}
           onPauseGame={pausePhaseTimer}
           onResumeGame={resumePhaseTimer}
           onStopRound={stopRoundEarly}
@@ -166,7 +172,7 @@ function PlayScreen({ config }: { config: Config }) {
           },
           {
             label: 'Tak, wróć do menu',
-            onClick: () => router.push('/games/charades'),
+            onClick: handleExitToMenu,
             variant: 'danger',
             fullWidth: true,
           },
