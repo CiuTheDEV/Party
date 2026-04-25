@@ -61,7 +61,6 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin, categor
   const {
     roomState,
     hasSyncedRoomState,
-    resetCount,
     revealCard,
     setAssassinTeam,
     resetGame,
@@ -81,7 +80,7 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin, categor
   const [activeInputDevice, setActiveInputDevice] = useState<'keyboard' | 'controller'>('keyboard')
   const [controllerProfile, setControllerProfile] = useState<GamepadProfile>('generic')
   const [controlBindings, setControlBindings] = useState(() => loadPersistedBindings())
-  const [pendingExitResetCount, setPendingExitResetCount] = useState<number | null>(null)
+  const [isExitToMenuPending, setIsExitToMenuPending] = useState(false)
   const openModalRef = useRef<(target: HostNavigationFocusSnapshot) => void>(() => undefined)
   const closeModalRef = useRef<() => void>(() => undefined)
 
@@ -159,22 +158,22 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin, categor
   }, [roomState.phase])
 
   const exitToMenu = useCallback(() => {
-    setPendingExitResetCount(resetCount)
-    resetGame({ autoRestart: false })
-  }, [resetCount, resetGame])
+    setIsExitToMenuPending(true)
+    restartMatch()
+  }, [restartMatch])
 
   useEffect(() => {
-    if (pendingExitResetCount === null) {
+    if (!isExitToMenuPending) {
       return
     }
 
-    if (resetCount <= pendingExitResetCount) {
+    if (roomState.phase !== 'waiting' || roomState.roundWinsRed !== 0 || roomState.roundWinsBlue !== 0) {
       return
     }
 
-    setPendingExitResetCount(null)
+    setIsExitToMenuPending(false)
     router.push('/games/codenames')
-  }, [pendingExitResetCount, resetCount, router])
+  }, [isExitToMenuPending, roomState.phase, roomState.roundWinsBlue, roomState.roundWinsRed, router])
 
   const handleHostControlCommand = useCallback(
     (command: HostControlCommand) => {
