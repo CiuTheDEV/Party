@@ -40,14 +40,16 @@ export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }:
   const [isBrowserExitAlertOpen, setIsBrowserExitAlertOpen] = useState(false)
   const screenMode = getCaptainScreenMode(roomState)
   const boardMeta = getCaptainBoardMeta(roomState)
+  const resolvedRedTeam = resolveCaptainTeam(roomState.redTeam, redTeam)
+  const resolvedBlueTeam = resolveCaptainTeam(roomState.blueTeam, blueTeam)
 
-  const redTeamLabel = redTeam.name
-  const blueTeamLabel = blueTeam.name
+  const redTeamLabel = resolvedRedTeam.name
+  const blueTeamLabel = resolvedBlueTeam.name
   const activeTeamLabel = team === 'red' ? redTeamLabel : blueTeamLabel
-  const activeTeamAvatar = team === 'red' ? redTeam.avatar : blueTeam.avatar
+  const activeTeamAvatar = team === 'red' ? resolvedRedTeam.avatar : resolvedBlueTeam.avatar
   const activeTeamClass = team === 'red' ? styles.teamRed : styles.teamBlue
   const viewerReady = team === 'red' ? roomState.captainRedReady : roomState.captainBlueReady
-  const startingTeamAvatar = roomState.startingTeam === 'red' ? redTeam.avatar : blueTeam.avatar
+  const startingTeamAvatar = roomState.startingTeam === 'red' ? resolvedRedTeam.avatar : resolvedBlueTeam.avatar
 
   const startingTeamLabel =
     roomState.startingTeam === 'red' ? redTeamLabel : roomState.startingTeam === 'blue' ? blueTeamLabel : null
@@ -226,7 +228,7 @@ export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }:
               <div className={styles.bottomTray}>
                 <div className={styles.countBadge} data-team="red">
                   <div className={styles.countBadgeIcon}>
-                    <AvatarAsset avatar={redTeam.avatar} size={14} />
+                    <AvatarAsset avatar={resolvedRedTeam.avatar} size={14} />
                   </div>
                   <strong className={styles.countBadgeValue}>{boardMeta.redRemaining}</strong>
                   <span className={styles.countBadgeLabel}>pozostało</span>
@@ -234,7 +236,7 @@ export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }:
 
                 <div className={styles.countBadge} data-team="blue">
                   <div className={styles.countBadgeIcon}>
-                    <AvatarAsset avatar={blueTeam.avatar} size={14} />
+                    <AvatarAsset avatar={resolvedBlueTeam.avatar} size={14} />
                   </div>
                   <strong className={styles.countBadgeValue}>{boardMeta.blueRemaining}</strong>
                   <span className={styles.countBadgeLabel}>pozostało</span>
@@ -347,4 +349,11 @@ function StatusGlyph({ kind }: { kind: 'session-ended' | 'devices-disconnected' 
       <CircleAlert size={18} />
     </div>
   )
+}
+
+function resolveCaptainTeam(team: Partial<CaptainTeam> | null | undefined, fallback: CaptainTeam): CaptainTeam {
+  return {
+    name: team?.name?.trim() || fallback.name,
+    avatar: team?.avatar || fallback.avatar,
+  }
 }
