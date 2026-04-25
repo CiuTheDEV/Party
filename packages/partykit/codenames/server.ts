@@ -151,11 +151,7 @@ export function reduceIncomingEvent(
   }
 
   if (event.type === 'CAPTAIN_CONNECTED') {
-    // Only register the first connection per team
     if (event.team === 'red') {
-      if (current.captainRedConnectionId !== null) {
-        return { ...current, accepted: false }
-      }
       return {
         accepted: true,
         state: { ...current.state, captainRedConnected: true },
@@ -164,9 +160,6 @@ export function reduceIncomingEvent(
         captainBlueConnectionId: current.captainBlueConnectionId,
       }
     } else {
-      if (current.captainBlueConnectionId !== null) {
-        return { ...current, accepted: false }
-      }
       return {
         accepted: true,
         state: { ...current.state, captainBlueConnected: true },

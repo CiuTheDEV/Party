@@ -141,6 +141,32 @@ run('unlocks the board only after both captains confirm ready', () => {
   assert.equal(server.state.boardUnlocked, true)
 })
 
+run('allows a captain seat to be reclaimed after reconnect and still accepts ready', () => {
+  const room = createRoom()
+  const server = new serverModule.default(room)
+
+  server.onMessage(JSON.stringify({ type: 'CAPTAIN_CONNECTED', team: 'red' }), { id: 'captain-red-1' })
+  server.onMessage(JSON.stringify({ type: 'CAPTAIN_CONNECTED', team: 'blue' }), { id: 'captain-blue' })
+  server.onMessage(
+    JSON.stringify({
+      type: 'GAME_START',
+      cards: makeCards({ red: 1, blue: 1, neutral: 23 }),
+      redTotal: 1,
+      blueTotal: 1,
+      startingTeam: 'red',
+    }),
+    { id: 'host-1' },
+  )
+
+  server.onMessage(JSON.stringify({ type: 'CAPTAIN_CONNECTED', team: 'red' }), { id: 'captain-red-2' })
+  server.onMessage(JSON.stringify({ type: 'CAPTAIN_READY', team: 'red' }), { id: 'captain-red-2' })
+
+  assert.equal(server.captainRedConnectionId, 'captain-red-2')
+  assert.equal(server.state.captainRedConnected, true)
+  assert.equal(server.state.captainRedReady, true)
+  assert.equal(server.state.boardUnlocked, false)
+})
+
 run('increments the winning team after all opposing cards are revealed', () => {
   const room = createRoom()
   const server = new serverModule.default(room)
