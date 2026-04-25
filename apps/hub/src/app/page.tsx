@@ -136,38 +136,12 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section id="showcase" className={sectionStyles.showcaseSection}>
-          <div className={sectionStyles.showcaseVisual}>
-            <div className={sectionStyles.showcaseGlow} />
-            <div className={sectionStyles.showcasePanel}>
-              <div className={sectionStyles.showcaseBust} />
-            </div>
-          </div>
-
-          <div className={sectionStyles.showcaseCopy}>
-            <span className={sectionStyles.showcaseEyebrow}>Zaprojektowane dla bliskości</span>
-            <h2 className={`${sectionStyles.showcaseTitle} ${headingFont.className}`}>
-              Sztuka społecznej
-              <br />
-              pustki.
-            </h2>
-            <p className={sectionStyles.showcaseText}>
-              Bez rozpraszaczy. Bez bałaganu. Tylko Ty, Twoi znajomi i gry, które definiują noc. Project Party to
-              płótno dla Waszych wspólnych doświadczeń.
-            </p>
-            <button className={sectionStyles.ghostButton} type="button">
-              Poznaj wizję
-            </button>
-          </div>
-        </section>
-
         <footer id="footer" className={sectionStyles.footer}>
           <div className={sectionStyles.footerTop}>
             <div className={sectionStyles.footerBrandBlock}>
               <span className={`${sectionStyles.footerBrand} ${headingFont.className}`}>PROJECT PARTY</span>
               <p className={sectionStyles.footerText}>
-                Nowoczesne centrum gier towarzyskich zbudowane dla cyfrowej estetyki. Minimalistyczne z założenia,
-                wciągające z natury.
+                Hub gier towarzyskich na wspólne wieczory. Wchodzicie, wybieracie tytuł i od razu gracie.
               </p>
             </div>
 
@@ -176,7 +150,6 @@ export default function HomePage() {
                 <span className={sectionStyles.footerColumnTitle}>Platforma</span>
                 <SectionLink href="#library">Gry</SectionLink>
                 <SectionLink href="#hero">Lobby</SectionLink>
-                <SectionLink href="#showcase">Profile</SectionLink>
               </div>
 
               <div className={sectionStyles.footerColumn}>
@@ -189,7 +162,7 @@ export default function HomePage() {
           </div>
 
           <div className={sectionStyles.footerBottom}>
-            <p className={sectionStyles.footerMeta}>© 2024 Project Party. Wszelkie prawa zastrzeżone.</p>
+            <p className={sectionStyles.footerMeta}>© 2026 Project Party. Wszelkie prawa zastrzeżone.</p>
             <div className={sectionStyles.footerIcons}>
               <SectionLink href="#footer" ariaLabel="Strona publiczna">
                 <Globe size={16} aria-hidden="true" />

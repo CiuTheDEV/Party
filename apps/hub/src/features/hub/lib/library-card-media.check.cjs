@@ -58,6 +58,19 @@ run('returns video media for the five seconds loop with image poster fallback', 
   })
 })
 
+run('returns video media for the spyfall loop with image poster fallback', () => {
+  const media = mediaModule.resolveLibraryCardMedia({
+    imagePath: '/images/game-cards/spyfall-card-main.png',
+    videoPath: '/videos/game-cards/spyfall-card-main.mp4',
+  })
+
+  assert.deepEqual(media, {
+    kind: 'video',
+    src: '/videos/game-cards/spyfall-card-main.mp4',
+    poster: '/images/game-cards/spyfall-card-main.png',
+  })
+})
+
 run('returns image media when a card has only a static image', () => {
   const media = mediaModule.resolveLibraryCardMedia({
     imagePath: '/images/game-cards/charades-card-main.png',

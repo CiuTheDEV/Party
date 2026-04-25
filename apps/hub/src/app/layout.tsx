@@ -4,8 +4,13 @@ import '@party/ui/tokens.css'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Party - gry przeglądarkowe',
+  title: 'Project Party',
   description: 'Portal gier imprezowych dla znajomych.',
+  icons: {
+    icon: [{ url: '/favicons/hub.png', type: 'image/png' }],
+    shortcut: [{ url: '/favicons/hub.png', type: 'image/png' }],
+    apple: [{ url: '/favicons/hub.png', type: 'image/png' }],
+  },
 }
 
 export default function RootLayout({

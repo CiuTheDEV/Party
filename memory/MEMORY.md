@@ -60,6 +60,7 @@ Use this order:
 
 ### Framework / app runtime gotchas
 
+- `2026-04-25 - Prefer metadata/icons over app head.tsx for browser chrome in this hub`
 - `2026-03-22 - Clerk crashes the dev server with a placeholder key`
 - `2026-03-22 - Hydration mismatch from typeof window !== 'undefined' in Next.js`
 - `2026-03-22 - CSS imports from workspace packages work in Next.js without extra config`
@@ -361,3 +362,15 @@ Use this order:
 **Fix:** Move the presenter route toward a viewport-locked shell, sync height from `window.visualViewport` / `window.innerHeight`, and validate on an actual phone before treating the layout as done.
 
 **How to prevent it:** For mobile fullscreen surfaces, treat DevTools emulation as a first-pass filter only. Final validation must happen on a real device before closing viewport or orientation bugs.
+
+---
+
+### 2026-04-25 - Prefer `metadata.icons` over app `head.tsx` for browser chrome in this hub
+
+**Symptom:** Route-level `head.tsx` files for the hub and game pages looked correct in source, but the real localhost HTML still kept stale titles and emitted no favicon links for those routes.
+
+**Root cause:** In this Next.js/App Router setup for the hub, relying on ad hoc route `head.tsx` files was not a trustworthy way to drive page title/favicon output. The route shells were already structured around nested layouts, and the reliable path was server-resolved `metadata` plus a real root `public/favicon.ico`.
+
+**Fix:** Move titles and icons into server `layout.tsx` metadata, keep client logic in separate `*LayoutClient.tsx` files, and add a real `apps/hub/public/favicon.ico` so the browser default request stops 404-ing.
+
+**How to prevent it:** For browser chrome changes in this repo, prefer layout-level `metadata` / `metadata.icons` and file-based favicon assets over `head.tsx`. If a title or favicon change does not show up in the real rendered HTML, inspect the live HTML before assuming the browser cache is the only issue.

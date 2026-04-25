@@ -144,10 +144,10 @@ For new game module scaffolding and maturity expectations, see `docs/game-module
 ---
 
 <!-- handoff:start -->
-- Last: 2026-04-25 13:35 by Codex
-- Task: Harden Tajniacy host setup around the captain-link pairing flow and close the reported menu flicker if reproducible.
-- Did: Kept the previously fixed avatar picker in place, then hardened the setup-open path for Tajniacy by persisting modal state in `?setup=1`, removing a duplicate `window.open()` from the pairing action, and restoring setup before paint through `apps/hub/src/app/games/codenames/CodenamesMenuPageClient.tsx`. Local browser passes on `http://localhost:3000` did not reproduce the user's reported host flicker to the main menu during `otwórz w nowej karcie` and `/captain/...` entry, but package and hub builds passed after the hardening changes.
-- Next: Add narrow dev instrumentation around Tajniacy host setup state (`showSetup`, remount, focus/visibility, URL changes`) during the captain-link flow, then rerun the visible browser pass and only patch further once the true trigger is captured.
-- Blocker: Reported flicker around the captain-link flow still lacks a reliable local reproduction, so the bug is not closed despite the setup-state hardening.
+- Last: 2026-04-25 13:06 by Codex
+- Task: Production-readiness pass across Tajniacy/Kalambury plus hub/browser-chrome polish and content refresh.
+- Did: Production-tested Tajniacy and Kalambury, fixed the Tajniacy captain-route crash that blocked pairing, refreshed Charades and Codenames word pools, activated the live Tajniacy hero plus Spyfall animated card in the hub, removed the redundant community/showcase block, moved browser titles/favicons onto server metadata with separate `*LayoutClient.tsx` shells, added a real root `favicon.ico`, and updated footer copy/year. Hub builds and localhost title/favicon checks are green.
+- Next: If the Tajniacy setup flicker report returns, instrument `showSetup`, remount, focus/visibility, and URL changes around the captain-link flow before applying any more fixes. Optional hub follow-up is only copy cleanup for remaining placeholder footer/platform labels.
+- Blocker: No blocker for the shipped hub/content/browser-chrome work. Separate unresolved risk remains the non-reproduced Tajniacy host-setup flicker around `otwórz w nowej karcie` / captain-link entry.
 <!-- handoff:end -->
 

@@ -10,6 +10,16 @@
 - Next: dołożyć krótkie dev-logowanie zmian `showSetup`, remountu i focus/visibility hosta dokładnie wokół flow `modal parowania -> link kapitana`, żeby złapać realny trigger na maszynie użytkownika albo w bardziej wiernym local passie.
 - Experience recorded: no
 
+### S89 (13:06~) [Hub/Content] Browser chrome polish + landing cleanup
+
+- Aktywowano live hero Tajniaków i animowaną kartę Spyfall w bibliotece huba, a ze strony głównej usunięto zbędny blok społeczności/showcase.
+- Hub dostał finalny pass po chrome przeglądarki: tytuły kart są teraz ustawiane przez server metadata (`Project Party`, `Project Party - Gry`, `Project Party - Kalambury`, `Project Party - Tajniacy`), layouty gier zostały rozdzielone na server wrapper z metadata i client shell z logiką sterowania, a root dostał prawdziwe `apps/hub/public/favicon.ico`.
+- Dopięto też polish copy w footerze huba: nowy opis platformy i rok `2026`.
+- W tym samym bloku odświeżono też content gry: wyczyszczono/przesortowano pulę `content/charades/random.ts` oraz rozbudowano i doszlifowano pule `content/codenames/standard.ts` i `content/codenames/plus18.ts` do docelowego stanu `300 / 350` bez duplikatów między kategoriami.
+- Weryfikacja przechodzi: wielokrotne `npm run build --workspace @party/hub` oraz live check na `http://localhost:3000` dla tytułów i faviconów huba, katalogu, Kalamburów i Tajniaków.
+- Next: jeśli wróci zgłoszenie o flickerze setupu Tajniaków przy linku kapitana, wrócić do niego tylko przez wąską instrumentację `showSetup` / remount / focus, bez kolejnych ślepych patchy.
+- Experience recorded: yes
+
 ### S87 (2026-04-24) [Tajniacy] Avatar picker sync with Kalambury
 
 - Pierwszy fix był niepełny: niesłusznie usunięto zakładkę `Inne`, a sam bug renderu popupu nadal występował.

@@ -9,12 +9,12 @@ export const heroSlides = [
     tone: 'charades',
   },
   {
-    eyebrow: 'Niedługo w hubie',
+    eyebrow: 'Na stole teraz',
     title: 'Tajniacy',
     description:
-      'Drużynowa gra skojarzeń i dedukcji już się przygotowuje. Wkrótce dołączy do biblioteki Project Party.',
-    ctaLabel: 'Wkrótce',
-    href: '#library',
+      'Łącz skojarzenia, czytaj zamiary swojej drużyny i omijaj zabójcę. Dwa telefony kapitanów, jedna plansza i presja do ostatniego odkrycia.',
+    ctaLabel: 'Wejdź do gry',
+    href: '/games/codenames',
     tone: 'rotation',
   },
   {

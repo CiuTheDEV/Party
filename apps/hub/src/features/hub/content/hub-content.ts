@@ -1,4 +1,4 @@
-import { Gamepad2, LayoutGrid, Settings, UsersRound } from 'lucide-react'
+import { Gamepad2, LayoutGrid, Settings } from 'lucide-react'
 
 type LibraryCard = {
   gameId?: string
@@ -30,6 +30,7 @@ const allLibraryCards: readonly LibraryCard[] = [
     name: 'Mamy szpiega',
     label: 'Blef i dedukcja',
     imagePath: '/images/game-cards/spyfall-card-main.png',
+    videoPath: '/videos/game-cards/spyfall-card-main.mp4',
     tone: 'mafia',
   },
   {
@@ -46,6 +47,5 @@ export const featuredLibraryCards = allLibraryCards.slice(0, 4)
 export const railItems = [
   { label: 'Główna', href: '#hero', icon: LayoutGrid, pinnedBottom: false },
   { label: 'Biblioteka', href: '#library', icon: Gamepad2, pinnedBottom: false },
-  { label: 'Społeczność', href: '#showcase', icon: UsersRound, pinnedBottom: false },
   { label: 'Ustawienia', href: '#footer', icon: Settings, pinnedBottom: true },
 ] as const
