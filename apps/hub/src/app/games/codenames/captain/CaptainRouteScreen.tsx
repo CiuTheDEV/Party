@@ -21,8 +21,8 @@ export function CaptainRouteScreen({
 }) {
   const router = useRouter()
   const { roomState } = useCaptainRoomStatus({ roomId })
-  const redTeam = roomState.redTeam.name ? roomState.redTeam : DEFAULT_TEAMS[0]
-  const blueTeam = roomState.blueTeam.name ? roomState.blueTeam : DEFAULT_TEAMS[1]
+  const redTeam = resolveCaptainTeam(roomState.redTeam, DEFAULT_TEAMS[0])
+  const blueTeam = resolveCaptainTeam(roomState.blueTeam, DEFAULT_TEAMS[1])
 
   if (teamParam !== 'red' && teamParam !== 'blue') {
     return (
@@ -44,6 +44,13 @@ export function CaptainRouteScreen({
       onChangeRole={() => router.replace(buildCaptainRoutePath(roomId))}
     />
   )
+}
+
+function resolveCaptainTeam(team: Partial<CaptainTeam> | null | undefined, fallback: CaptainTeam): CaptainTeam {
+  return {
+    name: team?.name?.trim() || fallback.name,
+    avatar: team?.avatar || fallback.avatar,
+  }
 }
 
 function CaptainTeamSelect({

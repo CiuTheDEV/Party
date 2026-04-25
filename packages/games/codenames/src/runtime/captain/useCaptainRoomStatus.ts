@@ -2,8 +2,11 @@
 
 import { useState } from 'react'
 import usePartySocket from 'partysocket/react'
-import type { IncomingMessage, RoomState } from '../shared/codenames-events'
+import type { IncomingMessage, RoomState, TeamMetadata } from '../shared/codenames-events'
 import { getPartykitHost } from '../shared/codenames-runtime'
+
+const DEFAULT_RED_TEAM: TeamMetadata = { name: 'Czerwoni', avatar: 'star' }
+const DEFAULT_BLUE_TEAM: TeamMetadata = { name: 'Niebiescy', avatar: 'moon' }
 
 const initialRoomState: RoomState = {
   phase: 'waiting',
@@ -21,8 +24,8 @@ const initialRoomState: RoomState = {
   captainRedReady: false,
   captainBlueReady: false,
   boardUnlocked: false,
-  redTeam: { name: 'Czerwoni', avatar: 'star' },
-  blueTeam: { name: 'Niebiescy', avatar: 'moon' },
+  redTeam: DEFAULT_RED_TEAM,
+  blueTeam: DEFAULT_BLUE_TEAM,
 }
 
 type UseCaptainRoomStatusParams = {
@@ -43,7 +46,12 @@ export function useCaptainRoomStatus({ roomId }: UseCaptainRoomStatusParams) {
 
       if (msg.type === 'ROOM_STATE') {
         setRoomState((current) => {
-          const nextState = { ...msg.state, hostConnected: msg.state.hostConnected || current.hostConnected }
+          const nextState = normalizeRoomState({
+            ...msg.state,
+            hostConnected: msg.state.hostConnected || current.hostConnected,
+            redTeam: normalizeTeamMetadata(msg.state.redTeam, current.redTeam, DEFAULT_RED_TEAM),
+            blueTeam: normalizeTeamMetadata(msg.state.blueTeam, current.blueTeam, DEFAULT_BLUE_TEAM),
+          })
           setHostDisconnected((currentDisconnected) => (nextState.hostConnected ? false : currentDisconnected))
           return nextState
         })
@@ -101,7 +109,12 @@ function applyRoomStatusEvent(state: RoomState, event: IncomingMessage): RoomSta
       }
     case 'HOST_CONNECTED':
     case 'HOST_SETUP_CONNECTED':
-      return { ...state, hostConnected: true, redTeam: event.redTeam, blueTeam: event.blueTeam }
+      return normalizeRoomState({
+        ...state,
+        hostConnected: true,
+        redTeam: normalizeTeamMetadata(event.redTeam, state.redTeam, DEFAULT_RED_TEAM),
+        blueTeam: normalizeTeamMetadata(event.blueTeam, state.blueTeam, DEFAULT_BLUE_TEAM),
+      })
     case 'CARD_REVEAL':
     case 'ASSASSIN_TEAM':
     case 'GAME_RESET':
@@ -126,5 +139,24 @@ function applyRoomStatusEvent(state: RoomState, event: IncomingMessage): RoomSta
       }
     default:
       return state
+  }
+}
+
+function normalizeRoomState(state: RoomState): RoomState {
+  return {
+    ...state,
+    redTeam: normalizeTeamMetadata(state.redTeam, initialRoomState.redTeam, DEFAULT_RED_TEAM),
+    blueTeam: normalizeTeamMetadata(state.blueTeam, initialRoomState.blueTeam, DEFAULT_BLUE_TEAM),
+  }
+}
+
+function normalizeTeamMetadata(
+  team: TeamMetadata | null | undefined,
+  fallback: TeamMetadata,
+  defaultTeam: TeamMetadata,
+): TeamMetadata {
+  return {
+    name: team?.name?.trim() || fallback.name || defaultTeam.name,
+    avatar: team?.avatar || fallback.avatar || defaultTeam.avatar,
   }
 }
