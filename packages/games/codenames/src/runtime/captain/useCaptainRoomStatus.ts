@@ -36,6 +36,8 @@ export function useCaptainRoomStatus({ roomId }: UseCaptainRoomStatusParams) {
   const [roomState, setRoomState] = useState<RoomState>(initialRoomState)
   const [hasSyncedRoomState, setHasSyncedRoomState] = useState(false)
   const [hostDisconnected, setHostDisconnected] = useState(false)
+  const [devicesDisconnectedByHost, setDevicesDisconnectedByHost] = useState(false)
+  const [sessionCodeChangedRoomId, setSessionCodeChangedRoomId] = useState<string | null>(null)
 
   usePartySocket({
     host: getPartykitHost(),
@@ -55,6 +57,10 @@ export function useCaptainRoomStatus({ roomId }: UseCaptainRoomStatusParams) {
           setHostDisconnected((currentDisconnected) => (nextState.hostConnected ? false : currentDisconnected))
           return nextState
         })
+        if (msg.state.hostConnected) {
+          setDevicesDisconnectedByHost(false)
+          setSessionCodeChangedRoomId(null)
+        }
         setHasSyncedRoomState(true)
         return
       }
@@ -68,6 +74,20 @@ export function useCaptainRoomStatus({ roomId }: UseCaptainRoomStatusParams) {
       if (msg.type === 'HOST_CONNECTED' || msg.type === 'HOST_SETUP_CONNECTED') {
         setRoomState((current) => applyRoomStatusEvent(current, msg))
         setHostDisconnected(false)
+        setDevicesDisconnectedByHost(false)
+        setSessionCodeChangedRoomId(null)
+        return
+      }
+
+      if (msg.type === 'DEVICES_DISCONNECTED') {
+        setDevicesDisconnectedByHost(true)
+        setSessionCodeChangedRoomId(null)
+        return
+      }
+
+      if (msg.type === 'SESSION_CODE_CHANGED') {
+        setDevicesDisconnectedByHost(false)
+        setSessionCodeChangedRoomId(msg.nextRoomId)
         return
       }
 
@@ -75,7 +95,7 @@ export function useCaptainRoomStatus({ roomId }: UseCaptainRoomStatusParams) {
     },
   })
 
-  return { roomState, hasSyncedRoomState, hostDisconnected }
+  return { roomState, hasSyncedRoomState, hostDisconnected, devicesDisconnectedByHost, sessionCodeChangedRoomId }
 }
 
 function applyRoomStatusEvent(state: RoomState, event: IncomingMessage): RoomState {

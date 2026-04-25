@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import type { GameSetupSectionComponentProps } from '@party/game-sdk'
 import type { CodenamesSetupHelpers } from '../helpers'
-import type { CodenamesSetupState } from '../state'
+import { getCodenamesAssassinCount, type CodenamesSetupState } from '../state'
 import { SettingsModal } from '../components/SettingsModal'
 import { SettingsPanel } from '../components/SettingsPanel'
 import styles from './SettingsSection.module.css'
@@ -20,14 +20,16 @@ export function SettingsSection({
         <h3 className={styles.sectionTitle}>Ustawienia trybu</h3>
         <SettingsPanel
           rounds={state.settings.rounds}
+          assassinCount={getCodenamesAssassinCount(state.settings)}
+          extraAssassinsEnabled={state.settings.assassins.enabled}
           onOpen={() => setShowModal(true)}
         />
       </section>
 
       {showModal ? (
         <SettingsModal
-          rounds={state.settings.rounds}
-          onChange={(rounds) => updateState((current) => ({ ...current, settings: { ...current.settings, rounds } }))}
+          settings={state.settings}
+          onChange={(settings) => updateState((current) => ({ ...current, settings }))}
           onClose={() => setShowModal(false)}
         />
       ) : null}

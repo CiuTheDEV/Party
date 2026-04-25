@@ -35,6 +35,8 @@ export type HostEvent =
   | { type: 'BETWEEN_TURNS'; nextPresenterName: string; nextPresenterAvatar: string }
   | { type: 'PRESENTER_DISCONNECTED' }
   | { type: 'GAME_END' }
+  | { type: 'DEVICES_DISCONNECTED' }
+  | { type: 'SESSION_CODE_CHANGED'; nextRoomId: string }
   | { type: 'GAME_RESET' }
 
 // Eventy wysyłane przez TELEFON PREZENTERA do hosta

@@ -2,31 +2,38 @@
 
 import { useEffect, useState } from 'react'
 import { Link2, Smartphone } from 'lucide-react'
-import { DevicePairingModal } from '@party/ui'
+import { AlertDialog, DevicePairingModal } from '@party/ui'
 import { buildPresenterUrl, getPresenterOrigin, isLocalPresenterOrigin } from '../runtime'
 import styles from './PairingPanel.module.css'
 
 type Props = {
   roomId: string
   isConnected: boolean
+  isModalOpen: boolean
   onDisconnect: () => void
+  onRegenerateSessionCode: () => void
+  onOpenModal: () => void
+  onCloseModal: () => void
 }
 
-export function PairingPanel({ roomId, isConnected, onDisconnect }: Props) {
+export function PairingPanel({
+  roomId,
+  isConnected,
+  isModalOpen,
+  onDisconnect,
+  onRegenerateSessionCode,
+  onOpenModal,
+  onCloseModal,
+}: Props) {
   const [presenterUrl, setPresenterUrl] = useState('')
-  const [showModal, setShowModal] = useState(false)
   const [copyState, setCopyState] = useState<'idle' | 'success' | 'error'>('idle')
+  const [isDisconnectConfirmOpen, setIsDisconnectConfirmOpen] = useState(false)
+  const [isRegenerateConfirmOpen, setIsRegenerateConfirmOpen] = useState(false)
 
   useEffect(() => {
     const origin = getPresenterOrigin()
     setPresenterUrl(origin ? buildPresenterUrl(origin, roomId) : '')
   }, [roomId])
-
-  useEffect(() => {
-    if (isConnected) {
-      setShowModal(false)
-    }
-  }, [isConnected])
 
   useEffect(() => {
     if (copyState === 'idle') return
@@ -85,27 +92,40 @@ export function PairingPanel({ roomId, isConnected, onDisconnect }: Props) {
                 <span className={styles.connectedSubtle}>Telefon prezentera jest gotowy do gry.</span>
               </div>
             </div>
-            <button type="button" className={styles.disconnectBtn} onClick={onDisconnect}>
+            <button type="button" className={styles.disconnectBtn} onClick={() => setIsDisconnectConfirmOpen(true)}>
               Rozłącz
             </button>
           </div>
-        ) : (
-          <button type="button" className={styles.addBtn} onClick={() => setShowModal(true)}>
-            <span className={styles.addBtnIcon}>
-              <Link2 size={18} />
-            </span>
-            Dodaj urządzenia
-          </button>
-        )}
+        ) : null}
+
+        <button type="button" className={styles.addBtn} onClick={onOpenModal}>
+          <span className={styles.addBtnIcon}>
+            <Link2 size={18} />
+          </span>
+          Dodaj urządzenia
+        </button>
       </div>
 
-      {showModal ? (
+      {isModalOpen ? (
         <DevicePairingModal
           eyebrow="Parowanie"
           title="Podłącz urządzenie prezentera"
           qrValue={presenterUrl}
           roleLabel="Tryb: prezenter"
           description="Zeskanuj kod telefonem prezentera. Na ekranie pojawi się karta hasła i czas tury."
+          statusSection={
+            isConnected ? (
+              <div className={styles.modalStatus}>
+                <span className={styles.modalStatusDot} aria-hidden="true" />
+                <span className={styles.modalStatusText}>Urządzenie prezentera jest już połączone.</span>
+              </div>
+            ) : (
+              <div className={styles.modalStatus}>
+                <span className={`${styles.modalStatusDot} ${styles.modalStatusDotIdle}`} aria-hidden="true" />
+                <span className={styles.modalStatusText}>Czekam na połączenie telefonu prezentera.</span>
+              </div>
+            )
+          }
           warning={
             showLocalhostWarning ? (
               <>
@@ -124,26 +144,93 @@ export function PairingPanel({ roomId, isConnected, onDisconnect }: Props) {
             if (!presenterUrl) return
             window.open(presenterUrl, '_blank', 'noopener,noreferrer')
           }}
-          onClose={() => setShowModal(false)}
+          onClose={onCloseModal}
           footer={
-            <>
-              <button type="button" className={styles.closeBtn} onClick={() => setShowModal(false)}>
+            <div className={styles.modalActions}>
+              <div className={styles.modalActionRow}>
+                <button
+                  type="button"
+                  className={styles.secondaryModalBtn}
+                  onClick={() => {
+                    if (isConnected) {
+                      setIsRegenerateConfirmOpen(true)
+                      return
+                    }
+
+                    onRegenerateSessionCode()
+                  }}
+                >
+                  Zmień kod sesji
+                </button>
+                <button
+                  type="button"
+                  className={styles.disconnectAllBtn}
+                  disabled={!isConnected}
+                  onClick={() => setIsDisconnectConfirmOpen(true)}
+                >
+                  Rozłącz urządzenie
+                </button>
+              </div>
+              <button type="button" className={styles.closeBtn} onClick={onCloseModal}>
                 Zamknij
               </button>
-              <button
-                type="button"
-                className={styles.disconnectAllBtn}
-                onClick={() => {
-                  onDisconnect()
-                  setShowModal(false)
-                }}
-              >
-                Rozłącz wszystkie urządzenia
-              </button>
-            </>
+            </div>
           }
         />
       ) : null}
+
+      <AlertDialog
+        open={isDisconnectConfirmOpen}
+        variant="danger"
+        eyebrow="Urządzenie prezentera"
+        title="Rozłączyć sparowany telefon?"
+        description="To unieważni aktualny kod sesji i telefon prezentera będzie musiał połączyć się ponownie."
+        actions={[
+          {
+            label: 'Anuluj',
+            variant: 'secondary',
+            onClick: () => setIsDisconnectConfirmOpen(false),
+          },
+          {
+            label: 'Rozłącz urządzenie',
+            variant: 'danger',
+            fullWidth: true,
+            onClick: () => {
+              setIsDisconnectConfirmOpen(false)
+              onDisconnect()
+              onCloseModal()
+            },
+          },
+        ]}
+        onClose={() => setIsDisconnectConfirmOpen(false)}
+        closeOnBackdrop
+      />
+
+      <AlertDialog
+        open={isRegenerateConfirmOpen}
+        variant="danger"
+        eyebrow="Urządzenie prezentera"
+        title="Zmienić kod sesji?"
+        description="To unieważni aktualny kod sesji i telefon prezentera będzie musiał połączyć się ponownie."
+        actions={[
+          {
+            label: 'Anuluj',
+            variant: 'secondary',
+            onClick: () => setIsRegenerateConfirmOpen(false),
+          },
+          {
+            label: 'Zmień kod sesji',
+            variant: 'danger',
+            fullWidth: true,
+            onClick: () => {
+              setIsRegenerateConfirmOpen(false)
+              onRegenerateSessionCode()
+            },
+          },
+        ]}
+        onClose={() => setIsRegenerateConfirmOpen(false)}
+        closeOnBackdrop
+      />
     </>
   )
 }

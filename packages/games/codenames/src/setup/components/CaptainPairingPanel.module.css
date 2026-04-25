@@ -234,6 +234,66 @@
   transform: translateY(-1px);
 }
 
+.modalActions {
+  display: grid;
+  gap: 10px;
+}
+
+.modalActionRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.modalActionBtn {
+  width: 100%;
+  min-height: 48px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.modalActionBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.modalActionBtnGhost {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text);
+}
+
+.modalActionBtnGhost:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.modalActionBtnDanger {
+  border: 1px solid rgba(255, 90, 79, 0.22);
+  background: rgba(255, 90, 79, 0.12);
+  color: #ffd3cf;
+}
+
+.modalActionBtnDanger:hover:not(:disabled) {
+  border-color: rgba(255, 90, 79, 0.32);
+  background: rgba(255, 90, 79, 0.18);
+}
+
+.modalActionBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+  transform: none;
+}
+
+@media (max-width: 767px) {
+  .modalActionRow {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 767px) {
   .wrapper {
     padding: 18px;

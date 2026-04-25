@@ -6,6 +6,14 @@ import { useCharadesReducedMotion } from '../../shared/charades-motion'
 import styles from '../PlayBoard.module.css'
 import type { RoundSummaryViewProps } from './shared'
 
+function getRoundGuessTime(player: RoundSummaryViewProps['rankedPlayers'][number], currentRound: number) {
+  return player.lastScoredRound === currentRound ? player.lastCorrectGuessSeconds ?? null : null
+}
+
+function formatRoundGuessTimeBadge(seconds: number) {
+  return `Odgadnięto w ${formatGuessTime(seconds)}`
+}
+
 export function RoundSummaryView({
   currentRound,
   totalRounds,
@@ -15,6 +23,21 @@ export function RoundSummaryView({
 }: RoundSummaryViewProps) {
   const reducedMotion = useCharadesReducedMotion()
   const podiumPlayers = rankedPlayers.filter((player) => (player.score ?? 0) > 0 && player.rank <= 3)
+  const podiumGroups = podiumPlayers.reduce<Array<{ rank: number; players: typeof podiumPlayers }>>((groups, player) => {
+    const existingGroup = groups.find((group) => group.rank === player.rank)
+
+    if (existingGroup) {
+      existingGroup.players.push(player)
+      return groups
+    }
+
+    groups.push({
+      rank: player.rank,
+      players: [player],
+    })
+
+    return groups
+  }, [])
   const podiumPlayerNames = new Set(podiumPlayers.map((player) => player.name))
   const remainingPlayers = rankedPlayers.filter((player) => !podiumPlayerNames.has(player.name))
   const remainingListRef = useRef<HTMLDivElement | null>(null)
@@ -61,28 +84,58 @@ export function RoundSummaryView({
             </h1>
           </div>
 
-          {podiumPlayers.length > 0 ? (
+          {podiumGroups.length > 0 ? (
             <div className={styles.summaryTopRanking}>
-              {podiumPlayers.map((player) => {
-                const isTie = podiumPlayers.filter((candidate) => candidate.rank === player.rank).length > 1
-                const roundGuessTime =
-                  player.lastScoredRound === currentRound ? player.lastCorrectGuessSeconds ?? null : null
+              {podiumGroups.map((group) => {
+                const isTie = group.players.length > 1
 
                 return (
-                  <div key={player.name} className={styles.summaryTopPlayer} data-rank={player.rank}>
-                    <div className={styles.summaryTopBadge}>
-                      <span className={styles.summaryTopBadgeRank}>#{player.rank}</span>
-                      <span className={styles.summaryTopBadgeLabel}>{isTie ? 'Remis' : 'Top'}</span>
-                    </div>
-                    <AvatarAsset avatar={player.avatar} className={styles.summaryTopAvatar} />
-                    <span className={styles.summaryTopName} data-gender={player.gender}>
-                      {player.name}
-                    </span>
-                    <div className={styles.summaryScoreStack}>
-                      <span className={styles.summaryTopScore}>{player.score ?? 0}</span>
-                      {roundGuessTime ? (
-                        <span className={styles.summaryTimeBadge}>{formatGuessTime(roundGuessTime)}</span>
+                  <div
+                    key={`summary-rank-${group.rank}`}
+                    className={styles.summaryTopGroup}
+                    data-rank={group.rank}
+                    data-layout={isTie ? 'multi' : 'single'}
+                  >
+                    <div className={styles.summaryTopHeader}>
+                      <div className={styles.summaryTopBadge}>
+                        <span className={styles.summaryTopBadgeLabel}>{isTie ? 'Remis' : 'Top'}</span>
+                        <span className={styles.summaryTopBadgeRank}>#{group.rank}</span>
+                      </div>
+                      {isTie ? (
+                        <span className={styles.summaryTopCountBadge}>
+                          {group.players.length} osoby
+                        </span>
                       ) : null}
+                    </div>
+                    <div
+                      className={styles.summaryTopPlayers}
+                      data-layout={isTie ? 'multi' : 'single'}
+                      data-count={group.players.length}
+                    >
+                      {group.players.map((player) => {
+                        const roundGuessTime = getRoundGuessTime(player, currentRound)
+
+                        return (
+                          <article
+                            key={player.name}
+                            className={styles.summaryTopPlayerCard}
+                            data-layout={isTie ? 'multi' : 'single'}
+                          >
+                            <AvatarAsset avatar={player.avatar} variant="animated" className={styles.summaryTopAvatar} />
+                            <span className={styles.summaryTopName} data-gender={player.gender}>
+                              {player.name}
+                            </span>
+                            <div className={styles.summaryScoreStack}>
+                              <span className={styles.summaryTopScore}>{player.score ?? 0}</span>
+                              {roundGuessTime ? (
+                                <span className={styles.summaryTimeBadge}>
+                                  {formatRoundGuessTimeBadge(roundGuessTime)}
+                                </span>
+                              ) : null}
+                            </div>
+                          </article>
+                        )
+                      })}
                     </div>
                   </div>
                 )
@@ -106,7 +159,9 @@ export function RoundSummaryView({
                     <div className={styles.summaryScoreStack}>
                       <span className={styles.summaryScore}>{player.score ?? 0}</span>
                       {player.lastScoredRound === currentRound && player.lastCorrectGuessSeconds ? (
-                        <span className={styles.summaryTimeBadge}>{formatGuessTime(player.lastCorrectGuessSeconds)}</span>
+                        <span className={styles.summaryTimeBadge}>
+                          {formatRoundGuessTimeBadge(player.lastCorrectGuessSeconds)}
+                        </span>
                       ) : null}
                     </div>
                   </div>

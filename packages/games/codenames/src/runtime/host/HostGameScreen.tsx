@@ -39,15 +39,24 @@ type CodenamesCategoryBalance = {
   leftSharePercent: number
 }
 
+type CodenamesGameSettings = {
+  rounds: number
+  assassins: {
+    enabled: boolean
+    count: number
+  }
+}
+
 type HostGameScreenProps = {
   categories: Array<{ id: string; words: string[] }>
   roomId: string
   teams: [CodenamesTeam, CodenamesTeam]
   roundsToWin: number
   categoryBalance: CodenamesCategoryBalance | null
+  settings: CodenamesGameSettings
 }
 
-export function HostGameScreen({ roomId, categories, teams, roundsToWin, categoryBalance }: HostGameScreenProps) {
+export function HostGameScreen({ roomId, categories, teams, roundsToWin, categoryBalance, settings }: HostGameScreenProps) {
   const router = useRouter()
   const {
     roomState,
@@ -62,7 +71,7 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin, categor
     startBlockedReason,
     clearStartBlockedReason,
     resetPoolAndRetryStart,
-  } = useHostGame({ roomId, categories, teams, categoryBalance })
+  } = useHostGame({ roomId, categories, teams, categoryBalance, settings })
   const [showEntryIntro, setShowEntryIntro] = useState(true)
   const [soundEnabled, setSoundEnabled] = useState(true)
   const [animationsEnabled, setAnimationsEnabled] = useState(true)
@@ -562,6 +571,7 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin, categor
             captainRedConnected={roomState.captainRedConnected}
             captainBlueConnected={roomState.captainBlueConnected}
             showCloseButton={false}
+            onExitToMenu={exitToMenu}
           />
         ) : null}
 

@@ -4,6 +4,8 @@ export type PresenterPhase =
   | 'waiting'
   | 'round-order'
   | 'host-left'
+  | 'devices-disconnected'
+  | 'session-code-changed'
   | 'your-turn'
   | 'reveal-buffer'
   | 'timer-running'
@@ -30,6 +32,7 @@ export type PresenterViewState = {
   nextPresenterAvatar: string
   nextStep: PresenterNextStep
   turnEndReason: PresenterTurnEndReason
+  nextRoomId: string
 }
 
 export type PresenterScreenProps = {

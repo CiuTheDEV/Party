@@ -140,6 +140,16 @@
 
 ---
 
+## Setup and pairing overlays should be URL-backed in the same handler that opens them
+
+**Scenario:** Host setup or device-pairing modal can be interrupted by a remount or route refresh while a second screen is joining.
+
+**Solution:** Keep setup-open and pairing-modal-open state at page level and update the URL synchronously in the same open/close handler, for example `?setup=1` and `?pairing=1`, instead of writing URL state later in a `useEffect`.
+
+**Why:** A post-render URL sync leaves a race window where the UI is open locally but the URL still says it is closed. If a remount happens inside that window, the host drops back to menu or loses the nested pairing modal. URL-backed state plus page-level control survives remounts consistently.
+
+---
+
 ## Tie-aware ranking should carry previous ordering keys explicitly
 
 **Scenario:** A scoreboard needs competition-style places (`1, 1, 1, 4`) and later adds a secondary tiebreaker such as total guess time.

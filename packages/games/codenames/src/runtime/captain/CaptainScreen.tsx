@@ -1,5 +1,6 @@
 'use client'
 
+import { CircleAlert, KeyRound, SmartphoneNfc } from 'lucide-react'
 import { AlertDialog, AvatarAsset } from '@party/ui'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -26,7 +27,16 @@ type CaptainScreenProps = {
 
 export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }: CaptainScreenProps) {
   const router = useRouter()
-  const { roomState, hasSyncedRoomState, hostDisconnected, sessionInvalidated, isRoundIntroVisible, markReady } = useCaptainGame({ roomId, team })
+  const {
+    roomState,
+    hasSyncedRoomState,
+    hostDisconnected,
+    sessionInvalidated,
+    devicesDisconnectedByHost,
+    sessionCodeChangedRoomId,
+    isRoundIntroVisible,
+    markReady,
+  } = useCaptainGame({ roomId, team })
   const [isBrowserExitAlertOpen, setIsBrowserExitAlertOpen] = useState(false)
   const screenMode = getCaptainScreenMode(roomState)
   const boardMeta = getCaptainBoardMeta(roomState)
@@ -44,11 +54,14 @@ export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }:
   const isReconnectRequired =
     hasSyncedRoomState &&
     !hostDisconnected &&
+    !devicesDisconnectedByHost &&
+    !sessionCodeChangedRoomId &&
     (roomState.phase === 'playing' || roomState.phase === 'assassin-reveal') &&
     (!roomState.captainRedConnected || !roomState.captainBlueConnected)
   const shouldExitAfterSessionInvalidation =
     hasSyncedRoomState &&
-    sessionInvalidated
+    sessionInvalidated &&
+    !sessionCodeChangedRoomId
   const runtimeStatus = getCaptainRuntimeStatus({
     phase: roomState.phase,
     hostConnected: roomState.hostConnected,
@@ -118,13 +131,31 @@ export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }:
                 <span className={styles.waitingRole}>{team === 'red' ? 'Kapitan Czerwonych' : 'Kapitan Niebieskich'}</span>
                 <h1 className={`${styles.teamName} ${activeTeamClass}`}>{activeTeamLabel}</h1>
               </div>
-              <div className={styles.loader} data-team={team} aria-hidden="true">
-                <span />
-              </div>
+              {shouldExitAfterSessionInvalidation ? (
+                <StatusGlyph kind="session-ended" />
+              ) : devicesDisconnectedByHost ? (
+                <StatusGlyph kind="devices-disconnected" />
+              ) : sessionCodeChangedRoomId ? (
+                <StatusGlyph kind="session-code-changed" />
+              ) : (
+                <div className={styles.loader} data-team={team} aria-hidden="true">
+                  <span />
+                </div>
+              )}
               {shouldExitAfterSessionInvalidation ? (
                 <>
                   <p className={styles.waitingTitle}>Poprzednia sesja została zakończona</p>
                   <p className={styles.waitingCopy}>Wracam do menu głównego...</p>
+                </>
+              ) : devicesDisconnectedByHost ? (
+                <>
+                  <p className={styles.waitingTitle}>Urządzenia zostały rozłączone</p>
+                  <p className={styles.waitingCopy}>Host odłączył ten telefon od gry. Poczekaj na ponowne parowanie.</p>
+                </>
+              ) : sessionCodeChangedRoomId ? (
+                <>
+                  <p className={styles.waitingTitle}>Kod sesji został zmieniony</p>
+                  <p className={styles.waitingCopy}>Host uruchomił nowy pokój: {sessionCodeChangedRoomId.toUpperCase()}</p>
                 </>
               ) : (
                 <>
@@ -229,9 +260,25 @@ export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }:
                   <p className={styles.connectionCopy}>Jeśli host uruchomił nowy pokój, dołącz do niego ponownie z nowym kodem.</p>
                 </div>
               </div>
+            ) : devicesDisconnectedByHost ? (
+              <div className={styles.connectionOverlay} role="dialog" aria-modal="true" aria-label="Urządzenia zostały rozłączone">
+                <div className={styles.connectionModal}>
+                  <span className={styles.connectionEyebrow}>Urządzenie rozłączone</span>
+                  <h2 className={styles.connectionTitle}>Host odłączył ten telefon od gry</h2>
+                  <p className={styles.connectionCopy}>Ta karta nie jest już aktywna. Poczekaj, aż host połączy urządzenia ponownie.</p>
+                </div>
+              </div>
+            ) : sessionCodeChangedRoomId ? (
+              <div className={styles.connectionOverlay} role="dialog" aria-modal="true" aria-label="Kod sesji został zmieniony">
+                <div className={styles.connectionModal}>
+                  <span className={styles.connectionEyebrow}>Nowy kod sesji</span>
+                  <h2 className={styles.connectionTitle}>Host zmienił kod pokoju</h2>
+                  <p className={styles.connectionCopy}>Ta karta nie jest już aktywna. Dołącz ponownie z kodem {sessionCodeChangedRoomId.toUpperCase()}.</p>
+                </div>
+              </div>
             ) : null}
 
-            {!isReconnectRequired && !shouldExitAfterSessionInvalidation && runtimeStatus ? (
+            {!isReconnectRequired && !shouldExitAfterSessionInvalidation && !devicesDisconnectedByHost && !sessionCodeChangedRoomId && runtimeStatus ? (
               <div className={styles.connectionOverlay} role="dialog" aria-modal="true" aria-label={runtimeStatus.title}>
                 <div className={styles.connectionModal}>
                   <span className={styles.connectionEyebrow}>{runtimeStatus.eyebrow}</span>
@@ -275,5 +322,29 @@ export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }:
         ]}
       />
     </>
+  )
+}
+
+function StatusGlyph({ kind }: { kind: 'session-ended' | 'devices-disconnected' | 'session-code-changed' }) {
+  if (kind === 'session-code-changed') {
+    return (
+      <div className={`${styles.waitingStatusIcon} ${styles.waitingStatusIconCode}`} aria-hidden="true">
+        <KeyRound size={18} />
+      </div>
+    )
+  }
+
+  if (kind === 'devices-disconnected') {
+    return (
+      <div className={`${styles.waitingStatusIcon} ${styles.waitingStatusIconDisconnect}`} aria-hidden="true">
+        <SmartphoneNfc size={18} />
+      </div>
+    )
+  }
+
+  return (
+    <div className={`${styles.waitingStatusIcon} ${styles.waitingStatusIconEnded}`} aria-hidden="true">
+      <CircleAlert size={18} />
+    </div>
   )
 }

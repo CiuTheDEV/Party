@@ -41,6 +41,8 @@ export type HostEvent =
   | { type: 'GAME_START'; cards: Card[]; redTotal: number; blueTotal: number; startingTeam: 'red' | 'blue' }
   | { type: 'CARD_REVEAL'; index: number }
   | { type: 'ASSASSIN_TEAM'; team: 'red' | 'blue' }
+  | { type: 'DEVICES_DISCONNECTED' }
+  | { type: 'SESSION_CODE_CHANGED'; nextRoomId: string }
   | { type: 'GAME_RESET' }
   | { type: 'MATCH_RESET' }
 

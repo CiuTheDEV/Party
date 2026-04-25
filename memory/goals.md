@@ -7,8 +7,8 @@
 ## This Week
 
 1. Re-test Charades presenter flow on a stable local/live stack after the reveal-word sizing fix
-2. Explain and eliminate the Codenames host-setup flicker around the captain-link flow, then run the visible browser validation pass for the pool-manager/setup flow
-3. Close the remaining Charades runtime browser pass after the new verdict/summary/results polish, then continue cleanup without widening scope beyond real pain points
+2. Keep pairing/device flows stable in both Tajniacy and Kalambury after the new URL-backed setup/modal hardening
+3. Close the remaining Charades runtime cleanup after the new verdict/summary/results polish, then continue without widening scope beyond real pain points
 4. Keep the new agent-first docs/playbooks synced with code while they are still fresh
 
 ## Charades - MVP hardening
@@ -38,8 +38,8 @@
 ### Menu and settings polish
 - [ ] Finish Charades host-side menu/settings/runtime controller polish
   Scope: final visible validation after the latest runtime/summary/results polish, plus any last keyboard/controller edge cases
-- [ ] Stabilize Codenames host setup around captain-link pairing
-  Scope: reproduce or instrument the reported flicker to menu on `otwórz w nowej karcie` / `/captain/...`, then re-run a visible browser validation pass for setup and pool-manager UX
+- [ ] Keep Codenames runtime reconnect and captain-device edge cases polished after the pairing hardening
+  Scope: follow-up only on narrower runtime issues such as disconnect/session-code-change behavior during an already active match
 
 ## Shared UI and Repo Workflow
 

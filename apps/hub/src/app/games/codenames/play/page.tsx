@@ -17,7 +17,13 @@ type CodenamesCategoryBalance = {
 type CodenamesConfig = {
   selectedCategories: Record<string, true>
   teams?: [CodenamesTeam, CodenamesTeam]
-  settings?: { rounds?: number }
+  settings?: {
+    rounds?: number
+    assassins?: {
+      enabled?: boolean
+      count?: number
+    }
+  }
   categoryBalance?: CodenamesCategoryBalance | null
 }
 
@@ -49,6 +55,13 @@ function readConfig() {
         teams: DEFAULT_TEAMS,
         roundsToWin: 3,
         categoryBalance: null,
+        settings: {
+          rounds: 3,
+          assassins: {
+            enabled: false,
+            count: 1,
+          },
+        },
       }
     }
 
@@ -59,6 +72,16 @@ function readConfig() {
       teams: config.teams ?? DEFAULT_TEAMS,
       roundsToWin: config.settings?.rounds ?? 3,
       categoryBalance: config.categoryBalance ?? null,
+      settings: {
+        rounds: config.settings?.rounds ?? 3,
+        assassins: {
+          enabled: config.settings?.assassins?.enabled === true,
+          count:
+            typeof config.settings?.assassins?.count === 'number' && Number.isFinite(config.settings.assassins.count)
+              ? Math.max(1, Math.min(4, Math.round(config.settings.assassins.count)))
+              : 1,
+        },
+      },
     }
   } catch {
     return {
@@ -66,6 +89,13 @@ function readConfig() {
       teams: DEFAULT_TEAMS,
       roundsToWin: 3,
       categoryBalance: null,
+      settings: {
+        rounds: 3,
+        assassins: {
+          enabled: false,
+          count: 1,
+        },
+      },
     }
   }
 }
@@ -79,6 +109,13 @@ function PlayPageContent() {
     teams: [CodenamesTeam, CodenamesTeam]
     roundsToWin: number
     categoryBalance: CodenamesCategoryBalance | null
+    settings: {
+      rounds: number
+      assassins: {
+        enabled: boolean
+        count: number
+      }
+    }
   } | null>(null)
 
   useEffect(() => {
@@ -103,6 +140,7 @@ function PlayPageContent() {
         teams={config.teams}
         roundsToWin={config.roundsToWin}
         categoryBalance={config.categoryBalance}
+        settings={config.settings}
       />
     </div>
   )

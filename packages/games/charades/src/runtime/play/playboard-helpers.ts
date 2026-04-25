@@ -5,6 +5,7 @@ export function getRankedPlayers(players: PlayerSummary[]) {
   let previousScore: number | null = null
   let previousTotalGuessTimeSeconds: number | null = null
   let previousRank = 0
+  let currentRank = 0
 
   return [...players]
     .sort(
@@ -16,17 +17,17 @@ export function getRankedPlayers(players: PlayerSummary[]) {
     .map((player, index) => {
       const score = player.score ?? 0
       const totalGuessTimeSeconds = player.totalGuessTimeSeconds ?? 0
-      const rank =
+      const isTie =
         previousScore !== null &&
         previousTotalGuessTimeSeconds !== null &&
         score === previousScore &&
         totalGuessTimeSeconds === previousTotalGuessTimeSeconds
-          ? previousRank
-          : index + 1
+      const rank = isTie ? previousRank : currentRank + 1
 
       previousScore = score
       previousTotalGuessTimeSeconds = totalGuessTimeSeconds
       previousRank = rank
+      currentRank = rank
 
       return { ...player, rank }
     })

@@ -18,6 +18,7 @@ export const INITIAL_PRESENTER_STATE: PresenterViewState = {
   nextPresenterAvatar: '',
   nextStep: 'next-presenter',
   turnEndReason: 'none',
+  nextRoomId: '',
 }
 
 function buildRoundOrderPresenterState(): PresenterViewState {
@@ -57,6 +58,7 @@ function mapActiveRoomState(roomState: RoomState): PresenterViewState {
     nextPresenterAvatar: roomState.nextPresenterAvatar,
     nextStep: roomState.nextStep,
     turnEndReason: roomState.turnEndReason,
+    nextRoomId: '',
   }
 }
 
@@ -148,6 +150,17 @@ export function applyPresenterHostEvent(state: PresenterViewState, event: HostEv
         phase: 'ended',
         turnEndReason: 'none',
       })
+    case 'DEVICES_DISCONNECTED':
+      return {
+        ...INITIAL_PRESENTER_STATE,
+        phase: 'devices-disconnected',
+      }
+    case 'SESSION_CODE_CHANGED':
+      return {
+        ...INITIAL_PRESENTER_STATE,
+        phase: 'session-code-changed',
+        nextRoomId: event.nextRoomId,
+      }
     case 'GAME_RESET':
       return {
         ...INITIAL_PRESENTER_STATE,

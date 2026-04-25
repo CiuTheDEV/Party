@@ -10,6 +10,7 @@ import { PairingSection } from './setup/sections/PairingSection'
 import type { CodenamesSetupHelpers } from './setup/helpers'
 import {
   createInitialCodenamesSetupState,
+  createCodenamesRoomId,
   type CodenamesSetupState,
   validateCodenamesSetup,
 } from './setup/state'
@@ -40,7 +41,7 @@ export const codenamesModule: GameModule<CodenamesSetupState, CodenamesSetupHelp
   GameResults: CodenamesResultsFallback,
 }
 
-export { config, createInitialCodenamesSetupState, validateCodenamesSetup }
+export { config, createInitialCodenamesSetupState, createCodenamesRoomId, validateCodenamesSetup }
 export { CodenamesMenuContent }
 export { shouldKeepCaptainListenerActive } from './menu/captain-listener-activation'
 export {

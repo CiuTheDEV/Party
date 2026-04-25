@@ -271,7 +271,12 @@ export function reduceIncomingEvent(
   }
 
   const newState = applyEvent(current.state, event)
-  if (newState === current.state && event.type !== 'GAME_RESET') {
+  if (
+    newState === current.state &&
+    event.type !== 'GAME_RESET' &&
+    event.type !== 'SESSION_CODE_CHANGED' &&
+    event.type !== 'DEVICES_DISCONNECTED'
+  ) {
     // Event was rejected by applyEvent (invalid transition)
     return { ...current, accepted: false }
   }
@@ -377,6 +382,11 @@ export function applyEvent(state: RoomState, event: CodenamesEvent): RoomState {
         blueTeam: state.blueTeam,
       }
     }
+
+    case 'DEVICES_DISCONNECTED':
+      return state
+    case 'SESSION_CODE_CHANGED':
+      return state
 
     default:
       return state

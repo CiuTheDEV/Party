@@ -38,6 +38,8 @@ export function useCaptainGame({ roomId, team }: UseCaptainGameParams) {
   const [hasSyncedRoomState, setHasSyncedRoomState] = useState(false)
   const [hostDisconnected, setHostDisconnected] = useState(false)
   const [sessionInvalidated, setSessionInvalidated] = useState(false)
+  const [devicesDisconnectedByHost, setDevicesDisconnectedByHost] = useState(false)
+  const [sessionCodeChangedRoomId, setSessionCodeChangedRoomId] = useState<string | null>(null)
   const [isRoundIntroVisible, setIsRoundIntroVisible] = useState(false)
   const teamRef = useRef(team)
   const previousBoardUnlockedRef = useRef(false)
@@ -60,6 +62,8 @@ export function useCaptainGame({ roomId, team }: UseCaptainGameParams) {
         })
         if (msg.state.hostConnected) {
           setSessionInvalidated(false)
+          setDevicesDisconnectedByHost(false)
+          setSessionCodeChangedRoomId(null)
         }
         setHasSyncedRoomState(true)
         return
@@ -75,6 +79,24 @@ export function useCaptainGame({ roomId, team }: UseCaptainGameParams) {
         setRoomState((current) => applyServerEvent(current, msg))
         setHostDisconnected(false)
         setSessionInvalidated(false)
+        setDevicesDisconnectedByHost(false)
+        setSessionCodeChangedRoomId(null)
+        return
+      }
+
+      if (msg.type === 'DEVICES_DISCONNECTED') {
+        setDevicesDisconnectedByHost(true)
+        setSessionInvalidated(false)
+        setSessionCodeChangedRoomId(null)
+        setHostDisconnected(false)
+        return
+      }
+
+      if (msg.type === 'SESSION_CODE_CHANGED') {
+        setSessionCodeChangedRoomId(msg.nextRoomId)
+        setDevicesDisconnectedByHost(false)
+        setSessionInvalidated(true)
+        setHostDisconnected(false)
         return
       }
 
@@ -103,7 +125,7 @@ export function useCaptainGame({ roomId, team }: UseCaptainGameParams) {
   }, [roomState.boardUnlocked, roomState.phase])
 
   useEffect(() => {
-    if (!hasSyncedRoomState || !hostDisconnected) {
+    if (!hasSyncedRoomState || !hostDisconnected || sessionCodeChangedRoomId || devicesDisconnectedByHost) {
       return
     }
 
@@ -112,13 +134,22 @@ export function useCaptainGame({ roomId, team }: UseCaptainGameParams) {
     }, HOST_RETURN_GRACE_MS)
 
     return () => window.clearTimeout(timeoutId)
-  }, [hasSyncedRoomState, hostDisconnected, roomId])
+  }, [devicesDisconnectedByHost, hasSyncedRoomState, hostDisconnected, roomId, sessionCodeChangedRoomId])
 
   const markReady = useCallback(() => {
     socket.send(JSON.stringify({ type: 'CAPTAIN_READY', team: teamRef.current }))
   }, [socket])
 
-  return { roomState, hasSyncedRoomState, hostDisconnected, sessionInvalidated, isRoundIntroVisible, markReady }
+  return {
+    roomState,
+    hasSyncedRoomState,
+    hostDisconnected,
+    sessionInvalidated,
+    devicesDisconnectedByHost,
+    sessionCodeChangedRoomId,
+    isRoundIntroVisible,
+    markReady,
+  }
 }
 
 function applyServerEvent(state: RoomState, event: IncomingMessage): RoomState {

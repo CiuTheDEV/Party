@@ -43,12 +43,21 @@ const started = moduleUnderTest.prepareCodenamesGameStart({
     rightCategoryId: 'adult',
     leftSharePercent: 80,
   },
+  settings: {
+    rounds: 3,
+    assassins: {
+      enabled: true,
+      count: 4,
+    },
+  },
 })
 
 assert.equal(started.ok, true)
 assert.equal(started.board.cards.length, 25)
 assert.equal(started.board.cards.filter((card) => card.word.startsWith('standard-')).length, 20)
 assert.equal(started.board.cards.filter((card) => card.word.startsWith('adult-')).length, 5)
+assert.equal(started.board.cards.filter((card) => card.color === 'assassin').length, 4)
+assert.equal(started.board.cards.filter((card) => card.color === 'neutral').length, 4)
 assert.equal(started.history.pools.standard.usedWords.length, 20)
 assert.equal(started.history.pools.adult.usedWords.length, 5)
 

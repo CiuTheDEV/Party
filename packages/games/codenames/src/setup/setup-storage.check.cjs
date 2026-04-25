@@ -20,7 +20,13 @@ const restored = moduleUnderTest.restoreCodenamesSetupState(
       { name: 'Beta', avatar: 'moon' },
     ],
     selectedCategories: { standard: true, adult: true },
-    settings: { rounds: 5 },
+    settings: {
+      rounds: 5,
+      assassins: {
+        enabled: true,
+        count: 4,
+      },
+    },
     categoryBalance: {
       leftCategoryId: 'standard',
       rightCategoryId: 'plus18',
@@ -36,7 +42,13 @@ assert.deepEqual(restored.teams, [
   { name: 'Beta', avatar: 'moon' },
 ])
 assert.deepEqual(restored.selectedCategories, { standard: true })
-assert.deepEqual(restored.settings, { rounds: 5 })
+assert.deepEqual(restored.settings, {
+  rounds: 5,
+  assassins: {
+    enabled: true,
+    count: 4,
+  },
+})
 assert.equal(restored.categoryBalance, null)
 assert.equal(restored.roomId, 'ROOM1234')
 assert.equal(restored.captainRedConnected, false)
@@ -47,7 +59,13 @@ const fallback = moduleUnderTest.restoreCodenamesSetupState('{"broken":true}')
 assert.equal(typeof fallback.roomId, 'string')
 assert.equal(fallback.roomId.length, 8)
 assert.deepEqual(fallback.selectedCategories, { standard: true })
-assert.deepEqual(fallback.settings, { rounds: 3 })
+assert.deepEqual(fallback.settings, {
+  rounds: 3,
+  assassins: {
+    enabled: false,
+    count: 1,
+  },
+})
 assert.equal(fallback.categoryBalance, null)
 
 const serialized = moduleUnderTest.serializeCodenamesSetupState(restored)

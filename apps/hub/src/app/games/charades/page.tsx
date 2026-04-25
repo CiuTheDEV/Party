@@ -2,7 +2,7 @@
 
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react'
 import {
   buildPromptPool,
   charadesModule,
@@ -44,6 +44,15 @@ type StartWarningState = {
 
 type SetupFocusTarget = 'close' | 'start'
 type StartWarningFocusTarget = 'back' | 'manage' | 'start'
+type SetupUiState = {
+  showSetup: boolean
+  isPairingModalOpen: boolean
+}
+type PendingSessionCodeChange = {
+  type: 'disconnect-devices' | 'session-code-change'
+  nextRoomId: string
+  resetWordHistory: boolean
+}
 
 export default function CharadesMenuPage() {
   const router = useRouter()
@@ -65,13 +74,17 @@ export default function CharadesMenuPage() {
     commitMenuViewChange,
     setHasUnsavedSettingsChanges,
   } = useCharadesMenuView()
-  const [showSetup, setShowSetup] = useState(false)
+  const [setupUi, setSetupUi] = useState<SetupUiState>({
+    showSetup: false,
+    isPairingModalOpen: false,
+  })
   const [isSetupReady, setIsSetupReady] = useState(false)
   const [setupState, setSetupState] = useState<CharadesSetupState>(() => charadesModule.createInitialSetupState())
   const [startWarning, setStartWarning] = useState<StartWarningState | null>(null)
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const [setupFocus, setSetupFocus] = useState<SetupFocusTarget>('start')
   const [warningFocus, setWarningFocus] = useState<StartWarningFocusTarget>('start')
+  const [pendingSessionCodeChange, setPendingSessionCodeChange] = useState<PendingSessionCodeChange | null>(null)
   const entitlements = user?.entitlements ?? EMPTY_ENTITLEMENTS
 
   const hasCategoryAccess = useMemo(
@@ -119,22 +132,54 @@ export default function CharadesMenuPage() {
     })
   }, [entitlements, isLoading, isSetupReady])
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (typeof window === 'undefined') {
       return
     }
 
     const params = new URLSearchParams(window.location.search)
-    if (params.get('setup') === '1') {
-      setShowSetup(true)
+    const shouldShowSetup = params.get('setup') === '1'
+    const shouldShowPairing = shouldShowSetup && params.get('pairing') === '1'
+
+    if (shouldShowSetup) {
+      setSetupUi({
+        showSetup: true,
+        isPairingModalOpen: shouldShowPairing,
+      })
       requestMenuViewChange('mode')
     }
   }, [requestMenuViewChange])
 
+  const updateSetupUi = useCallback((nextState: SetupUiState | ((current: SetupUiState) => SetupUiState)) => {
+    setSetupUi((current) => {
+      const resolvedState = typeof nextState === 'function' ? nextState(current) : nextState
+
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+
+        if (resolvedState.showSetup) {
+          url.searchParams.set('setup', '1')
+        } else {
+          url.searchParams.delete('setup')
+        }
+
+        if (resolvedState.showSetup && resolvedState.isPairingModalOpen) {
+          url.searchParams.set('pairing', '1')
+        } else {
+          url.searchParams.delete('pairing')
+        }
+
+        window.history.replaceState(window.history.state, '', url)
+      }
+
+      return resolvedState
+    })
+  }, [])
+
   useEffect(() => {
-    setIsMenuInputSuspended(showSetup || startWarning !== null || isSettingsModalOpen)
+    setIsMenuInputSuspended(setupUi.showSetup || startWarning !== null || isSettingsModalOpen)
     return () => setIsMenuInputSuspended(false)
-  }, [isSettingsModalOpen, setIsMenuInputSuspended, showSetup, startWarning])
+  }, [isSettingsModalOpen, setIsMenuInputSuspended, setupUi.showSetup, startWarning])
 
   useEffect(() => {
     if (!isSetupReady || !setupState.roomId) {
@@ -149,19 +194,75 @@ export default function CharadesMenuPage() {
     })
   }, [isSetupReady, setupState])
 
+  const applyCharadesRoomTransition = useCallback((transition: PendingSessionCodeChange) => {
+    setPendingSessionCodeChange(null)
+    clearPresenterSession()
+
+    if (transition.resetWordHistory) {
+      startNewCharadesWordHistorySession()
+    }
+
+    setSetupState((current) => ({
+      ...current,
+      roomId: transition.nextRoomId,
+      isDeviceConnected: false,
+    }))
+  }, [])
+
+  const requestCharadesRoomTransition = useCallback((type: 'disconnect-devices' | 'session-code-change', resetWordHistory: boolean) => {
+    const nextRoomId = createCharadesRoomId()
+
+    if (!isSetupReady || !setupState.roomId || nextRoomId === setupState.roomId) {
+      applyCharadesRoomTransition({
+        type,
+        nextRoomId,
+        resetWordHistory,
+      })
+      return
+    }
+
+    setPendingSessionCodeChange({
+      type,
+      nextRoomId,
+      resetWordHistory,
+    })
+  }, [applyCharadesRoomTransition, isSetupReady, setupState.roomId])
+
+  useEffect(() => {
+    if (!pendingSessionCodeChange) {
+      return
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      applyCharadesRoomTransition(pendingSessionCodeChange)
+    }, 700)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [applyCharadesRoomTransition, pendingSessionCodeChange])
+
   const validation = useMemo(() => charadesModule.validateSetup(setupState), [setupState])
 
   const helpers: CharadesSetupHelpers = useMemo(
     () => ({
       categories: allCategories,
       DeviceListener,
+      isPairingModalOpen: setupUi.isPairingModalOpen,
       onDisconnectDevice: () => {
-        clearPresenterSession()
-        startNewCharadesWordHistorySession()
-        setSetupState((current) => ({
+        requestCharadesRoomTransition('disconnect-devices', true)
+      },
+      onRegenerateSessionCode: () => {
+        requestCharadesRoomTransition('session-code-change', false)
+      },
+      openPairingModal: () => {
+        updateSetupUi((current) => ({
+          showSetup: true,
+          isPairingModalOpen: true,
+        }))
+      },
+      closePairingModal: () => {
+        updateSetupUi((current) => ({
           ...current,
-          roomId: createCharadesRoomId(),
-          isDeviceConnected: false,
+          isPairingModalOpen: false,
         }))
       },
       hasCategoryAccess,
@@ -169,7 +270,7 @@ export default function CharadesMenuPage() {
         await redeemActivationCode(code)
       },
     }),
-    [hasCategoryAccess, redeemActivationCode],
+    [hasCategoryAccess, redeemActivationCode, requestCharadesRoomTransition, setupUi.isPairingModalOpen, updateSetupUi],
   )
 
   const sections = charadesModule.setupSections.map((section: (typeof charadesModule.setupSections)[number]) => {
@@ -238,7 +339,7 @@ export default function CharadesMenuPage() {
   }
 
   useMenuControls({
-    enabled: showSetup && startWarning === null,
+    enabled: setupUi.showSetup && startWarning === null,
     onAction: (action) => {
       if (action === 'left' || action === 'right' || action === 'up' || action === 'down') {
         setSetupFocus((current) => (current === 'start' ? 'close' : 'start'))
@@ -252,7 +353,10 @@ export default function CharadesMenuPage() {
 
       if (action === 'confirm' || action === 'primary') {
         if (setupFocus === 'close') {
-          setShowSetup(false)
+          updateSetupUi({
+            showSetup: false,
+            isPairingModalOpen: false,
+          })
           return
         }
 
@@ -299,9 +403,33 @@ export default function CharadesMenuPage() {
 
   return (
     <>
+      {isSetupReady && setupState.roomId.trim().length > 0 ? (
+        <DeviceListener
+          roomId={setupState.roomId}
+          pendingDeviceAction={pendingSessionCodeChange}
+          onDeviceActionSent={(action) => {
+            if (
+              !pendingSessionCodeChange ||
+              pendingSessionCodeChange.type !== action.type ||
+              pendingSessionCodeChange.nextRoomId !== action.nextRoomId
+            ) {
+              return
+            }
+
+            applyCharadesRoomTransition(pendingSessionCodeChange)
+          }}
+          onConnect={() => {
+            setSetupState((current) => ({ ...current, isDeviceConnected: true }))
+          }}
+          onDisconnect={() => {
+            setSetupState((current) => ({ ...current, isDeviceConnected: false }))
+          }}
+        />
+      ) : null}
+
       <CharadesMenuContent
         activeView={activeMenuView}
-        controlsEnabled={!showSetup && startWarning === null && menuFocusArea === 'content' && isHostInputAwake && !isControllerWakeGuardActive}
+        controlsEnabled={!setupUi.showSetup && startWarning === null && menuFocusArea === 'content' && isHostInputAwake && !isControllerWakeGuardActive}
         isContentFocused={menuFocusArea === 'content' && isHostInputAwake}
         onChangeView={requestMenuViewChange}
         registerSettingsExitGuard={registerSettingsExitGuard}
@@ -327,18 +455,25 @@ export default function CharadesMenuPage() {
           setMenuFocusArea('content')
           setIsRailForcedExpanded(false)
           setSetupFocus('start')
-          setShowSetup(true)
+          updateSetupUi({
+            showSetup: true,
+            isPairingModalOpen: false,
+          })
         }}
       />
 
-      {showSetup ? (
+      {setupUi.showSetup ? (
         <GameSetupTemplate
           title="Kalambury"
           subtitle="Konfiguracja meczu"
           sections={sections}
           validation={validation}
           onStart={handleStart}
-          onClose={() => setShowSetup(false)}
+          onClose={() =>
+            updateSetupUi({
+              showSetup: false,
+              isPairingModalOpen: false,
+            })}
           isFocusVisible={isHostInputAwake}
           startLabel="Rozpocznij grę"
           focusedAction={setupFocus}

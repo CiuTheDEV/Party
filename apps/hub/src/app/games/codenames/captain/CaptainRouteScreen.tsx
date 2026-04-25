@@ -20,7 +20,7 @@ export function CaptainRouteScreen({
   teamParam: string | null
 }) {
   const router = useRouter()
-  const { roomState } = useCaptainRoomStatus({ roomId })
+  const { roomState, devicesDisconnectedByHost, sessionCodeChangedRoomId } = useCaptainRoomStatus({ roomId })
   const redTeam = resolveCaptainTeam(roomState.redTeam, DEFAULT_TEAMS[0])
   const blueTeam = resolveCaptainTeam(roomState.blueTeam, DEFAULT_TEAMS[1])
 
@@ -30,6 +30,8 @@ export function CaptainRouteScreen({
         roomId={roomId}
         redTeam={redTeam}
         blueTeam={blueTeam}
+        devicesDisconnectedByHost={devicesDisconnectedByHost}
+        sessionCodeChangedRoomId={sessionCodeChangedRoomId}
         onChooseTeam={(team) => router.replace(buildCaptainRoutePath(roomId, team))}
       />
     )
@@ -57,21 +59,29 @@ function CaptainTeamSelect({
   roomId,
   redTeam,
   blueTeam,
+  devicesDisconnectedByHost,
+  sessionCodeChangedRoomId,
   onChooseTeam,
 }: {
   roomId: string
   redTeam: CaptainTeam
   blueTeam: CaptainTeam
+  devicesDisconnectedByHost: boolean
+  sessionCodeChangedRoomId: string | null
   onChooseTeam: (team: 'red' | 'blue') => void
 }) {
   const { roomState, hasSyncedRoomState } = useCaptainRoomStatus({ roomId })
   const redTaken = roomState.captainRedConnected
   const blueTaken = roomState.captainBlueConnected
-  const statusCopy = !hasSyncedRoomState
-    ? 'Sprawdzam dostępność drużyn...'
-    : redTaken && blueTaken
-      ? 'Obie drużyny mają już kapitanów.'
-      : 'Wybierz wolną drużynę i przejmij klucz planszy.'
+  const statusCopy = devicesDisconnectedByHost
+    ? 'Host rozłączył urządzenia tej sesji. Zamknij ten ekran i poczekaj na ponowne parowanie.'
+    : sessionCodeChangedRoomId
+    ? `Host uruchomił nowy pokój: ${sessionCodeChangedRoomId.toUpperCase()}. Zamknij ten ekran i dołącz ponownie z nowym kodem.`
+    : !hasSyncedRoomState
+      ? 'Sprawdzam dostępność drużyn...'
+      : redTaken && blueTaken
+        ? 'Obie drużyny mają już kapitanów.'
+        : 'Wybierz wolną drużynę i przejmij klucz planszy.'
 
   return (
     <div className={styles.teamSelect}>
@@ -79,18 +89,20 @@ function CaptainTeamSelect({
       <div className={styles.teamSelectShell}>
         <div className={styles.teamSelectHeader}>
           <span className={styles.teamSelectEyebrow}>Tajniacy</span>
-          <h1 className={styles.teamSelectTitle}>Wybierz drużynę</h1>
+          <h1 className={styles.teamSelectTitle}>
+            {devicesDisconnectedByHost ? 'Urządzenia zostały rozłączone' : sessionCodeChangedRoomId ? 'Kod sesji został zmieniony' : 'Wybierz drużynę'}
+          </h1>
           <p className={styles.teamSelectDesc}>{statusCopy}</p>
           <div className={styles.roomBadge}>
-            <span className={styles.roomBadgeLabel}>Pokój</span>
-            <strong className={styles.roomBadgeValue}>{roomId.toUpperCase()}</strong>
+            <span className={styles.roomBadgeLabel}>{sessionCodeChangedRoomId ? 'Nowy kod' : 'Pokój'}</span>
+            <strong className={styles.roomBadgeValue}>{(sessionCodeChangedRoomId ?? roomId).toUpperCase()}</strong>
           </div>
         </div>
 
         <div className={styles.teamSelectButtons}>
           <button
             className={`${styles.teamBtn} ${styles.teamBtnRed}`}
-            disabled={!hasSyncedRoomState || redTaken}
+            disabled={!hasSyncedRoomState || redTaken || devicesDisconnectedByHost || Boolean(sessionCodeChangedRoomId)}
             onClick={() => onChooseTeam('red')}
           >
             <span className={styles.teamBtnGlow} aria-hidden="true" />
@@ -114,7 +126,7 @@ function CaptainTeamSelect({
 
           <button
             className={`${styles.teamBtn} ${styles.teamBtnBlue}`}
-            disabled={!hasSyncedRoomState || blueTaken}
+            disabled={!hasSyncedRoomState || blueTaken || devicesDisconnectedByHost || Boolean(sessionCodeChangedRoomId)}
             onClick={() => onChooseTeam('blue')}
           >
             <span className={styles.teamBtnGlow} aria-hidden="true" />

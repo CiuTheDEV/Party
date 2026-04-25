@@ -14,37 +14,164 @@
 }
 
 .shell {
+  position: relative;
   width: min(1080px, 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 56px;
+  gap: 42px;
   text-align: center;
   animation: shellIn 320ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.banner {
+.celebrationStage {
+  position: relative;
+  width: min(860px, 100%);
+  padding-top: 18px;
+}
+
+.confettiLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.confettiPiece {
+  position: absolute;
+  left: var(--confetti-left);
+  top: var(--confetti-top);
+  width: var(--confetti-size);
+  height: calc(var(--confetti-size) * 1.7);
+  border-radius: 999px;
+  transform: rotate(var(--confetti-rotate));
+  transform-origin: center;
+  animation: confettiFloat 3.6s ease-in-out infinite;
+  animation-delay: var(--confetti-delay);
+  opacity: 0.92;
+}
+
+.confettiPiece[data-tone='gold'] {
+  background: linear-gradient(180deg, #fde68a 0%, #facc15 100%);
+  box-shadow: 0 0 24px rgba(250, 204, 21, 0.36);
+}
+
+.confettiPiece[data-tone='red'] {
+  background: linear-gradient(180deg, #ff8b83 0%, #ff5a4f 100%);
+}
+
+.confettiPiece[data-tone='blue'] {
+  background: linear-gradient(180deg, #93ccff 0%, #4aa7ff 100%);
+}
+
+.confettiPiece[data-tone='white'] {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 1) 0%, rgba(214, 226, 255, 0.9) 100%);
+}
+
+.heroCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 26px 36px 34px;
+  border-radius: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.12), transparent 54%),
+    linear-gradient(180deg, rgba(14, 16, 20, 0.94), rgba(11, 12, 16, 0.9));
+  box-shadow:
+    0 36px 90px rgba(0, 0, 0, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.heroCard[data-accent='red'] {
+  box-shadow:
+    0 36px 90px rgba(0, 0, 0, 0.34),
+    0 0 0 1px rgba(255, 90, 79, 0.24),
+    0 0 72px rgba(255, 90, 79, 0.16);
+}
+
+.heroCard[data-accent='blue'] {
+  box-shadow:
+    0 36px 90px rgba(0, 0, 0, 0.34),
+    0 0 0 1px rgba(74, 167, 255, 0.24),
+    0 0 72px rgba(74, 167, 255, 0.16);
+}
+
+.heroBadge {
   display: inline-flex;
   align-items: center;
-  gap: 18px;
-  padding: 16px 28px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  background: rgba(12, 12, 12, 0.86);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02);
+  min-height: 34px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.72);
 }
 
-.banner[data-accent='red'],
-.banner[data-accent='blue'] {
+.heroAvatarWrap {
+  position: relative;
+  width: 204px;
+  height: 204px;
+  display: grid;
+  place-items: center;
+}
+
+.heroAvatarGlow,
+.heroAvatarRing {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+}
+
+.heroAvatarGlow {
+  background:
+    radial-gradient(circle, rgba(250, 204, 21, 0.42) 0%, rgba(250, 204, 21, 0.1) 42%, transparent 72%);
+  filter: blur(10px);
+}
+
+.heroAvatarRing {
+  inset: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 0 0 8px rgba(255, 255, 255, 0.04),
+    0 0 42px rgba(250, 204, 21, 0.14);
+}
+
+.heroAvatar {
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 22px 34px rgba(0, 0, 0, 0.26));
+}
+
+.heroCopy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  max-width: 760px;
+}
+
+.heroTitle {
+  font-size: clamp(32px, 4vw, 58px);
+  font-weight: 900;
+  line-height: 0.96;
   color: #facc15;
-  box-shadow: 0 0 0 1px rgba(250, 204, 21, 0.24);
+  text-wrap: balance;
 }
 
-.bannerText {
-  font-size: clamp(24px, 2.8vw, 40px);
-  font-weight: 800;
-  line-height: 1;
-  color: inherit;
+.heroSubtitle {
+  font-size: clamp(15px, 1.4vw, 18px);
+  font-weight: 700;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.72);
+  text-wrap: balance;
 }
 
 .vsRow {
@@ -60,11 +187,16 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  transition: transform 180ms ease, opacity 180ms ease;
 }
 
 .teamSide[data-side='right'] {
   flex-direction: row-reverse;
   justify-content: flex-end;
+}
+
+.teamSide[data-winner='true'] {
+  transform: scale(1.04);
 }
 
 .teamSideLabel {
@@ -106,7 +238,12 @@
 
 .scoreCard[data-team='blue'] {
   background: #4aa7ff;
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.92);
+}
+
+.scoreCard[data-winner='true'] {
+  box-shadow:
+    0 0 0 4px rgba(255, 255, 255, 0.92),
+    0 0 34px rgba(255, 255, 255, 0.2);
 }
 
 .vs {
@@ -201,6 +338,17 @@
   white-space: nowrap;
 }
 
+@keyframes confettiFloat {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--confetti-rotate));
+  }
+
+  50% {
+    transform: translateY(12px) rotate(calc(var(--confetti-rotate) + 12deg));
+  }
+}
+
 @keyframes overlayIn {
   from {
     opacity: 0;
@@ -228,6 +376,21 @@
     gap: 36px;
   }
 
+  .heroCard {
+    padding: 22px 20px 28px;
+    border-radius: 28px;
+    gap: 20px;
+  }
+
+  .heroAvatarWrap {
+    width: 166px;
+    height: 166px;
+  }
+
+  .heroAvatarRing {
+    inset: 14px;
+  }
+
   .vsRow {
     grid-template-columns: 1fr;
     gap: 14px;
@@ -250,6 +413,10 @@
   .footerActions {
     flex-direction: column;
     width: 100%;
+  }
+
+  .confettiPiece {
+    opacity: 0.78;
   }
 
   .actionBadge {

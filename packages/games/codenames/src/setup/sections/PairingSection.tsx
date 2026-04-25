@@ -14,6 +14,11 @@ export function PairingSection({ state, updateState, helpers }: Props) {
       teams={state.teams}
       captainRedConnected={state.captainRedConnected}
       captainBlueConnected={state.captainBlueConnected}
+      isModalOpen={helpers.isPairingModalOpen}
+      onDisconnectDevices={helpers.disconnectCaptainDevices}
+      onRegenerateSessionCode={helpers.regenerateSessionCode}
+      onOpenModal={helpers.openPairingModal}
+      onCloseModal={helpers.closePairingModal}
     />
   )
 }

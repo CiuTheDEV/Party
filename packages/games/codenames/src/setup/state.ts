@@ -9,6 +9,10 @@ export type CodenamesTeam = {
 
 export type CodenamesGameSettings = {
   rounds: number
+  assassins: {
+    enabled: boolean
+    count: number
+  }
 }
 
 export type CodenamesCategoryBalance = {
@@ -29,7 +33,7 @@ export type CodenamesSetupState = {
 
 export const CODENAMES_DEFAULT_AVATARS = ['star', 'moon'] as const
 
-function createCodenamesRoomId() {
+export function createCodenamesRoomId() {
   if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
     return crypto.randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase()
   }
@@ -44,7 +48,13 @@ export function createInitialCodenamesSetupState(): CodenamesSetupState {
       { name: 'Niebiescy', avatar: CODENAMES_DEFAULT_AVATARS[1] },
     ],
     selectedCategories: { standard: true },
-    settings: { rounds: 3 },
+    settings: {
+      rounds: 3,
+      assassins: {
+        enabled: false,
+        count: 1,
+      },
+    },
     categoryBalance: null,
     captainRedConnected: false,
     captainBlueConnected: false,
@@ -70,4 +80,8 @@ export function validateCodenamesSetup(state: CodenamesSetupState): GameSetupVal
     canStart: errors.length === 0,
     errors,
   }
+}
+
+export function getCodenamesAssassinCount(settings: CodenamesGameSettings) {
+  return settings.assassins.enabled ? settings.assassins.count : 1
 }

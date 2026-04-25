@@ -1,10 +1,6 @@
-export function shouldAutoCloseCaptainPairingModal(captainRedConnected: boolean, captainBlueConnected: boolean) {
-  return captainRedConnected && captainBlueConnected
-}
-
 export function getCaptainPairingSummary(captainRedConnected: boolean, captainBlueConnected: boolean) {
   if (captainRedConnected && captainBlueConnected) {
-    return 'Obaj kapitanowie są już połączeni. Zamykam parowanie.'
+    return 'Obaj kapitanowie są już połączeni.'
   }
 
   if (captainRedConnected) {

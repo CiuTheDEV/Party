@@ -57,6 +57,25 @@ function normalizeRounds(value: unknown, fallback: number) {
   return Math.max(1, Math.round(value.rounds))
 }
 
+function normalizeAssassins(
+  value: unknown,
+  fallback: CodenamesSetupState['settings']['assassins'],
+): CodenamesSetupState['settings']['assassins'] {
+  if (!isRecord(value) || !isRecord(value.assassins)) {
+    return fallback
+  }
+
+  const count =
+    typeof value.assassins.count === 'number' && Number.isFinite(value.assassins.count)
+      ? Math.max(1, Math.min(4, Math.round(value.assassins.count)))
+      : fallback.count
+
+  return {
+    enabled: value.assassins.enabled === true,
+    count,
+  }
+}
+
 function normalizeCategoryBalance(
   value: unknown,
   selectedCategories: Record<string, true>,
@@ -115,6 +134,7 @@ export function restoreCodenamesSetupState(raw: string | null | undefined): Code
       selectedCategories,
       settings: {
         rounds: normalizeRounds(parsed.settings, fallback.settings.rounds),
+        assassins: normalizeAssassins(parsed.settings, fallback.settings.assassins),
       },
       categoryBalance: normalizeCategoryBalance(parsed.categoryBalance, selectedCategories),
       // Connection flags are runtime-only; restoring them would fake paired devices after reload.

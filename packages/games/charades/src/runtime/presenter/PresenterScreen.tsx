@@ -88,6 +88,22 @@ export function PresenterScreen({ state, connectionState, onRevealWord, onChange
             />
           )}
 
+          {state.phase === 'devices-disconnected' && (
+            <MessagePanel
+              accent="Urządzenie rozłączone"
+              title="Host rozłączył urządzenie"
+              body="Ten telefon nie jest już sparowany z grą. Poczekaj, aż host połączy urządzenie ponownie."
+            />
+          )}
+
+          {state.phase === 'session-code-changed' && (
+            <MessagePanel
+              accent="Nowy kod sesji"
+              title="Host zmienił kod sesji"
+              body={`Ta karta nie jest już aktywna. Dołącz ponownie z nowym kodem: ${state.nextRoomId.toUpperCase()}.`}
+            />
+          )}
+
           {state.phase === 'round-order' && (
             <MessagePanel
               accent="Losowanie"
@@ -156,6 +172,14 @@ function getStagePhase(phase: PresenterViewState['phase']) {
   }
 
   if (phase === 'host-left') {
+    return 'ended'
+  }
+
+  if (phase === 'devices-disconnected') {
+    return 'ended'
+  }
+
+  if (phase === 'session-code-changed') {
     return 'ended'
   }
 
@@ -257,6 +281,18 @@ const PRESENTER_PHASE_CHROME: Record<
     presenterLabel: 'Stan telefonu',
     phaseSummary: 'Host zakończył tę rozgrywkę i wrócił do menu.',
     presenterName: () => 'Odłączony od gry',
+  },
+  'devices-disconnected': {
+    phaseLabel: 'Urządzenie rozłączone',
+    presenterLabel: 'Stan telefonu',
+    phaseSummary: 'Host rozłączył ten telefon. Poczekaj na ponowne sparowanie.',
+    presenterName: () => 'Nie jest już sparowany',
+  },
+  'session-code-changed': {
+    phaseLabel: 'Nowy kod sesji',
+    presenterLabel: 'Stan telefonu',
+    phaseSummary: 'Host zmienił kod. Sparuj telefon ponownie z nową sesją.',
+    presenterName: () => 'Wymaga ponownego połączenia',
   },
   'your-turn': {
     phaseLabel: 'Przygotowanie',

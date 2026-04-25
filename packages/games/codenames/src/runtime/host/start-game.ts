@@ -1,6 +1,6 @@
 import { CODENAMES_BOARD_WORD_COUNT } from '../../setup/pool-validation'
 import { resolveBoardSplit } from '../../setup/category-balance'
-import type { CodenamesCategoryBalance } from '../../setup/state'
+import { getCodenamesAssassinCount, type CodenamesCategoryBalance, type CodenamesGameSettings } from '../../setup/state'
 import { generateBoard } from '../shared/board-generator'
 import {
   getFreshWordsForCategories,
@@ -13,7 +13,10 @@ export function prepareCodenamesGameStart(params: {
   categories: Array<{ id: string; words: string[] }>
   history: StoredCodenamesWordHistory
   categoryBalance?: CodenamesCategoryBalance | null
+  settings?: CodenamesGameSettings | null
 }) {
+  const assassinCount = params.settings ? getCodenamesAssassinCount(params.settings) : 1
+
   if (params.categoryBalance) {
     if (params.categories.length !== 2) {
       return {
@@ -64,7 +67,7 @@ export function prepareCodenamesGameStart(params: {
       ...leftFreshWords.slice(0, leftCount),
       ...rightFreshWords.slice(0, rightCount),
     ]
-    const board = generateBoard(freshWords)
+    const board = generateBoard(freshWords, { assassinCount })
     const history = recordUsedWordsForCategories({
       categories: params.categories,
       history: params.history,
@@ -90,7 +93,7 @@ export function prepareCodenamesGameStart(params: {
     }
   }
 
-  const board = generateBoard(freshWords)
+  const board = generateBoard(freshWords, { assassinCount })
   const history = recordUsedWordsForCategories({
     categories: params.categories,
     history: params.history,

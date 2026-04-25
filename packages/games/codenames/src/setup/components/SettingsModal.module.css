@@ -74,6 +74,10 @@
     0 10px 22px color-mix(in srgb, var(--game-color-primary) 14%, transparent);
 }
 
+.optionCardDisabled {
+  opacity: 0.58;
+}
+
 .cancelBtn {
   padding: 14px 28px;
   border: 1px solid rgba(255, 255, 255, 0.1);

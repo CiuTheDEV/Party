@@ -291,6 +291,10 @@ export function applyEvent(state: RoomState, event: CharadesEvent): RoomState {
         revealRemaining: 0,
         revealDuration: 0,
       }
+    case 'DEVICES_DISCONNECTED':
+      return state
+    case 'SESSION_CODE_CHANGED':
+      return state
     case 'GAME_RESET':
       return buildResetRoomState(state.presenterConnected)
     default:

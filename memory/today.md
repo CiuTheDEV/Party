@@ -20,6 +20,19 @@
 - Next: jeśli wróci zgłoszenie o flickerze setupu Tajniaków przy linku kapitana, wrócić do niego tylko przez wąską instrumentację `showSetup` / remount / focus, bez kolejnych ślepych patchy.
 - Experience recorded: yes
 
+### S90 (2026-04-25) [Tajniacy/Kalambury] Pairing flow hardening around setup/modal remounts
+
+- Zamiast kolejnych punktowych fixów zrobiono pełny przegląd lifecycle parowania w obu grach: host setup, modal parowania, listener websocket i flow `otwórz w nowej karcie -> dołączenie urządzenia`.
+- Root cause okazał się wspólny dla Tajniaków i Kalamburów: stan `showSetup` i stan modala parowania były rozdzielone po lokalnych `useState`, a zapis do URL następował dopiero w efekcie po renderze. Jeśli w tym oknie następował remount, host tracił setup albo sam modal.
+- Fix przenosi oba stany na poziom strony i traktuje URL jako trwały nośnik UI state: `?setup=1` dla setupu i `?pairing=1` dla modala parowania. Aktualizacja URL dzieje się synchronicznie w tych samych handlerach, które otwierają lub zamykają overlay, więc znika wyścig między kliknięciem a remountem.
+- Panele parowania w obu grach przestały trzymać własny `showModal`; są teraz sterowane propsami z poziomu strony, więc remount nie gasi już modala.
+- Weryfikacja jest zielona: `npm run build --workspace @party/charades`, `npm run build --workspace @party/codenames`, `npm run build --workspace @party/hub`.
+- Browser pass przeszedł dla obu flow host + urządzenie:
+- Kalambury: po `Dodaj urządzenia -> Otwórz w nowej karcie` host pozostał na `?setup=1&pairing=1`, modal został otwarty, a po wejściu prezentera status zmienił się na `Połączono` bez zamknięcia modala.
+- Tajniacy: po `Dodaj urządzenia -> Otwórz w nowej karcie -> wybór drużyny` host pozostał na `?setup=1&pairing=1`, setup i modal nie zniknęły, a status kapitana zaktualizował się w otwartym modalu.
+- Artefakt browser verify zapisano w `output/playwright/codenames-pairing-retained.png`.
+- Experience recorded: yes
+
 ### S87 (2026-04-24) [Tajniacy] Avatar picker sync with Kalambury
 
 - Pierwszy fix był niepełny: niesłusznie usunięto zakładkę `Inne`, a sam bug renderu popupu nadal występował.

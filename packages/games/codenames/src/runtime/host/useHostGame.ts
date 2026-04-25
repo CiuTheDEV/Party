@@ -19,6 +19,14 @@ type CodenamesCategoryBalance = {
   leftSharePercent: number
 }
 
+type CodenamesGameSettings = {
+  rounds: number
+  assassins: {
+    enabled: boolean
+    count: number
+  }
+}
+
 const initialRoomState: RoomState = {
   phase: 'waiting',
   cards: [],
@@ -44,9 +52,10 @@ type UseHostGameParams = {
   roomId: string
   teams: [{ name: string; avatar: string }, { name: string; avatar: string }]
   categoryBalance: CodenamesCategoryBalance | null
+  settings: CodenamesGameSettings
 }
 
-export function useHostGame({ categories, roomId, teams, categoryBalance }: UseHostGameParams) {
+export function useHostGame({ categories, roomId, teams, categoryBalance, settings }: UseHostGameParams) {
   const [roomState, setRoomState] = useState<RoomState>(initialRoomState)
   const [hasSyncedRoomState, setHasSyncedRoomState] = useState(false)
   const [isRoundIntroVisible, setIsRoundIntroVisible] = useState(false)
@@ -63,6 +72,8 @@ export function useHostGame({ categories, roomId, teams, categoryBalance }: UseH
   teamsRef.current = teams
   const categoryBalanceRef = useRef(categoryBalance)
   categoryBalanceRef.current = categoryBalance
+  const settingsRef = useRef(settings)
+  settingsRef.current = settings
 
   const socket = usePartySocket({
     host: getPartykitHost(),
@@ -112,6 +123,7 @@ export function useHostGame({ categories, roomId, teams, categoryBalance }: UseH
       socket,
       categoriesRef.current,
       categoryBalanceRef.current,
+      settingsRef.current,
       setStartBlockedReason,
     )
   }, [roomState, socket])
@@ -130,6 +142,7 @@ export function useHostGame({ categories, roomId, teams, categoryBalance }: UseH
       socket,
       categoriesRef.current,
       categoryBalanceRef.current,
+      settingsRef.current,
       setStartBlockedReason,
     )
   }, [roomState, socket])
@@ -179,6 +192,7 @@ export function useHostGame({ categories, roomId, teams, categoryBalance }: UseH
       socket,
       categoriesRef.current,
       categoryBalanceRef.current,
+      settingsRef.current,
       setStartBlockedReason,
     )
   }, [roomState, socket])
@@ -227,6 +241,7 @@ export function useHostGame({ categories, roomId, teams, categoryBalance }: UseH
       socket,
       categoriesRef.current,
       categoryBalanceRef.current,
+      settingsRef.current,
       setStartBlockedReason,
     )
   }, [roomState, socket])
@@ -351,12 +366,14 @@ function trySendGameStart(
   socket: { send: (data: string) => void },
   categories: Array<{ id: string; words: string[] }>,
   categoryBalance: CodenamesCategoryBalance | null,
+  settings: CodenamesGameSettings,
   setStartBlockedReason: (reason: string | null) => void,
 ) {
   const result = prepareCodenamesGameStart({
     categories,
     history: readCodenamesWordHistory(),
     categoryBalance,
+    settings,
   })
 
   if (!result.ok) {

@@ -1,10 +1,11 @@
 'use client'
 
 import dynamic from 'next/dynamic'
-import { useMemo, useState, useEffect, useLayoutEffect } from 'react'
+import { useMemo, useState, useEffect, useLayoutEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   appendPoolValidationError,
+  createCodenamesRoomId,
   getCodenamesBalancedPoolError,
   getCodenamesCategoryPoolSummaries,
   getCodenamesPoolSummary,
@@ -31,6 +32,14 @@ import { useCodenamesMenuView } from './menu-view-context'
 const CaptainListener = dynamic(async () => CodenameCaptainListener, { ssr: false })
 
 type SetupFocusTarget = 'close' | 'start'
+type SetupUiState = {
+  showSetup: boolean
+  isPairingModalOpen: boolean
+}
+type PendingDeviceAction = {
+  type: 'disconnect-devices' | 'session-code-change'
+  nextRoomId: string
+}
 
 function getBalancedCategoryIds(selectedCategories: Record<string, true>) {
   const selectedIds = Object.keys(selectedCategories)
@@ -102,7 +111,10 @@ export function CodenamesMenuPageClient() {
     setHasUnsavedSettingsChanges,
   } = useCodenamesMenuView()
 
-  const [showSetup, setShowSetup] = useState(false)
+  const [setupUi, setSetupUi] = useState<SetupUiState>({
+    showSetup: false,
+    isPairingModalOpen: false,
+  })
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false)
   const [setupState, setSetupState] = useState<CodenamesSetupState>(() => codenamesModule.createInitialSetupState())
   const [captainConnections, setCaptainConnections] = useState(() =>
@@ -113,6 +125,7 @@ export function CodenamesMenuPageClient() {
   )
   const [hasRestoredSetup, setHasRestoredSetup] = useState(false)
   const [setupFocus, setSetupFocus] = useState<SetupFocusTarget>('start')
+  const [pendingDeviceAction, setPendingDeviceAction] = useState<PendingDeviceAction | null>(null)
   const runtimeSetupState = useMemo(
     () => ({
       ...setupState,
@@ -165,11 +178,69 @@ export function CodenamesMenuPageClient() {
     }
   }, [categoryPoolSummaries, poolSummary, runtimeSetupState])
 
+  const isCaptainListenerActive = shouldKeepCaptainListenerActive({
+    hasRestoredSetup,
+    roomId: setupState.roomId,
+  })
+
+  const applyCaptainRoomTransition = useCallback((nextRoomId: string) => {
+    setPendingDeviceAction(null)
+    setSetupState((current) => ({
+      ...current,
+      roomId: nextRoomId,
+      captainRedConnected: false,
+      captainBlueConnected: false,
+    }))
+  }, [])
+
+  const requestCaptainRoomTransition = useCallback((type: 'disconnect-devices' | 'session-code-change', nextRoomId: string) => {
+    if (!nextRoomId || nextRoomId === setupState.roomId) {
+      return
+    }
+
+    if (!isCaptainListenerActive) {
+      applyCaptainRoomTransition(nextRoomId)
+      return
+    }
+
+    setPendingDeviceAction({
+      type,
+      nextRoomId,
+    })
+  }, [applyCaptainRoomTransition, isCaptainListenerActive, setupState.roomId])
+
+  const updateSetupUi = useCallback((nextState: SetupUiState | ((current: SetupUiState) => SetupUiState)) => {
+    setSetupUi((current) => {
+      const resolvedState = typeof nextState === 'function' ? nextState(current) : nextState
+
+      if (typeof window !== 'undefined') {
+        const url = new URL(window.location.href)
+
+        if (resolvedState.showSetup) {
+          url.searchParams.set('setup', '1')
+        } else {
+          url.searchParams.delete('setup')
+        }
+
+        if (resolvedState.showSetup && resolvedState.isPairingModalOpen) {
+          url.searchParams.set('pairing', '1')
+        } else {
+          url.searchParams.delete('pairing')
+        }
+
+        window.history.replaceState(window.history.state, '', url)
+      }
+
+      return resolvedState
+    })
+  }, [])
+
   const helpers: CodenamesSetupHelpers = useMemo(
     () => ({
       categories: codenamesCategories,
       categoryPoolSummaries,
       CaptainListener,
+      isPairingModalOpen: setupUi.isPairingModalOpen,
       poolSummary,
       resetActivePoolHistory: () => {
         const activeCategoryIds = Object.keys(setupState.selectedCategories)
@@ -201,8 +272,26 @@ export function CodenamesMenuPageClient() {
           selectedCategories: { ...current.selectedCategories },
         }))
       },
+      disconnectCaptainDevices: () => {
+        requestCaptainRoomTransition('disconnect-devices', createCodenamesRoomId())
+      },
+      regenerateSessionCode: () => {
+        requestCaptainRoomTransition('session-code-change', createCodenamesRoomId())
+      },
+      openPairingModal: () => {
+        updateSetupUi({
+          showSetup: true,
+          isPairingModalOpen: true,
+        })
+      },
+      closePairingModal: () => {
+        updateSetupUi((current) => ({
+          ...current,
+          isPairingModalOpen: false,
+        }))
+      },
     }),
-    [categoryPoolSummaries, poolSummary, setupState.selectedCategories],
+    [categoryPoolSummaries, poolSummary, requestCaptainRoomTransition, setupState.selectedCategories, setupUi.isPairingModalOpen, updateSetupUi],
   )
 
   useEffect(() => {
@@ -215,10 +304,15 @@ export function CodenamesMenuPageClient() {
       return
     }
 
-    const shouldShowSetup = new URLSearchParams(window.location.search).get('setup') === '1'
+    const searchParams = new URLSearchParams(window.location.search)
+    const shouldShowSetup = searchParams.get('setup') === '1'
+    const shouldShowPairing = shouldShowSetup && searchParams.get('pairing') === '1'
 
     if (shouldShowSetup) {
-      setShowSetup(true)
+      setSetupUi({
+        showSetup: true,
+        isPairingModalOpen: shouldShowPairing,
+      })
       requestMenuViewChange('mode')
     }
   }, [requestMenuViewChange])
@@ -231,25 +325,21 @@ export function CodenamesMenuPageClient() {
   }, [setupState.roomId])
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
+    if (!pendingDeviceAction) {
       return
     }
 
-    const url = new URL(window.location.href)
+    const timeoutId = window.setTimeout(() => {
+      applyCaptainRoomTransition(pendingDeviceAction.nextRoomId)
+    }, 700)
 
-    if (showSetup) {
-      url.searchParams.set('setup', '1')
-    } else {
-      url.searchParams.delete('setup')
-    }
-
-    window.history.replaceState(window.history.state, '', url)
-  }, [showSetup])
+    return () => window.clearTimeout(timeoutId)
+  }, [applyCaptainRoomTransition, pendingDeviceAction])
 
   useEffect(() => {
-    setIsMenuInputSuspended(showSetup || isSettingsModalOpen)
+    setIsMenuInputSuspended(setupUi.showSetup || isSettingsModalOpen)
     return () => setIsMenuInputSuspended(false)
-  }, [isSettingsModalOpen, setIsMenuInputSuspended, showSetup])
+  }, [isSettingsModalOpen, setIsMenuInputSuspended, setupUi.showSetup])
 
   useEffect(() => {
     if (!hasRestoredSetup) {
@@ -298,7 +388,7 @@ export function CodenamesMenuPageClient() {
   })
 
   useMenuControls({
-    enabled: showSetup,
+    enabled: setupUi.showSetup,
     onAction: (action) => {
       if (action === 'left' || action === 'right' || action === 'up' || action === 'down') {
         setSetupFocus((current) => (current === 'start' ? 'close' : 'start'))
@@ -312,7 +402,10 @@ export function CodenamesMenuPageClient() {
 
       if (action === 'confirm' || action === 'primary') {
         if (setupFocus === 'close') {
-          setShowSetup(false)
+          updateSetupUi({
+            showSetup: false,
+            isPairingModalOpen: false,
+          })
           return
         }
 
@@ -323,17 +416,14 @@ export function CodenamesMenuPageClient() {
     },
   })
 
-  const isCaptainListenerActive = shouldKeepCaptainListenerActive({
-    hasRestoredSetup,
-    roomId: setupState.roomId,
-  })
-
   return (
     <>
       {isCaptainListenerActive ? (
         <CaptainListener
           roomId={setupState.roomId}
           teams={setupState.teams}
+          pendingDeviceAction={pendingDeviceAction}
+          onDeviceActionSent={(action) => applyCaptainRoomTransition(action.nextRoomId)}
           onConnectionStateChange={(next) =>
             setCaptainConnections((current) => ({
               captainRedConnected:
@@ -347,7 +437,7 @@ export function CodenamesMenuPageClient() {
 
       <CodenamesMenuContent
         activeView={activeMenuView}
-        controlsEnabled={!showSetup && menuFocusArea === 'content' && isHostInputAwake && !isControllerWakeGuardActive}
+        controlsEnabled={!setupUi.showSetup && menuFocusArea === 'content' && isHostInputAwake && !isControllerWakeGuardActive}
         isContentFocused={menuFocusArea === 'content' && isHostInputAwake}
         onChangeView={requestMenuViewChange}
         registerSettingsExitGuard={registerSettingsExitGuard}
@@ -373,18 +463,25 @@ export function CodenamesMenuPageClient() {
           setMenuFocusArea('content')
           setIsRailForcedExpanded(false)
           setSetupFocus('start')
-          setShowSetup(true)
+          updateSetupUi({
+            showSetup: true,
+            isPairingModalOpen: false,
+          })
         }}
       />
 
-      {showSetup ? (
+      {setupUi.showSetup ? (
         <GameSetupTemplate
           title="Tajniacy"
           subtitle="Konfiguracja meczu"
           sections={sections}
           validation={validation}
           onStart={startGameFromSetup}
-          onClose={() => setShowSetup(false)}
+          onClose={() =>
+            updateSetupUi({
+              showSetup: false,
+              isPairingModalOpen: false,
+            })}
           isFocusVisible={isHostInputAwake}
           startLabel="Zagraj"
           focusedAction={setupFocus}

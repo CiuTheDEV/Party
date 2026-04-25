@@ -9,6 +9,13 @@ export type CaptainListenerProps = {
   roomId: string
   teams: [CodenamesTeam, CodenamesTeam]
   onConnectionStateChange: (state: PartialCaptainConnectionState) => void
+  pendingDeviceAction?:
+    | {
+        type: 'disconnect-devices' | 'session-code-change'
+        nextRoomId: string
+      }
+    | null
+  onDeviceActionSent?: (action: { type: 'disconnect-devices' | 'session-code-change'; nextRoomId: string }) => void
 }
 
 export type CodenamesSetupHelpers = {
@@ -22,6 +29,7 @@ export type CodenamesSetupHelpers = {
     isSelected: boolean
   }>
   CaptainListener: ComponentType<CaptainListenerProps>
+  isPairingModalOpen: boolean
   poolSummary: {
     poolKey: string
     total: number
@@ -30,4 +38,8 @@ export type CodenamesSetupHelpers = {
   }
   resetActivePoolHistory: () => void
   resetCategoryPoolHistory: (categoryId: string) => void
+  disconnectCaptainDevices: () => void
+  regenerateSessionCode: () => void
+  openPairingModal: () => void
+  closePairingModal: () => void
 }

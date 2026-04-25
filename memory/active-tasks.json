@@ -18,16 +18,5 @@
                                   "Remind user about tasks stale >14 days"
                               ]
                 },
-    "tasks":  [
-                  {
-                      "id":  "T002",
-                      "title":  "Codenames pool manager polish and browser validation",
-                      "status":  "blocked",
-                      "context":  "Persistent non-repeating words are implemented for Tajniacy with per-category history, active-pool blocking below 25 fresh words, shared pool-manager modal reuse, and per-category resets from the setup modal. Code-level checks and package builds pass. The setup flow was further hardened with `?setup=1` persistence and a client-side pre-paint restore path, but the user still reports a host-side flicker to the menu when the captain link is opened from the pairing modal. A local browser pass on `http://localhost:3000` did not reproduce that flicker, so stable browser validation for the pool-manager/setup flow is still blocked by an unresolved reproduction gap around setup remounting.",
-                      "next_action":  "Add focused dev instrumentation around Tajniacy host setup state (`showSetup`, remount, focus/visibility, URL updates`) during the captain-link flow, then repeat the visible browser pass and continue pool-manager UX polish once the flicker is explained.",
-                      "blocker":  "The reported Tajniacy setup flicker around `otwórz w nowej karcie` / captain-link entry still does not reproduce reliably in local browser automation, which blocks trustworthy end-to-end validation of the setup modal and pool-manager flow.",
-                      "created":  "2026-04-19",
-                      "updated":  "2026-04-25"
-                  }
-              ]
+    "tasks":  []
 }

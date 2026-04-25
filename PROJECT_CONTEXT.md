@@ -144,10 +144,10 @@ For new game module scaffolding and maturity expectations, see `docs/game-module
 ---
 
 <!-- handoff:start -->
-- Last: 2026-04-25 13:06 by Codex
-- Task: Production-readiness pass across Tajniacy/Kalambury plus hub/browser-chrome polish and content refresh.
-- Did: Production-tested Tajniacy and Kalambury, fixed the Tajniacy captain-route crash that blocked pairing, refreshed Charades and Codenames word pools, activated the live Tajniacy hero plus Spyfall animated card in the hub, removed the redundant community/showcase block, moved browser titles/favicons onto server metadata with separate `*LayoutClient.tsx` shells, added a real root `favicon.ico`, and updated footer copy/year. Hub builds and localhost title/favicon checks are green.
-- Next: If the Tajniacy setup flicker report returns, instrument `showSetup`, remount, focus/visibility, and URL changes around the captain-link flow before applying any more fixes. Optional hub follow-up is only copy cleanup for remaining placeholder footer/platform labels.
-- Blocker: No blocker for the shipped hub/content/browser-chrome work. Separate unresolved risk remains the non-reproduced Tajniacy host-setup flicker around `otwórz w nowej karcie` / captain-link entry.
+- Last: 2026-04-25 15:10 by Codex
+- Task: Hardening pairing flow in Tajniacy and Kalambury so host setup and pairing modal survive device join/remounts.
+- Did: Audited both pairing lifecycles end-to-end, identified the shared race between local overlay state and delayed URL sync, moved setup/pairing UI ownership to page level in both games, added URL-backed `?setup=1` + `?pairing=1` state updated synchronously in open/close handlers, and converted both pairing panels to controlled modals. Verified with green builds for `@party/charades`, `@party/codenames`, and `@party/hub`, plus live browser passes for host + device join in both games. Saved artifact: `output/playwright/codenames-pairing-retained.png`.
+- Next: Continue only if a new pairing bug appears in a narrower surface, for example disconnect/session-code-change edge cases during an already connected room. The base host-drop/modal-drop bug is now reproduced, explained, and fixed.
+- Blocker: No active blocker on the pairing flicker/drop flow after the current browser verification.
 <!-- handoff:end -->
 
