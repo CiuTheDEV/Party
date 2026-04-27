@@ -109,6 +109,10 @@ run('accepts game start only after both captains connect', () => {
   assert.equal(server.state.captainBlueReady, false)
   assert.equal(server.state.hostConnected, true)
   assert.ok(room.broadcasts.some((entry) => JSON.parse(entry.message).type === 'GAME_START'))
+  assert.deepEqual(JSON.parse(room.broadcasts[3].message), {
+    type: 'ROOM_STATE',
+    state: server.state,
+  })
 })
 
 run('unlocks the board only after both captains confirm ready', () => {
@@ -192,6 +196,12 @@ run('increments the winning team after all opposing cards are revealed', () => {
   assert.equal(server.state.winner, 'red')
   assert.equal(server.state.roundWinsRed, 1)
   assert.equal(server.state.roundWinsBlue, 0)
+  assert.ok(
+    room.broadcasts.some((entry) => {
+      const message = JSON.parse(entry.message)
+      return message.type === 'ROOM_STATE' && JSON.stringify(message.state) === JSON.stringify(server.state)
+    }),
+  )
 })
 
 run('preserves round wins after reset', () => {
@@ -250,6 +260,12 @@ run('increments the losing team after assassin selection', () => {
   assert.equal(server.state.winner, 'blue')
   assert.equal(server.state.roundWinsBlue, 1)
   assert.equal(server.state.roundWinsRed, 0)
+  assert.ok(
+    room.broadcasts.some((entry) => {
+      const message = JSON.parse(entry.message)
+      return message.type === 'ROOM_STATE' && JSON.stringify(message.state) === JSON.stringify(server.state)
+    }),
+  )
 })
 
 run('resets the whole match after match reset', () => {
@@ -279,12 +295,13 @@ run('resets the whole match after match reset', () => {
   assert.equal(server.state.roundWinsBlue, 0)
   assert.equal(server.state.winner, null)
   assert.equal(server.state.assassinTeam, null)
-  assert.equal(room.broadcasts.length, 9)
-  assert.equal(JSON.parse(room.broadcasts[7].message).type, 'MATCH_RESET')
-  assert.deepEqual(JSON.parse(room.broadcasts[8].message), {
-    type: 'ROOM_STATE',
-    state: server.state,
-  })
+  assert.ok(room.broadcasts.some((entry) => JSON.parse(entry.message).type === 'MATCH_RESET'))
+  assert.ok(
+    room.broadcasts.some((entry) => {
+      const message = JSON.parse(entry.message)
+      return message.type === 'ROOM_STATE' && JSON.stringify(message.state) === JSON.stringify(server.state)
+    }),
+  )
 })
 
 run('broadcasts host disconnected when host closes', () => {

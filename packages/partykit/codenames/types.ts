@@ -16,6 +16,7 @@ export type TeamMetadata = {
 export type RoomState = {
   phase: RoomPhase
   cards: Card[]
+  lastRevealedIndex: number | null
   redTotal: number
   blueTotal: number
   roundWinsRed: number

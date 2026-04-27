@@ -9,6 +9,7 @@ import { ROUND_INTRO_DURATION_MS } from '../shared/RoundIntroOverlay'
 const initialRoomState: RoomState = {
   phase: 'waiting',
   cards: [],
+  lastRevealedIndex: null,
   redTotal: 0,
   blueTotal: 0,
   roundWinsRed: 0,
@@ -160,6 +161,7 @@ function applyServerEvent(state: RoomState, event: IncomingMessage): RoomState {
         hostConnected: true,
         phase: 'playing',
         cards: event.cards,
+        lastRevealedIndex: null,
         redTotal: event.redTotal,
         blueTotal: event.blueTotal,
         startingTeam: event.startingTeam,
@@ -179,16 +181,16 @@ function applyServerEvent(state: RoomState, event: IncomingMessage): RoomState {
         i === event.index ? { ...card, revealed: true } : card,
       )
       const hit = cards[event.index]
-      if (hit.color === 'assassin') return { ...state, hostConnected: true, cards, phase: 'assassin-reveal' }
+      if (hit.color === 'assassin') return { ...state, hostConnected: true, cards, lastRevealedIndex: event.index, phase: 'assassin-reveal' }
       const redRevealed = cards.filter((card) => card.color === 'red' && card.revealed).length
       const blueRevealed = cards.filter((card) => card.color === 'blue' && card.revealed).length
       if (redRevealed >= state.redTotal) {
-        return { ...state, hostConnected: true, cards, phase: 'ended', winner: 'red', roundWinsRed: state.roundWinsRed + 1 }
+        return { ...state, hostConnected: true, cards, lastRevealedIndex: event.index, phase: 'ended', winner: 'red', roundWinsRed: state.roundWinsRed + 1 }
       }
       if (blueRevealed >= state.blueTotal) {
-        return { ...state, hostConnected: true, cards, phase: 'ended', winner: 'blue', roundWinsBlue: state.roundWinsBlue + 1 }
+        return { ...state, hostConnected: true, cards, lastRevealedIndex: event.index, phase: 'ended', winner: 'blue', roundWinsBlue: state.roundWinsBlue + 1 }
       }
-      return { ...state, hostConnected: true, cards }
+      return { ...state, hostConnected: true, cards, lastRevealedIndex: event.index }
     }
     case 'ASSASSIN_TEAM': {
       const winner = event.team === 'red' ? 'blue' : 'red'

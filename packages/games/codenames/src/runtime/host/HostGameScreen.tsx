@@ -30,6 +30,8 @@ import { CaptainPairingModal } from '../../setup/components/CaptainPairingPanel'
 import { getVisibleHostControlActionLabel, type HostControlCommand } from './host-controls'
 import { useHostControls } from './useHostControls'
 import { RuntimeStatusRail } from './RuntimeStatusRail'
+import { BoardKeyOverlay } from './BoardKeyOverlay'
+import { getBoardKeyStats } from './board-key-stats'
 import styles from './HostGameScreen.module.css'
 
 type CodenamesTeam = { name: string; avatar: string }
@@ -75,6 +77,7 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin, categor
   const [soundEnabled, setSoundEnabled] = useState(true)
   const [animationsEnabled, setAnimationsEnabled] = useState(true)
   const [isStatusRailOpen, setIsStatusRailOpen] = useState(false)
+  const [isBoardKeyOpen, setIsBoardKeyOpen] = useState(false)
   const [boardSelectionIndex, setBoardSelectionIndex] = useState(12)
   const [assassinFocusedTeam, setAssassinFocusedTeam] = useState<'red' | 'blue'>('red')
   const [activeInputDevice, setActiveInputDevice] = useState<'keyboard' | 'controller'>('keyboard')
@@ -92,6 +95,7 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin, categor
   const endScreenMode = getHostEndScreenMode({ roundWinsRed: redRoundWins, roundWinsBlue: blueRoundWins, roundsToWin })
   const redRevealed = roomState.cards.filter((c) => c.color === 'red' && c.revealed).length
   const blueRevealed = roomState.cards.filter((c) => c.color === 'blue' && c.revealed).length
+  const boardKeyStats = useMemo(() => getBoardKeyStats(roomState), [roomState])
   const isCaptainReconnectRequired = !roomState.captainRedConnected || !roomState.captainBlueConnected
   const showReadyStatusInBottomBar =
     roomState.phase === 'playing' &&
@@ -157,9 +161,15 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin, categor
     }
   }, [roomState.phase])
 
+  useEffect(() => {
+    if (roomState.phase !== 'ended') {
+      setIsBoardKeyOpen(false)
+    }
+  }, [roomState.phase])
+
   const exitToMenu = useCallback(() => {
     setIsExitToMenuPending(true)
-    restartMatch()
+    restartMatch('exit-to-menu')
   }, [restartMatch])
 
   useEffect(() => {
@@ -371,48 +381,78 @@ export function HostGameScreen({ roomId, categories, teams, roundsToWin, categor
 
     if (endScreenMode === 'match') {
       return (
-        <MatchSummaryScreen
-          winnerTeam={winnerTeam}
-          loserTeam={loserTeam}
+        <>
+          <MatchSummaryScreen
+            winnerTeam={winnerTeam}
+            loserTeam={loserTeam}
+            redTeam={redTeam}
+            blueTeam={blueTeam}
+            redRoundWins={redRoundWins}
+            blueRoundWins={blueRoundWins}
+            roundsToWin={roundsToWin}
+            onShowBoardKey={() => setIsBoardKeyOpen(true)}
+            controlsEnabled={!isBoardKeyOpen}
+            onReplayMatch={() => {
+              const entryTarget = getCodenamesRuntimeEntryTarget()
+              runtimeControls.setFocus({
+                screenId: CODENAMES_NAVIGATION_SCREENS.runtime,
+                zoneId: entryTarget.zoneId,
+                targetId: entryTarget.targetId,
+              })
+              restartMatch()
+            }}
+            onExitToMenu={exitToMenu}
+          />
+          {isBoardKeyOpen ? (
+            <BoardKeyOverlay
+              mode="review"
+              cards={roomState.cards}
+              startingTeam={roomState.startingTeam}
+              redTeam={redTeam}
+              blueTeam={blueTeam}
+              stats={boardKeyStats}
+              onClose={() => setIsBoardKeyOpen(false)}
+            />
+          ) : null}
+        </>
+      )
+    }
+
+    return (
+      <>
+        <RoundSummaryScreen
+          reason={reason}
           redTeam={redTeam}
           blueTeam={blueTeam}
+          winnerTeam={winnerTeam}
+          loserTeam={loserTeam}
           redRoundWins={redRoundWins}
           blueRoundWins={blueRoundWins}
           roundsToWin={roundsToWin}
-          onReplayMatch={() => {
+          onShowBoardKey={() => setIsBoardKeyOpen(true)}
+          controlsEnabled={!isBoardKeyOpen}
+          onNextRound={() => {
             const entryTarget = getCodenamesRuntimeEntryTarget()
             runtimeControls.setFocus({
               screenId: CODENAMES_NAVIGATION_SCREENS.runtime,
               zoneId: entryTarget.zoneId,
               targetId: entryTarget.targetId,
             })
-            restartMatch()
+            resetGame()
           }}
-          onExitToMenu={exitToMenu}
         />
-      )
-    }
-
-    return (
-      <RoundSummaryScreen
-        reason={reason}
-        redTeam={redTeam}
-        blueTeam={blueTeam}
-        winnerTeam={winnerTeam}
-        loserTeam={loserTeam}
-        redRoundWins={redRoundWins}
-        blueRoundWins={blueRoundWins}
-        roundsToWin={roundsToWin}
-        onNextRound={() => {
-          const entryTarget = getCodenamesRuntimeEntryTarget()
-          runtimeControls.setFocus({
-            screenId: CODENAMES_NAVIGATION_SCREENS.runtime,
-            zoneId: entryTarget.zoneId,
-            targetId: entryTarget.targetId,
-          })
-          resetGame()
-        }}
-      />
+        {isBoardKeyOpen ? (
+          <BoardKeyOverlay
+            mode="review"
+            cards={roomState.cards}
+            startingTeam={roomState.startingTeam}
+            redTeam={redTeam}
+            blueTeam={blueTeam}
+            stats={boardKeyStats}
+            onClose={() => setIsBoardKeyOpen(false)}
+          />
+        ) : null}
+      </>
     )
   }
 

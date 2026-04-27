@@ -39,6 +39,7 @@ Use this order:
 ### Multiplayer / runtime state / persistence
 
 - `2026-04-19 - Per-category pool reset requires per-category history, not combined selection keys`
+- `2026-04-27 - Codenames word history must not commit before PartyKit confirms GAME_START`
 - `2026-03-30 - Persistent game history must be written only after host-side validation`
 - `2026-04-11 - DeviceListener WebSocket reconnect loop caused by unstable callback refs`
 - `2026-04-11 - DeviceListener localStorage check does not work cross-device`
@@ -70,6 +71,16 @@ Use this order:
 ---
 
 ## Entries
+
+### 2026-04-27 - Codenames word history must not commit before PartyKit confirms `GAME_START`
+
+**Symptom:** After one visible Codenames board, the pool summary in setup could drop by more than `25` words, for example from `350/350` to `275/350`, even though the player only saw a single board.
+
+**Root cause:** Host runtime wrote `codenames-word-history` optimistically inside `trySendGameStart()` before PartyKit confirmed the start with `GAME_START`. If a start attempt was duplicated, interrupted, or otherwise not reflected as a truly started board for the player, local history still consumed that board's words.
+
+**Fix:** Stage pending board history locally, but commit it to `localStorage` only after the client receives a matching `GAME_START` from PartyKit. Clear any staged history on round/match reset so stale pending boards cannot leak into a later session.
+
+**How to prevent it:** Any durable browser-side gameplay history tied to multiplayer state must commit only after the authority layer confirms the state transition. Preparing a board can be speculative; consuming the word pool cannot.
 
 ### 2026-04-20 - `localhost` i `127.0.0.1` nie są równoważne dla lokalnego HMR huba
 

@@ -4,6 +4,7 @@ import type { RoomState, CodenamesEvent, Card } from './types'
 export const initialState: RoomState = {
   phase: 'waiting',
   cards: [],
+  lastRevealedIndex: null,
   redTotal: 0,
   blueTotal: 0,
   roundWinsRed: 0,
@@ -280,7 +281,11 @@ export function reduceIncomingEvent(
     hostConnectionId: resolvedHostConnectionId,
     captainRedConnectionId: current.captainRedConnectionId,
     captainBlueConnectionId: current.captainBlueConnectionId,
-    syncRoomState: event.type === 'MATCH_RESET',
+    syncRoomState:
+      event.type === 'GAME_START' ||
+      event.type === 'CARD_REVEAL' ||
+      event.type === 'ASSASSIN_TEAM' ||
+      event.type === 'MATCH_RESET',
   }
 }
 
@@ -293,6 +298,7 @@ export function applyEvent(state: RoomState, event: CodenamesEvent): RoomState {
         ...state,
         phase: 'playing',
         cards: event.cards,
+        lastRevealedIndex: null,
         redTotal: event.redTotal,
         blueTotal: event.blueTotal,
         startingTeam: event.startingTeam,
@@ -317,20 +323,20 @@ export function applyEvent(state: RoomState, event: CodenamesEvent): RoomState {
       )
 
       if (cards[event.index].color === 'assassin') {
-        return { ...state, cards, phase: 'assassin-reveal' }
+        return { ...state, cards, lastRevealedIndex: event.index, phase: 'assassin-reveal' }
       }
 
       const redRevealed = cards.filter(c => c.color === 'red' && c.revealed).length
       const blueRevealed = cards.filter(c => c.color === 'blue' && c.revealed).length
 
       if (redRevealed >= state.redTotal) {
-        return { ...state, cards, phase: 'ended', winner: 'red', roundWinsRed: state.roundWinsRed + 1 }
+        return { ...state, cards, lastRevealedIndex: event.index, phase: 'ended', winner: 'red', roundWinsRed: state.roundWinsRed + 1 }
       }
       if (blueRevealed >= state.blueTotal) {
-        return { ...state, cards, phase: 'ended', winner: 'blue', roundWinsBlue: state.roundWinsBlue + 1 }
+        return { ...state, cards, lastRevealedIndex: event.index, phase: 'ended', winner: 'blue', roundWinsBlue: state.roundWinsBlue + 1 }
       }
 
-      return { ...state, cards }
+      return { ...state, cards, lastRevealedIndex: event.index }
     }
 
     case 'ASSASSIN_TEAM': {

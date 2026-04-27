@@ -220,6 +220,7 @@ export function CaptainScreen({ roomId, team, redTeam, blueTeam, onChangeRole }:
                   startingTeam={roomState.startingTeam}
                   isLocked={isRoundIntroVisible}
                   isConcealed={!roomState.boardUnlocked}
+                  revealAll={roomState.phase === 'ended'}
                 />
               </div>
             </main>

@@ -11,6 +11,7 @@ const DEFAULT_BLUE_TEAM: TeamMetadata = { name: 'Niebiescy', avatar: 'moon' }
 const initialRoomState: RoomState = {
   phase: 'waiting',
   cards: [],
+  lastRevealedIndex: null,
   redTotal: 0,
   blueTotal: 0,
   roundWinsRed: 0,

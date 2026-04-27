@@ -12,6 +12,12 @@ import {
 import { ROUND_INTRO_DURATION_MS } from '../shared/RoundIntroOverlay'
 import { prepareCodenamesGameStart } from './start-game'
 import { canStartWaitingGame, shouldAutoStartPendingRound } from './start-policy'
+import { shouldAutoStartAfterMatchReset, type MatchResetIntent } from './match-reset-policy'
+import {
+  commitPendingGameStartHistory,
+  createPendingGameStartHistory,
+  type PendingGameStartHistory,
+} from './game-start-history'
 
 type CodenamesCategoryBalance = {
   leftCategoryId: string
@@ -30,6 +36,7 @@ type CodenamesGameSettings = {
 const initialRoomState: RoomState = {
   phase: 'waiting',
   cards: [],
+  lastRevealedIndex: null,
   redTotal: 0,
   blueTotal: 0,
   roundWinsRed: 0,
@@ -67,6 +74,7 @@ export function useHostGame({ categories, roomId, teams, categoryBalance, settin
   const previousBoardUnlockedRef = useRef(false)
   const gameStartedRef = useRef(false)
   const pendingNewGameRef = useRef(false)
+  const pendingGameStartHistoryRef = useRef<PendingGameStartHistory | null>(null)
   const initialStartTriggeredRef = useRef(false)
   const teamsRef = useRef(teams)
   teamsRef.current = teams
@@ -90,6 +98,18 @@ export function useHostGame({ categories, roomId, teams, categoryBalance, settin
     },
     onMessage(evt) {
       const msg = JSON.parse(evt.data) as IncomingMessage
+
+      if (msg.type === 'GAME_START') {
+        writeCodenamesWordHistory(
+          commitPendingGameStartHistory({
+            pending: pendingGameStartHistoryRef.current,
+            categories: categoriesRef.current,
+            cards: msg.cards,
+            history: readCodenamesWordHistory(),
+          }),
+        )
+        pendingGameStartHistoryRef.current = null
+      }
 
       if (msg.type === 'ROOM_STATE') {
         setRoomState((current) => ({ ...msg.state, hostConnected: msg.state.hostConnected || current.hostConnected }))
@@ -125,6 +145,7 @@ export function useHostGame({ categories, roomId, teams, categoryBalance, settin
       categoryBalanceRef.current,
       settingsRef.current,
       setStartBlockedReason,
+      pendingGameStartHistoryRef,
     )
   }, [roomState, socket])
 
@@ -144,6 +165,7 @@ export function useHostGame({ categories, roomId, teams, categoryBalance, settin
       categoryBalanceRef.current,
       settingsRef.current,
       setStartBlockedReason,
+      pendingGameStartHistoryRef,
     )
   }, [roomState, socket])
 
@@ -194,21 +216,24 @@ export function useHostGame({ categories, roomId, teams, categoryBalance, settin
       categoryBalanceRef.current,
       settingsRef.current,
       setStartBlockedReason,
+      pendingGameStartHistoryRef,
     )
   }, [roomState, socket])
 
   const resetGame = useCallback((options?: { autoRestart?: boolean }) => {
     setStartBlockedReason(null)
     pendingNewGameRef.current = options?.autoRestart ?? true
+    pendingGameStartHistoryRef.current = null
     gameStartedRef.current = false
     initialStartTriggeredRef.current = true
     const event = { type: 'GAME_RESET' as const }
     socket.send(JSON.stringify(event satisfies HostEvent))
   }, [socket])
 
-  const restartMatch = useCallback(() => {
+  const restartMatch = useCallback((intent: MatchResetIntent = 'rematch') => {
     setStartBlockedReason(null)
-    pendingNewGameRef.current = true
+    pendingNewGameRef.current = shouldAutoStartAfterMatchReset(intent)
+    pendingGameStartHistoryRef.current = null
     gameStartedRef.current = false
     initialStartTriggeredRef.current = true
     const event = { type: 'MATCH_RESET' as const }
@@ -243,6 +268,7 @@ export function useHostGame({ categories, roomId, teams, categoryBalance, settin
       categoryBalanceRef.current,
       settingsRef.current,
       setStartBlockedReason,
+      pendingGameStartHistoryRef,
     )
   }, [roomState, socket])
 
@@ -271,6 +297,7 @@ export function applyEvent(state: RoomState, msg: IncomingMessage): RoomState {
         hostConnected: true,
         phase: 'playing',
         cards: msg.cards,
+        lastRevealedIndex: null,
         redTotal: msg.redTotal,
         blueTotal: msg.blueTotal,
         startingTeam: msg.startingTeam,
@@ -292,12 +319,12 @@ export function applyEvent(state: RoomState, msg: IncomingMessage): RoomState {
       if (state.cards[msg.index].revealed) return state
       const cards = state.cards.map((c, i) => (i === msg.index ? { ...c, revealed: true } : c))
       const hit = cards[msg.index]
-      if (hit.color === 'assassin') return { ...state, hostConnected: true, cards, phase: 'assassin-reveal' }
+      if (hit.color === 'assassin') return { ...state, hostConnected: true, cards, lastRevealedIndex: msg.index, phase: 'assassin-reveal' }
       const redRevealed = cards.filter((c) => c.color === 'red' && c.revealed).length
       const blueRevealed = cards.filter((c) => c.color === 'blue' && c.revealed).length
-      if (redRevealed >= state.redTotal) return { ...state, hostConnected: true, cards, phase: 'ended', winner: 'red', roundWinsRed: state.roundWinsRed + 1 }
-      if (blueRevealed >= state.blueTotal) return { ...state, hostConnected: true, cards, phase: 'ended', winner: 'blue', roundWinsBlue: state.roundWinsBlue + 1 }
-      return { ...state, hostConnected: true, cards }
+      if (redRevealed >= state.redTotal) return { ...state, hostConnected: true, cards, lastRevealedIndex: msg.index, phase: 'ended', winner: 'red', roundWinsRed: state.roundWinsRed + 1 }
+      if (blueRevealed >= state.blueTotal) return { ...state, hostConnected: true, cards, lastRevealedIndex: msg.index, phase: 'ended', winner: 'blue', roundWinsBlue: state.roundWinsBlue + 1 }
+      return { ...state, hostConnected: true, cards, lastRevealedIndex: msg.index }
     }
 
     case 'ASSASSIN_TEAM':
@@ -368,6 +395,7 @@ function trySendGameStart(
   categoryBalance: CodenamesCategoryBalance | null,
   settings: CodenamesGameSettings,
   setStartBlockedReason: (reason: string | null) => void,
+  pendingStartHistoryRef: { current: PendingGameStartHistory | null },
 ) {
   const result = prepareCodenamesGameStart({
     categories,
@@ -377,11 +405,14 @@ function trySendGameStart(
   })
 
   if (!result.ok) {
+    pendingStartHistoryRef.current = null
     setStartBlockedReason(result.reason)
     return false
   }
 
-  writeCodenamesWordHistory(result.history)
+  pendingStartHistoryRef.current = createPendingGameStartHistory({
+    cards: result.board.cards,
+  })
   setStartBlockedReason(null)
   const event = {
     type: 'GAME_START' as const,

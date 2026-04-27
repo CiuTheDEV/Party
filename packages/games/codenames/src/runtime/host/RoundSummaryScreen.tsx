@@ -26,6 +26,8 @@ type RoundSummaryScreenProps = {
   blueRoundWins: number
   roundsToWin: number
   onNextRound: () => void
+  onShowBoardKey: () => void
+  controlsEnabled?: boolean
 }
 
 export function RoundSummaryScreen({
@@ -38,14 +40,18 @@ export function RoundSummaryScreen({
   blueRoundWins,
   roundsToWin,
   onNextRound,
+  onShowBoardKey,
+  controlsEnabled = true,
 }: RoundSummaryScreenProps) {
   const [isInputAwake, setIsInputAwake] = useState(true)
   const [activeInputDevice, setActiveInputDevice] = useState<'keyboard' | 'controller'>('keyboard')
   const [controllerProfile, setControllerProfile] = useState<GamepadProfile>('generic')
   const [controlBindings, setControlBindings] = useState(() => loadPersistedBindings())
 
+  const [focusedAction, setFocusedAction] = useState<'show-key' | 'next'>('next')
+
   useMenuControls({
-    enabled: true,
+    enabled: controlsEnabled,
     onAction: (action, input) => {
       if (!isInputAwake) {
         setActiveInputDevice(input?.device ?? 'keyboard')
@@ -53,7 +59,17 @@ export function RoundSummaryScreen({
         return
       }
 
+      if (action === 'left' || action === 'right') {
+        setFocusedAction((current) => (current === 'next' ? 'show-key' : 'next'))
+        return
+      }
+
       if (action === 'confirm' || action === 'primary') {
+        if (focusedAction === 'show-key') {
+          onShowBoardKey()
+          return
+        }
+
         onNextRound()
       }
     },
@@ -140,18 +156,40 @@ export function RoundSummaryScreen({
 
         <div className={styles.footer}>
           <div className={styles.hint}>Do {roundsToWin} wygranych rund</div>
-          <button
-            type="button"
-            className={isInputAwake ? `${styles.nextRoundButton} ${styles.nextRoundButtonFocused}` : styles.nextRoundButton}
-            onClick={onNextRound}
-          >
-            Kolejna runda
-            {isInputAwake && confirmActionLabel ? (
-              <span className={styles.actionBadge} aria-hidden="true">
-                <span className={styles.actionBadgeLabel}>{confirmActionLabel}</span>
-              </span>
-            ) : null}
-          </button>
+          <div className={styles.footerActions}>
+            <button
+              type="button"
+              className={
+                isInputAwake && focusedAction === 'show-key'
+                  ? `${styles.secondaryButton} ${styles.actionButtonFocused}`
+                  : styles.secondaryButton
+              }
+              onClick={onShowBoardKey}
+            >
+              Pokaż klucz
+              {isInputAwake && focusedAction === 'show-key' && confirmActionLabel ? (
+                <span className={styles.actionBadge} aria-hidden="true">
+                  <span className={styles.actionBadgeLabel}>{confirmActionLabel}</span>
+                </span>
+              ) : null}
+            </button>
+            <button
+              type="button"
+              className={
+                isInputAwake && focusedAction === 'next'
+                  ? `${styles.nextRoundButton} ${styles.nextRoundButtonFocused}`
+                  : styles.nextRoundButton
+              }
+              onClick={onNextRound}
+            >
+              Kolejna runda
+              {isInputAwake && focusedAction === 'next' && confirmActionLabel ? (
+                <span className={styles.actionBadge} aria-hidden="true">
+                  <span className={styles.actionBadgeLabel}>{confirmActionLabel}</span>
+                </span>
+              ) : null}
+            </button>
+          </div>
         </div>
       </div>
     </div>

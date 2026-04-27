@@ -121,33 +121,57 @@
   gap: 16px;
 }
 
+.footerActions {
+  display: flex;
+  gap: 12px;
+}
+
 .hint {
   font-size: 14px;
   color: rgba(255, 255, 255, 0.32);
   font-weight: 700;
 }
 
+.secondaryButton,
 .nextRoundButton {
   position: relative;
   padding: 18px 34px;
   border: none;
   border-radius: 14px;
-  background: #ff5a4f;
-  color: #fff;
   font-size: 18px;
   font-weight: 800;
   cursor: pointer;
+}
+
+.secondaryButton {
+  background: #2a3038;
+  color: #f3f4f6;
+  box-shadow: 0 0 24px rgba(0, 0, 0, 0.18);
+}
+
+.nextRoundButton {
+  background: #ff5a4f;
+  color: #fff;
   box-shadow: 0 0 24px rgba(255, 90, 79, 0.28);
 }
 
-.nextRoundButtonFocused {
+.actionButtonFocused {
+  box-shadow:
+    0 0 0 3px rgba(255, 255, 255, 0.94),
+    0 0 0 10px rgba(255, 255, 255, 0.16),
+    0 0 24px rgba(0, 0, 0, 0.18);
+}
+
+.nextRoundButtonFocused,
+.nextRoundButton.actionButtonFocused {
   box-shadow:
     0 0 0 3px rgba(255, 255, 255, 0.94),
     0 0 0 10px rgba(255, 255, 255, 0.16),
     0 0 24px rgba(255, 90, 79, 0.28);
 }
 
-.nextRoundButton:hover {
+.nextRoundButton:hover,
+.secondaryButton:hover {
   filter: brightness(1.05);
 }
 
@@ -222,6 +246,10 @@
     width: 96px;
     height: 96px;
     font-size: 46px;
+  }
+
+  .footerActions {
+    flex-direction: column;
   }
 
   .actionBadge {

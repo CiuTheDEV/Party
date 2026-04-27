@@ -26,6 +26,8 @@ type MatchSummaryScreenProps = {
   roundsToWin: number
   onReplayMatch: () => void
   onExitToMenu: () => void
+  onShowBoardKey: () => void
+  controlsEnabled?: boolean
 }
 
 const CONFETTI_PIECES = [
@@ -49,16 +51,18 @@ export function MatchSummaryScreen({
   roundsToWin,
   onReplayMatch,
   onExitToMenu,
+  onShowBoardKey,
+  controlsEnabled = true,
 }: MatchSummaryScreenProps) {
   const shellRef = useRef<HTMLDivElement | null>(null)
   const [isInputAwake, setIsInputAwake] = useState(true)
   const [activeInputDevice, setActiveInputDevice] = useState<'keyboard' | 'controller'>('keyboard')
   const [controllerProfile, setControllerProfile] = useState<GamepadProfile>('generic')
   const [controlBindings, setControlBindings] = useState(() => loadPersistedBindings())
-  const [focusedAction, setFocusedAction] = useState<'exit' | 'replay'>('replay')
+  const [focusedAction, setFocusedAction] = useState<'exit' | 'show-key' | 'replay'>('replay')
 
   useMenuControls({
-    enabled: true,
+    enabled: controlsEnabled,
     onAction: (action, input) => {
       if (!isInputAwake) {
         setActiveInputDevice(input?.device ?? 'keyboard')
@@ -68,11 +72,13 @@ export function MatchSummaryScreen({
 
       if (action === 'left' || action === 'right') {
         setFocusedAction((current) => {
-          if (action === 'left') {
-            return current === 'replay' ? 'exit' : 'replay'
+          const actions: Array<'exit' | 'show-key' | 'replay'> = ['exit', 'show-key', 'replay']
+          const currentIndex = actions.indexOf(current)
+          if (currentIndex === -1) {
+            return 'replay'
           }
-
-          return current === 'exit' ? 'replay' : 'exit'
+          const delta = action === 'left' ? -1 : 1
+          return actions[(currentIndex + delta + actions.length) % actions.length] ?? 'replay'
         })
         return
       }
@@ -80,6 +86,11 @@ export function MatchSummaryScreen({
       if (action === 'confirm' || action === 'primary') {
         if (focusedAction === 'exit') {
           onExitToMenu()
+          return
+        }
+
+        if (focusedAction === 'show-key') {
+          onShowBoardKey()
           return
         }
 
@@ -261,6 +272,22 @@ export function MatchSummaryScreen({
             >
               Powrót do menu
               {isInputAwake && focusedAction === 'exit' && confirmActionLabel ? (
+                <span className={styles.actionBadge} aria-hidden="true">
+                  <span className={styles.actionBadgeLabel}>{confirmActionLabel}</span>
+                </span>
+              ) : null}
+            </button>
+            <button
+              type="button"
+              className={
+                isInputAwake && focusedAction === 'show-key'
+                  ? `${styles.secondaryButton} ${styles.actionButtonFocused}`
+                  : styles.secondaryButton
+              }
+              onClick={onShowBoardKey}
+            >
+              Pokaż klucz
+              {isInputAwake && focusedAction === 'show-key' && confirmActionLabel ? (
                 <span className={styles.actionBadge} aria-hidden="true">
                   <span className={styles.actionBadgeLabel}>{confirmActionLabel}</span>
                 </span>

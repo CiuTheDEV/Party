@@ -144,10 +144,10 @@ For new game module scaffolding and maturity expectations, see `docs/game-module
 ---
 
 <!-- handoff:start -->
-- Last: 2026-04-25 19:25 by Codex
-- Task: Final party-polish pass for Tajniacy and Kalambury: pairing/device edge cases, Codenames runtime polish, and card-back assets.
-- Did: Finished the remaining narrow device-flow fixes in both games: confirm alerts for session-code changes and disconnects, distinct mobile messaging for `SESSION_CODE_CHANGED` vs `DEVICES_DISCONNECTED`, persistent pairing controls, and authority-side rejection of a second presenter in Charades with `PRESENTER_SLOT_TAKEN`. On Codenames, added a denser non-scrolling host status rail, win-screen polish, assassin-count settings separation, portrait/landscape card-back assets wired into host/captain grids, and restored `MATCH_RESET` room-state sync so replay starts from `0:0`. Also recovered a corrupted `packages/partykit/codenames/server.ts` after it contained `\x00` bytes and revalidated the PartyKit compile path.
-- Next: Stay in narrow polish/debug mode only. New work should target concrete UX/runtime reports, not another broad pairing refactor, unless a fresh root-cause investigation proves a new cross-cutting bug.
-- Blocker: No active blocker. Current builds and PartyKit authority checks are green after the final reset-sync fix.
+- Last: 2026-04-27 00:00 by Codex
+- Task: Fix the Codenames pool-consumption regression where one visible board could reduce the remaining word pool by more than `25`.
+- Did: Traced the issue to optimistic history writes in host start flow rather than the setup counter itself. `trySendGameStart()` was persisting `codenames-word-history` before PartyKit confirmed `GAME_START`, so duplicated or invisible start attempts could permanently consume extra words. Added a small `game-start-history` helper that stages pending board history and commits it only after a matching `GAME_START` arrives; round/match resets clear pending staged history. Verified with `npm run test:game-start-history --workspace @party/codenames`, `npm run test:word-history --workspace @party/codenames`, and `npm run build --workspace @party/codenames`. Then ran a real local browser pass on `localhost:3000` + `localhost:1999`: for a clean `plus18` pool the flow `350/350 -> one board -> return to menu -> 325/350` passed, and the stored history showed exactly `25` consumed words.
+- Next: Continue only with fresh narrow runtime issues; if the host return-to-menu flow comes back again, re-run a dedicated browser pass in the same local stack instead of reasoning from code alone.
+- Blocker: No active blocker. Focused checks are green and the live browser pass for the pool counter passed with saved screenshots in `output/playwright/codenames-pool-before.png` and `output/playwright/codenames-pool-after.png`.
 <!-- handoff:end -->
 

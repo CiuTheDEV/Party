@@ -1,5 +1,58 @@
 # Today - 2026-04-20
 
+### S96 (2026-04-27) [Tajniacy] Pool history now commits only after confirmed board start
+
+- Naprawiono kolejny runtime bug w Tajniakach dotyczący znikających haseł z puli po powrocie do menu. Objaw był realny: po jednej planszy licznik puli potrafił spaść bardziej niż o `25`, co oznaczało, że historia słów była zużywana także przez niewidoczne lub zdublowane próby startu.
+- Root cause był po stronie hostowego startu planszy: `trySendGameStart()` zapisywał `codenames-word-history` optymistycznie jeszcze przed potwierdzonym `GAME_START` z PartyKit. Wystarczało więc, że start został zdublowany albo nie doszedł do skutku tak, jak widział to gracz, a lokalna pula i tak traciła słowa.
+- Fix wprowadza mały pending-commit seam: host przygotowuje historię dla konkretnego boardu, ale commit do `localStorage` następuje dopiero po odebraniu zgodnego `GAME_START` z serwera. Reset meczu/rundy czyści też oczekujący commit, żeby nie przenieść starej rezerwacji na kolejny flow.
+- Dodano focused regression check `npm run test:game-start-history --workspace @party/codenames`, który pilnuje kontraktu `pending board + matching GAME_START => commit`, `pending board + inny board => brak commitu`.
+- Weryfikacja przechodzi: `npm run test:game-start-history --workspace @party/codenames`, `npm run test:word-history --workspace @party/codenames`, `npm run build --workspace @party/codenames`.
+- Potem domknięto też realny browser pass `game-playtest`: dla czystej puli `plus18` flow `350/350 -> jedna plansza -> powrót do menu -> 325/350` przeszedł zgodnie z oczekiwaniem, a `localStorage` pokazał dokładnie `25` zużytych słów. Artefakty zapisano w `output/playwright/codenames-pool-before.png` i `output/playwright/codenames-pool-after.png`.
+- Experience recorded: yes
+
+### S95 (2026-04-27) [Tajniacy] Exit-to-menu no longer arms automatic rematch
+
+- Naprawiono regresję hostowego powrotu z planszy do menu w Tajniakach: potwierdzenie `Wróć do menu` korzystało z tego samego `restartMatch()` co `Zagraj ponownie`, więc uzbrajało automatyczny start kolejnego meczu i potrafiło wymagać kilku kliknięć, zanim runtime zdążył naprawdę wrócić do `waiting`.
+- Root cause został zamknięty u źródła zamiast przez dalsze poprawki UI: `restartMatch` przyjmuje teraz jawną intencję (`rematch` vs `exit-to-menu`), a ścieżka wyjścia do menu robi `MATCH_RESET` bez auto-startu nowej planszy.
+- Dodano focused regression check `npm run test:match-reset-policy --workspace @party/codenames`, który pilnuje kontraktu `rematch => auto start`, `exit-to-menu => brak auto startu`.
+- Weryfikacja przechodzi: `npm run test:match-reset-policy --workspace @party/codenames`, `npm run build --workspace @party/codenames`.
+- Browser verify tego konkretnego flow nie był odpalany w tej sesji.
+- Experience recorded: no
+
+### S94 (2026-04-27) [Tajniacy] Board key overlay redesign for host readability
+
+- Przebudowano `BoardKeyOverlay` w Tajniakach pod realny ekran hosta `TV/monitor`, zgodnie z kierunkiem `hero board + bottom info rail` zamiast wcześniejszego modalowego układu z osobnymi kartami statystyk.
+- Overlay przestał wyglądać jak popup: plansza zajmuje teraz dominującą część ekranu, górny chrome został odchudzony do lekkiego nagłówka, a kluczowe dane rundy zostały zebrane do jednego zwartego dolnego raila.
+- Rail pokazuje tylko pięć najważniejszych segmentów: stan czerwonych, stan niebieskich, zwycięzcę, status zabójcy i drużynę startującą, z większą typografią dla danych oglądanych z dystansu.
+- Tryby `reveal` i `review` zachowują ten sam layout; różnią się tylko copy i obecnością / wagą akcji zamknięcia, bez rozwidlania runtime na dwa osobne widoki.
+- Po ostrym review hostowego ekranu poprawiono też dwa realne braki funkcjonalne overlayu: usunięto zbędny badge `ESC`, dodano trwały marker ostatnio trafionej karty (`lastRevealedIndex` w stanie pokoju po stronie hosta, klienta i PartyKit), a hostowy `BoardGrid` dostał wreszcie czaszkę dla kart zabójców tak jak kapitański grid.
+- Na końcu dołożono celowy test skilli UI bez ruszania danych runtime: `BoardKeyOverlay` ma teraz lokalny przełącznik `1 / 2 / 3`, gdzie każdy numer odpala pełny skin całego overlayu inspirowany odpowiednio `frontend-design`, `frontend-app-builder` i `game-ui-frontend`. Domyślny wariant to `3`, a mały focused check pilnuje kontraktu wariantów.
+- Po decyzji właściciela test został skompresowany do wyniku końcowego: overlay zostaje na stałe przy wariancie `1` (`frontend-design`), przełącznik `1 / 2 / 3` został usunięty z topbara, a auto-reveal klucza po końcu rundy i meczu został wyłączony. Klucz planszy jest teraz dostępny wyłącznie ręcznie przez istniejący przycisk `Pokaż klucz`.
+- Dla śladu decyzji zapisano mały spec w `docs/superpowers/specs/2026-04-27-codenames-board-key-overlay-design.md`.
+- Dla testu wariantów zapisano też plan w `docs/superpowers/plans/2026-04-27-codenames-board-key-overlay-variant-test.md`.
+- Weryfikacja przechodzi: `npm run test:board-key-overlay-variants --workspace @party/codenames`, `npm run build --workspace @party/codenames`, `npm run test:authority:codenames --workspace @party/partykit`.
+- Browser verify dla tego konkretnego overlayu nie był odpalany w tej sesji.
+- Experience recorded: no
+
+### S93 (2026-04-27) [Tajniacy/Kalambury] End-of-round board key reveal + presenter scoring
+
+- Po nowym feedbacku z graczy domknięto dwa stricte produktowe follow-upy bez rozszerzania scope poza runtime obu gier: Tajniacy dostały jawny reveal pełnego klucza po końcu rundy/meczu oraz ręczny podgląd klucza ze statystykami, a Kalambury zaczęły nagradzać także prezentera za poprawnie odgadnięte hasło.
+- W Tajniakach host i kapitan renderują teraz pełny układ planszy po wejściu w `ended`; host pokazuje automatyczny reveal klucza przez `3s`, również po ścieżce z zabójcą dopiero po wyborze winnej drużyny, a potem na ekranie podsumowania rundy i meczu działa przycisk `Pokaż klucz`.
+- Nowy overlay klucza planszy pokazuje pełny reveal kart oraz statystyki końca rundy: odkryte karty obu drużyn, neutralne pola, status zabójcy i zwycięzcę. Summary screeny hosta dostały przez to drugi action target i blokadę sterowania w tle podczas otwartego overlayu.
+- W Kalamburach poprawna odpowiedź daje już `+1` zgadującemu i `+1` prezenterowi w tej samej state transition; copy akcji hosta zostało urealnione z `Przyznaj punkt` na `Przyznaj punkty`.
+- Weryfikacja przechodzi: `npm run build --workspace @party/codenames`, `npm run build --workspace @party/charades`, `npm run test:authority:codenames --workspace @party/partykit`.
+- Next: przy następnym live passie warto sprawdzić, czy reveal `3s` jest dobrze wyważony na żywo i czy gracze chcą jeszcze np. ręcznego `Pokaż klucz` także po pojedynczym revealu bez czekania na summary.
+- Experience recorded: no
+
+### S92 (2026-04-27) [Tajniacy/Kalambury] Post-playtest fix pass for captain sync and verdict robustness
+
+- Po zgłoszeniach z większego testu zrobiono wąski pass po dwóch realnych objawach zamiast kolejnego szerokiego refactoru: kapitańskie telefony w Tajniakach potrafiły zostać na starym stanie planszy, a hostowy werdykt Kalamburów miał jeszcze problemy z gęstością i ekspozycją treści.
+- Po stronie PartyKit Tajniaków dołożono jawny `ROOM_STATE` sync po `GAME_START`, `CARD_REVEAL` i `ASSASSIN_TEAM`, żeby kapitan dostał pełny stan pokoju także wtedy, gdy sam broadcast eventu nie wystarczy do odzyskania spójności po mobilnym edge case.
+- W Kalamburach poprawiono kontrakt ekranu werdyktu: badge czasu nie znika już przy bardzo szybkiej poprawnej odpowiedzi (`min 1s` zgodnie z logiką punktowania), picker `Kto zgadł` przechodzi na gęstszy układ już od `8+` kandydatów, a pokazane hasło dostało bezpieczniejszy autoscaling i większy kontener, żeby nie ucinać dłuższych fraz.
+- Weryfikacja przechodzi: `npm run test:authority:codenames --workspace @party/partykit`, `npm run build --workspace @party/charades`, `node packages/games/charades/src/runtime/play/verdict-picker-layout.check.cjs`.
+- Next: jeśli wróci raport, że konkretne telefony kapitanów nadal nie odświeżają się po revealu, dołożyć krótki debug ślad reconnect/`ROOM_STATE` po stronie urządzenia zamiast zgadywać dalej po objawach.
+- Experience recorded: no
+
 ### S91 (18:55~) [Tajniacy/Kalambury] Device-flow hardening + Codenames runtime polish
 
 - Domknięto szeroki pass po realnych zgłoszeniach z domówki zamiast pojedynczych kosmetyk: Tajniacy dostały nowy runtime rail bez desktopowego scrolla, lepszy ekran wygranej, lżejszy blur overlay po rundzie, osobny slot ustawień zabójców i rewers kart jako prawdziwe assety w wariantach `portrait` / `landscape`.
